@@ -1,0 +1,8 @@
+[package]
+name = "serde_with"
+version = "0.1.0"
+authors = ["Jonas Bushart <jonas@bushart.org>"]
+description = "Placeholder for a collection of useful de/serialize_with functions"
+license = "Unlicense"                                                                                                                                                                                                                         
+
+[dependencies]
