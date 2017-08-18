@@ -1,0 +1,6 @@
+# List of commit statuses that must pass on the merge commit before it is pushed to master.
+status = [
+  "continuous-integration/travis-ci/push"
+]
+# If set to true, and if the PR branch is on the same repository that bors-ng itself is on, the branch will be deleted.
+delete_merged_branches = true

@@ -1,0 +1,29 @@
+notifications:
+  email: false
+
+branches:
+  only:
+    # Enable building pull requests.
+    - master
+    # This is where pull requests from "bors r+" are built.
+    - staging
+    # This is where pull requests from "bors try" are built.
+    - trying
+
+language: rust
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+cache: cargo
+
+matrix:
+  allow_failures:
+    - rust: nightly
+
+script:
+  - set -e
+  - cargo build --verbose
+  - cargo test --verbose
