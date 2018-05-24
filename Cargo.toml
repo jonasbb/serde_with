@@ -1,8 +1,13 @@
 [package]
 name = "serde_with"
 version = "0.1.0"
-authors = ["Jonas Bushart <jonas@bushart.org>"]
+authors = ["jonasbb"]
+
 description = "Placeholder for a collection of useful de/serialize_with functions"
-license = "Unlicense"                                                                                                                                                                                                                         
+documentation = "https://docs.rs/serde_with/"
+repository = "https://github.com/jonasbb/serde_with"
+readme = "README.md"
+keywords = ["serde", "utilities"]
+license = "MIT/Apache-2.0"
 
 [dependencies]
