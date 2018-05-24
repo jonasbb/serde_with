@@ -10,9 +10,13 @@ readme = "README.md"
 keywords = ["serde", "utilities"]
 license = "MIT/Apache-2.0"
 
+[features]
+json = [ "serde_json" ]
+
 [dependencies]
 chrono = { version = "0.4.2", features = [ "serde" ], optional = true }
 serde = "1.0.59"
+serde_json = { version = "1.0.17", optional = true }
 
 [dev-dependencies]
 serde_derive = "1.0.59"
