@@ -7,7 +7,6 @@
 
 #[cfg(feature = "chrono")]
 extern crate chrono as chrono_crate;
-#[cfg(any(feature = "chrono", feature = "json"))]
 extern crate serde;
 #[cfg(feature = "json")]
 extern crate serde_json;
@@ -16,3 +15,4 @@ extern crate serde_json;
 pub mod chrono;
 #[cfg(feature = "json")]
 pub mod json;
+pub mod rust;
