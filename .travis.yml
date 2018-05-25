@@ -1,3 +1,7 @@
+language: rust
+sudo: false
+cache: cargo
+
 notifications:
   email: false
 
@@ -10,20 +14,27 @@ branches:
     # This is where pull requests from "bors try" are built.
     - trying
 
-language: rust
-
 rust:
-  - stable
-  - beta
-  - nightly
+- 1.26.0
+- stable
+- beta
+- nightly
 
-cache: cargo
-
-matrix:
-  allow_failures:
-    - rust: nightly
+env:
+- FEATURES=""
+- FEATURES=chrono
+- FEATURES=json
+- FEATURES=all
 
 script:
-  - set -e
-  - cargo build --verbose
-  - cargo test --verbose
+  - |
+    set -e
+    if [ "$FEATURES" = all ]; then
+      FEATURES_COMMAND="--all-features"
+    elif [ -n $FEATURES ]; then
+      FEATURES_COMMAND="--features="$FEATURES
+    else
+      FEATURES_COMMAND="--no-default-features"
+    fi
+    cargo build --verbose ${FEATURES_COMMAND}
+    cargo test --verbose ${FEATURES_COMMAND}
