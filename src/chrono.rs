@@ -1,3 +1,9 @@
+//! De/Serialization of [chrono][] types
+//!
+//! This modules is only available if using the `chrono` feature of the crate.
+//!
+//! [chrono]: https://docs.rs/chrono/
+
 /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
 ///
 /// The `DateTime<Utc>` can be serialized from an integer, a float, or a string representing a number.

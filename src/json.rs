@@ -1,3 +1,7 @@
+//! De/Serialization of JSON
+//!
+//! This modules is only available if using the `json` feature of the crate.
+
 /// Serialize value as string containing JSON
 ///
 /// # Examples
