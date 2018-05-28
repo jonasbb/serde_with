@@ -1,5 +1,12 @@
 //! De/Serialization for Rust's builtin and std types
 
+use serde::{de, ser, Deserialize};
+use std::fmt::Display;
+use std::iter::FromIterator;
+use std::marker::PhantomData;
+use std::str::FromStr;
+use Separator;
+
 /// De/Serialize using [Display] and [FromStr] implementation
 ///
 /// # Examples
@@ -34,9 +41,6 @@
 /// assert_eq!(r#"{"address":"127.53.0.1","b":"false"}"#, serde_json::to_string(&x).unwrap());
 /// # }
 /// ```
-///
-/// [Display]: ::std::fmt::Display
-/// [FromStr]: ::std::str::FromStr
 pub mod display_fromstr {
     use serde::de::{Deserializer, Error, Visitor};
     use serde::ser::Serializer;
@@ -50,7 +54,7 @@ pub mod display_fromstr {
     where
         D: Deserializer<'de>,
         T: FromStr,
-        <T as FromStr>::Err: Display,
+        T::Err: Display,
     {
         struct Helper<S>(PhantomData<S>);
 
@@ -83,5 +87,85 @@ pub mod display_fromstr {
         S: Serializer,
     {
         serializer.serialize_str(&*value.to_string())
+    }
+}
+
+/// De/Serialize a delimited collection using [Display] and [FromStr] implementation
+///
+/// You can define an arbitrary seperator, by specifying a type which implements [Separator].
+/// Some common ones, like space and comma are already predefined and you can find them [here][Separator].
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// use serde_with::{CommaSeparator, SpaceSeparator};
+/// use std::collections::BTreeSet;
+///
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::StringWithSeparator::<SpaceSeparator>")]
+///     tags: Vec<String>,
+///     #[serde(with = "serde_with::rust::StringWithSeparator::<CommaSeparator>")]
+///     more_tags: BTreeSet<String>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_str(r##"{
+///     "tags": "#hello #world",
+///     "more_tags": "foo,bar,bar"
+/// }"##).unwrap();
+/// assert_eq!(vec!["#hello", "#world"], v.tags);
+/// assert_eq!(2, v.more_tags.len());
+///
+/// let x = A {
+///     tags: vec!["1".to_string(), "2".to_string(), "3".to_string()],
+///     more_tags: BTreeSet::new(),
+/// };
+/// assert_eq!(r#"{"tags":"1 2 3","more_tags":""}"#, serde_json::to_string(&x).unwrap());
+/// # }
+/// ```
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct StringWithSeparator<Sep>(PhantomData<Sep>);
+
+impl<Sep> StringWithSeparator<Sep>
+where
+    Sep: Separator,
+{
+    pub fn serialize<S, T, V>(values: T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: ser::Serializer,
+        T: IntoIterator<Item = V>,
+        V: Display,
+    {
+        let mut s = String::new();
+        for v in values {
+            s.push_str(&*v.to_string());
+            s.push_str(Sep::separator());
+        }
+        serializer.serialize_str(if !s.is_empty() {
+            // remove trailing separator if present
+            &s[..s.len() - Sep::separator().len()]
+        } else {
+            &s[..]
+        })
+    }
+
+    pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: de::Deserializer<'de>,
+        T: FromIterator<V>,
+        V: FromStr,
+        V::Err: Display,
+    {
+        let s = String::deserialize(deserializer)?;
+        s.split(Sep::separator())
+            .map(FromStr::from_str)
+            .collect::<Result<_, _>>()
+            .map_err(de::Error::custom)
     }
 }

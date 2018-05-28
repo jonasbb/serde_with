@@ -20,18 +20,21 @@
 /// # use chrono::{DateTime, Utc};
 /// #[derive(Debug, Deserialize)]
 /// struct S {
-///     #[serde(with = "serde_with::chrono::datetime_as_timestamp_from_any")]
+///     #[serde(with = "serde_with::chrono::datetime_utc_ts_seconds_from_any")]
 ///     date: DateTime<Utc>,
 /// }
 ///
 /// # fn main() {
+/// // Deserializes integers
 /// assert!(serde_json::from_str::<S>(r#"{ "date": 1478563200 }"#).is_ok());
+/// // floats
 /// assert!(serde_json::from_str::<S>(r#"{ "date": 1478563200.123 }"#).is_ok());
+/// // and strings with numbers, for high-precision values
 /// assert!(serde_json::from_str::<S>(r#"{ "date": "1478563200.123" }"#).is_ok());
 /// # }
 /// ```
 ///
-pub mod datetime_as_timestamp_from_any {
+pub mod datetime_utc_ts_seconds_from_any {
     use chrono_crate::{DateTime, NaiveDateTime, Utc};
     use serde::de::{Deserializer, Error, Unexpected, Visitor};
 
