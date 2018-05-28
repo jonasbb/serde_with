@@ -19,7 +19,7 @@ fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
 fn json_datetime_from_any_to_string_deserialization() {
     #[derive(Debug, Deserialize)]
     struct S {
-        #[serde(with = "serde_with::chrono::datetime_as_timestamp_from_any")]
+        #[serde(with = "serde_with::chrono::datetime_utc_ts_seconds_from_any")]
         date: DateTime<Utc>,
     }
     let from = r#"[

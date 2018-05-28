@@ -50,7 +50,7 @@ pub mod display_fromstr {
     where
         D: Deserializer<'de>,
         T: FromStr,
-        <T as FromStr>::Err: Display,
+        T::Err: Display,
     {
         struct Helper<S>(PhantomData<S>);
 

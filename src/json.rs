@@ -14,7 +14,7 @@
 /// # extern crate serde_with;
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
-///     #[serde(with = "serde_with::json::embedded_json")]
+///     #[serde(with = "serde_with::json::nested")]
 ///     other_struct: B,
 /// }
 /// #[derive(Deserialize, Serialize)]
@@ -33,7 +33,7 @@
 /// # }
 /// ```
 ///
-pub mod embedded_json {
+pub mod nested {
     use serde::de::{DeserializeOwned, Deserializer, Error, Visitor};
     use serde::ser::{self, Serialize, Serializer};
     use serde_json;
