@@ -16,3 +16,32 @@ pub mod chrono;
 #[cfg(feature = "json")]
 pub mod json;
 pub mod rust;
+
+/// Seperator for string-based collection de/serialization
+pub trait Separator {
+    /// Return the string delimiting two elements in the string-based collection
+    fn separator() -> &'static str;
+}
+
+/// Predefined seperator using a single space
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct SpaceSeparator;
+
+impl Separator for SpaceSeparator {
+    #[inline]
+    fn separator() -> &'static str {
+        " "
+    }
+}
+
+/// Predefined seperator using a single comma
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
+pub struct CommaSeparator;
+
+impl Separator for CommaSeparator {
+    #[inline]
+    fn separator() -> &'static str {
+        ","
+    }
+}
+
