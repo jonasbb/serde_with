@@ -95,6 +95,8 @@ pub mod display_fromstr {
 /// You can define an arbitrary seperator, by specifying a type which implements [Separator].
 /// Some common ones, like space and comma are already predefined and you can find them [here][Separator].
 ///
+/// An empty string deserializes as an empty collection.
+///
 /// # Examples
 ///
 /// ```
@@ -163,9 +165,13 @@ where
         V::Err: Display,
     {
         let s = String::deserialize(deserializer)?;
-        s.split(Sep::separator())
-            .map(FromStr::from_str)
-            .collect::<Result<_, _>>()
-            .map_err(de::Error::custom)
+        if s.is_empty() {
+            Ok(None.into_iter().collect())
+        } else {
+            s.split(Sep::separator())
+                .map(FromStr::from_str)
+                .collect::<Result<_, _>>()
+                .map_err(de::Error::custom)
+        }
     }
 }
