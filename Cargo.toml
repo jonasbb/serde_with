@@ -1,9 +1,9 @@
 [package]
 name = "serde_with"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["jonasbb"]
 
-description = "Placeholder for a collection of useful de/serialize_with functions"
+description = "Custom de/serialization functions for Rust's serde"
 documentation = "https://docs.rs/serde_with/"
 repository = "https://github.com/jonasbb/serde_with"
 readme = "README.md"
@@ -22,3 +22,6 @@ serde_json = { version = "1.0.17", optional = true }
 serde_derive = "1.0.59"
 serde_json = "1.0.17"
 pretty_assertions = "0.5.1"
+
+[package.metadata.docs.rs]
+all-features = true

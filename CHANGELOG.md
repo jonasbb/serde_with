@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
 
 * Add chrono support: Deserialize timestamps from int, float, and string
 * Serialization of embedded JSON strings
 * De/Serialization using `Display` and `FromStr` implementations
+* String-based collections using `Display` and `FromStr`, allows to deserialize "#foo,#bar"
 
 ## [0.1.0]
 
