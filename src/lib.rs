@@ -16,6 +16,7 @@ pub mod chrono;
 #[cfg(feature = "json")]
 pub mod json;
 pub mod rust;
+pub mod option;
 
 /// Seperator for string-based collection de/serialization
 pub trait Separator {
