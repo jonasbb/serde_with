@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Double Option pattern to differentiate between missing, unset, or existing value
+
 ## [0.2.0]
 
 ### Added
