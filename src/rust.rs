@@ -7,7 +7,14 @@ use std::marker::PhantomData;
 use std::str::FromStr;
 use Separator;
 
-/// De/Serialize using [Display] and [FromStr] implementation
+/// De/Serialize using [Display][] and [FromStr][] implementation
+///
+/// This allows to deserialize a string as a number.
+/// It can be very useful for serialization formats like JSON, which do not support integer
+/// numbers and have to resort to strings to represent them.
+///
+/// [Display]: https://doc.rust-lang.org/stable/std/fmt/trait.Display.html
+/// [FromStr]: https://doc.rust-lang.org/stable/std/str/trait.FromStr.html
 ///
 /// # Examples
 ///
@@ -90,12 +97,16 @@ pub mod display_fromstr {
     }
 }
 
-/// De/Serialize a delimited collection using [Display] and [FromStr] implementation
+/// De/Serialize a delimited collection using [Display][] and [FromStr][] implementation
 ///
-/// You can define an arbitrary seperator, by specifying a type which implements [Separator].
+/// You can define an arbitrary separator, by specifying a type which implements [Separator][].
 /// Some common ones, like space and comma are already predefined and you can find them [here][Separator].
 ///
 /// An empty string deserializes as an empty collection.
+///
+/// [Display]: https://doc.rust-lang.org/stable/std/fmt/trait.Display.html
+/// [FromStr]: https://doc.rust-lang.org/stable/std/str/trait.FromStr.html
+/// [Separator]: ../trait.Separator.html
 ///
 /// # Examples
 ///

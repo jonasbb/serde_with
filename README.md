@@ -1,13 +1,23 @@
 # Custom de/serialization functions for Rust's [serde](https://serde.rs)
 
+[![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
+[![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
+[![Build Status](https://travis-ci.org/jonasbb/serde_with.svg?branch=master)](https://travis-ci.org/jonasbb/serde_with)
+
+---
+
 This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation].
 
+Serde tracks a wishlist of similar helpers at [serde#553].
+
 ## Usage
+
+Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies.serde_with]
 version = "..."
-features = [ ... ]
+features = [ "..." ]
 ```
 
 The crate is divided into different modules.
@@ -41,6 +51,7 @@ struct Foo {
 However, this will prohibit you from applying deserialize on the value returned by serializing a struct.
 
 [with-annotation]: https://serde.rs/field-attrs.html#serdewith--module
+[serde#553]: https://github.com/serde-rs/serde/issues/553
 
 ## License
 

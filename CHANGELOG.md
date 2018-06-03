@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * Double Option pattern to differentiate between missing, unset, or existing value
+* `with_prefix!` macro, which puts a prefix on every struct field
 
 ## [0.2.0]
 
