@@ -63,7 +63,9 @@
 
 #[cfg(feature = "chrono")]
 extern crate chrono as chrono_crate;
-extern crate serde;
+#[doc(hidden)]
+#[macro_use]
+pub extern crate serde;
 #[cfg(feature = "json")]
 extern crate serde_json;
 
@@ -72,6 +74,8 @@ pub mod chrono;
 #[cfg(feature = "json")]
 pub mod json;
 pub mod rust;
+#[doc(hidden)]
+pub mod with_prefix;
 
 /// Seperator for string-based collection de/serialization
 pub trait Separator {
