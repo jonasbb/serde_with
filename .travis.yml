@@ -29,6 +29,9 @@ env:
 script:
   - |
     set -e
+    if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
+      cargo clean --verbose
+    fi
     if [ "$FEATURES" = all ]; then
       FEATURES_COMMAND="--all-features"
     elif [ -n $FEATURES ]; then
