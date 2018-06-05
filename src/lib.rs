@@ -5,16 +5,24 @@
 )]
 #![allow(missing_docs)]
 
+//! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
+//! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
+//! [![Build Status](https://travis-ci.org/jonasbb/serde_with.svg?branch=master)](https://travis-ci.org/jonasbb/serde_with)
+//!
+//! ---
+//!
 //! This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation].
 //!
 //! Serde tracks a wishlist of similar helpers at [serde#553].
 //!
 //! # Usage
 //!
+//! Add this to your `Cargo.toml`:
+//!
 //! ```toml
 //! [dependencies.serde_with]
 //! version = "..."
-//! features = [ ... ]
+//! features = [ "..." ]
 //! ```
 //!
 //! The crate is divided into different modules.
@@ -44,7 +52,7 @@
 //! # #[macro_use]
 //! # extern crate serde_derive;
 //! # extern crate serde_with;
-//! #[cfg(feature = "json")]
+//! # #[cfg(feature = "json")]
 //! #[derive(Deserialize, Serialize)]
 //! struct Foo {
 //!     #[serde(
@@ -77,13 +85,13 @@ pub mod rust;
 #[doc(hidden)]
 pub mod with_prefix;
 
-/// Seperator for string-based collection de/serialization
+/// Separator for string-based collection de/serialization
 pub trait Separator {
     /// Return the string delimiting two elements in the string-based collection
     fn separator() -> &'static str;
 }
 
-/// Predefined seperator using a single space
+/// Predefined separator using a single space
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct SpaceSeparator;
 
@@ -94,7 +102,7 @@ impl Separator for SpaceSeparator {
     }
 }
 
-/// Predefined seperator using a single comma
+/// Predefined separator using a single comma
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct CommaSeparator;
 
