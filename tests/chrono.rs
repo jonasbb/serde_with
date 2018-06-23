@@ -51,3 +51,73 @@ fn json_datetime_from_any_to_string_deserialization() {
     assert_eq!(new_datetime(0, 0), res[7].date);
     assert_eq!(new_datetime(-86000, 999_000_000), res[8].date);
 }
+
+use serde_with::chrono::*;
+#[test]
+fn test_ts_s_ms_float_deserialize() {
+    #[derive(Eq, PartialEq, Debug, Deserialize)]
+    struct S {
+        #[serde(with = "TsSecondsWithMsAsFloat")]
+        ts: Timestamp,
+    }
+    let ts = Timestamp {
+        seconds: 1,
+        nanoseconds: 0,
+    };
+    assert_eq!(S { ts }, serde_json::from_str(r#"{"ts": 1.0}"#).unwrap());
+    let ts = Timestamp {
+        seconds: 1,
+        nanoseconds: 538_000_000,
+    };
+    assert_eq!(S { ts }, serde_json::from_str(r#"{"ts": 1.538}"#).unwrap());
+    let ts = Timestamp {
+        seconds: -1,
+        nanoseconds: 500_000_000,
+    };
+    assert_eq!(S { ts }, serde_json::from_str(r#"{"ts": -1.5}"#).unwrap());
+    let ts = Timestamp {
+        seconds: 1,
+        nanoseconds: 538_000_000,
+    };
+    assert_eq!(
+        S { ts },
+        serde_json::from_str(r#"{"ts": 1.538123}"#).unwrap()
+    );
+}
+
+#[test]
+fn test_ts_s_ms_float_serialize() {
+    #[derive(Serialize)]
+    struct S {
+        #[serde(with = "TsSecondsWithMsAsFloat")]
+        ts: Timestamp,
+    }
+    let ts = Timestamp {
+        seconds: 1,
+        nanoseconds: 0,
+    };
+    assert_eq!(r#"{"ts":1.0}"#, serde_json::to_string(&S { ts }).unwrap());
+    let ts = Timestamp {
+        seconds: 1,
+        nanoseconds: 538_000_000,
+    };
+    assert_eq!(r#"{"ts":1.538}"#, serde_json::to_string(&S { ts }).unwrap());
+    let ts = Timestamp {
+        seconds: 1,
+        nanoseconds: 538_123_456,
+    };
+    assert_eq!(
+        r#"{"ts":1.538}"#,
+        serde_json::to_string(&S { ts }).unwrap(),
+        "Higher precision is ignored"
+    );
+    let ts = Timestamp {
+        seconds: -1,
+        nanoseconds: 500_000_000,
+    };
+    assert_eq!(
+        r#"{"ts":-1.5}"#,
+        serde_json::to_string(&S { ts }).unwrap(),
+        "Negative values"
+    );
+}
