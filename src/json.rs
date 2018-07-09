@@ -34,11 +34,12 @@
 /// ```
 ///
 pub mod nested {
-    use serde::de::{DeserializeOwned, Deserializer, Error, Visitor};
-    use serde::ser::{self, Serialize, Serializer};
+    use serde::{
+        de::{DeserializeOwned, Deserializer, Error, Visitor},
+        ser::{self, Serialize, Serializer},
+    };
     use serde_json;
-    use std::fmt;
-    use std::marker::PhantomData;
+    use std::{fmt, marker::PhantomData};
 
     /// Deserialize value from a string which is valid JSON
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
