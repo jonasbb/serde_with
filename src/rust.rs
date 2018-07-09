@@ -258,3 +258,93 @@ pub mod double_option {
         }
     }
 }
+
+/// Serialize inner value if `Some(T)`. If `None`, serialize the unit struct `()`.
+///
+/// When used in conjunction with `skip_serializing_if = "Option::is_none"` and
+/// `default`, you can build an optional value by skipping if it is `None`, or serializing its
+/// inner value if `Some(T)`.
+///
+/// Not all serialization formats easily support optional values.
+/// While JSON uses the `Option` type to represent optional values and only serializes the inner
+/// part of the `Some()`, other serialization formats, such as [RON][], choose to serialize the
+/// `Some` around a value.
+/// This helper helps building a truly optional value for such serializers.
+///
+/// [RON]: https://github.com/ron-rs/ron
+///
+/// # Example
+///
+/// ```rust
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// # extern crate ron;
+/// # #[derive(Debug, Eq, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Doc {
+///     mandatory: usize,
+///     #[serde(
+///         default,                                    // <- important for deserialization
+///         skip_serializing_if = "Option::is_none",    // <- important for serialization
+///         with = "::serde_with::rust::unwrap_or_skip",
+///     )]
+///     optional: Option<usize>,
+/// }
+/// # fn main() {
+///
+/// // Transparently add/remove Some() wrapper
+/// # let pretty_config = ron::ser::PrettyConfig::default();
+/// let s = r#"(
+///     mandatory: 1,
+///     optional: 2,
+/// )"#;
+/// let v = Doc {
+///     mandatory: 1,
+///     optional: Some(2),
+/// };
+/// assert_eq!(v, ron::de::from_str(s).unwrap());
+/// assert_eq!(s, ron::ser::to_string_pretty(&v, pretty_config).unwrap());
+///
+/// // Missing values are deserialized as `None`
+/// // while `None` values are skipped during serialization.
+/// # let pretty_config = ron::ser::PrettyConfig::default();
+/// let s = r#"(
+///     mandatory: 1,
+/// )"#;
+/// let v = Doc {
+///     mandatory: 1,
+///     optional: None,
+/// };
+/// assert_eq!(v, ron::de::from_str(s).unwrap());
+/// assert_eq!(s, ron::ser::to_string_pretty(&v, pretty_config).unwrap());
+/// # }
+/// ```
+pub mod unwrap_or_skip {
+    use serde::de::{DeserializeOwned, Deserializer};
+    use serde::ser::{Serialize, Serializer};
+
+    /// Deserialize value wrapped in Some(T)
+    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+        T: DeserializeOwned,
+    {
+        T::deserialize(deserializer).map(Some)
+    }
+
+    /// Serialize value if Some(T), unit struct if None
+    pub fn serialize<T, S>(option: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        if let Some(value) = option {
+            value.serialize(serializer)
+        } else {
+            ().serialize(serializer)
+        }
+    }
+}
