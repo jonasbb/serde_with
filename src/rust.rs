@@ -1,10 +1,7 @@
 //! De/Serialization for Rust's builtin and std types
 
 use serde::{de, ser, Deserialize};
-use std::fmt::Display;
-use std::iter::FromIterator;
-use std::marker::PhantomData;
-use std::str::FromStr;
+use std::{fmt::Display, iter::FromIterator, marker::PhantomData, str::FromStr};
 use Separator;
 
 /// De/Serialize using [Display][] and [FromStr][] implementation
@@ -49,12 +46,15 @@ use Separator;
 /// # }
 /// ```
 pub mod display_fromstr {
-    use serde::de::{Deserializer, Error, Visitor};
-    use serde::ser::Serializer;
-    use std::fmt;
-    use std::fmt::Display;
-    use std::marker::PhantomData;
-    use std::str::FromStr;
+    use serde::{
+        de::{Deserializer, Error, Visitor},
+        ser::Serializer,
+    };
+    use std::{
+        fmt::{self, Display},
+        marker::PhantomData,
+        str::FromStr,
+    };
 
     /// Deserialize T using [FromStr]
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
@@ -235,8 +235,10 @@ where
 /// ```
 #[cfg_attr(feature = "cargo-clippy", allow(option_option))]
 pub mod double_option {
-    use serde::de::{Deserialize, Deserializer};
-    use serde::ser::{Serialize, Serializer};
+    use serde::{
+        de::{Deserialize, Deserializer},
+        ser::{Serialize, Serializer},
+    };
 
     pub fn deserialize<'de, T, D>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
     where
