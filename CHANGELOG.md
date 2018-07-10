@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * `unwrap_or_skip` allows to transparently serialize the inner part of a `Some(T)`
+* Add deserialization helpser for sets and maps, inspired by [comment](https://github.com/serde-rs/serde/issues/553#issuecomment-299711855)
+    * Create an error if duplicate values for a set are detected
+    * Create an error if duplicate keys for a map are detected
 
 ## [0.2.1]
 
