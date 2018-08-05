@@ -325,8 +325,10 @@ pub mod double_option {
 /// # }
 /// ```
 pub mod unwrap_or_skip {
-    use serde::de::{DeserializeOwned, Deserializer};
-    use serde::ser::{Serialize, Serializer};
+    use serde::{
+        de::{DeserializeOwned, Deserializer},
+        ser::{Serialize, Serializer},
+    };
 
     /// Deserialize value wrapped in Some(T)
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
@@ -348,5 +350,348 @@ pub mod unwrap_or_skip {
         } else {
             ().serialize(serializer)
         }
+    }
+}
+
+/// Ensure no duplicate values exist in a set.
+///
+/// By default serde has a last-value-wins implementation, if duplicate values for a set exist.
+/// Sometimes it is desirable to know when such an event happens, as the first value is overwritten
+/// and it can indicate an error in the serialized data.
+///
+/// This helper returns an error if two identical values exist in a set.
+///
+/// # Example
+///
+/// ```rust
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// # use std::{collections::HashSet, iter::FromIterator};
+/// # #[derive(Debug, Eq, PartialEq)]
+/// #[derive(Deserialize)]
+/// struct Doc {
+///     #[serde(with = "::serde_with::rust::sets_duplicate_value_is_error")]
+///     set: HashSet<usize>,
+/// }
+/// # fn main() {
+///
+/// // Sets are serialized normally,
+/// let s = r#"{"set": [1, 2, 3, 4]}"#;
+/// let v = Doc {
+///     set: HashSet::from_iter(vec![1, 2, 3, 4]),
+/// };
+/// assert_eq!(v, serde_json::from_str(s).unwrap());
+///
+/// // but create an error if duplicate values, like the `1`, exist.
+/// let s = r#"{"set": [1, 2, 3, 4, 1]}"#;
+/// let res: Result<Doc, _> = serde_json::from_str(s);
+/// assert!(res.is_err());
+/// # }
+/// ```
+pub mod sets_duplicate_value_is_error {
+    use duplicate_key_impls::PreventDuplicateInsertsSet;
+    use serde::de::{Deserialize, Deserializer, Error, SeqAccess, Visitor};
+    use std::{fmt, marker::PhantomData};
+
+    /// Deserialize a set and return an error on duplicate values
+    pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: PreventDuplicateInsertsSet<V>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        struct SeqVisitor<T, V> {
+            marker: PhantomData<T>,
+            set_item_type: PhantomData<V>,
+        };
+
+        impl<'de, T, V> Visitor<'de> for SeqVisitor<T, V>
+        where
+            T: PreventDuplicateInsertsSet<V>,
+            V: Deserialize<'de>,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            #[inline]
+            fn visit_seq<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut values = Self::Value::new(access.size_hint());
+
+                while let Some(value) = access.next_element()? {
+                    if !values.insert(value) {
+                        return Err(Error::custom("invalid entry: found duplicate value"));
+                    };
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = SeqVisitor {
+            marker: PhantomData,
+            set_item_type: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
+    }
+}
+
+/// Ensure no duplicate keys exist in a map.
+///
+/// By default serde has a last-value-wins implementation, if duplicate keys for a map exist.
+/// Sometimes it is desirable to know when such an event happens, as the first value is overwritten
+/// and it can indicate an error in the serialized data.
+///
+/// This helper returns an error if two identical keys exist in a map.
+///
+/// # Example
+///
+/// ```rust
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// # use std::collections::HashMap;
+/// # #[derive(Debug, Eq, PartialEq)]
+/// #[derive(Deserialize)]
+/// struct Doc {
+///     #[serde(with = "::serde_with::rust::maps_duplicate_key_is_error")]
+///     map: HashMap<usize, usize>,
+/// }
+/// # fn main() {
+///
+/// // Maps are serialized normally,
+/// let s = r#"{"map": {"1": 1, "2": 2, "3": 3}}"#;
+/// let mut v = Doc {
+///     map: HashMap::new(),
+/// };
+/// v.map.insert(1, 1);
+/// v.map.insert(2, 2);
+/// v.map.insert(3, 3);
+/// assert_eq!(v, serde_json::from_str(s).unwrap());
+///
+/// // but create an error if duplicate keys, like the `1`, exist.
+/// let s = r#"{"map": {"1": 1, "2": 2, "1": 3}}"#;
+/// let res: Result<Doc, _> = serde_json::from_str(s);
+/// assert!(res.is_err());
+/// # }
+/// ```
+pub mod maps_duplicate_key_is_error {
+
+    use duplicate_key_impls::PreventDuplicateInsertsMap;
+    use serde::de::{Deserialize, Deserializer, Error, MapAccess, Visitor};
+    use std::{fmt, marker::PhantomData};
+
+    /// Deserialize a map and return an error on duplicate keys
+    pub fn deserialize<'de, D, T, K, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: PreventDuplicateInsertsMap<K, V>,
+        K: Deserialize<'de>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        struct MapVisitor<T, K, V> {
+            marker: PhantomData<T>,
+            map_key_type: PhantomData<K>,
+            map_value_type: PhantomData<V>,
+        };
+
+        impl<'de, T, K, V> Visitor<'de> for MapVisitor<T, K, V>
+        where
+            T: PreventDuplicateInsertsMap<K, V>,
+            K: Deserialize<'de>,
+            V: Deserialize<'de>,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a map")
+            }
+
+            #[inline]
+            fn visit_map<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut values = Self::Value::new(access.size_hint());
+
+                while let Some((key, value)) = access.next_entry()? {
+                    if !values.insert(key, value) {
+                        return Err(Error::custom("invalid entry: found duplicate key"));
+                    };
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = MapVisitor {
+            marker: PhantomData,
+            map_key_type: PhantomData,
+            map_value_type: PhantomData,
+        };
+        deserializer.deserialize_map(visitor)
+    }
+}
+
+/// Ensure that the first value is taken, if duplicate values exist
+///
+/// By default serde has a last-value-wins implementation, if duplicate keys for a set exist.
+/// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
+pub mod sets_first_value_wins {
+    use duplicate_key_impls::DuplicateInsertsFirstWinsSet;
+    use serde::de::{Deserialize, Deserializer, SeqAccess, Visitor};
+    use std::{fmt, marker::PhantomData};
+
+    /// Deserialize a set and return an error on duplicate values
+    pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: DuplicateInsertsFirstWinsSet<V>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        struct SeqVisitor<T, V> {
+            marker: PhantomData<T>,
+            set_item_type: PhantomData<V>,
+        };
+
+        impl<'de, T, V> Visitor<'de> for SeqVisitor<T, V>
+        where
+            T: DuplicateInsertsFirstWinsSet<V>,
+            V: Deserialize<'de>,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            #[inline]
+            fn visit_seq<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut values = Self::Value::new(access.size_hint());
+
+                while let Some(value) = access.next_element()? {
+                    values.insert(value);
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = SeqVisitor {
+            marker: PhantomData,
+            set_item_type: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
+    }
+}
+
+/// Ensure that the first key is taken, if duplicate keys exist
+///
+/// By default serde has a last-key-wins implementation, if duplicate keys for a map exist.
+/// Sometimes the opposite strategy is desired. This helper implements a first-key-wins strategy.
+///
+/// # Example
+///
+/// ```rust
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// # use std::collections::HashMap;
+/// # #[derive(Debug, Eq, PartialEq)]
+/// #[derive(Deserialize)]
+/// struct Doc {
+///     #[serde(with = "::serde_with::rust::maps_first_key_wins")]
+///     map: HashMap<usize, usize>,
+/// }
+/// # fn main() {
+///
+/// // Maps are serialized normally,
+/// let s = r#"{"map": {"1": 1, "2": 2, "3": 3}}"#;
+/// let mut v = Doc {
+///     map: HashMap::new(),
+/// };
+/// v.map.insert(1, 1);
+/// v.map.insert(2, 2);
+/// v.map.insert(3, 3);
+/// assert_eq!(v, serde_json::from_str(s).unwrap());
+///
+/// // but create an error if duplicate keys, like the `1`, exist.
+/// let s = r#"{"map": {"1": 1, "2": 2, "1": 3}}"#;
+/// let mut v = Doc {
+///     map: HashMap::new(),
+/// };
+/// v.map.insert(1, 1);
+/// v.map.insert(2, 2);
+/// assert_eq!(v, serde_json::from_str(s).unwrap());
+/// # }
+/// ```
+pub mod maps_first_key_wins {
+
+    use duplicate_key_impls::DuplicateInsertsFirstWinsMap;
+    use serde::de::{Deserialize, Deserializer, MapAccess, Visitor};
+    use std::{fmt, marker::PhantomData};
+
+    /// Deserialize a map and return an error on duplicate keys
+    pub fn deserialize<'de, D, T, K, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: DuplicateInsertsFirstWinsMap<K, V>,
+        K: Deserialize<'de>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        struct MapVisitor<T, K, V> {
+            marker: PhantomData<T>,
+            map_key_type: PhantomData<K>,
+            map_value_type: PhantomData<V>,
+        };
+
+        impl<'de, T, K, V> Visitor<'de> for MapVisitor<T, K, V>
+        where
+            T: DuplicateInsertsFirstWinsMap<K, V>,
+            K: Deserialize<'de>,
+            V: Deserialize<'de>,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a map")
+            }
+
+            #[inline]
+            fn visit_map<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut values = Self::Value::new(access.size_hint());
+
+                while let Some((key, value)) = access.next_entry()? {
+                    values.insert(key, value);
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = MapVisitor {
+            marker: PhantomData,
+            map_key_type: PhantomData,
+            map_value_type: PhantomData,
+        };
+        deserializer.deserialize_map(visitor)
     }
 }
