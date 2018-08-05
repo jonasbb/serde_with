@@ -392,7 +392,56 @@ pub mod unwrap_or_skip {
 /// # }
 /// ```
 pub mod sets_duplicate_value_is_error {
-    pub use duplicate_key_impls::deserialize_set as deserialize;
+    use duplicate_key_impls::PreventDuplicateInsertsSet;
+    use serde::de::{Deserialize, Deserializer, Error, SeqAccess, Visitor};
+    use std::{fmt, marker::PhantomData};
+
+    /// Deserialize a set and return an error on duplicate values
+    pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: PreventDuplicateInsertsSet<V>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        struct SeqVisitor<T, V> {
+            marker: PhantomData<T>,
+            set_item_type: PhantomData<V>,
+        };
+
+        impl<'de, T, V> Visitor<'de> for SeqVisitor<T, V>
+        where
+            T: PreventDuplicateInsertsSet<V>,
+            V: Deserialize<'de>,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            #[inline]
+            fn visit_seq<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut values = Self::Value::new(access.size_hint());
+
+                while let Some(value) = access.next_element()? {
+                    if !values.insert(value) {
+                        return Err(Error::custom("invalid entry: found duplicate value"));
+                    };
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = SeqVisitor {
+            marker: PhantomData,
+            set_item_type: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
+    }
 }
 
 /// Ensure no duplicate keys exist in a map.
@@ -437,5 +486,59 @@ pub mod sets_duplicate_value_is_error {
 /// # }
 /// ```
 pub mod maps_duplicate_key_is_error {
-    pub use duplicate_key_impls::deserialize_map as deserialize;
+
+    use duplicate_key_impls::PreventDuplicateInsertsMap;
+    use serde::de::{Deserialize, Deserializer, Error, MapAccess, Visitor};
+    use std::{fmt, marker::PhantomData};
+
+    /// Deserialize a map and return an error on duplicate keys
+    pub fn deserialize<'de, D, T, K, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: PreventDuplicateInsertsMap<K, V>,
+        K: Deserialize<'de>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        struct MapVisitor<T, K, V> {
+            marker: PhantomData<T>,
+            map_key_type: PhantomData<K>,
+            map_value_type: PhantomData<V>,
+        };
+
+        impl<'de, T, K, V> Visitor<'de> for MapVisitor<T, K, V>
+        where
+            T: PreventDuplicateInsertsMap<K, V>,
+            K: Deserialize<'de>,
+            V: Deserialize<'de>,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a map")
+            }
+
+            #[inline]
+            fn visit_map<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut values = Self::Value::new(access.size_hint());
+
+                while let Some((key, value)) = access.next_entry()? {
+                    if !values.insert(key, value) {
+                        return Err(Error::custom("invalid entry: found duplicate key"));
+                    };
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = MapVisitor {
+            marker: PhantomData,
+            map_key_type: PhantomData,
+            map_value_type: PhantomData,
+        };
+        deserializer.deserialize_map(visitor)
+    }
 }
