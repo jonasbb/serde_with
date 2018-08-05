@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.2]
+
 ### Added
 
 * `unwrap_or_skip` allows to transparently serialize the inner part of a `Some(T)`
