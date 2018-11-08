@@ -149,6 +149,7 @@ impl<Sep> StringWithSeparator<Sep>
 where
     Sep: Separator,
 {
+    /// Serialize collection into a string with separator symbol
     pub fn serialize<S, T, V>(values: T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: ser::Serializer,
@@ -168,6 +169,7 @@ where
         })
     }
 
+    /// Deserialize a collection from a string with separator symbol
     pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
     where
         D: de::Deserializer<'de>,
@@ -240,6 +242,7 @@ pub mod double_option {
         ser::{Serialize, Serializer},
     };
 
+    /// Deserialize potentially non-existing optional value
     pub fn deserialize<'de, T, D>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
     where
         T: Deserialize<'de>,
@@ -248,6 +251,7 @@ pub mod double_option {
         Deserialize::deserialize(deserializer).map(Some)
     }
 
+    /// Serialize optional value
     pub fn serialize<S, T>(values: &Option<Option<T>>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
