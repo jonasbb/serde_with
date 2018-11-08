@@ -1,6 +1,6 @@
 [package]
 name = "serde_with"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["jonasbb"]
 
 description = "Custom de/serialization functions for Rust's serde"
@@ -11,6 +11,10 @@ keywords = ["serde", "utilities"]
 license = "MIT/Apache-2.0"
 
 exclude = [".gitignore", ".travis.yml", "bors.toml", "README.tpl", "rustfmt.toml"]
+
+[badges]
+travis-ci = { repository = "jonasbb/serde_with", branch = "master" }
+maintenance = { status = "actively-developed" }
 
 [features]
 json = [ "serde_json" ]
