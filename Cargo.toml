@@ -14,14 +14,14 @@ license = "MIT/Apache-2.0"
 json = [ "serde_json" ]
 
 [dependencies]
-chrono = { version = "0.4.2", features = [ "serde" ], optional = true }
-serde = "1.0.65"
-serde_json = { version = "1.0.17", optional = true }
+chrono = { version = "0.4.1", features = [ "serde" ], optional = true }
+serde = "1.0.75"
+serde_json = { version = "1.0.1", optional = true }
 
 [dev-dependencies]
-serde_derive = "1.0.65"
-serde_json = "1.0.17"
-ron = "0.4.0"
+serde_derive = "1.0.75"
+serde_json = "1.0.1"
+ron = ">=0.3.0,<0.6"
 pretty_assertions = "0.5.1"
 
 [package.metadata.docs.rs]

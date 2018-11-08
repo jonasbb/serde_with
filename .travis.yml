@@ -14,30 +14,53 @@ branches:
     # This is where pull requests from "bors try" are built.
     - trying
 
-rust:
-- 1.26.0
-- stable
-- beta
-- nightly
+matrix:
+  include:
+    - name: "Bors (1.26.2)"
+      if: branch = staging OR branch = trying OR type = cron
+      rust: 1.26.2
+    - name: "Bors (stable)"
+      if: branch = staging OR branch = trying OR type = cron
+      rust: stable
+    - name: "Bors (beta)"
+      if: branch = staging OR branch = trying OR type = cron
+      rust: beta
+    - name: "Bors (nightly)"
+      if: branch = staging OR branch = trying OR type = cron
+      rust: nightly
+    - name: "PR Open"
+      if: type = pull_request AND branch = master
+      rust: stable
+    - name: "Minimal Versions"
+      rust: nightly
+      script:
+        - set -e
+        - cargo generate-lockfile -Z minimal-versions
+        - cargo build --verbose --all --all-features
+        - cargo test --verbose --all --all-features
 
-env:
-- FEATURES=""
-- FEATURES=chrono
-- FEATURES=json
-- FEATURES=all
+# https://levans.fr/rust_travis_cache.html
+# Need to cache the whole `.cargo` directory to keep .crates.toml for
+# cargo-update to work
+cache:
+  directories:
+    - /home/travis/.cargo
+
+# But don't cache the cargo registry
+before_cache:
+  - rm -rf /home/travis/.cargo/registry
+
+before_script:
+  # skip this step for 1.26.2
+  - ( test $TRAVIS_RUST_VERSION = "1.26.2" || rustup component add clippy-preview )
 
 script:
+  - set -e
   - |
-    set -e
-    if [ "$TRAVIS_EVENT_TYPE" = "cron" ]; then
-      cargo clean --verbose
-    fi
-    if [ "$FEATURES" = all ]; then
-      FEATURES_COMMAND="--all-features"
-    elif [ -n $FEATURES ]; then
-      FEATURES_COMMAND="--features="$FEATURES
-    else
-      FEATURES_COMMAND="--no-default-features"
-    fi
-    cargo build --verbose ${FEATURES_COMMAND}
-    cargo test --verbose ${FEATURES_COMMAND}
+    for FEATURES_COMMAND in "--no-default-features" "" "--features=chrono" "--features=json" "--all-features"
+    do
+      cargo build --verbose --all ${FEATURES_COMMAND}
+      # skip this step for 1.26.2
+      ( test $TRAVIS_RUST_VERSION = "1.26.2" || cargo clippy --verbose --all ${FEATURES_COMMAND} )
+      cargo test --verbose --all ${FEATURES_COMMAND}
+    done
