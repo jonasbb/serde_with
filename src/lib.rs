@@ -1,6 +1,7 @@
 #![deny(
     missing_debug_implementations,
     missing_copy_implementations,
+    missing_docs,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
@@ -8,7 +9,7 @@
     unused_qualifications,
     variant_size_differences
 )]
-#![allow(missing_docs)]
+#![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
@@ -84,12 +85,12 @@ extern crate serde_json;
 
 #[cfg(feature = "chrono")]
 pub mod chrono;
+mod duplicate_key_impls;
 #[cfg(feature = "json")]
 pub mod json;
 pub mod rust;
 #[doc(hidden)]
 pub mod with_prefix;
-mod duplicate_key_impls;
 
 /// Separator for string-based collection de/serialization
 pub trait Separator {

@@ -82,7 +82,7 @@ pub mod nested {
         T: Serialize,
         S: Serializer,
     {
-        let s = serde_json::to_string(value).map_err(|err| ser::Error::custom(err))?;
+        let s = serde_json::to_string(value).map_err(ser::Error::custom)?;
         serializer.serialize_str(&*s)
     }
 }

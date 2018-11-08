@@ -1,6 +1,6 @@
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, HashSet},
-    hash::Hash,
+    hash::{BuildHasher, Hash},
 };
 
 pub trait DuplicateInsertsFirstWinsSet<T> {
@@ -17,15 +17,16 @@ pub trait DuplicateInsertsFirstWinsMap<K, V> {
     fn insert(&mut self, key: K, value: V);
 }
 
-impl<T> DuplicateInsertsFirstWinsSet<T> for HashSet<T>
+impl<T, S> DuplicateInsertsFirstWinsSet<T> for HashSet<T, S>
 where
     T: Eq + Hash,
+    S: BuildHasher + Default,
 {
     #[inline]
     fn new(size_hint: Option<usize>) -> Self {
         match size_hint {
-            Some(size) => Self::with_capacity(size),
-            None => Self::new(),
+            Some(size) => Self::with_capacity_and_hasher(size, S::default()),
+            None => Self::with_hasher(S::default()),
         }
     }
 
@@ -52,15 +53,16 @@ where
     }
 }
 
-impl<K, V> DuplicateInsertsFirstWinsMap<K, V> for HashMap<K, V>
+impl<K, V, S> DuplicateInsertsFirstWinsMap<K, V> for HashMap<K, V, S>
 where
     K: Eq + Hash,
+    S: BuildHasher + Default,
 {
     #[inline]
     fn new(size_hint: Option<usize>) -> Self {
         match size_hint {
-            Some(size) => Self::with_capacity(size),
-            None => Self::new(),
+            Some(size) => Self::with_capacity_and_hasher(size, S::default()),
+            None => Self::with_hasher(S::default()),
         }
     }
 
