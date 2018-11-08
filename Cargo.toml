@@ -10,6 +10,8 @@ readme = "README.md"
 keywords = ["serde", "utilities"]
 license = "MIT/Apache-2.0"
 
+exclude = [".gitignore", ".travis.yml", "bors.toml", "README.tpl", "rustfmt.toml"]
+
 [features]
 json = [ "serde_json" ]
 
