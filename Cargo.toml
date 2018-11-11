@@ -7,7 +7,7 @@ description = "Custom de/serialization functions for Rust's serde"
 documentation = "https://docs.rs/serde_with/"
 repository = "https://github.com/jonasbb/serde_with"
 readme = "README.md"
-keywords = ["serde", "utilities"]
+keywords = ["serde", "utilities", "serialization", "deserialization"]
 license = "MIT/Apache-2.0"
 
 exclude = [".gitignore", ".travis.yml", "bors.toml", "README.tpl", "rustfmt.toml"]

@@ -1,5 +1,5 @@
 language: rust
-sudo: false
+sudo: true
 cache: cargo
 
 notifications:
@@ -32,6 +32,7 @@ matrix:
       if: type = pull_request AND branch = master
       rust: stable
     - name: "Minimal Versions"
+      if: branch = staging OR branch = trying OR type = cron OR ( type = pull_request AND branch = master )
       rust: nightly
       script:
         - set -e
@@ -50,9 +51,34 @@ cache:
 before_cache:
   - rm -rf /home/travis/.cargo/registry
 
+env:
+  global:
+  - RUSTFLAGS="-C link-dead-code"
+
+addons:
+  apt:
+    packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - binutils-dev
+      - libiberty-dev
+
 before_script:
   # skip this step for 1.26.2
   - ( test $TRAVIS_RUST_VERSION = "1.26.2" || rustup component add clippy-preview )
+  - export PATH=$HOME/.cargo/bin:$PATH
+  - which cargo-install-update || cargo install cargo-update
+  - which cargo-kcov || cargo install cargo-kcov
+  - cargo fetch && cargo install-update -a
+  - |
+    if [ ! -x $HOME/.cargo/bin/kcov ] || [ ! -f $HOME/.cargo/bin/kcov ]; then
+      mkdir kcov
+      cd kcov
+      cargo kcov --print-install-kcov-sh | sh
+      cd ${TRAVIS_BUILD_DIR}
+      rm -rf kcov
+    fi
 
 script:
   - set -e
@@ -64,3 +90,6 @@ script:
       ( test $TRAVIS_RUST_VERSION = "1.26.2" || cargo clippy --verbose --all ${FEATURES_COMMAND} )
       cargo test --verbose --all ${FEATURES_COMMAND}
     done
+  - cargo kcov --verbose --no-clean-rebuild --features=chrono,json
+  - bash <(curl -s https://codecov.io/bash)
+  - echo "CodeCov Uploading of data was successful!"

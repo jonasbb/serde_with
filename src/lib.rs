@@ -14,6 +14,7 @@
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
 //! [![Build Status](https://travis-ci.org/jonasbb/serde_with.svg?branch=master)](https://travis-ci.org/jonasbb/serde_with)
+//! [![codecov](https://codecov.io/gh/jonasbb/serde_with/branch/master/graph/badge.svg)](https://codecov.io/gh/jonasbb/serde_with)
 //!
 //! ---
 //!
