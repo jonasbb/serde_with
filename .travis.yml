@@ -65,8 +65,8 @@ addons:
       - libiberty-dev
 
 before_script:
-  # skip this step for 1.26.2
-  - ( test $TRAVIS_RUST_VERSION = "1.26.2" || rustup component add clippy-preview )
+  # Allow this step to fail in case clippy is not available for whatever reason
+  - ( rustup component add clippy-preview || true )
   - export PATH=$HOME/.cargo/bin:$PATH
   - which cargo-install-update || cargo install cargo-update
   - which cargo-kcov || cargo install cargo-kcov
@@ -86,8 +86,9 @@ script:
     for FEATURES_COMMAND in "--no-default-features" "" "--features=chrono" "--features=json" "--all-features"
     do
       cargo build --verbose --all ${FEATURES_COMMAND}
-      # skip this step for 1.26.2
-      ( test $TRAVIS_RUST_VERSION = "1.26.2" || cargo clippy --verbose --all ${FEATURES_COMMAND} )
+      # skip this step if clippy is not available, e.g., bad nightly
+      # `|| true` to make the command always succeed, because the `set -e` would fail otherwise
+      ( which cargo-clippy >/dev/null 2>&1 && cargo clippy --verbose --all ${FEATURES_COMMAND} ) || true
       cargo test --verbose --all ${FEATURES_COMMAND}
     done
   - cargo kcov --verbose --no-clean-rebuild --features=chrono,json
