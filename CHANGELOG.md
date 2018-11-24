@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.4]
+
+### Added
+
+* De/Serialize sequences by using `Display` and `FromStr` implementations on each element. Contributed by @katyo
+
 ## [0.2.3]
 
 ### Added
