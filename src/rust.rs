@@ -1,7 +1,15 @@
 //! De/Serialization for Rust's builtin and std types
 
-use serde::{de, ser, Deserialize};
-use std::{fmt::Display, iter::FromIterator, marker::PhantomData, str::FromStr};
+use serde::{
+    de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
+    ser::{Serialize, Serializer},
+};
+use std::{
+    fmt::{self, Display},
+    iter::FromIterator,
+    marker::PhantomData,
+    str::FromStr,
+};
 use Separator;
 
 /// De/Serialize using [Display][] and [FromStr][] implementation
@@ -46,15 +54,8 @@ use Separator;
 /// # }
 /// ```
 pub mod display_fromstr {
-    use serde::{
-        de::{Deserializer, Error, Visitor},
-        ser::Serializer,
-    };
-    use std::{
-        fmt::{self, Display},
-        marker::PhantomData,
-        str::FromStr,
-    };
+    use super::*;
+    use std::str::FromStr;
 
     /// Deserialize T using [FromStr]
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
@@ -153,10 +154,12 @@ pub mod seq_display_fromstr {
         de::{Deserializer, Error, SeqAccess, Visitor},
         ser::{SerializeSeq, Serializer},
     };
-    use std::fmt::{self, Display};
-    use std::iter::{FromIterator, IntoIterator};
-    use std::marker::PhantomData;
-    use std::str::FromStr;
+    use std::{
+        fmt::{self, Display},
+        iter::{FromIterator, IntoIterator},
+        marker::PhantomData,
+        str::FromStr,
+    };
 
     /// Deserialize collection T using [FromIterator] and [FromStr] for each element
     pub fn deserialize<'de, D, T, I>(deserializer: D) -> Result<T, D::Error>
@@ -273,7 +276,7 @@ where
     /// Serialize collection into a string with separator symbol
     pub fn serialize<S, T, V>(values: T, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: ser::Serializer,
+        S: Serializer,
         T: IntoIterator<Item = V>,
         V: Display,
     {
@@ -293,7 +296,7 @@ where
     /// Deserialize a collection from a string with separator symbol
     pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
     where
-        D: de::Deserializer<'de>,
+        D: Deserializer<'de>,
         T: FromIterator<V>,
         V: FromStr,
         V::Err: Display,
@@ -305,7 +308,7 @@ where
             s.split(Sep::separator())
                 .map(FromStr::from_str)
                 .collect::<Result<_, _>>()
-                .map_err(de::Error::custom)
+                .map_err(Error::custom)
         }
     }
 }
@@ -358,10 +361,7 @@ where
 /// ```
 #[cfg_attr(feature = "cargo-clippy", allow(option_option))]
 pub mod double_option {
-    use serde::{
-        de::{Deserialize, Deserializer},
-        ser::{Serialize, Serializer},
-    };
+    use super::*;
 
     /// Deserialize potentially non-existing optional value
     pub fn deserialize<'de, T, D>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
@@ -450,10 +450,7 @@ pub mod double_option {
 /// # }
 /// ```
 pub mod unwrap_or_skip {
-    use serde::{
-        de::{DeserializeOwned, Deserializer},
-        ser::{Serialize, Serializer},
-    };
+    use super::*;
 
     /// Deserialize value wrapped in Some(T)
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
@@ -517,9 +514,8 @@ pub mod unwrap_or_skip {
 /// # }
 /// ```
 pub mod sets_duplicate_value_is_error {
+    use super::*;
     use duplicate_key_impls::PreventDuplicateInsertsSet;
-    use serde::de::{Deserialize, Deserializer, Error, SeqAccess, Visitor};
-    use std::{fmt, marker::PhantomData};
 
     /// Deserialize a set and return an error on duplicate values
     pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
@@ -611,10 +607,8 @@ pub mod sets_duplicate_value_is_error {
 /// # }
 /// ```
 pub mod maps_duplicate_key_is_error {
-
+    use super::*;
     use duplicate_key_impls::PreventDuplicateInsertsMap;
-    use serde::de::{Deserialize, Deserializer, Error, MapAccess, Visitor};
-    use std::{fmt, marker::PhantomData};
 
     /// Deserialize a map and return an error on duplicate keys
     pub fn deserialize<'de, D, T, K, V>(deserializer: D) -> Result<T, D::Error>
@@ -673,9 +667,8 @@ pub mod maps_duplicate_key_is_error {
 /// By default serde has a last-value-wins implementation, if duplicate keys for a set exist.
 /// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
 pub mod sets_first_value_wins {
+    use super::*;
     use duplicate_key_impls::DuplicateInsertsFirstWinsSet;
-    use serde::de::{Deserialize, Deserializer, SeqAccess, Visitor};
-    use std::{fmt, marker::PhantomData};
 
     /// Deserialize a set and return an error on duplicate values
     pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
@@ -766,10 +759,8 @@ pub mod sets_first_value_wins {
 /// # }
 /// ```
 pub mod maps_first_key_wins {
-
+    use super::*;
     use duplicate_key_impls::DuplicateInsertsFirstWinsMap;
-    use serde::de::{Deserialize, Deserializer, MapAccess, Visitor};
-    use std::{fmt, marker::PhantomData};
 
     /// Deserialize a map and return an error on duplicate keys
     pub fn deserialize<'de, D, T, K, V>(deserializer: D) -> Result<T, D::Error>
@@ -818,5 +809,115 @@ pub mod maps_first_key_wins {
             map_value_type: PhantomData,
         };
         deserializer.deserialize_map(visitor)
+    }
+}
+
+/// De/Serialize a `Option<String>` type while transforming the empty string to `None`
+///
+/// Convert an `Option<T>` from/to string using `FromStr` and `AsRef<str>` implementations.
+/// An empty string is deserialized as `None` and a `None` vice versa.
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+///
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::string_empty_as_none")]
+///     tags: Option<String>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_str(r##"{
+///     "tags": ""
+/// }"##).unwrap();
+/// assert!(v.tags.is_none());
+///
+/// let v: A = serde_json::from_str(r##"{
+///     "tags": "Hi"
+/// }"##).unwrap();
+/// assert_eq!(Some("Hi".to_string()), v.tags);
+///
+/// let x = A {
+///     tags: Some("This is text".to_string()),
+/// };
+/// assert_eq!(r#"{"tags":"This is text"}"#, serde_json::to_string(&x).unwrap());
+///
+/// let x = A {
+///     tags: None,
+/// };
+/// assert_eq!(r#"{"tags":""}"#, serde_json::to_string(&x).unwrap());
+/// # }
+/// ```
+pub mod string_empty_as_none {
+    use super::*;
+
+    /// Deserialize an `Option<T>` from a string using `FromStr`
+    pub fn deserialize<'de, D, S>(deserializer: D) -> Result<Option<S>, D::Error>
+    where
+        D: Deserializer<'de>,
+        S: FromStr,
+        S::Err: Display,
+    {
+        struct OptionStringEmptyNone<S>(PhantomData<S>);
+        impl<'de, S> Visitor<'de> for OptionStringEmptyNone<S>
+        where
+            S: FromStr,
+            S::Err: Display,
+        {
+            type Value = Option<S>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("any string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match value {
+                    "" => Ok(None),
+                    v => S::from_str(v).map(Some).map_err(Error::custom),
+                }
+            }
+
+            fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match &*value {
+                    "" => Ok(None),
+                    v => S::from_str(v).map(Some).map_err(Error::custom),
+                }
+            }
+
+            // handles the `null` case
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(None)
+            }
+        }
+
+        deserializer.deserialize_any(OptionStringEmptyNone(PhantomData))
+    }
+
+    /// Serialize a string from `Option<T>` using `AsRef<str>` or using the empty string if `None`.
+    pub fn serialize<T, S>(option: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: AsRef<str>,
+        S: Serializer,
+    {
+        if let Some(value) = option {
+            value.as_ref().serialize(serializer)
+        } else {
+            "".serialize(serializer)
+        }
     }
 }

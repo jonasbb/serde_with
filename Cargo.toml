@@ -1,6 +1,6 @@
 [package]
 name = "serde_with"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["jonasbb"]
 
 description = "Custom de/serialization functions for Rust's serde"
