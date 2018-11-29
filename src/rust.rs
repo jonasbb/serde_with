@@ -811,3 +811,113 @@ pub mod maps_first_key_wins {
         deserializer.deserialize_map(visitor)
     }
 }
+
+/// De/Serialize a `Option<String>` type while transforming the empty string to `None`
+///
+/// Convert an `Option<T>` from/to string using `FromStr` and `AsRef<str>` implementations.
+/// An empty string is deserialized as `None` and a `None` vice versa.
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+///
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::string_empty_as_none")]
+///     tags: Option<String>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_str(r##"{
+///     "tags": ""
+/// }"##).unwrap();
+/// assert!(v.tags.is_none());
+///
+/// let v: A = serde_json::from_str(r##"{
+///     "tags": "Hi"
+/// }"##).unwrap();
+/// assert_eq!(Some("Hi".to_string()), v.tags);
+///
+/// let x = A {
+///     tags: Some("This is text".to_string()),
+/// };
+/// assert_eq!(r#"{"tags":"This is text"}"#, serde_json::to_string(&x).unwrap());
+///
+/// let x = A {
+///     tags: None,
+/// };
+/// assert_eq!(r#"{"tags":""}"#, serde_json::to_string(&x).unwrap());
+/// # }
+/// ```
+pub mod string_empty_as_none {
+    use super::*;
+
+    /// Deserialize an `Option<T>` from a string using `FromStr`
+    pub fn deserialize<'de, D, S>(deserializer: D) -> Result<Option<S>, D::Error>
+    where
+        D: Deserializer<'de>,
+        S: FromStr,
+        S::Err: Display,
+    {
+        struct OptionStringEmptyNone<S>(PhantomData<S>);
+        impl<'de, S> Visitor<'de> for OptionStringEmptyNone<S>
+        where
+            S: FromStr,
+            S::Err: Display,
+        {
+            type Value = Option<S>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("any string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match value {
+                    "" => Ok(None),
+                    v => S::from_str(v).map(Some).map_err(Error::custom),
+                }
+            }
+
+            fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match &*value {
+                    "" => Ok(None),
+                    v => S::from_str(v).map(Some).map_err(Error::custom),
+                }
+            }
+
+            // handles the `null` case
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(None)
+            }
+        }
+
+        deserializer.deserialize_any(OptionStringEmptyNone(PhantomData))
+    }
+
+    /// Serialize a string from `Option<T>` using `AsRef<str>` or using the empty string if `None`.
+    pub fn serialize<T, S>(option: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: AsRef<str>,
+        S: Serializer,
+    {
+        if let Some(value) = option {
+            value.as_ref().serialize(serializer)
+        } else {
+            "".serialize(serializer)
+        }
+    }
+}
