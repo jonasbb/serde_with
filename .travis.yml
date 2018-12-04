@@ -70,7 +70,7 @@ before_script:
   # Install or update cargo tarpaulin
   - |
     if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
-      which cargo-tarpaulin || env RUSTFLAGS="--cfg procmacro2_semver_exempt" cargo install-update --allow-no-update cargo-tarpaulin
+      env RUSTFLAGS="--cfg procmacro2_semver_exempt" cargo install-update --allow-no-update cargo-tarpaulin
     fi
   # Update all tools
   - cargo install-update -a
