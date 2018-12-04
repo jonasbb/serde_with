@@ -1,0 +1,41 @@
+coverage:
+  # See this link for documentation
+  # https://docs.codecov.io/docs/coverage-configuration
+
+  # Specifies the color range
+  # Increase it after we can use the rustdoc tests for coverage analysis
+  # See https://github.com/rust-lang/rust/pull/56189
+  range: 50..80
+  round: down
+  precision: 2
+
+  # See this link for documentation on the commit statuses
+  # https://docs.codecov.io/docs/commit-status
+  status:
+
+    # Status for all the lines of the project
+    project:
+      # disable the default status that measures entire project
+      default: false
+
+      # declare a new status context "tests"
+      tests:
+        # We cannot require 100%, as tarpaulin has some issues in counting lines
+        target: 90%
+        # Only include coverage of the "tests/" folder
+        paths: "tests/"
+        # Allow the coverage to change by up to 5%
+        threshold: "5%"
+
+      # declare a new status context "crate"
+      crate:
+        paths: "src/"
+        # Use the coverage from the base commit as baseline
+        target: auto
+        # Allow the coverage to change by up to 5%
+        threshold: "5%"
+
+    # Status for only the lines changed by the patch
+    # This does not make that much sense, if we cannot use the rustdoc tests
+    # See https://github.com/rust-lang/rust/pull/56189
+patch: off
