@@ -91,7 +91,7 @@ after_success:
   - |
     if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
       # Uncomment the following two lines create and upload a report for codecov.io
-      cargo tarpaulin --out Xml --skip-clean --all --all-features
+      cargo tarpaulin --out Xml --all --all-features
       bash <(curl -s https://codecov.io/bash)
       echo "CodeCov Uploading of data was successful!"
     fi
