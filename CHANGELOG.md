@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.0.0]
+
+No changes in this release.
+Bumped version number to indicate the stability of the library.
+
 ## [0.2.5]
 
 ### Added
