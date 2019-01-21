@@ -21,6 +21,7 @@ exclude = [
 
 [badges]
 travis-ci = { repository = "jonasbb/serde_with", branch = "master" }
+codecov = { repository = "jonasbb/serde_with", branch = "master", service = "github" }
 maintenance = { status = "actively-developed" }
 
 [features]
