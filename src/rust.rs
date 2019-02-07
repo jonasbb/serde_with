@@ -2,10 +2,13 @@
 
 use serde::{
     de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
-    ser::{Serialize, Serializer},
+    ser::{Serialize, SerializeSeq, Serializer},
 };
 use std::{
+    cmp::Eq,
+    collections::{BTreeMap, HashMap},
     fmt::{self, Display},
+    hash::{BuildHasher, Hash},
     iter::FromIterator,
     marker::PhantomData,
     str::FromStr,
@@ -918,6 +921,114 @@ pub mod string_empty_as_none {
             value.as_ref().serialize(serializer)
         } else {
             "".serialize(serializer)
+        }
+    }
+}
+
+pub mod hashmap_as_tuple_list {
+    use super::*;
+
+    pub fn serialize<K, V, S, BH>(map: &HashMap<K, V, BH>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        K: Eq + Hash + Serialize,
+        V: Serialize,
+        BH: BuildHasher,
+    {
+        let mut seq = serializer.serialize_seq(Some(map.len()))?;
+        for item in map.iter() {
+            seq.serialize_element(&item)?;
+        }
+        seq.end()
+    }
+
+    pub fn deserialize<'de, K, V, BH, D>(deserializer: D) -> Result<HashMap<K, V, BH>, D::Error>
+    where
+        D: Deserializer<'de>,
+        K: Eq + Hash + Deserialize<'de>,
+        V: Deserialize<'de>,
+        BH: BuildHasher + Default,
+    {
+        deserializer.deserialize_seq(HashMapVisitor(PhantomData))
+    }
+
+    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    struct HashMapVisitor<K, V, BH>(PhantomData<fn() -> HashMap<K, V, BH>>);
+
+    impl<'de, K, V, BH> Visitor<'de> for HashMapVisitor<K, V, BH>
+    where
+        K: Deserialize<'de> + Eq + Hash,
+        V: Deserialize<'de>,
+        BH: BuildHasher + Default,
+    {
+        type Value = HashMap<K, V, BH>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a list of key-value pairs")
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut map =
+                HashMap::with_capacity_and_hasher(seq.size_hint().unwrap_or(0), BH::default());
+            while let Some((key, value)) = seq.next_element()? {
+                map.insert(key, value);
+            }
+            Ok(map)
+        }
+    }
+}
+
+pub mod btreemap_as_tuple_list {
+    use super::*;
+
+    pub fn serialize<K, V, S>(map: &BTreeMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        K: Eq + Hash + Serialize,
+        V: Serialize,
+    {
+        let mut seq = serializer.serialize_seq(Some(map.len()))?;
+        for item in map.iter() {
+            seq.serialize_element(&item)?;
+        }
+        seq.end()
+    }
+
+    pub fn deserialize<'de, K, V, D>(deserializer: D) -> Result<BTreeMap<K, V>, D::Error>
+    where
+        D: Deserializer<'de>,
+        K: Deserialize<'de> + Ord,
+        V: Deserialize<'de>,
+    {
+        deserializer.deserialize_seq(BTreeMapVisitor(PhantomData))
+    }
+
+    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    struct BTreeMapVisitor<K, V>(PhantomData<fn() -> BTreeMap<K, V>>);
+
+    impl<'de, K, V> Visitor<'de> for BTreeMapVisitor<K, V>
+    where
+        K: Deserialize<'de> + Ord,
+        V: Deserialize<'de>,
+    {
+        type Value = BTreeMap<K, V>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a list of key-value pairs")
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut map = BTreeMap::default();
+            while let Some((key, value)) = seq.next_element()? {
+                map.insert(key, value);
+            }
+            Ok(map)
         }
     }
 }

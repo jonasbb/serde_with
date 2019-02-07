@@ -1,3 +1,4 @@
+extern crate fnv;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -6,7 +7,9 @@ extern crate serde_with;
 #[macro_use]
 extern crate pretty_assertions;
 
+use fnv::FnvHashMap;
 use serde_with::CommaSeparator;
+use std::collections::{BTreeMap, HashMap};
 
 #[test]
 fn string_collection() {
@@ -241,4 +244,184 @@ fn duplicate_key_first_wins_btreemap() {
     v.map.insert(1, 1);
     v.map.insert(2, 2);
     assert_eq!(v, serde_json::from_str(s).unwrap());
+}
+
+#[test]
+fn test_hashmap_as_tuple_list() {
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
+    struct S {
+        #[serde(with = "serde_with::rust::hashmap_as_tuple_list")]
+        s: HashMap<String, u8>,
+    }
+    let from = r#"{
+        "s": [
+            ["ABC", 1],
+            ["Hello", 0],
+            ["World", 20]
+        ]
+    }"#;
+    let mut expected = S::default();
+    expected.s.insert("ABC".to_string(), 1);
+    expected.s.insert("Hello".to_string(), 0);
+    expected.s.insert("World".to_string(), 20);
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert_eq!(expected, res);
+
+    let from = r#"{
+  "s": [
+    [
+      "Hello",
+      0
+    ]
+  ]
+}"#;
+    let mut expected = S::default();
+    expected.s.insert("Hello".to_string(), 0);
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert_eq!(expected, res);
+    // We can only do this with a HashMap of size 1 as otherwise the iteration order is unspecified
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": []
+}"#;
+    let expected = S::default();
+    let res: S = serde_json::from_str(from).unwrap();
+    assert!(res.s.is_empty());
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    // Test parse error
+    let from = r#"{
+  "s": [ [1] ]
+}"#;
+    let res: Result<S, _> = serde_json::from_str(from);
+    assert!(res.is_err());
+    let err = res.unwrap_err();
+    println!("{:?}", err);
+    assert!(err.is_data());
+}
+
+#[test]
+fn test_hashmap_as_tuple_list_fnv() {
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
+    struct S {
+        #[serde(with = "serde_with::rust::hashmap_as_tuple_list")]
+        s: FnvHashMap<String, u8>,
+    }
+    let from = r#"{
+        "s": [
+            ["ABC", 1],
+            ["Hello", 0],
+            ["World", 20]
+        ]
+    }"#;
+    let mut expected = S::default();
+    expected.s.insert("ABC".to_string(), 1);
+    expected.s.insert("Hello".to_string(), 0);
+    expected.s.insert("World".to_string(), 20);
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert_eq!(expected, res);
+
+    let from = r#"{
+  "s": [
+    [
+      "Hello",
+      0
+    ]
+  ]
+}"#;
+    let mut expected = S::default();
+    expected.s.insert("Hello".to_string(), 0);
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert_eq!(expected, res);
+    // We can only do this with a HashMap of size 1 as otherwise the iteration order is unspecified
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": []
+}"#;
+    let expected = S::default();
+    let res: S = serde_json::from_str(from).unwrap();
+    assert!(res.s.is_empty());
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    // Test parse error
+    let from = r#"{
+  "s": [ [1] ]
+}"#;
+    let res: Result<S, _> = serde_json::from_str(from);
+    assert!(res.is_err());
+    let err = res.unwrap_err();
+    println!("{:?}", err);
+    assert!(err.is_data());
+}
+
+#[test]
+fn test_btreemap_as_tuple_list() {
+    #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
+    struct S {
+        #[serde(with = "serde_with::rust::btreemap_as_tuple_list")]
+        s: BTreeMap<String, u8>,
+    }
+    let from = r#"{
+  "s": [
+    [
+      "ABC",
+      1
+    ],
+    [
+      "Hello",
+      0
+    ],
+    [
+      "World",
+      20
+    ]
+  ]
+}"#;
+    let mut expected = S::default();
+    expected.s.insert("ABC".to_string(), 1);
+    expected.s.insert("Hello".to_string(), 0);
+    expected.s.insert("World".to_string(), 20);
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert_eq!(expected, res);
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": [
+    [
+      "Hello",
+      0
+    ]
+  ]
+}"#;
+    let mut expected = S::default();
+    expected.s.insert("Hello".to_string(), 0);
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert_eq!(expected, res);
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": []
+}"#;
+    let expected = S::default();
+    let res: S = serde_json::from_str(from).unwrap();
+    assert!(res.s.is_empty());
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    // Test parse error
+    let from = r#"{
+  "s": [ [1] ]
+}"#;
+    let res: Result<S, _> = serde_json::from_str(from);
+    assert!(res.is_err());
+    let err = res.unwrap_err();
+    println!("{:?}", err);
+    assert!(err.is_data());
 }
