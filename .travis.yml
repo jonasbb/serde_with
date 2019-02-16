@@ -1,6 +1,5 @@
 language: rust
 sudo: true
-cache: cargo
 
 notifications:
   email: false
@@ -53,7 +52,8 @@ before_cache:
 
 env:
   global:
-  - RUSTFLAGS="-C link-dead-code"
+    - RUSTFLAGS="-C link-dead-code"
+    - RUST_BACKTRACE="full"
 
 addons:
   apt:
