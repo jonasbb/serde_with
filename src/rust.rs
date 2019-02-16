@@ -925,9 +925,83 @@ pub mod string_empty_as_none {
     }
 }
 
+/// De/Serialize a [`HashMap`] into a list of tuples
+///
+/// Some formats, like JSON, have limitations on the type of keys for maps.
+/// In case of JSON, keys are restricted to strings.
+/// Rust features more powerfull keys, for example tuple, which can not be serialized to JSON.
+///
+/// This helper serializes the [`HashMap`] into a list of tuples, which does not have the same type restrictions.
+///
+/// If you need to de/serialize a [`BTreeMap`] then use [`btreemap_as_tuple_list`].
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # #[macro_use]
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use std::collections::HashMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::hashmap_as_tuple_list")]
+///     s: HashMap<(String, u32), u32>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_value(json!({
+///     "s": [
+///         [["Hello", 123], 0],
+///         [["World", 456], 1]
+///     ]
+/// })).unwrap();
+///
+/// assert_eq!(2, v.s.len());
+/// assert_eq!(1, v.s[&("World".to_string(), 456)]);
+/// # }
+/// ```
+///
+/// The helper is generic over the hasher type of the [`HashMap`] and works with different variants, such as `FnvHashMap`.
+///
+/// ```
+/// # extern crate fnv;
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # #[macro_use]
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// use fnv::FnvHashMap;
+///
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::hashmap_as_tuple_list")]
+///     s: FnvHashMap<u32, bool>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_value(json!({
+///     "s": [
+///         [0, false],
+///         [1, true]
+///     ]
+/// })).unwrap();
+///
+/// assert_eq!(2, v.s.len());
+/// assert_eq!(true, v.s[&1]);
+/// # }
+/// ```
 pub mod hashmap_as_tuple_list {
+    use super::SerializeSeq; // Needed to remove the unused import warning in the parent scope
     use super::*;
 
+    /// Serialize the [`HashMap`] as a list of tuples
     pub fn serialize<K, V, S, BH>(map: &HashMap<K, V, BH>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -942,6 +1016,7 @@ pub mod hashmap_as_tuple_list {
         seq.end()
     }
 
+    /// Deserialize a [`HashMap`] from a list of tuples
     pub fn deserialize<'de, K, V, BH, D>(deserializer: D) -> Result<HashMap<K, V, BH>, D::Error>
     where
         D: Deserializer<'de>,
@@ -981,9 +1056,50 @@ pub mod hashmap_as_tuple_list {
     }
 }
 
+/// De/Serialize a [`BTreeMap`] into a list of tuples
+///
+/// Some formats, like JSON, have limitations on the type of keys for maps.
+/// In case of JSON, keys are restricted to strings.
+/// Rust features more powerfull keys, for example tuple, which can not be serialized to JSON.
+///
+/// This helper serializes the [`BTreeMap`] into a list of tuples, which does not have the same type restrictions.
+///
+/// If you need to de/serialize a [`HashMap`] then use [`hashmap_as_tuple_list`].
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # #[macro_use]
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use std::collections::BTreeMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::btreemap_as_tuple_list")]
+///     s: BTreeMap<(String, u32), u32>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_value(json!({
+///     "s": [
+///         [["Hello", 123], 0],
+///         [["World", 456], 1]
+///     ]
+/// })).unwrap();
+///
+/// assert_eq!(2, v.s.len());
+/// assert_eq!(1, v.s[&("World".to_string(), 456)]);
+/// # }
+/// ```
 pub mod btreemap_as_tuple_list {
     use super::*;
 
+    /// Serialize the [`BTreeMap`] as a list of tuples
     pub fn serialize<K, V, S>(map: &BTreeMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -997,6 +1113,7 @@ pub mod btreemap_as_tuple_list {
         seq.end()
     }
 
+    /// Deserialize a [`BTreeMap`] from a list of tuples
     pub fn deserialize<'de, K, V, D>(deserializer: D) -> Result<BTreeMap<K, V>, D::Error>
     where
         D: Deserializer<'de>,
