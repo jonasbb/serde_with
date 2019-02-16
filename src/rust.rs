@@ -2,10 +2,13 @@
 
 use serde::{
     de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
-    ser::{Serialize, Serializer},
+    ser::{Serialize, SerializeSeq, Serializer},
 };
 use std::{
+    cmp::Eq,
+    collections::{BTreeMap, HashMap},
     fmt::{self, Display},
+    hash::{BuildHasher, Hash},
     iter::FromIterator,
     marker::PhantomData,
     str::FromStr,
@@ -918,6 +921,231 @@ pub mod string_empty_as_none {
             value.as_ref().serialize(serializer)
         } else {
             "".serialize(serializer)
+        }
+    }
+}
+
+/// De/Serialize a [`HashMap`] into a list of tuples
+///
+/// Some formats, like JSON, have limitations on the type of keys for maps.
+/// In case of JSON, keys are restricted to strings.
+/// Rust features more powerfull keys, for example tuple, which can not be serialized to JSON.
+///
+/// This helper serializes the [`HashMap`] into a list of tuples, which does not have the same type restrictions.
+///
+/// If you need to de/serialize a [`BTreeMap`] then use [`btreemap_as_tuple_list`].
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # #[macro_use]
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use std::collections::HashMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::hashmap_as_tuple_list")]
+///     s: HashMap<(String, u32), u32>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_value(json!({
+///     "s": [
+///         [["Hello", 123], 0],
+///         [["World", 456], 1]
+///     ]
+/// })).unwrap();
+///
+/// assert_eq!(2, v.s.len());
+/// assert_eq!(1, v.s[&("World".to_string(), 456)]);
+/// # }
+/// ```
+///
+/// The helper is generic over the hasher type of the [`HashMap`] and works with different variants, such as `FnvHashMap`.
+///
+/// ```
+/// # extern crate fnv;
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # #[macro_use]
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// use fnv::FnvHashMap;
+///
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::hashmap_as_tuple_list")]
+///     s: FnvHashMap<u32, bool>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_value(json!({
+///     "s": [
+///         [0, false],
+///         [1, true]
+///     ]
+/// })).unwrap();
+///
+/// assert_eq!(2, v.s.len());
+/// assert_eq!(true, v.s[&1]);
+/// # }
+/// ```
+pub mod hashmap_as_tuple_list {
+    use super::SerializeSeq; // Needed to remove the unused import warning in the parent scope
+    use super::*;
+
+    /// Serialize the [`HashMap`] as a list of tuples
+    pub fn serialize<K, V, S, BH>(map: &HashMap<K, V, BH>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        K: Eq + Hash + Serialize,
+        V: Serialize,
+        BH: BuildHasher,
+    {
+        let mut seq = serializer.serialize_seq(Some(map.len()))?;
+        for item in map.iter() {
+            seq.serialize_element(&item)?;
+        }
+        seq.end()
+    }
+
+    /// Deserialize a [`HashMap`] from a list of tuples
+    pub fn deserialize<'de, K, V, BH, D>(deserializer: D) -> Result<HashMap<K, V, BH>, D::Error>
+    where
+        D: Deserializer<'de>,
+        K: Eq + Hash + Deserialize<'de>,
+        V: Deserialize<'de>,
+        BH: BuildHasher + Default,
+    {
+        deserializer.deserialize_seq(HashMapVisitor(PhantomData))
+    }
+
+    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    struct HashMapVisitor<K, V, BH>(PhantomData<fn() -> HashMap<K, V, BH>>);
+
+    impl<'de, K, V, BH> Visitor<'de> for HashMapVisitor<K, V, BH>
+    where
+        K: Deserialize<'de> + Eq + Hash,
+        V: Deserialize<'de>,
+        BH: BuildHasher + Default,
+    {
+        type Value = HashMap<K, V, BH>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a list of key-value pairs")
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut map =
+                HashMap::with_capacity_and_hasher(seq.size_hint().unwrap_or(0), BH::default());
+            while let Some((key, value)) = seq.next_element()? {
+                map.insert(key, value);
+            }
+            Ok(map)
+        }
+    }
+}
+
+/// De/Serialize a [`BTreeMap`] into a list of tuples
+///
+/// Some formats, like JSON, have limitations on the type of keys for maps.
+/// In case of JSON, keys are restricted to strings.
+/// Rust features more powerfull keys, for example tuple, which can not be serialized to JSON.
+///
+/// This helper serializes the [`BTreeMap`] into a list of tuples, which does not have the same type restrictions.
+///
+/// If you need to de/serialize a [`HashMap`] then use [`hashmap_as_tuple_list`].
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # #[macro_use]
+/// # extern crate serde_derive;
+/// # #[macro_use]
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use std::collections::BTreeMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde(with = "serde_with::rust::btreemap_as_tuple_list")]
+///     s: BTreeMap<(String, u32), u32>,
+/// }
+///
+/// # fn main() {
+/// let v: A = serde_json::from_value(json!({
+///     "s": [
+///         [["Hello", 123], 0],
+///         [["World", 456], 1]
+///     ]
+/// })).unwrap();
+///
+/// assert_eq!(2, v.s.len());
+/// assert_eq!(1, v.s[&("World".to_string(), 456)]);
+/// # }
+/// ```
+pub mod btreemap_as_tuple_list {
+    use super::*;
+
+    /// Serialize the [`BTreeMap`] as a list of tuples
+    pub fn serialize<K, V, S>(map: &BTreeMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        K: Eq + Hash + Serialize,
+        V: Serialize,
+    {
+        let mut seq = serializer.serialize_seq(Some(map.len()))?;
+        for item in map.iter() {
+            seq.serialize_element(&item)?;
+        }
+        seq.end()
+    }
+
+    /// Deserialize a [`BTreeMap`] from a list of tuples
+    pub fn deserialize<'de, K, V, D>(deserializer: D) -> Result<BTreeMap<K, V>, D::Error>
+    where
+        D: Deserializer<'de>,
+        K: Deserialize<'de> + Ord,
+        V: Deserialize<'de>,
+    {
+        deserializer.deserialize_seq(BTreeMapVisitor(PhantomData))
+    }
+
+    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    struct BTreeMapVisitor<K, V>(PhantomData<fn() -> BTreeMap<K, V>>);
+
+    impl<'de, K, V> Visitor<'de> for BTreeMapVisitor<K, V>
+    where
+        K: Deserialize<'de> + Ord,
+        V: Deserialize<'de>,
+    {
+        type Value = BTreeMap<K, V>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a list of key-value pairs")
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut map = BTreeMap::default();
+            while let Some((key, value)) = seq.next_element()? {
+                map.insert(key, value);
+            }
+            Ok(map)
         }
     }
 }
