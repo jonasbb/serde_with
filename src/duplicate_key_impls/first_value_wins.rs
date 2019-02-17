@@ -13,7 +13,7 @@ pub trait DuplicateInsertsFirstWinsSet<T> {
 pub trait DuplicateInsertsFirstWinsMap<K, V> {
     fn new(size_hint: Option<usize>) -> Self;
 
-    /// Insert the value into the set, if there is not already an existing value
+    /// Insert the value into the map, if there is not already an existing value
     fn insert(&mut self, key: K, value: V);
 }
 

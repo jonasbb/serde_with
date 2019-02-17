@@ -15,14 +15,11 @@ use std::{
 };
 use Separator;
 
-/// De/Serialize using [Display][] and [FromStr][] implementation
+/// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
 /// This allows to deserialize a string as a number.
 /// It can be very useful for serialization formats like JSON, which do not support integer
 /// numbers and have to resort to strings to represent them.
-///
-/// [Display]: https://doc.rust-lang.org/stable/std/fmt/trait.Display.html
-/// [FromStr]: https://doc.rust-lang.org/stable/std/str/trait.FromStr.html
 ///
 /// # Examples
 ///
@@ -101,14 +98,9 @@ pub mod display_fromstr {
     }
 }
 
-/// De/Serialize sequences using [FromIterator] and [IntoIterator] implementation for it and [Display][] and [FromStr][] implementation for each element
+/// De/Serialize sequences using [`FromIterator`] and [`IntoIterator`] implementation for it and [`Display`] and [`FromStr`] implementation for each element
 ///
 /// This allows to serialize and deserialize collections with elements which can be represented as strings.
-///
-/// [FromIterator]: https://doc.rust-lang.org/std/iter/trait.FromIterator.html
-/// [IntoIterator]: https://doc.rust-lang.org/std/iter/trait.IntoIterator.html
-/// [Display]: https://doc.rust-lang.org/stable/std/fmt/trait.Display.html
-/// [FromStr]: https://doc.rust-lang.org/stable/std/str/trait.FromStr.html
 ///
 /// # Examples
 ///
@@ -224,16 +216,12 @@ pub mod seq_display_fromstr {
     }
 }
 
-/// De/Serialize a delimited collection using [Display][] and [FromStr][] implementation
+/// De/Serialize a delimited collection using [`Display`] and [`FromStr`] implementation
 ///
-/// You can define an arbitrary separator, by specifying a type which implements [Separator][].
+/// You can define an arbitrary separator, by specifying a type which implements [`Separator`].
 /// Some common ones, like space and comma are already predefined and you can find them [here][Separator].
 ///
 /// An empty string deserializes as an empty collection.
-///
-/// [Display]: https://doc.rust-lang.org/stable/std/fmt/trait.Display.html
-/// [FromStr]: https://doc.rust-lang.org/stable/std/str/trait.FromStr.html
-/// [Separator]: ../trait.Separator.html
 ///
 /// # Examples
 ///
@@ -389,16 +377,16 @@ pub mod double_option {
     }
 }
 
-/// Serialize inner value if `Some(T)`. If `None`, serialize the unit struct `()`.
+/// Serialize inner value if [`Some`]`(T)`. If [`None`], serialize the unit struct `()`.
 ///
 /// When used in conjunction with `skip_serializing_if = "Option::is_none"` and
-/// `default`, you can build an optional value by skipping if it is `None`, or serializing its
-/// inner value if `Some(T)`.
+/// `default`, you can build an optional value by skipping if it is [`None`], or serializing its
+/// inner value if [`Some`]`(T)`.
 ///
 /// Not all serialization formats easily support optional values.
-/// While JSON uses the `Option` type to represent optional values and only serializes the inner
-/// part of the `Some()`, other serialization formats, such as [RON][], choose to serialize the
-/// `Some` around a value.
+/// While JSON uses the [`Option`] type to represent optional values and only serializes the inner
+/// part of the [`Some`]`()`, other serialization formats, such as [RON][], choose to serialize the
+/// [`Some`] around a value.
 /// This helper helps building a truly optional value for such serializers.
 ///
 /// [RON]: https://github.com/ron-rs/ron
@@ -485,6 +473,11 @@ pub mod unwrap_or_skip {
 /// and it can indicate an error in the serialized data.
 ///
 /// This helper returns an error if two identical values exist in a set.
+///
+/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
+///
+/// [`HashSet`]: std::collections::HashSet
+/// [`BTreeSet`]: std::collections::HashSet
 ///
 /// # Example
 ///
@@ -575,6 +568,11 @@ pub mod sets_duplicate_value_is_error {
 /// and it can indicate an error in the serialized data.
 ///
 /// This helper returns an error if two identical keys exist in a map.
+///
+/// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
+///
+/// [`HashMap`]: std::collections::HashMap
+/// [`BTreeMap`]: std::collections::HashMap
 ///
 /// # Example
 ///
@@ -669,6 +667,11 @@ pub mod maps_duplicate_key_is_error {
 ///
 /// By default serde has a last-value-wins implementation, if duplicate keys for a set exist.
 /// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
+///
+/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
+///
+/// [`HashSet`]: std::collections::HashSet
+/// [`BTreeSet`]: std::collections::HashSet
 pub mod sets_first_value_wins {
     use super::*;
     use duplicate_key_impls::DuplicateInsertsFirstWinsSet;
@@ -723,6 +726,11 @@ pub mod sets_first_value_wins {
 ///
 /// By default serde has a last-key-wins implementation, if duplicate keys for a map exist.
 /// Sometimes the opposite strategy is desired. This helper implements a first-key-wins strategy.
+///
+/// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
+///
+/// [`HashMap`]: std::collections::HashMap
+/// [`BTreeMap`]: std::collections::HashMap
 ///
 /// # Example
 ///
@@ -815,10 +823,10 @@ pub mod maps_first_key_wins {
     }
 }
 
-/// De/Serialize a `Option<String>` type while transforming the empty string to `None`
+/// De/Serialize a [`Option`]`<String>` type while transforming the empty string to [`None`]
 ///
-/// Convert an `Option<T>` from/to string using `FromStr` and `AsRef<str>` implementations.
-/// An empty string is deserialized as `None` and a `None` vice versa.
+/// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<str>` implementations.
+/// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
 /// # Examples
 ///
@@ -828,7 +836,7 @@ pub mod maps_first_key_wins {
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
-///
+/// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
 ///     #[serde(with = "serde_with::rust::string_empty_as_none")]
