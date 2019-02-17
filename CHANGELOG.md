@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.1.0]
+
+Serialize HashMap/BTreeMap as list of tuples
+
 ## [1.0.0]
 
 No changes in this release.
