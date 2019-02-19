@@ -7,14 +7,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add macro helper to support deserializing values with nested or flattened syntax #38
+
+### Changed
+
+* Bumped minimal Rust version to 1.30.0
+
 ## [1.1.0]
 
-Serialize HashMap/BTreeMap as list of tuples
+### Added
+
+* Serialize HashMap/BTreeMap as list of tuples
 
 ## [1.0.0]
 
-No changes in this release.
-Bumped version number to indicate the stability of the library.
+### Added
+
+* No changes in this release.
+* Bumped version number to indicate the stability of the library.
 
 ## [0.2.5]
 

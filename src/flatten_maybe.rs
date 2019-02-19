@@ -1,3 +1,14 @@
+/// Support deserializing from flattened and non-flattened representation
+///
+/// When working with different serialization formats, sometimes it is more idiomatic to flatten
+/// fields, while other formats prefer nesting. Using `#[serde(flatten)]` only the flattened form
+/// is supported.
+///
+/// This helper creates a function, which support deserializing from either the flattened or the
+/// nested form. It gives an error, when both forms are provided. The `flatten` attribute is
+/// required on the field such that the helper works. The serialization format will always be
+/// flattened.
+///
 /// # Examples
 ///
 /// ```rust
