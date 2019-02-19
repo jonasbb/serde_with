@@ -1,13 +1,13 @@
 extern crate fnv;
+extern crate pretty_assertions;
 extern crate serde;
-#[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
 extern crate serde_with;
-#[macro_use]
-extern crate pretty_assertions;
 
 use fnv::FnvHashMap;
+use pretty_assertions::assert_eq;
+use serde_derive::{Deserialize, Serialize};
 use serde_with::CommaSeparator;
 use std::collections::{BTreeMap, HashMap};
 

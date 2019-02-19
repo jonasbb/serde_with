@@ -2,14 +2,14 @@
 
 extern crate chrono;
 extern crate serde;
-#[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
 extern crate serde_with;
-#[macro_use]
 extern crate pretty_assertions;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
+use pretty_assertions::assert_eq;
+use serde_derive::Deserialize;
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
     DateTime::from_utc(NaiveDateTime::from_timestamp(secs, nsecs), Utc)

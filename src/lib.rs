@@ -1,7 +1,7 @@
 #![deny(
     missing_debug_implementations,
     missing_copy_implementations,
-    missing_docs,
+    // missing_docs,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
@@ -40,9 +40,11 @@
 //!
 //! ```rust
 //! # extern crate serde;
-//! # #[macro_use]
 //! # extern crate serde_derive;
 //! # extern crate serde_with;
+//! #
+//! # use serde_derive::{Deserialize, Serialize};
+//! #
 //! #[derive(Deserialize, Serialize)]
 //! struct Foo {
 //!     #[serde(with = "serde_with::rust::display_fromstr")]
@@ -57,9 +59,11 @@
 //!
 //! ```rust
 //! # extern crate serde;
-//! # #[macro_use]
 //! # extern crate serde_derive;
 //! # extern crate serde_with;
+//! #
+//! # use serde_derive::{Deserialize, Serialize};
+//! #
 //! # #[cfg(feature = "json")]
 //! #[derive(Deserialize, Serialize)]
 //! struct Foo {
@@ -80,7 +84,6 @@
 #[cfg(feature = "chrono")]
 extern crate chrono as chrono_crate;
 #[doc(hidden)]
-#[macro_use]
 pub extern crate serde;
 #[cfg(feature = "json")]
 extern crate serde_json;

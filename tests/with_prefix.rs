@@ -1,17 +1,13 @@
-#[macro_use]
-extern crate serde_json;
-
-#[macro_use]
+extern crate pretty_assertions;
+extern crate serde;
 extern crate serde_derive;
-
-#[macro_use]
+extern crate serde_json;
 extern crate serde_with;
 
-#[macro_use]
-extern crate pretty_assertions;
-
-extern crate serde;
-
+use pretty_assertions::assert_eq;
+use serde_derive::{Deserialize, Serialize};
+use serde_json::json;
+use serde_with::with_prefix;
 use std::collections::HashMap;
 
 #[test]

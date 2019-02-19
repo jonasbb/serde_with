@@ -13,11 +13,13 @@
 /// ```
 /// # extern crate chrono;
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
 /// # use chrono::{DateTime, Utc};
+/// # use serde_derive::{Deserialize, Serialize};
+/// #
 /// #[derive(Debug, Deserialize)]
 /// struct S {
 ///     #[serde(with = "serde_with::chrono::datetime_utc_ts_seconds_from_any")]
