@@ -90,6 +90,7 @@ pub mod chrono;
 mod duplicate_key_impls;
 #[cfg(feature = "json")]
 pub mod json;
+mod flatten_maybe;
 pub mod rust;
 #[doc(hidden)]
 pub mod with_prefix;
