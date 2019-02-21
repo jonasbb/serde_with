@@ -25,11 +25,13 @@ use Separator;
 ///
 /// ```
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
 /// # use std::net::Ipv4Addr;
+/// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
 ///     #[serde(with = "serde_with::rust::display_fromstr")]
@@ -106,12 +108,15 @@ pub mod display_fromstr {
 ///
 /// ```
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
-/// # use std::net::Ipv4Addr;
-/// # use std::collections::BTreeSet;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// #
+/// use std::collections::BTreeSet;
+/// use std::net::Ipv4Addr;
+///
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
 ///     #[serde(with = "serde_with::rust::seq_display_fromstr")]
@@ -227,10 +232,12 @@ pub mod seq_display_fromstr {
 ///
 /// ```
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// #
 /// use serde_with::{CommaSeparator, SpaceSeparator};
 /// use std::collections::BTreeSet;
 ///
@@ -319,10 +326,12 @@ where
 ///
 /// ```rust
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// #
 /// # #[derive(Debug, PartialEq, Eq)]
 /// #[derive(Deserialize, Serialize)]
 /// struct Doc {
@@ -395,11 +404,13 @@ pub mod double_option {
 ///
 /// ```rust
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
 /// # extern crate ron;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize, Serialize)]
 /// struct Doc {
@@ -483,11 +494,13 @@ pub mod unwrap_or_skip {
 ///
 /// ```rust
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
 /// # use std::{collections::HashSet, iter::FromIterator};
+/// # use serde_derive::{Deserialize, Serialize};
+/// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
 /// struct Doc {
@@ -578,11 +591,13 @@ pub mod sets_duplicate_value_is_error {
 ///
 /// ```rust
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
 /// # use std::collections::HashMap;
+/// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
 /// struct Doc {
@@ -736,11 +751,13 @@ pub mod sets_first_value_wins {
 ///
 /// ```rust
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
 /// # use std::collections::HashMap;
+/// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
 /// struct Doc {
@@ -832,10 +849,11 @@ pub mod maps_first_key_wins {
 ///
 /// ```
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
 /// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
@@ -947,12 +965,12 @@ pub mod string_empty_as_none {
 ///
 /// ```
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
-/// # #[macro_use]
 /// # extern crate serde_json;
 /// # extern crate serde_with;
 /// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
 /// # use std::collections::HashMap;
 /// #
 /// #[derive(Deserialize, Serialize)]
@@ -979,11 +997,12 @@ pub mod string_empty_as_none {
 /// ```
 /// # extern crate fnv;
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
-/// # #[macro_use]
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
 /// #
 /// use fnv::FnvHashMap;
 ///
@@ -1078,12 +1097,12 @@ pub mod hashmap_as_tuple_list {
 ///
 /// ```
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
-/// # #[macro_use]
 /// # extern crate serde_json;
 /// # extern crate serde_with;
 /// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
 /// # use std::collections::BTreeMap;
 /// #
 /// #[derive(Deserialize, Serialize)]

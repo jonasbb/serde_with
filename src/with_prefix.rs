@@ -2,6 +2,7 @@ use std::fmt;
 
 use serde::{
     de::{self, DeserializeSeed, Deserializer, IgnoredAny, IntoDeserializer, MapAccess, Visitor},
+    forward_to_deserialize_any,
     ser::{self, Impossible, Serialize, SerializeMap, SerializeStruct, Serializer},
 };
 
@@ -44,13 +45,13 @@ use serde::{
 /// An implementation of the Challonge API would use `with_prefix!` like this:
 ///
 /// ```rust
-/// #[macro_use]
 /// extern crate serde_derive;
-///
-/// #[macro_use]
+/// extern crate serde_json;
 /// extern crate serde_with;
 ///
-/// extern crate serde_json;
+/// use serde_derive::{Deserialize, Serialize};
+/// use serde_json::json;
+/// use serde_with::with_prefix;
 ///
 /// #[derive(Serialize, Deserialize)]
 /// struct Match {

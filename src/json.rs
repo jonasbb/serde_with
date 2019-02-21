@@ -8,10 +8,12 @@
 ///
 /// ```
 /// # extern crate serde;
-/// # #[macro_use]
 /// # extern crate serde_derive;
 /// # extern crate serde_json;
 /// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
 ///     #[serde(with = "serde_with::json::nested")]
