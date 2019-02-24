@@ -8,8 +8,9 @@ extern crate serde_with;
 use fnv::FnvHashMap;
 use pretty_assertions::assert_eq;
 use serde_derive::{Deserialize, Serialize};
+use serde_json::error::Category;
 use serde_with::CommaSeparator;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, LinkedList, VecDeque};
 
 #[test]
 fn string_collection() {
@@ -424,4 +425,149 @@ fn test_btreemap_as_tuple_list() {
     let err = res.unwrap_err();
     println!("{:?}", err);
     assert!(err.is_data());
+}
+
+#[test]
+fn tuple_list_as_map_vec() {
+    #[derive(Debug, Deserialize, Serialize, Default)]
+    struct S {
+        #[serde(with = "serde_with::rust::tuple_list_as_map")]
+        s: Vec<(Wrapper<i32>, Wrapper<String>)>,
+    }
+
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    #[serde(transparent)]
+    struct Wrapper<T>(T);
+
+    let from = r#"{
+  "s": {
+    "1": "Hi",
+    "2": "Cake",
+    "99": "Lie"
+  }
+}"#;
+    let mut expected = S::default();
+    expected.s.push((Wrapper(1), Wrapper("Hi".into())));
+    expected.s.push((Wrapper(2), Wrapper("Cake".into())));
+    expected.s.push((Wrapper(99), Wrapper("Lie".into())));
+
+    let res: S = serde_json::from_str(from).unwrap();
+    for ((exp_k, exp_v), (res_k, res_v)) in expected.s.iter().zip(&res.s) {
+        assert_eq!(exp_k.0, res_k.0);
+        assert_eq!(exp_v.0, res_v.0);
+    }
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": {}
+}"#;
+    let expected = S::default();
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert!(res.s.is_empty());
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": []
+}"#;
+    let res: Result<S, _> = serde_json::from_str(from);
+    let res = res.unwrap_err();
+    assert_eq!(Category::Data, res.classify());
+    assert_eq!(
+        "invalid type: sequence, expected a map at line 2 column 7",
+        res.to_string()
+    );
+
+    let from = r#"{
+  "s": null
+}"#;
+    let res: Result<S, _> = serde_json::from_str(from);
+    let res = res.unwrap_err();
+    assert_eq!(Category::Data, res.classify());
+    assert_eq!(
+        "invalid type: null, expected a map at line 2 column 11",
+        res.to_string()
+    );
+}
+
+#[test]
+fn tuple_list_as_map_linkedlist() {
+    #[derive(Debug, Deserialize, Serialize, Default)]
+    struct S {
+        #[serde(with = "serde_with::rust::tuple_list_as_map")]
+        s: LinkedList<(Wrapper<i32>, Wrapper<String>)>,
+    }
+
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    #[serde(transparent)]
+    struct Wrapper<T>(T);
+
+    let from = r#"{
+  "s": {
+    "1": "Hi",
+    "2": "Cake",
+    "99": "Lie"
+  }
+}"#;
+    let mut expected = S::default();
+    expected.s.push_back((Wrapper(1), Wrapper("Hi".into())));
+    expected.s.push_back((Wrapper(2), Wrapper("Cake".into())));
+    expected.s.push_back((Wrapper(99), Wrapper("Lie".into())));
+
+    let res: S = serde_json::from_str(from).unwrap();
+    for ((exp_k, exp_v), (res_k, res_v)) in expected.s.iter().zip(&res.s) {
+        assert_eq!(exp_k.0, res_k.0);
+        assert_eq!(exp_v.0, res_v.0);
+    }
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": {}
+}"#;
+    let expected = S::default();
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert!(res.s.is_empty());
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+}
+
+#[test]
+fn tuple_list_as_map_vecdeque() {
+    #[derive(Debug, Deserialize, Serialize, Default)]
+    struct S {
+        #[serde(with = "serde_with::rust::tuple_list_as_map")]
+        s: VecDeque<(Wrapper<i32>, Wrapper<String>)>,
+    }
+
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    #[serde(transparent)]
+    struct Wrapper<T>(T);
+
+    let from = r#"{
+  "s": {
+    "1": "Hi",
+    "2": "Cake",
+    "99": "Lie"
+  }
+}"#;
+    let mut expected = S::default();
+    expected.s.push_back((Wrapper(1), Wrapper("Hi".into())));
+    expected.s.push_back((Wrapper(2), Wrapper("Cake".into())));
+    expected.s.push_back((Wrapper(99), Wrapper("Lie".into())));
+
+    let res: S = serde_json::from_str(from).unwrap();
+    for ((exp_k, exp_v), (res_k, res_v)) in expected.s.iter().zip(&res.s) {
+        assert_eq!(exp_k.0, res_k.0);
+        assert_eq!(exp_v.0, res_v.0);
+    }
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+
+    let from = r#"{
+  "s": {}
+}"#;
+    let expected = S::default();
+
+    let res: S = serde_json::from_str(from).unwrap();
+    assert!(res.s.is_empty());
+    assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
 }

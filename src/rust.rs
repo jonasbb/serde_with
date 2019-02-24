@@ -2,7 +2,7 @@
 
 use serde::{
     de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
-    ser::{Serialize, SerializeSeq, Serializer},
+    ser::{Serialize, SerializeMap, SerializeSeq, Serializer},
 };
 use std::{
     cmp::Eq,
@@ -1025,8 +1025,7 @@ pub mod string_empty_as_none {
 /// # }
 /// ```
 pub mod hashmap_as_tuple_list {
-    use super::SerializeSeq; // Needed to remove the unused import warning in the parent scope
-    use super::*;
+    use super::{SerializeSeq, *}; // Needed to remove the unused import warning in the parent scope
 
     /// Serialize the [`HashMap`] as a list of tuples
     pub fn serialize<K, V, S, BH>(map: &HashMap<K, V, BH>, serializer: S) -> Result<S::Ok, S::Error>
@@ -1173,6 +1172,79 @@ pub mod btreemap_as_tuple_list {
                 map.insert(key, value);
             }
             Ok(map)
+        }
+    }
+}
+
+pub mod tuple_list_as_map {
+    use super::{SerializeMap, *}; // Needed to remove the unused import warning in the parent scope
+
+    pub fn serialize<'a, I, K, V, S>(iter: I, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        I: IntoIterator<Item =  &'a (K, V)>,
+        I::IntoIter: ExactSizeIterator,
+        K: Serialize + 'a,
+        V: Serialize + 'a,
+        S: Serializer,
+    {
+        let iter = iter.into_iter();
+        let mut map = serializer.serialize_map(Some(iter.len()))?;
+        for (key, value) in iter {
+            map.serialize_entry(&key, &value)?;
+        }
+        map.end()
+    }
+
+    pub fn deserialize<'de, I, K, V, D>(deserializer: D) -> Result<I, D::Error>
+    where
+        I: FromIterator<(K, V)>,
+        K: Deserialize<'de>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_map(MapVisitor(PhantomData))
+    }
+
+    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    struct MapVisitor<I, K, V>(PhantomData<fn() -> (I, K, V)>);
+
+    impl<'de, I, K, V> Visitor<'de> for MapVisitor<I, K, V>
+    where
+        I: FromIterator<(K, V)>,
+        K: Deserialize<'de>,
+        V: Deserialize<'de>,
+    {
+        type Value = I;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a map")
+        }
+
+        fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
+        where
+            A: MapAccess<'de>,
+        {
+            let iter = MapIter(map, PhantomData);
+            iter.collect()
+        }
+    }
+
+    struct MapIter<'de, A, K, V>(A, PhantomData<(&'de (), A, K, V)>);
+
+    impl<'de, A, K, V> Iterator for MapIter<'de, A, K, V>
+    where
+        A: MapAccess<'de>,
+        K: Deserialize<'de>,
+        V: Deserialize<'de>,
+    {
+        type Item = Result<(K, V), A::Error>;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            match self.0.next_entry() {
+                Ok(Some(x)) => Some(Ok(x)),
+                Ok(None) => None,
+                Err(err) => Some(Err(err)),
+            }
         }
     }
 }
