@@ -1176,9 +1176,100 @@ pub mod btreemap_as_tuple_list {
     }
 }
 
+/// This serializes a list of tuples into a map and back
+///
+/// Normally, you want to use a [`HashMap`] or a [`BTreeMap`] when deserializing a map.
+/// However, sometimes this is not possible due to type contains, e.g., if the type implements neither [`Hash`] nor [`Ord`].
+/// Another use case is deserializing a map with duplicate keys.
+///
+/// The implementation is generic using the [`FromIterator`] and [`IntoIterator`] traits.
+/// Therefore, all of [`Vec`], [`VecDeque`](std::collections::VecDeque), and [`LinkedList`](std::collections::LinkedList) and anything which implements those are supported.
+///
+/// # Examples
+///
+/// `Wrapper` does not implement [`Hash`] nor [`Ord`], thus prohibiting the use [`HashMap`] or [`BTreeMap`].
+///
+/// ```
+/// # extern crate serde;
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// #
+/// #[derive(Debug, Deserialize, Serialize, Default)]
+/// struct S {
+///     #[serde(with = "serde_with::rust::tuple_list_as_map")]
+///     s: Vec<(Wrapper<i32>, Wrapper<String>)>,
+/// }
+///
+/// #[derive(Clone, Debug, Serialize, Deserialize)]
+/// #[serde(transparent)]
+/// struct Wrapper<T>(T);
+///
+/// # fn main() {
+/// let from = r#"{
+///   "s": {
+///     "1": "Hi",
+///     "2": "Cake",
+///     "99": "Lie"
+///   }
+/// }"#;
+/// let mut expected = S::default();
+/// expected.s.push((Wrapper(1), Wrapper("Hi".into())));
+/// expected.s.push((Wrapper(2), Wrapper("Cake".into())));
+/// expected.s.push((Wrapper(99), Wrapper("Lie".into())));
+///
+/// let res: S = serde_json::from_str(from).unwrap();
+/// for ((exp_k, exp_v), (res_k, res_v)) in expected.s.iter().zip(&res.s) {
+///     assert_eq!(exp_k.0, res_k.0);
+///     assert_eq!(exp_v.0, res_v.0);
+/// }
+/// assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+/// # }
+/// ```
+///
+/// In this example, the serialized format contains duplicate keys, which is not supported with [`HashMap`] or [`BTreeMap`].
+///
+/// ```
+/// # extern crate serde;
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// #
+/// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
+/// struct S {
+///     #[serde(with = "serde_with::rust::tuple_list_as_map")]
+///     s: Vec<(i32, String)>,
+/// }
+///
+/// # fn main() {
+/// let from = r#"{
+///   "s": {
+///     "1": "Hi",
+///     "1": "Cake",
+///     "1": "Lie"
+///   }
+/// }"#;
+/// let mut expected = S::default();
+/// expected.s.push((1, "Hi".into()));
+/// expected.s.push((1, "Cake".into()));
+/// expected.s.push((1, "Lie".into()));
+///
+/// let res: S = serde_json::from_str(from).unwrap();
+/// assert_eq!(3, res.s.len());
+/// assert_eq!(expected, res);
+/// assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+/// # }
+/// ```
 pub mod tuple_list_as_map {
     use super::{SerializeMap, *}; // Needed to remove the unused import warning in the parent scope
 
+    /// Serialize any iteration of tuples into a map.
     pub fn serialize<'a, I, K, V, S>(iter: I, serializer: S) -> Result<S::Ok, S::Error>
     where
         I: IntoIterator<Item =  &'a (K, V)>,
@@ -1195,6 +1286,7 @@ pub mod tuple_list_as_map {
         map.end()
     }
 
+    /// Deserialize a map into an iterator of tuples.
     pub fn deserialize<'de, I, K, V, D>(deserializer: D) -> Result<I, D::Error>
     where
         I: FromIterator<(K, V)>,
