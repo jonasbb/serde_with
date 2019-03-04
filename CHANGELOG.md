@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * Add macro helper to support deserializing values with nested or flattened syntax #38
-* Serialize
+* Serialize tuple list as map helper
 
 ### Changed
 
