@@ -1,3 +1,8 @@
+[workspace]
+members = [
+    "serde_with_macros",
+]
+
 [package]
 name = "serde_with"
 version = "1.2.0"
@@ -26,12 +31,15 @@ codecov = { repository = "jonasbb/serde_with", branch = "master", service = "git
 maintenance = { status = "actively-developed" }
 
 [features]
+default = [ "macros" ]
 json = [ "serde_json" ]
+macros = [ "serde_with_macros" ]
 
 [dependencies]
 chrono = { version = "0.4.1", features = [ "serde" ], optional = true }
 serde = "1.0.75"
 serde_json = { version = "1.0.1", optional = true }
+serde_with_macros = { path = "./serde_with_macros", version = "0.1.0", optional = true}
 
 [dev-dependencies]
 fnv = "1.0.6"

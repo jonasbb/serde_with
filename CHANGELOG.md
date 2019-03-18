@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add `skip_serializing_null` attribute, which adds `#[serde(skip_serializing_if = "Option::is_none")]` for each Option in a struct.
+    This is helpfull for APIs which have many optional fields.
+
 ## [1.2.0]
 
 ### Added

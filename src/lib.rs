@@ -83,6 +83,8 @@ extern crate chrono as chrono_crate;
 pub extern crate serde;
 #[cfg(feature = "json")]
 extern crate serde_json;
+#[cfg(feature = "macros")]
+extern crate serde_with_macros;
 
 #[cfg(feature = "chrono")]
 pub mod chrono;
@@ -93,6 +95,11 @@ mod flatten_maybe;
 pub mod rust;
 #[doc(hidden)]
 pub mod with_prefix;
+
+// Re-Export all proc_macros, as these should be seen as part of the serde_with crate
+#[cfg(feature = "macros")]
+#[doc(inline)]
+pub use serde_with_macros::*;
 
 /// Separator for string-based collection de/serialization
 pub trait Separator {

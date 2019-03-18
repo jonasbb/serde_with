@@ -1,0 +1,21 @@
+[package]
+name = "serde_with_macros"
+version = "0.1.0"
+authors = ["jonasbb"]
+
+description = "proc-macro library for serde_with"
+documentation = "https://docs.rs/serde_with_macros/"
+repository = "https://github.com/jonasbb/serde_with/serde_with_macros"
+readme = "README.md"
+keywords = ["serde", "utilities", "serialization", "deserialization"]
+license = "MIT/Apache-2.0"
+
+[lib]
+proc-macro = true
+
+[badges]
+travis-ci = { repository = "jonasbb/serde_with", branch = "master" }
+codecov = { repository = "jonasbb/serde_with", branch = "master", service = "github" }
+maintenance = { status = "actively-developed" }
+
+[dependencies]
