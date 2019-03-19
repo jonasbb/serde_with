@@ -58,6 +58,40 @@ struct DataFullyQualified {
 }
 test!(test_fully_qualified, DataFullyQualified);
 
+fn never<T>(_t: &T) -> bool {
+    false
+}
+
+#[skip_serializing_null]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+struct DataExistingAnnotation {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    a: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "abc")]
+    b: Option<String>,
+    #[serde(default)]
+    c: Option<String>,
+    #[serde(skip_serializing_if = "never")]
+    #[serde(rename = "name")]
+    d: Option<String>,
+}
+
+#[test]
+fn test_existing_annotation() {
+    let expected = json!({
+        "name": null
+    });
+    let data = DataExistingAnnotation {
+        a: None,
+        b: None,
+        c: None,
+        d: None,
+    };
+    let res = serde_json::to_value(&data).unwrap();
+    assert_eq!(expected, res);
+    assert_eq!(data, serde_json::from_value(res).unwrap());
+}
+
 #[skip_serializing_null]
 #[derive(Debug, Eq, PartialEq, Serialize)]
 struct DataTuple(Option<String>, std::option::Option<String>);
