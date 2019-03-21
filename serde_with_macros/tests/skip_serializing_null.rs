@@ -78,13 +78,42 @@ struct DataExistingAnnotation {
 
 #[test]
 fn test_existing_annotation() {
-    let expected = json!({
-        "name": null
-    });
+    let expected = json!({ "name": null });
     let data = DataExistingAnnotation {
         a: None,
         b: None,
         c: None,
+        d: None,
+    };
+    let res = serde_json::to_value(&data).unwrap();
+    assert_eq!(expected, res);
+    assert_eq!(data, serde_json::from_value(res).unwrap());
+}
+
+#[skip_serializing_null]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+struct DataSerializeAlways {
+    #[serialize_always]
+    a: Option<String>,
+    #[serialize_always]
+    b: Option<String>,
+    c: i64,
+    #[serialize_always]
+    d: Option<String>,
+}
+
+#[test]
+fn test_serialize_always() {
+    let expected = json!({
+        "a": null,
+        "b": null,
+        "c": 0,
+        "d": null
+    });
+    let data = DataSerializeAlways {
+        a: None,
+        b: None,
+        c: 0,
         d: None,
     };
     let res = serde_json::to_value(&data).unwrap();
