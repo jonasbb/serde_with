@@ -25,8 +25,8 @@ use syn::{
 };
 
 #[proc_macro_attribute]
-pub fn skip_serializing_null(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let res = match skip_serializing_null_do(input) {
+pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let res = match skip_serializing_none_do(input) {
         Ok(res) => res,
         Err(msg) => {
             let span = Span::call_site();
@@ -36,17 +36,17 @@ pub fn skip_serializing_null(_args: TokenStream, input: TokenStream) -> TokenStr
     TokenStream::from(res)
 }
 
-fn skip_serializing_null_do(input: TokenStream) -> Result<proc_macro2::TokenStream, String> {
+fn skip_serializing_none_do(input: TokenStream) -> Result<proc_macro2::TokenStream, String> {
     // For each field in the struct given by `input`, add the `skip_serializing_if` attribute,
     // if and only if, it is of type `Option`
     if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
-        skip_serializing_null_handle_fields(&mut input.fields)?;
+        skip_serializing_none_handle_fields(&mut input.fields)?;
         Ok(quote!(#input))
     } else if let Ok(mut input) = syn::parse::<ItemEnum>(input.clone()) {
         input
             .variants
             .iter_mut()
-            .map(|variant| skip_serializing_null_handle_fields(&mut variant.fields))
+            .map(|variant| skip_serializing_none_handle_fields(&mut variant.fields))
             .collect::<Result<(), _>>()?;
         Ok(quote!(#input))
     } else {
@@ -108,7 +108,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 }
 
 /// Add the skip_serializing_if annotation to each field of the struct
-fn skip_serializing_null_add_attr_to_field<'a>(
+fn skip_serializing_none_add_attr_to_field<'a>(
     fields: impl IntoIterator<Item = &'a mut Field>,
 ) -> Result<(), String> {
     fields.into_iter().map(|field| ->Result<(), String> {
@@ -166,15 +166,15 @@ fn skip_serializing_null_add_attr_to_field<'a>(
 }
 
 /// Handle a single struct or a single enum variant
-fn skip_serializing_null_handle_fields(fields: &mut Fields) -> Result<(), String> {
+fn skip_serializing_none_handle_fields(fields: &mut Fields) -> Result<(), String> {
     match fields {
         // simple, no fields, do nothing
         Fields::Unit => Ok(()),
         Fields::Named(ref mut fields) => {
-            skip_serializing_null_add_attr_to_field(fields.named.iter_mut())
+            skip_serializing_none_add_attr_to_field(fields.named.iter_mut())
         }
         Fields::Unnamed(ref mut fields) => {
-            skip_serializing_null_add_attr_to_field(fields.unnamed.iter_mut())
+            skip_serializing_none_add_attr_to_field(fields.unnamed.iter_mut())
         }
     }
 }

@@ -6,7 +6,7 @@ extern crate serde_with_macros;
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use serde_with_macros::skip_serializing_null;
+use serde_with_macros::skip_serializing_none;
 
 macro_rules! test {
     ($fn:ident, $struct:ident) => {
@@ -38,7 +38,7 @@ macro_rules! test_tuple {
     };
 }
 
-#[skip_serializing_null]
+#[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 struct DataBasic {
     a: Option<String>,
@@ -48,7 +48,7 @@ struct DataBasic {
 }
 test!(test_basic, DataBasic);
 
-#[skip_serializing_null]
+#[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 struct DataFullyQualified {
     a: ::std::option::Option<String>,
@@ -62,7 +62,7 @@ fn never<T>(_t: &T) -> bool {
     false
 }
 
-#[skip_serializing_null]
+#[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 struct DataExistingAnnotation {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -90,7 +90,7 @@ fn test_existing_annotation() {
     assert_eq!(data, serde_json::from_value(res).unwrap());
 }
 
-#[skip_serializing_null]
+#[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 struct DataSerializeAlways {
     #[serialize_always]
@@ -121,12 +121,12 @@ fn test_serialize_always() {
     assert_eq!(data, serde_json::from_value(res).unwrap());
 }
 
-#[skip_serializing_null]
+#[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize)]
 struct DataTuple(Option<String>, std::option::Option<String>);
 test_tuple!(test_tuple, DataTuple);
 
-#[skip_serializing_null]
+#[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize)]
 enum DataEnum {
     Tuple(Option<i64>, std::option::Option<bool>),
