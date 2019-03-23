@@ -1,0 +1,23 @@
+error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field: `a`.
+ --> $DIR/skip-none-always.rs:7:1
+  |
+7 | #[skip_serializing_none]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field.
+  --> $DIR/skip-none-always.rs:15:1
+   |
+15 | #[skip_serializing_none]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: `serialize_always` may only be used on fields of type `Option`.
+  --> $DIR/skip-none-always.rs:23:1
+   |
+23 | #[skip_serializing_none]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0601]: `main` function not found in crate `$CRATE`
+  |
+  = note: consider adding a `main` function to `$DIR/tests/compile-fail/skip-none-always.rs`
+
+For more information about this error, try `rustc --explain E0601`.

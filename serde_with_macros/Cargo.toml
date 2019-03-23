@@ -31,8 +31,10 @@ features = [
 
 [dev-dependencies]
 pretty_assertions = "0.5.1"
+rustc_version = "0.2.3"
 serde = { version = "1.0.75", features = [ "derive" ] }
 serde_json = "1.0.25"
+trybuild = "1.0.4"
 version-sync = "0.7.0"
 
 [package.metadata.docs.rs]
