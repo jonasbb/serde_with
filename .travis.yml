@@ -30,14 +30,6 @@ matrix:
     - name: "PR Open"
       if: type = pull_request AND branch = master
       rust: nightly
-    - name: "Minimal Versions"
-      if: branch = staging OR branch = trying OR type = cron OR ( type = pull_request AND branch = master )
-      rust: nightly
-      script:
-        - set -e
-        - cargo generate-lockfile -Z minimal-versions
-        - cargo build --verbose --all --all-features
-        - cargo test --verbose --all --all-features
 
 # https://levans.fr/rust_travis_cache.html
 # Need to cache the whole `.cargo` directory to keep .crates.toml for
