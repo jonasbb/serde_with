@@ -11,6 +11,12 @@
 #![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/1.0.0")]
 
+//! proc-macro extensions for [`serde_with`]
+//!
+//! This crate should not be used alone, but through the [`serde_with`] crate.
+//!
+//! [`serde_with`]: https://crates.io/crates/serde_with/
+
 extern crate proc_macro;
 extern crate proc_macro2;
 extern crate quote;
@@ -24,6 +30,98 @@ use syn::{
     Type,
 };
 
+/// Add `skip_serializing_if` annotations to [`Option`] fields.
+///
+/// The attribute can be added to structs and enums.
+///
+/// # Example
+///
+/// JSON APIs sometimes have many optional values.
+/// Missing values should not be serialized, to keep the serialized format smaller.
+/// Such a data type might look like:
+///
+/// ```rust
+/// # extern crate serde;
+/// # use serde::Serialize;
+/// #
+/// #[derive(Serialize)]
+/// struct Data {
+///     #[serde(skip_serializing_if = "Option::is_none")]
+///     a: Option<String>,
+///     #[serde(skip_serializing_if = "Option::is_none")]
+///     b: Option<u64>,
+///     #[serde(skip_serializing_if = "Option::is_none")]
+///     c: Option<String>,
+///     #[serde(skip_serializing_if = "Option::is_none")]
+///     d: Option<bool>,
+/// }
+/// ```
+///
+/// The `skip_serializing_if` annotation is repetitive and harms readability.
+/// Instead the same struct can be written as:
+///
+/// ```rust
+/// # extern crate serde;
+/// # extern crate serde_with_macros;
+/// #
+/// # use serde::Serialize;
+/// # use serde_with_macros::skip_serializing_none;
+/// #[skip_serializing_none]
+/// #[derive(Serialize)]
+/// struct Data {
+///     a: Option<String>,
+///     b: Option<u64>,
+///     c: Option<String>,
+///     d: Option<bool>,
+/// }
+/// ```
+///
+/// Existing `skip_serializing_if` annotations will not be altered.
+///
+/// If some values should always be serialized, then the `serialize_always` can be used.
+///
+/// # Limitations
+///
+/// The `serialize_always` cannot be used together with a manual `skip_serializing_if` annotations, as these conflict in their meaning.
+/// A compile error will be generated if this occurs.
+///
+/// The `skip_serializing_none` only works if the type is called `Option`, `std::option::Option`, or `core::option::Option`.
+/// Type aliasing on `Option` and giving it another name, will cause this field to be ignored.
+/// This cannot be supported, as proc-macros run before type checking, thus it is not possible to determine if a type alias refers to an `Option`.
+///
+/// ```rust,ignore
+/// # extern crate serde;
+/// # extern crate serde_with_macros;
+/// #
+/// # use serde::Serialize;
+/// # use serde_with_macros::skip_serializing_none;
+/// type MyOption<T> = Option<T>;
+///
+/// #[skip_serializing_none]
+/// #[derive(Serialize)]
+/// struct Data {
+///     a: MyOption<String>, // This field will not be skipped
+/// }
+/// ```
+///
+/// Likewise, if you import a type and name it `Option`, the `skip_serializing_if` attributes will be added and compile errors will occur, if `Option::is_none` is not a valid function.
+/// Here the function `Vec::is_none` does not exist and therefore the example fails to compile.
+///
+/// ```rust,compile_fail
+/// # extern crate serde;
+/// # extern crate serde_with_macros;
+/// #
+/// # use serde::Serialize;
+/// # use serde_with_macros::skip_serializing_none;
+/// use std::vec::Vec as Option;
+///
+/// #[skip_serializing_none]
+/// #[derive(Serialize)]
+/// struct Data {
+///     a: Option<String>,
+/// }
+/// ```
+///
 #[proc_macro_attribute]
 pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStream {
     let res = match skip_serializing_none_do(input) {
