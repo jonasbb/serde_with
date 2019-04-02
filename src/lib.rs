@@ -10,7 +10,7 @@
     variant_size_differences
 )]
 #![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
-#![doc(html_root_url = "https://docs.rs/serde_with/1.2.0")]
+#![doc(html_root_url = "https://docs.rs/serde_with/1.3.0")]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
@@ -29,7 +29,7 @@
 //!
 //! ```toml
 //! [dependencies.serde_with]
-//! version = "1.2.0"
+//! version = "1.3.0"
 //! features = [ "..." ]
 //! ```
 //!
