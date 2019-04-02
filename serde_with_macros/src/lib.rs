@@ -85,9 +85,9 @@ use syn::{
 /// The `serialize_always` cannot be used together with a manual `skip_serializing_if` annotations, as these conflict in their meaning.
 /// A compile error will be generated if this occurs.
 ///
-/// The `skip_serializing_none` only works if the type is called `Option`, `std::option::Option`, or `core::option::Option`.
-/// Type aliasing on `Option` and giving it another name, will cause this field to be ignored.
-/// This cannot be supported, as proc-macros run before type checking, thus it is not possible to determine if a type alias refers to an `Option`.
+/// The `skip_serializing_none` only works if the type is called [`Option`], [`std::option::Option`], or [`core::option::Option`].
+/// Type aliasing an [`Option`] and giving it another name, will cause this field to be ignored.
+/// This cannot be supported, as proc-macros run before type checking, thus it is not possible to determine if a type alias refers to an [`Option`].
 ///
 /// ```rust,ignore
 /// # extern crate serde;

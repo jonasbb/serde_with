@@ -74,6 +74,13 @@
 //!
 //! However, this will prohibit you from applying deserialize on the value returned by serializing a struct.
 //!
+//! # Attributes
+//!
+//! The crate comes with custom attributes, which futher extend how serde serialization can be customized.
+//! They are enabled by default, but can be disabled, by removing the default features from this crate.
+//!
+//! [The documentation for the custom attributes can be found here.](serde_with_macros)
+//!
 //! [with-annotation]: https://serde.rs/field-attrs.html#serdewith--module
 //! [serde#553]: https://github.com/serde-rs/serde/issues/553
 
