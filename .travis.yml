@@ -70,7 +70,7 @@ before_script:
 script:
   - set -e
   - |
-    for FEATURES_COMMAND in "--no-default-features" "" "--features=chrono" "--features=json" "--all-features"
+    for FEATURES_COMMAND in "--no-default-features" "" "--features=chrono" "--features=json" "--features=macros" "--all-features"
     do
       cargo build --verbose --all ${FEATURES_COMMAND}
       # skip this step if clippy is not available, e.g., bad nightly

@@ -74,6 +74,13 @@
 //!
 //! However, this will prohibit you from applying deserialize on the value returned by serializing a struct.
 //!
+//! # Attributes
+//!
+//! The crate comes with custom attributes, which futher extend how serde serialization can be customized.
+//! They are enabled by default, but can be disabled, by removing the default features from this crate.
+//!
+//! [The documentation for the custom attributes can be found here.](serde_with_macros)
+//!
 //! [with-annotation]: https://serde.rs/field-attrs.html#serdewith--module
 //! [serde#553]: https://github.com/serde-rs/serde/issues/553
 
@@ -83,6 +90,8 @@ extern crate chrono as chrono_crate;
 pub extern crate serde;
 #[cfg(feature = "json")]
 extern crate serde_json;
+#[cfg(feature = "macros")]
+extern crate serde_with_macros;
 
 #[cfg(feature = "chrono")]
 pub mod chrono;
@@ -93,6 +102,11 @@ mod flatten_maybe;
 pub mod rust;
 #[doc(hidden)]
 pub mod with_prefix;
+
+// Re-Export all proc_macros, as these should be seen as part of the serde_with crate
+#[cfg(feature = "macros")]
+#[doc(inline)]
+pub use serde_with_macros::*;
 
 /// Separator for string-based collection de/serialization
 pub trait Separator {
