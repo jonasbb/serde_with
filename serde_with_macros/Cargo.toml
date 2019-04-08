@@ -24,13 +24,9 @@ quote = "0.6.11"
 
 [dependencies.syn]
 version = "0.15.29"
-default-features = false
 features = [
-    "extra-traits", # Only for debugging
+    # "extra-traits", # Only for debugging
     "full",
-    "parsing",
-    "printing",
-    "proc-macro",
 ]
 
 [dev-dependencies]

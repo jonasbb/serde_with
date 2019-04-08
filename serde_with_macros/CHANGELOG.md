@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Features for the `syn` dependency were missing.
+    This was hidden due to the dev-dependencies whose features leaked into the normal build.
+
 ## [1.0.0]
 
 Initial Release
