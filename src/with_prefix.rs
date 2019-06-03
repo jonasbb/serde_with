@@ -9,6 +9,12 @@ use serde::{
 /// Serialize with an added prefix on every field name and deserialize by
 /// trimming away the prefix.
 ///
+/// **Note:** Use of this macro is incompatible with applying the [`deny_unknown_fields`] attribute
+/// on the container.
+/// While deserializing, it will always warn about unknown fields, even though they are processed
+/// by the `with_prefix` wrapper.
+/// More details can be found in [this issue][issue-with_prefix-deny_unknown_fields].
+///
 /// # Example
 ///
 /// The [Challonge REST API] likes to use prefixes to group related fields. In
@@ -95,6 +101,9 @@ use serde::{
 /// #     assert_eq!(j, EXPECTED);
 /// }
 /// ```
+///
+/// [`deny_unknown_fields`]: https://serde.rs/container-attrs.html#deny_unknown_fields
+/// [issue-with_prefix-deny_unknown_fields]: https://github.com/jonasbb/serde_with/issues/57
 #[macro_export]
 macro_rules! with_prefix {
     ($module:ident $prefix:expr) => {
