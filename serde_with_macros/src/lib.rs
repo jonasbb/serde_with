@@ -66,6 +66,8 @@ use syn::{
 /// #
 /// # use serde::Serialize;
 /// # use serde_with_macros::skip_serializing_none;
+/// use serde_with::skip_serializing_none;
+/// 
 /// #[skip_serializing_none]
 /// #[derive(Serialize)]
 /// struct Data {
