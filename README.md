@@ -56,6 +56,9 @@ However, this will prohibit you from applying deserialize on the value returned 
 The crate comes with custom attributes, which futher extend how serde serialization can be customized.
 They are enabled by default, but can be disabled, by removing the default features from this crate.
 
+The `serde_with` crate re-exports all items from `serde_with_macros`.
+This means, if you want to use any proc_macros, import them like `use serde_with::skip_serializing_none`.
+
 [The documentation for the custom attributes can be found here.](serde_with_macros)
 
 [with-annotation]: https://serde.rs/field-attrs.html#serdewith--module
