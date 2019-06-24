@@ -34,6 +34,8 @@ use syn::{
 ///
 /// The attribute can be added to structs and enums.
 ///
+/// Import this attribute with `use serde_with::skip_serializing_none;`.
+///
 /// # Example
 ///
 /// JSON APIs sometimes have many optional values.
