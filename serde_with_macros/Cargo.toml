@@ -20,7 +20,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 proc-macro2 = { version = "0.4.27" }
-quote = "0.6.11"
+quote = "1.0.1"
 
 [dependencies.syn]
 version = "0.15.29"
