@@ -195,8 +195,10 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
                 if let Meta::List(expr) = expr {
                     for expr in expr.nested {
                         if let NestedMeta::Meta(Meta::NameValue(expr)) = expr {
-                            if expr.ident.to_string() == name {
-                                return true;
+                            if let Some(ident) = expr.path.get_ident() {
+                                if ident.to_string() == name {
+                                    return true;
+                                }
                             }
                         }
                     }
