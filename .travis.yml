@@ -15,20 +15,20 @@ branches:
 
 matrix:
   include:
-    - name: "Bors (1.30.0)"
-      if: branch = staging OR branch = trying OR type = cron
-      rust: 1.30.0
+    - name: "Bors (1.31.1)"
+      if: type = pull_request OR branch = staging OR branch = trying OR type = cron OR type = api
+      rust: 1.31.1
     - name: "Bors (stable)"
-      if: branch = staging OR branch = trying OR type = cron
+      if: branch = staging OR branch = trying OR type = cron OR type = api
       rust: stable
     - name: "Bors (beta)"
-      if: branch = staging OR branch = trying OR type = cron
+      if: branch = staging OR branch = trying OR type = cron OR type = api
       rust: beta
     - name: "Bors (nightly)"
-      if: branch = staging OR branch = trying OR type = cron
+      if: branch = staging OR branch = trying OR type = cron OR type = api
       rust: nightly
     - name: "PR Open"
-      if: type = pull_request AND branch = master
+      if: type = pull_request AND branch = master OR type = api
       rust: nightly
 
 # https://levans.fr/rust_travis_cache.html
@@ -59,16 +59,24 @@ before_script:
   - which cargo-install-update || cargo install cargo-update
   # Update cargo metadata to make cargo install-update work
   - cargo fetch
-  # Install or update cargo tarpaulin
+  # Install or update all tools
   - |
-    if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
-      env RUSTFLAGS="--cfg procmacro2_semver_exempt" cargo install-update --allow-no-update cargo-tarpaulin
+    if [[ "$TRAVIS_RUST_VERSION" == stable ]] || [[ "$TRAVIS_RUST_VERSION" == nightly ]]
+    then
+      cargo install-update --allow-no-update \
+        cargo-audit \
+        cargo-tarpaulin
     fi
   # Update all tools
   - cargo install-update -a
 
 script:
   - set -e
+  - |
+    if [[ "$TRAVIS_RUST_VERSION" == stable ]]
+    then
+      cargo audit
+    fi
   - |
     for FEATURES_COMMAND in "--no-default-features" "" "--features=chrono" "--features=json" "--features=macros" "--all-features"
     do
@@ -81,8 +89,8 @@ script:
 
 after_success:
   - |
-    if [[ "$TRAVIS_RUST_VERSION" == nightly ]]; then
-      # Uncomment the following two lines create and upload a report for codecov.io
+    if [[ "$TRAVIS_RUST_VERSION" == stable ]] || [[ "$TRAVIS_RUST_VERSION" == nightly ]]
+    then
       cargo tarpaulin --out Xml --all --all-features
       bash <(curl -s https://codecov.io/bash)
       echo "CodeCov Uploading of data was successful!"
