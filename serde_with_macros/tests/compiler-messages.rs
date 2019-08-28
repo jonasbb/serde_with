@@ -1,13 +1,15 @@
-extern crate rustc_version;
+extern crate rustversion;
 extern crate trybuild;
 
-use rustc_version::{version, Version};
-
+// This test fails for older compiler versions since the error messages are different.
+#[rustversion::attr(before(1.35), ignore)]
 #[test]
 fn compile_test() {
-    // This test fails for older compiler versions since the error messages are different.
-    if version().unwrap() >= Version::parse("1.35.0").unwrap() {
-        let t = trybuild::TestCases::new();
-        t.compile_fail("tests/compile-fail/*.rs");
+    // This test does not work under tarpaulin, so skip it if detected
+    if std::env::var("TARPAULIN") == Ok("1".to_string()) {
+        return;
     }
+
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/compile-fail/*.rs");
 }
