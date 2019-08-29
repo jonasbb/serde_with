@@ -1,0 +1,11 @@
+error: The attribute can only be applied to struct or enum definitions.
+ --> $DIR/skip-none-not-struct.rs:5:1
+  |
+5 | #[skip_serializing_none]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0601]: `main` function not found in crate `$CRATE`
+  |
+  = note: consider adding a `main` function to `$DIR/tests/compile-fail/skip-none-not-struct.rs`
+
+For more information about this error, try `rustc --explain E0601`.
