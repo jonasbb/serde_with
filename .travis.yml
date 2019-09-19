@@ -56,19 +56,19 @@ before_script:
   # Allow this step to fail in case clippy is not available for whatever reason
   - ( rustup component add clippy-preview || true )
   - export PATH=$HOME/.cargo/bin:$PATH
-  - which cargo-install-update || cargo install cargo-update
-  # Update cargo metadata to make cargo install-update work
-  - cargo fetch
-  # Install or update all tools
   - |
-    if [[ "$TRAVIS_RUST_VERSION" == stable ]] || [[ "$TRAVIS_RUST_VERSION" == nightly ]]
+    if [[ "$TRAVIS_RUST_VERSION" == stable ]] || [[ "$TRAVIS_RUST_VERSION" == beta ]] || [[ "$TRAVIS_RUST_VERSION" == nightly ]]
     then
+      which cargo-install-update || cargo install cargo-update
+      # Update cargo metadata to make cargo install-update work
+      cargo fetch
+      # Install or update all tools
       cargo install-update --allow-no-update \
         cargo-audit \
         cargo-tarpaulin
+      # Update all tools
+      cargo install-update -a
     fi
-  # Update all tools
-  - cargo install-update -a
 
 script:
   - set -e
