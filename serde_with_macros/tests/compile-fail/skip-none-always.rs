@@ -14,10 +14,10 @@ struct Data {
 
 #[skip_serializing_none]
 #[derive(Serialize)]
-struct Data2 (
+struct Data2(
     #[serialize_always]
     #[serde(skip_serializing_if = "Option::is_none")]
-    Option<char>
+    Option<char>,
 );
 
 #[skip_serializing_none]
@@ -26,3 +26,5 @@ struct Data3 {
     #[serialize_always]
     a: char,
 }
+
+fn main() {}
