@@ -1340,3 +1340,106 @@ pub mod tuple_list_as_map {
         }
     }
 }
+
+/// Deserialize from bytes or String
+///
+/// Any Rust [`String`] can be converted into bytes ([`Vec`]`<u8>`).
+/// Accepting both as formats while deserializing can be helpful while interacting with language
+/// which have a looser definition of string than Rust.
+///
+/// # Example
+/// ```rust
+/// # extern crate serde;
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// #
+/// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
+/// struct S {
+///     #[serde(deserialize_with = "serde_with::rust::bytes_or_string::deserialize")]
+///     bos: Vec<u8>,
+/// }
+///
+/// # fn main() {
+/// // Here we deserialize from a byte array ...
+/// let from = r#"{
+///   "bos": [
+///     0,
+///     1,
+///     2,
+///     3
+///   ]
+/// }"#;
+/// let expected = S {
+///     bos: vec![0, 1, 2, 3],
+/// };
+///
+/// let res: S = serde_json::from_str(from).unwrap();
+/// assert_eq!(expected, res);
+///
+/// // and serialization works too.
+/// assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
+///
+/// // But we also support deserializing from String
+/// let from = r#"{
+///   "bos": "✨Works!"
+/// }"#;
+/// let expected = S {
+///     bos: "✨Works!".as_bytes().to_vec(),
+/// };
+///
+/// let res: S = serde_json::from_str(from).unwrap();
+/// assert_eq!(expected, res);
+/// # }
+/// ```
+pub mod bytes_or_string {
+    use super::*;
+
+    /// Deserialize a [`Vec`]`<u8>` from either bytes or string
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_any(BytesOrStringVisitor)
+    }
+
+    struct BytesOrStringVisitor;
+
+    impl<'de> Visitor<'de> for BytesOrStringVisitor {
+        type Value = Vec<u8>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a list of bytes or a string")
+        }
+
+        fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E> {
+            Ok(v.to_vec())
+        }
+
+        fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E> {
+            Ok(v)
+        }
+
+        fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> {
+            Ok(v.as_bytes().to_vec())
+        }
+
+        fn visit_string<E>(self, v: String) -> Result<Self::Value, E> {
+            Ok(v.into_bytes())
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut res = Vec::with_capacity(seq.size_hint().unwrap_or(0));
+            while let Some(value) = seq.next_element()? {
+                res.push(value);
+            }
+            Ok(res)
+        }
+    }
+}
