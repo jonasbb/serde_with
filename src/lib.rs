@@ -99,9 +99,9 @@ extern crate serde_with_macros;
 #[cfg(feature = "chrono")]
 pub mod chrono;
 mod duplicate_key_impls;
+mod flatten_maybe;
 #[cfg(feature = "json")]
 pub mod json;
-mod flatten_maybe;
 pub mod rust;
 #[doc(hidden)]
 pub mod with_prefix;

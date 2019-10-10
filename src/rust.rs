@@ -1272,7 +1272,7 @@ pub mod tuple_list_as_map {
     /// Serialize any iteration of tuples into a map.
     pub fn serialize<'a, I, K, V, S>(iter: I, serializer: S) -> Result<S::Ok, S::Error>
     where
-        I: IntoIterator<Item =  &'a (K, V)>,
+        I: IntoIterator<Item = &'a (K, V)>,
         I::IntoIter: ExactSizeIterator,
         K: Serialize + 'a,
         V: Serialize + 'a,
