@@ -9,7 +9,7 @@ on:
 
 env:
   CARGO_INCREMENTAL: 0
-  RUSTFLAGS: -D warnings
+  RUSTFLAGS: -D warnings -C link-dead-code
 
 jobs:
   clippy_check:
@@ -123,7 +123,7 @@ jobs:
         uses: actions-rs/tarpaulin@v0.1
         if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
         with:
-          args: "--workspace --all-features -- --test-threads 1"
+          args: "--workspace --all-features --run-types Tests Doctests -- --test-threads 1"
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1
         if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
