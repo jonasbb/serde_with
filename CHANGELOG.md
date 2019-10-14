@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add a helper to deserialize a `Vec<u8>` from `String` (#35)
+
 ### Changed
 
 * Bump minimal Rust version to 1.31.1 to support Rust Edition 2018

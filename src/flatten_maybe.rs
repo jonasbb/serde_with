@@ -76,7 +76,9 @@ macro_rules! flattened_maybe {
                 (Some(t), None) | (None, Some(t)) => Ok(t),
                 (None, None) => Err(serde::de::Error::missing_field($field)),
                 (Some(_), Some(_)) => Err(serde::de::Error::custom(concat!(
-                    "`", $field, "` is both flattened and not"
+                    "`",
+                    $field,
+                    "` is both flattened and not"
                 ))),
             }
         }

@@ -1,11 +1,11 @@
 #![cfg(feature = "chrono")]
 
 extern crate chrono;
+extern crate pretty_assertions;
 extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate serde_with;
-extern crate pretty_assertions;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
 use pretty_assertions::assert_eq;
