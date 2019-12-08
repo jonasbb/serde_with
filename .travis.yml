@@ -15,9 +15,9 @@ branches:
 
 matrix:
   include:
-    - name: "Bors (1.31.1)"
+    - name: "Bors (1.36.0)"
       if: type = pull_request OR branch = staging OR branch = trying OR type = cron OR type = api
-      rust: 1.31.1
+      rust: 1.36.0
     - name: "Bors (stable)"
       if: branch = staging OR branch = trying OR type = cron OR type = api
       rust: stable
