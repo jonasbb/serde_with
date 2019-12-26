@@ -40,7 +40,6 @@ use Separator;
 ///     b: bool,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_str(r#"{
 ///     "address": "192.168.2.1",
 ///     "b": "true"
@@ -53,7 +52,6 @@ use Separator;
 ///     b: false,
 /// };
 /// assert_eq!(r#"{"address":"127.53.0.1","b":"false"}"#, serde_json::to_string(&x).unwrap());
-/// # }
 /// ```
 pub mod display_fromstr {
     use super::*;
@@ -125,7 +123,6 @@ pub mod display_fromstr {
 ///     bs: Vec<bool>,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_str(r#"{
 ///     "addresses": ["192.168.2.1", "192.168.2.2", "192.168.1.1", "192.168.2.2"],
 ///     "bs": ["true", "false"]
@@ -147,7 +144,6 @@ pub mod display_fromstr {
 ///     bs: vec![false, true],
 /// };
 /// assert_eq!(r#"{"addresses":["127.53.0.1","127.53.0.2","127.53.1.1"],"bs":["false","true"]}"#, serde_json::to_string(&x).unwrap());
-/// # }
 /// ```
 pub mod seq_display_fromstr {
     use serde::{
@@ -249,7 +245,6 @@ pub mod seq_display_fromstr {
 ///     more_tags: BTreeSet<String>,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_str(r##"{
 ///     "tags": "#hello #world",
 ///     "more_tags": "foo,bar,bar"
@@ -262,7 +257,6 @@ pub mod seq_display_fromstr {
 ///     more_tags: BTreeSet::new(),
 /// };
 /// assert_eq!(r#"{"tags":"1 2 3","more_tags":""}"#, serde_json::to_string(&x).unwrap());
-/// # }
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct StringWithSeparator<Sep>(PhantomData<Sep>);
@@ -342,7 +336,6 @@ where
 ///     )]
 ///     a: Option<Option<u8>>,
 /// }
-/// # fn main() {
 /// // Missing Value
 /// let s = r#"{}"#;
 /// assert_eq!(Doc {a: None}, serde_json::from_str(s).unwrap());
@@ -357,7 +350,6 @@ where
 /// let s = r#"{"a":5}"#;
 /// assert_eq!(Doc {a: Some(Some(5))}, serde_json::from_str(s).unwrap());
 /// assert_eq!(s, serde_json::to_string(&Doc {a: Some(Some(5))}).unwrap());
-/// # }
 /// ```
 #[cfg_attr(feature = "cargo-clippy", allow(option_option))]
 pub mod double_option {
@@ -422,7 +414,6 @@ pub mod double_option {
 ///     )]
 ///     optional: Option<usize>,
 /// }
-/// # fn main() {
 ///
 /// // Transparently add/remove Some() wrapper
 /// # let pretty_config = ron::ser::PrettyConfig::default();
@@ -449,7 +440,6 @@ pub mod double_option {
 /// };
 /// assert_eq!(v, ron::de::from_str(s).unwrap());
 /// assert_eq!(s, ron::ser::to_string_pretty(&v, pretty_config).unwrap());
-/// # }
 /// ```
 pub mod unwrap_or_skip {
     use super::*;
@@ -507,7 +497,6 @@ pub mod unwrap_or_skip {
 ///     #[serde(with = "::serde_with::rust::sets_duplicate_value_is_error")]
 ///     set: HashSet<usize>,
 /// }
-/// # fn main() {
 ///
 /// // Sets are serialized normally,
 /// let s = r#"{"set": [1, 2, 3, 4]}"#;
@@ -520,7 +509,6 @@ pub mod unwrap_or_skip {
 /// let s = r#"{"set": [1, 2, 3, 4, 1]}"#;
 /// let res: Result<Doc, _> = serde_json::from_str(s);
 /// assert!(res.is_err());
-/// # }
 /// ```
 pub mod sets_duplicate_value_is_error {
     use super::*;
@@ -604,7 +592,6 @@ pub mod sets_duplicate_value_is_error {
 ///     #[serde(with = "::serde_with::rust::maps_duplicate_key_is_error")]
 ///     map: HashMap<usize, usize>,
 /// }
-/// # fn main() {
 ///
 /// // Maps are serialized normally,
 /// let s = r#"{"map": {"1": 1, "2": 2, "3": 3}}"#;
@@ -620,7 +607,6 @@ pub mod sets_duplicate_value_is_error {
 /// let s = r#"{"map": {"1": 1, "2": 2, "1": 3}}"#;
 /// let res: Result<Doc, _> = serde_json::from_str(s);
 /// assert!(res.is_err());
-/// # }
 /// ```
 pub mod maps_duplicate_key_is_error {
     use super::*;
@@ -764,7 +750,6 @@ pub mod sets_first_value_wins {
 ///     #[serde(with = "::serde_with::rust::maps_first_key_wins")]
 ///     map: HashMap<usize, usize>,
 /// }
-/// # fn main() {
 ///
 /// // Maps are serialized normally,
 /// let s = r#"{"map": {"1": 1, "2": 2, "3": 3}}"#;
@@ -784,7 +769,6 @@ pub mod sets_first_value_wins {
 /// v.map.insert(1, 1);
 /// v.map.insert(2, 2);
 /// assert_eq!(v, serde_json::from_str(s).unwrap());
-/// # }
 /// ```
 pub mod maps_first_key_wins {
     use super::*;
@@ -861,7 +845,6 @@ pub mod maps_first_key_wins {
 ///     tags: Option<String>,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_str(r##"{
 ///     "tags": ""
 /// }"##).unwrap();
@@ -881,7 +864,6 @@ pub mod maps_first_key_wins {
 ///     tags: None,
 /// };
 /// assert_eq!(r#"{"tags":""}"#, serde_json::to_string(&x).unwrap());
-/// # }
 /// ```
 pub mod string_empty_as_none {
     use super::*;
@@ -979,7 +961,6 @@ pub mod string_empty_as_none {
 ///     s: HashMap<(String, u32), u32>,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_value(json!({
 ///     "s": [
 ///         [["Hello", 123], 0],
@@ -989,7 +970,6 @@ pub mod string_empty_as_none {
 ///
 /// assert_eq!(2, v.s.len());
 /// assert_eq!(1, v.s[&("World".to_string(), 456)]);
-/// # }
 /// ```
 ///
 /// The helper is generic over the hasher type of the [`HashMap`] and works with different variants, such as `FnvHashMap`.
@@ -1012,7 +992,6 @@ pub mod string_empty_as_none {
 ///     s: FnvHashMap<u32, bool>,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_value(json!({
 ///     "s": [
 ///         [0, false],
@@ -1022,7 +1001,6 @@ pub mod string_empty_as_none {
 ///
 /// assert_eq!(2, v.s.len());
 /// assert_eq!(true, v.s[&1]);
-/// # }
 /// ```
 pub mod hashmap_as_tuple_list {
     use super::{SerializeSeq, *}; // Needed to remove the unused import warning in the parent scope
@@ -1110,7 +1088,6 @@ pub mod hashmap_as_tuple_list {
 ///     s: BTreeMap<(String, u32), u32>,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_value(json!({
 ///     "s": [
 ///         [["Hello", 123], 0],
@@ -1120,7 +1097,6 @@ pub mod hashmap_as_tuple_list {
 ///
 /// assert_eq!(2, v.s.len());
 /// assert_eq!(1, v.s[&("World".to_string(), 456)]);
-/// # }
 /// ```
 pub mod btreemap_as_tuple_list {
     use super::*;
@@ -1208,7 +1184,6 @@ pub mod btreemap_as_tuple_list {
 /// #[serde(transparent)]
 /// struct Wrapper<T>(T);
 ///
-/// # fn main() {
 /// let from = r#"{
 ///   "s": {
 ///     "1": "Hi",
@@ -1227,7 +1202,6 @@ pub mod btreemap_as_tuple_list {
 ///     assert_eq!(exp_v.0, res_v.0);
 /// }
 /// assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
-/// # }
 /// ```
 ///
 /// In this example, the serialized format contains duplicate keys, which is not supported with [`HashMap`] or [`BTreeMap`].
@@ -1247,7 +1221,6 @@ pub mod btreemap_as_tuple_list {
 ///     s: Vec<(i32, String)>,
 /// }
 ///
-/// # fn main() {
 /// let from = r#"{
 ///   "s": {
 ///     "1": "Hi",
@@ -1264,7 +1237,6 @@ pub mod btreemap_as_tuple_list {
 /// assert_eq!(3, res.s.len());
 /// assert_eq!(expected, res);
 /// assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
-/// # }
 /// ```
 pub mod tuple_list_as_map {
     use super::{SerializeMap, *}; // Needed to remove the unused import warning in the parent scope
@@ -1363,7 +1335,6 @@ pub mod tuple_list_as_map {
 ///     bos: Vec<u8>,
 /// }
 ///
-/// # fn main() {
 /// // Here we deserialize from a byte array ...
 /// let from = r#"{
 ///   "bos": [
@@ -1393,7 +1364,6 @@ pub mod tuple_list_as_map {
 ///
 /// let res: S = serde_json::from_str(from).unwrap();
 /// assert_eq!(expected, res);
-/// # }
 /// ```
 pub mod bytes_or_string {
     use super::*;
