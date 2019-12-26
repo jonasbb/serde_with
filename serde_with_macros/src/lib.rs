@@ -142,7 +142,7 @@ fn skip_serializing_none_do(input: TokenStream) -> Result<proc_macro2::TokenStre
     if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
         skip_serializing_none_handle_fields(&mut input.fields)?;
         Ok(quote!(#input))
-    } else if let Ok(mut input) = syn::parse::<ItemEnum>(input.clone()) {
+    } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
         input
             .variants
             .iter_mut()
