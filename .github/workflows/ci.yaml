@@ -1,0 +1,109 @@
+on: push
+name: Rust CI
+
+jobs:
+  clippy_check:
+    strategy:
+      matrix:
+        os: [
+          "ubuntu-latest",
+          "windows-latest",
+        ]
+        rust: [
+          "stable",
+          "nightly",
+        ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: clippy
+      - uses: actions-rs/clippy-check@v1
+        name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --no-default-features -- -D warnings
+          name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
+      - uses: actions-rs/clippy-check@v1
+        name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -- -D warnings
+          name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
+      - uses: actions-rs/clippy-check@v1
+        name: clippy "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features -- -D warnings
+          name: clippy "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
+
+  rustfmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: rustfmt
+      - uses: actions-rs/cargo@v1
+        name: Rustfmt Check (${{ matrix.rust }})
+        with:
+          command: fmt
+          args: --all -- --check
+
+  build_and_test:
+    name: Build and Test
+    needs: [
+      "rustfmt",
+      "clippy_check",
+    ]
+    strategy:
+      matrix:
+        os: [
+          "ubuntu-latest",
+          "windows-latest",
+        ]
+        rust: [
+          "1.36.0",
+          "stable",
+          "beta",
+          "nightly",
+        ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        name: Build (${{ matrix.os }} / ${{ matrix.rust }})
+        with:
+          command: build
+          args: --all-features
+      - uses: actions-rs/cargo@v1
+        name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        with:
+          command: test
+          args: --no-default-features
+      - uses: actions-rs/cargo@v1
+        name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }})
+        with:
+          command: test
+      - uses: actions-rs/cargo@v1
+        name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        with:
+          command: test
+          args: --all-features
