@@ -416,7 +416,10 @@ pub mod double_option {
 /// }
 ///
 /// // Transparently add/remove Some() wrapper
-/// # let pretty_config = ron::ser::PrettyConfig::default();
+/// # let pretty_config = ron::ser::PrettyConfig {
+/// #     new_line: "\n".into(),
+/// #     ..Default::default()
+/// # };
 /// let s = r#"(
 ///     mandatory: 1,
 ///     optional: 2,
@@ -430,7 +433,10 @@ pub mod double_option {
 ///
 /// // Missing values are deserialized as `None`
 /// // while `None` values are skipped during serialization.
-/// # let pretty_config = ron::ser::PrettyConfig::default();
+/// # let pretty_config = ron::ser::PrettyConfig {
+/// #     new_line: "\n".into(),
+/// #     ..Default::default()
+/// # };
 /// let s = r#"(
 ///     mandatory: 1,
 /// )"#;
