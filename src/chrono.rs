@@ -26,14 +26,12 @@
 ///     date: DateTime<Utc>,
 /// }
 ///
-/// # fn main() {
 /// // Deserializes integers
 /// assert!(serde_json::from_str::<S>(r#"{ "date": 1478563200 }"#).is_ok());
 /// // floats
 /// assert!(serde_json::from_str::<S>(r#"{ "date": 1478563200.123 }"#).is_ok());
 /// // and strings with numbers, for high-precision values
 /// assert!(serde_json::from_str::<S>(r#"{ "date": "1478563200.123" }"#).is_ok());
-/// # }
 /// ```
 ///
 pub mod datetime_utc_ts_seconds_from_any {

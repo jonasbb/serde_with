@@ -1,0 +1,37 @@
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'macros-v*'
+name: Publish to crates.io
+
+jobs:
+  publish_serde_with:
+    runs-on: ubuntu-latest
+    if: startWith(github.ref, 'v')
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: cargo login ${CRATES_IO_TOKEN}
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      - run: cargo publish
+
+  publish_serde_with_macros:
+    runs-on: ubuntu-latest
+    if: startWith(github.ref, 'macros-v')
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: cargo login ${CRATES_IO_TOKEN}
+        env:
+          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      - run: cd serde_with_macros && cargo publish

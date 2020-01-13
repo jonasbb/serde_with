@@ -24,7 +24,6 @@
 ///     value: usize,
 /// }
 ///
-/// # fn main() {
 /// let v: A = serde_json::from_str(r#"{"other_struct":"{\"value\":5}"}"#).unwrap();
 /// assert_eq!(5, v.other_struct.value);
 ///
@@ -32,7 +31,6 @@
 ///     other_struct: B { value: 10 },
 /// };
 /// assert_eq!(r#"{"other_struct":"{\"value\":10}"}"#, serde_json::to_string(&x).unwrap());
-/// # }
 /// ```
 ///
 pub mod nested {
