@@ -107,3 +107,14 @@ jobs:
         with:
           command: test
           args: --all-features
+
+      - name: Run cargo-tarpaulin
+        uses: actions-rs/tarpaulin@v0.1
+        if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
+        with:
+          args: "--workspace --all-features -- --test-threads 1"
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v1.0.2
+        if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
