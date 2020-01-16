@@ -8,7 +8,7 @@ name: Publish to crates.io
 jobs:
   publish_serde_with:
     runs-on: ubuntu-latest
-    if: startWith(github.ref, 'v')
+    if: startsWith(github.ref, 'v')
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -23,7 +23,7 @@ jobs:
 
   publish_serde_with_macros:
     runs-on: ubuntu-latest
-    if: startWith(github.ref, 'macros-v')
+    if: startsWith(github.ref, 'macros-v')
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
