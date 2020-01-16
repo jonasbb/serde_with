@@ -9,7 +9,7 @@
     variant_size_differences
 )]
 #![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
-#![doc(html_root_url = "https://docs.rs/serde_with_macros/1.0.1")]
+#![doc(html_root_url = "https://docs.rs/serde_with_macros/1.1.0")]
 
 //! proc-macro extensions for [`serde_with`]
 //!
