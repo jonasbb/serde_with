@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.1.0]
+
 ### Changed
 
-* Bump minimal Rust version to 1.31.1 to support Rust Edition 2018
+* Bump minimal Rust version to 1.36.0 to support Rust Edition 2018
 * Improved CI pipeline by running `cargo audit` and `tarpaulin` in all configurations now.
 
 ## [1.0.1]
