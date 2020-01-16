@@ -1419,3 +1419,116 @@ pub mod bytes_or_string {
         }
     }
 }
+
+/// Deserialize value and return [`Default`] on error
+///
+/// The main use case is ignoring error while deserializing.
+/// Instead of erroring, it simply deserializes the [`Default`] variant of the type.
+/// It is not possible to find the error location, i.e., which field had a deserialization error, with this method.
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use serde_derive::Deserialize;
+/// #
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde(deserialize_with = "serde_with::rust::default_on_error::deserialize")]
+///     value: u32,
+/// }
+///
+/// let a: A = serde_json::from_str(r#"{"value": 123}"#).unwrap();
+/// assert_eq!(123, a.value);
+///
+/// // null is of invalid type
+/// let a: A = serde_json::from_str(r#"{"value": null}"#).unwrap();
+/// assert_eq!(0, a.value);
+///
+/// // String is of invalid type
+/// let a: A = serde_json::from_str(r#"{"value": "123"}"#).unwrap();
+/// assert_eq!(0, a.value);
+///
+/// // Missing entries still cause errors
+/// assert!(serde_json::from_str::<A>(r#"{  }"#).is_err());
+/// ```
+///
+/// Deserializing missing values can be supported by adding the `default` field attribute:
+///
+/// ```
+/// # extern crate serde;
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use serde_derive::Deserialize;
+/// #
+/// #[derive(Deserialize)]
+/// struct B {
+///     #[serde(default, deserialize_with = "serde_with::rust::default_on_error::deserialize")]
+///     value: u32,
+/// }
+///
+///
+/// let b: B = serde_json::from_str(r#"{  }"#).unwrap();
+/// assert_eq!(0, b.value);
+/// ```
+pub mod default_on_error {
+    use super::*;
+
+    /// Deserialize T and return the [`Default`] value on error
+    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+        T: Deserialize<'de> + Default,
+    {
+        T::deserialize(deserializer).or_else(|_| Ok(Default::default()))
+    }
+}
+
+/// Deserialize default value if encountering `null`.
+///
+/// One use case are JSON APIs in which the `null` value represents some default state.
+/// This adapter allows to turn the `null` directly into the [`Default`] value of the type.
+///
+/// # Examples
+///
+/// ```
+/// # extern crate serde;
+/// # extern crate serde_derive;
+/// # extern crate serde_json;
+/// # extern crate serde_with;
+/// #
+/// # use serde_derive::Deserialize;
+/// #
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde(deserialize_with = "serde_with::rust::default_on_null::deserialize")]
+///     value: u32,
+/// }
+///
+/// let a: A = serde_json::from_str(r#"{"value": 123}"#).unwrap();
+/// assert_eq!(123, a.value);
+///
+/// let a: A = serde_json::from_str(r#"{"value": null}"#).unwrap();
+/// assert_eq!(0, a.value);
+///
+/// // String is invalid type
+/// assert!(serde_json::from_str::<A>(r#"{"value": "123"}"#).is_err());
+/// ```
+pub mod default_on_null {
+    use super::*;
+
+    /// Deserialize T and return the [`Default`] value if original value is `null`
+    pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+        T: Deserialize<'de> + Default,
+    {
+        Ok(Option::deserialize(deserializer)?.unwrap_or_default())
+    }
+}
