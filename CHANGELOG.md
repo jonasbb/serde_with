@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * Add a helper to deserialize a `Vec<u8>` from `String` (#35)
+* Add `default_on_error` helper, which turns errors into `Default`s of the type
+* Add `default_on_null` helper, which turns `null` values into `Default`s of the type
 
 ### Changed
 
