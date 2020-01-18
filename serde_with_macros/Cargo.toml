@@ -23,7 +23,7 @@ proc-macro2 = "1.0.1"
 quote = "1.0.0"
 
 [dependencies.syn]
-version = "1.0.0"
+version = "1.0.3"
 features = [
     # "extra-traits", # Only for debugging
     "full",
