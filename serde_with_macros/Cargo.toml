@@ -14,7 +14,7 @@ license = "MIT OR Apache-2.0"
 proc-macro = true
 
 [badges]
-travis-ci = { repository = "jonasbb/serde_with", branch = "master" }
+# github-actions = { repository = "jonasbb/serde_with", workflow = "Rust CI" }
 codecov = { repository = "jonasbb/serde_with", branch = "master", service = "github" }
 maintenance = { status = "actively-developed" }
 
