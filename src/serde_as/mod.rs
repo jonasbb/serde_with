@@ -395,6 +395,89 @@ where
     }
 }
 
+impl<T0, T1, As0, As1> SerializeAs<(T0, T1)> for (As0, As1)
+where
+    As0: SerializeAs<T0>,
+    As1: SerializeAs<T1>,
+{
+    fn serialize_as<S>((elem0, elem1): &(T0, T1), serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        use serde::ser::SerializeTuple;
+        let mut tup = serializer.serialize_tuple(2)?;
+        tup.serialize_element(&SerializeAsWrap::<T0, As0>::new(elem0))?;
+        tup.serialize_element(&SerializeAsWrap::<T1, As1>::new(elem1))?;
+        tup.end()
+    }
+}
+
+impl<'de, T0, T1, As0, As1> DeserializeAs<'de, (T0, T1)> for (As0, As1)
+where
+    As0: DeserializeAs<'de, T0>,
+    As1: DeserializeAs<'de, T1>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<(T0, T1), D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        use serde::de::{Error, SeqAccess, Visitor};
+
+        struct TupleVisitor<T0, T1> {
+            marker: PhantomData<(T0, T1)>,
+        }
+
+        impl<'de, T0, As0, T1, As1> Visitor<'de>
+            for TupleVisitor<DeserializeAsWrap<T0, As0>, DeserializeAsWrap<T1, As1>>
+        where
+            As0: DeserializeAs<'de, T0>,
+            As1: DeserializeAs<'de, T1>,
+        {
+            type Value = (T0, T1);
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a tuple of size 2")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let t0: DeserializeAsWrap<T0, As0> = match seq.next_element()? {
+                    Some(value) => value,
+                    None => return Err(Error::invalid_length(0, &self)),
+                };
+                let t1: DeserializeAsWrap<T1, As1> = match seq.next_element()? {
+                    Some(value) => value,
+                    None => return Err(Error::invalid_length(1, &self)),
+                };
+
+                Ok((t0.into_inner(), t1.into_inner()))
+            }
+        };
+
+        deserializer.deserialize_tuple(
+            2,
+            TupleVisitor::<DeserializeAsWrap<T0, As0>, DeserializeAsWrap<T1, As1>> {
+                marker: PhantomData,
+            },
+        )
+    }
+}
+
+// impl<K, KAs, V, VAs> SerializeAs<Vec<(KAs, VAs)>> for BTreeMap<K, V>
+// where
+//     K: SerializeAs<KAs>,
+//     V: SerializeAs<VAs>,
+// {
+//     fn serialize_as<S>(source: &BTreeMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: Serializer,
+//     {
+//         serializer.collect_seq(source.iter().map(|(key, value)| SerializeAsWrap::<T, U>::new(item)))
+//     }
+// }
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -425,5 +508,24 @@ mod test {
         };
 
         is_equal(Struct { value: 123 }, r#"{"value":"123"}"#);
+    }
+
+    #[test]
+    fn test_tuples() {
+        use std::net::IpAddr;
+
+        #[derive(Debug, Serialize, Deserialize, PartialEq)]
+        struct Struct {
+            #[serde(with = "As::<(DisplayString, DisplayString)>")]
+            values: (u32, IpAddr),
+        };
+
+        let ip = "1.2.3.4".parse().unwrap();
+        is_equal(
+            Struct {
+                values: (555_888, ip),
+            },
+            r#"{"values":["555888","1.2.3.4"]}"#,
+        );
     }
 }
