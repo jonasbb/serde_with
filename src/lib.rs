@@ -9,7 +9,7 @@
     unused_qualifications,
     variant_size_differences
 )]
-#![warn(rust_2018_idioms)]
+// #![warn(rust_2018_idioms)]
 #![doc(test(attr(deny(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -99,6 +99,8 @@ mod flatten_maybe;
 #[cfg(feature = "json")]
 pub mod json;
 pub mod rust;
+#[cfg(feature = "serde-as")]
+pub mod serde_as;
 #[doc(hidden)]
 pub mod with_prefix;
 

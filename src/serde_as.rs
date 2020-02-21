@@ -1,8 +1,15 @@
+#![allow(
+    missing_debug_implementations,
+    missing_docs,
+)]
+
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
-use std::fmt;
-use std::hash::{BuildHasher, Hash};
-use std::marker::PhantomData;
+use std::{
+    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
+    fmt,
+    hash::{BuildHasher, Hash},
+    marker::PhantomData,
+};
 
 pub trait SerializeAs<T> {
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
@@ -18,6 +25,7 @@ pub trait DeserializeAs<'de, T>: Sized {
     // TODO: deserialize_as_into
 }
 
+#[cfg(feature = "chrono")]
 impl SerializeAs<chrono::NaiveDateTime> for chrono::DateTime<chrono::Utc> {
     fn serialize_as<S>(source: &chrono::NaiveDateTime, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -28,6 +36,7 @@ impl SerializeAs<chrono::NaiveDateTime> for chrono::DateTime<chrono::Utc> {
     }
 }
 
+#[cfg(feature = "chrono")]
 impl<'de> DeserializeAs<'de, chrono::NaiveDateTime> for chrono::DateTime<chrono::Utc> {
     fn deserialize_as<D>(deserializer: D) -> Result<chrono::NaiveDateTime, D::Error>
     where
@@ -38,9 +47,11 @@ impl<'de> DeserializeAs<'de, chrono::NaiveDateTime> for chrono::DateTime<chrono:
     }
 }
 
+#[cfg(feature = "hex")]
 pub struct Hex;
 
 // TODO: AsRef
+#[cfg(feature = "hex")]
 impl SerializeAs<Vec<u8>> for Hex {
     fn serialize_as<S>(source: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -51,6 +62,7 @@ impl SerializeAs<Vec<u8>> for Hex {
     }
 }
 
+#[cfg(feature = "hex")]
 impl<'de> DeserializeAs<'de, Vec<u8>> for Hex {
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
     where
@@ -159,7 +171,7 @@ where
 {
     type Value = Option<T>;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("option")
     }
 
@@ -230,7 +242,7 @@ where
         {
             type Value = Vec<T>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a sequence")
             }
 
@@ -339,7 +351,7 @@ macro_rules! map_impl2 {
                 {
                     type Value = $ty<K, V $(, $typaram)*>;
 
-                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str("a map")
                     }
 
@@ -377,8 +389,7 @@ map_impl2!(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
+    #[cfg(feature = "chrono")]
     #[test]
     fn chrono() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -408,6 +419,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn chrono_opt() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -437,6 +449,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn chrono_opt_vec() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -475,6 +488,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "chrono")]
     #[test]
     fn chrono_hash_map() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -532,6 +546,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "hex")]
     #[test]
     fn hex_vec() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
