@@ -1,7 +1,4 @@
-#![allow(
-    missing_debug_implementations,
-    missing_docs,
-)]
+#![allow(missing_debug_implementations, missing_docs)]
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
@@ -343,3 +340,23 @@ map_impl2!(
     HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
     HashMap::with_capacity_and_hasher(serde::private::de::size_hint::cautious(map.size_hint()), S::default()));
+
+pub struct As<T>(PhantomData<T>);
+
+impl<T> As<T> {
+    pub fn serialize<S, I>(value: &I, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        T: SerializeAs<I>,
+    {
+        T::serialize_as(value, serializer)
+    }
+
+    pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>
+    where
+        T: DeserializeAs<'de, I>,
+        D: Deserializer<'de>,
+    {
+        T::deserialize_as(deserializer)
+    }
+}
