@@ -27,11 +27,7 @@ mod tests {
     fn hex_vec() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeBytes {
-            #[serde(
-                serialize_with = "<Vec<Hex>>::serialize_as",
-                deserialize_with = "<Vec<Hex>>::deserialize_as"
-            )]
-            // FIXME: #[serde(as = "Vec<Hex>")]
+            #[serde(with = "As::<Vec<Hex>>::deserialize_as")]
             bytes: Vec<Vec<u8>>,
         }
 

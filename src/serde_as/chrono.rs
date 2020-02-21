@@ -36,11 +36,7 @@ mod tests {
     fn chrono_crate() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
-            #[serde(
-                serialize_with = "<chrono_crate::DateTime<chrono_crate::Utc>>::serialize_as",
-                deserialize_with = "<chrono_crate::DateTime<chrono_crate::Utc>>::deserialize_as"
-            )]
-            // FIXME: #[serde(as = "chrono_crate::DateTime<chrono_crate::Utc>")]
+            #[serde(with = "As::<chrono_crate::DateTime<chrono_crate::Utc>>")]
             stamp: chrono_crate::NaiveDateTime,
         }
 
@@ -64,11 +60,7 @@ mod tests {
     fn chrono_crate_opt() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
-            #[serde(
-                serialize_with = "<Option<chrono_crate::DateTime<chrono_crate::Utc>>>::serialize_as",
-                deserialize_with = "<Option<chrono_crate::DateTime<chrono_crate::Utc>>>::deserialize_as"
-            )]
-            // FIXME: #[serde(as = "Option<chrono_crate::DateTime<chrono_crate::Utc>>")]
+            #[serde(with = "As::<Option<chrono_crate::DateTime<chrono_crate::Utc>>>")]
             stamp: Option<chrono_crate::NaiveDateTime>,
         }
 
@@ -92,11 +84,7 @@ mod tests {
     fn chrono_crate_opt_vec() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
-            #[serde(
-                serialize_with = "<Vec<Option<chrono_crate::DateTime<chrono_crate::Utc>>>>::serialize_as",
-                deserialize_with = "<Vec<Option<chrono_crate::DateTime<chrono_crate::Utc>>>>::deserialize_as"
-            )]
-            // FIXME: #[serde(as = "Vec<Option<chrono_crate::DateTime<chrono_crate::Utc>>>")]
+            #[serde(with = "As::<Vec<Option<chrono_crate::DateTime<chrono_crate::Utc>>>>")]
             stamps: Vec<Option<chrono_crate::NaiveDateTime>>,
         }
 
@@ -130,14 +118,11 @@ mod tests {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
             #[serde(
-                serialize_with = "<BTreeMap<SameAs<i32>, chrono_crate::DateTime<chrono_crate::Utc>>>::serialize_as",
-                deserialize_with = "<BTreeMap<SameAs<i32>, chrono_crate::DateTime<chrono_crate::Utc>>>::deserialize_as"
+                with = "As::<BTreeMap<SameAs<i32>, chrono_crate::DateTime<chrono_crate::Utc>>>"
             )]
-            // FIXME: #[serde(as = "HashMap<SameAs<i32>, chrono_crate::DateTime<chrono_crate::Utc>>")]
             stamps: BTreeMap<i32, chrono_crate::NaiveDateTime>,
         }
 
-        // FIXME: this test is flaky - random in hash-map sequence
         assert_eq!(
             serde_json::to_string(&SomeTime {
                 stamps: [
