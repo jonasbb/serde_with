@@ -3,9 +3,10 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
-    fmt,
+    fmt::{self, Debug, Display},
     hash::{BuildHasher, Hash},
     marker::PhantomData,
+    str::FromStr,
 };
 
 #[cfg(feature = "chrono")]
@@ -364,4 +365,65 @@ impl<T> As<T> {
 #[inline]
 fn size_hint_cautious(hint: Option<usize>) -> usize {
     std::cmp::min(hint.unwrap_or(0), 4096)
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DisplayString;
+
+impl<T> SerializeAs<T> for DisplayString
+where
+    T: Display,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        crate::rust::display_fromstr::serialize(source, serializer)
+    }
+}
+
+impl<'de, T> DeserializeAs<'de, T> for DisplayString
+where
+    T: FromStr,
+    T::Err: Display,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        crate::rust::display_fromstr::deserialize(deserializer)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use serde::de::DeserializeOwned;
+
+    fn is_equal<T>(value: T, s: &str)
+    where
+        T: Debug + DeserializeOwned + PartialEq + Serialize,
+    {
+        assert_eq!(
+            serde_json::from_str::<T>(s).unwrap(),
+            value,
+            "Deserialization differs from expected value."
+        );
+        assert_eq!(
+            serde_json::to_string(&value).unwrap(),
+            s,
+            "Serialization differs from expected value."
+        );
+    }
+
+    #[test]
+    fn test_display_fromstr() {
+        #[derive(Debug, Serialize, Deserialize, PartialEq)]
+        struct Struct {
+            #[serde(with = "As::<DisplayString>")]
+            value: u32,
+        };
+
+        is_equal(Struct { value: 123 }, r#"{"value":"123"}"#);
+    }
 }
