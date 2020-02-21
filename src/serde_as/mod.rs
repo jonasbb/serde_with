@@ -204,8 +204,7 @@ where
             where
                 A: serde::de::SeqAccess<'de>,
             {
-                let mut values =
-                    Vec::with_capacity(serde::private::de::size_hint::cautious(seq.size_hint()));
+                let mut values = Vec::with_capacity(size_hint_cautious(seq.size_hint()));
 
                 while let Some(value) = seq
                     .next_element()?
@@ -339,7 +338,7 @@ map_impl2!(
 map_impl2!(
     HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
-    HashMap::with_capacity_and_hasher(serde::private::de::size_hint::cautious(map.size_hint()), S::default()));
+    HashMap::with_capacity_and_hasher(size_hint_cautious(map.size_hint()), S::default()));
 
 pub struct As<T>(PhantomData<T>);
 
@@ -359,4 +358,10 @@ impl<T> As<T> {
     {
         T::deserialize_as(deserializer)
     }
+}
+
+/// Re-Implementation of `serde::private::de::size_hint::cautious`
+#[inline]
+fn size_hint_cautious(hint: Option<usize>) -> usize {
+    std::cmp::min(hint.unwrap_or(0), 4096)
 }
