@@ -513,19 +513,59 @@ mod test {
     #[test]
     fn test_tuples() {
         use std::net::IpAddr;
+        let ip = "1.2.3.4".parse().unwrap();
 
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         struct Struct {
             #[serde(with = "As::<(DisplayString, DisplayString)>")]
             values: (u32, IpAddr),
         };
-
-        let ip = "1.2.3.4".parse().unwrap();
         is_equal(
             Struct {
                 values: (555_888, ip),
             },
             r#"{"values":["555888","1.2.3.4"]}"#,
         );
+
+        #[derive(Debug, Serialize, Deserialize, PartialEq)]
+        struct Struct2 {
+            #[serde(with = "As::<(SameAs<u32>, DisplayString)>")]
+            values: (u32, IpAddr),
+        };
+        is_equal(
+            Struct2 { values: (987, ip) },
+            r#"{"values":[987,"1.2.3.4"]}"#,
+        );
+
+        #[derive(Debug, Serialize, Deserialize, PartialEq)]
+        struct Struct3 {
+            #[serde(with = "As::<(Same, DisplayString)>")]
+            values: (u32, IpAddr),
+        };
+        is_equal(
+            Struct3 { values: (987, ip) },
+            r#"{"values":[987,"1.2.3.4"]}"#,
+        );
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Same;
+
+impl<T: Serialize> SerializeAs<T> for Same {
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source.serialize(serializer)
+    }
+}
+
+impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        T::deserialize(deserializer)
     }
 }
