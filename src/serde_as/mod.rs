@@ -547,6 +547,38 @@ mod test {
             r#"{"values":[987,"1.2.3.4"]}"#,
         );
     }
+
+    #[test]
+    fn test_map_as_tuple_list() {
+        use std::net::IpAddr;
+        let ip = "1.2.3.4".parse().unwrap();
+        let ip2 = "255.255.255.255".parse().unwrap();
+
+        #[derive(Debug, Serialize, Deserialize, PartialEq)]
+        struct Struct {
+            #[serde(with = "As::<Vec<(DisplayString, DisplayString)>>")]
+            values: BTreeMap<u32, IpAddr>,
+        };
+
+        let map: BTreeMap<_, _> = vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect();
+        is_equal(
+            Struct {
+                values: map.clone(),
+            },
+            r#"{"values":[["1","1.2.3.4"],["10","1.2.3.4"],["200","255.255.255.255"]]}"#,
+        );
+
+        #[derive(Debug, Serialize, Deserialize, PartialEq)]
+        struct Struct2 {
+            #[serde(with = "As::<Vec<(Same, DisplayString)>>")]
+            values: BTreeMap<u32, IpAddr>,
+        };
+
+        is_equal(
+            Struct2 { values: map },
+            r#"{"values":[[1,"1.2.3.4"],[10,"1.2.3.4"],[200,"255.255.255.255"]]}"#,
+        );
+    }
 }
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -567,5 +599,75 @@ impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
         D: Deserializer<'de>,
     {
         T::deserialize(deserializer)
+    }
+}
+
+impl<K, KAs, V, VAs> SerializeAs<BTreeMap<K, V>> for Vec<(KAs, VAs)>
+where
+    KAs: SerializeAs<K>,
+    VAs: SerializeAs<V>,
+{
+    fn serialize_as<S>(source: &BTreeMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_seq(source.iter().map(|(k, v)| {
+            (
+                SerializeAsWrap::<K, KAs>::new(k),
+                SerializeAsWrap::<V, VAs>::new(v),
+            )
+        }))
+    }
+}
+
+impl<'de, K, KAs, V, VAs> DeserializeAs<'de, BTreeMap<K, V>> for Vec<(KAs, VAs)>
+where
+    KAs: DeserializeAs<'de, K>,
+    VAs: DeserializeAs<'de, V>,
+    K: Ord,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<BTreeMap<K, V>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct SeqVisitor<K, KAs, V, VAs> {
+            marker: PhantomData<(K, KAs, V, VAs)>,
+        }
+
+        impl<'de, K, KAs, V, VAs> serde::de::Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
+        where
+            KAs: DeserializeAs<'de, K>,
+            VAs: DeserializeAs<'de, V>,
+            K: Ord,
+        {
+            type Value = BTreeMap<K, V>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            #[inline]
+            fn visit_seq<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let mut values = BTreeMap::new();
+
+                while let Some((key, value)) = (access.next_element())?.map(
+                    |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
+                        (k.into_inner(), v.into_inner())
+                    },
+                ) {
+                    values.insert(key, value);
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = SeqVisitor::<K, KAs, V, VAs> {
+            marker: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
     }
 }
