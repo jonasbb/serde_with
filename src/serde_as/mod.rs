@@ -8,7 +8,7 @@ use std::marker::PhantomData;
 mod chrono;
 pub mod de;
 #[cfg(feature = "hex")]
-mod hex;
+pub mod hex;
 pub mod ser;
 #[cfg(test)]
 mod tests;
