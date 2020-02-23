@@ -229,52 +229,70 @@ where
     }
 }
 
-impl<'de, T0, T1, As0, As1> DeserializeAs<'de, (T0, T1)> for (As0, As1)
-where
-    As0: DeserializeAs<'de, T0>,
-    As1: DeserializeAs<'de, T1>,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<(T0, T1), D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct TupleVisitor<T0, T1>(PhantomData<(T0, T1)>);
-
-        impl<'de, T0, As0, T1, As1> Visitor<'de>
-            for TupleVisitor<DeserializeAsWrap<T0, As0>, DeserializeAsWrap<T1, As1>>
+macro_rules! tuple_impl {
+    ($len:literal $($n:tt $t:ident $tas:ident)+) => {
+        impl<'de, $($t, $tas,)+> DeserializeAs<'de, ($($t,)+)> for ($($tas,)+)
         where
-            As0: DeserializeAs<'de, T0>,
-            As1: DeserializeAs<'de, T1>,
+            $($tas: DeserializeAs<'de, $t>,)+
         {
-            type Value = (T0, T1);
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a tuple of size 2")
-            }
-
-            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            fn deserialize_as<D>(deserializer: D) -> Result<($($t,)+), D::Error>
             where
-                A: SeqAccess<'de>,
+                D: Deserializer<'de>,
             {
-                let t0: DeserializeAsWrap<T0, As0> = match seq.next_element()? {
-                    Some(value) => value,
-                    None => return Err(Error::invalid_length(0, &self)),
-                };
-                let t1: DeserializeAsWrap<T1, As1> = match seq.next_element()? {
-                    Some(value) => value,
-                    None => return Err(Error::invalid_length(1, &self)),
+                struct TupleVisitor<$($t,)+>(PhantomData<($($t,)+)>);
+
+                impl<'de, $($t, $tas,)+> Visitor<'de>
+                    for TupleVisitor<$(DeserializeAsWrap<$t, $tas>,)+>
+                where
+                    $($tas: DeserializeAs<'de, $t>,)+
+                {
+                    type Value = ($($t,)+);
+
+                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                        formatter.write_str(concat!("a tuple of size ", $len))
+                    }
+
+                    #[allow(non_snake_case)]
+                    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+                    where
+                        A: SeqAccess<'de>,
+                    {
+                        $(
+                            let $t: DeserializeAsWrap<$t, $tas> = match seq.next_element()? {
+                                Some(value) => value,
+                                None => return Err(Error::invalid_length($n, &self)),
+                            };
+                        )+
+
+                        Ok(($($t.into_inner(),)+))
+                    }
                 };
 
-                Ok((t0.into_inner(), t1.into_inner()))
+                deserializer.deserialize_tuple(
+                    $len,
+                    TupleVisitor::<$(DeserializeAsWrap<$t, $tas>,)+>(PhantomData),
+                )
             }
-        };
-
-        deserializer.deserialize_tuple(
-            2,
-            TupleVisitor::<DeserializeAsWrap<T0, As0>, DeserializeAsWrap<T1, As1>>(PhantomData),
-        )
-    }
+        }
+    };
 }
+
+tuple_impl!(1 0 T0 As0);
+tuple_impl!(2 0 T0 As0 1 T1 As1);
+tuple_impl!(3 0 T0 As0 1 T1 As1 2 T2 As2);
+tuple_impl!(4 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3);
+tuple_impl!(5 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4);
+tuple_impl!(6 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5);
+tuple_impl!(7 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6);
+tuple_impl!(8 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7);
+tuple_impl!(9 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8);
+tuple_impl!(10 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9);
+tuple_impl!(11 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10);
+tuple_impl!(12 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11);
+tuple_impl!(13 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12);
+tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13);
+tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
+tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
 impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>

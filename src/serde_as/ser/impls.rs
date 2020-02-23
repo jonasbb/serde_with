@@ -115,22 +115,43 @@ where
     }
 }
 
-impl<T0, T1, As0, As1> SerializeAs<(T0, T1)> for (As0, As1)
-where
-    As0: SerializeAs<T0>,
-    As1: SerializeAs<T1>,
-{
-    fn serialize_as<S>((elem0, elem1): &(T0, T1), serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        use serde::ser::SerializeTuple;
-        let mut tup = serializer.serialize_tuple(2)?;
-        tup.serialize_element(&SerializeAsWrap::<T0, As0>::new(elem0))?;
-        tup.serialize_element(&SerializeAsWrap::<T1, As1>::new(elem1))?;
-        tup.end()
-    }
+macro_rules! tuple_impl {
+    ($len:literal $($n:tt $t:ident $tas:ident)+) => {
+        impl<$($t, $tas,)+> SerializeAs<($($t,)+)> for ($($tas,)+)
+        where
+            $($tas: SerializeAs<$t>,)+
+        {
+            fn serialize_as<S>(tuple: &($($t,)+), serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                use serde::ser::SerializeTuple;
+                let mut tup = serializer.serialize_tuple($len)?;
+                $(
+                    tup.serialize_element(&SerializeAsWrap::<$t, $tas>::new(&tuple.$n))?;
+                )+
+                tup.end()
+            }
+        }
+    };
 }
+
+tuple_impl!(1 0 T0 As0);
+tuple_impl!(2 0 T0 As0 1 T1 As1);
+tuple_impl!(3 0 T0 As0 1 T1 As1 2 T2 As2);
+tuple_impl!(4 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3);
+tuple_impl!(5 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4);
+tuple_impl!(6 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5);
+tuple_impl!(7 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6);
+tuple_impl!(8 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7);
+tuple_impl!(9 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8);
+tuple_impl!(10 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9);
+tuple_impl!(11 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10);
+tuple_impl!(12 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11);
+tuple_impl!(13 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12);
+tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13);
+tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
+tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
 impl<T: Serialize> SerializeAs<T> for Same {
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>

@@ -35,35 +35,56 @@ fn test_tuples() {
     let ip = "1.2.3.4".parse().unwrap();
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct Struct {
+    struct Struct1 {
+        #[serde(with = "As::<(DisplayFromStr,)>")]
+        values: (u32,),
+    };
+    is_equal(Struct1 { values: (1,) }, r#"{"values":["1"]}"#);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct2a {
         #[serde(with = "As::<(DisplayFromStr, DisplayFromStr)>")]
         values: (u32, IpAddr),
     };
     is_equal(
-        Struct {
+        Struct2a {
             values: (555_888, ip),
         },
         r#"{"values":["555888","1.2.3.4"]}"#,
     );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct Struct2 {
+    struct Struct2b {
         #[serde(with = "As::<(SameAs<u32>, DisplayFromStr)>")]
         values: (u32, IpAddr),
     };
     is_equal(
-        Struct2 { values: (987, ip) },
+        Struct2b { values: (987, ip) },
         r#"{"values":[987,"1.2.3.4"]}"#,
     );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct Struct3 {
+    struct Struct2c {
         #[serde(with = "As::<(Same, DisplayFromStr)>")]
         values: (u32, IpAddr),
     };
     is_equal(
-        Struct3 { values: (987, ip) },
+        Struct2c { values: (987, ip) },
         r#"{"values":[987,"1.2.3.4"]}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct6 {
+        #[serde(
+            with = "As::<(DisplayFromStr, DisplayFromStr, DisplayFromStr, DisplayFromStr, DisplayFromStr, DisplayFromStr)>"
+        )]
+        values: (u8, u16, u32, i8, i16, i32),
+    };
+    is_equal(
+        Struct6 {
+            values: (8, 16, 32, -8, 16, -32),
+        },
+        r#"{"values":["8","16","32","-8","16","-32"]}"#,
     );
 }
 
