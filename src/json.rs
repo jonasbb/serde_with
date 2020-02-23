@@ -56,7 +56,7 @@ pub mod nested {
         {
             type Value = S;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(formatter, "valid json object")
             }
 
