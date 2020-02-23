@@ -630,8 +630,29 @@ where
     where
         D: Deserializer<'de>,
     {
+        use serde::de::SeqAccess;
+
         struct SeqVisitor<K, KAs, V, VAs> {
             marker: PhantomData<(K, KAs, V, VAs)>,
+        }
+
+        struct SeqIter<'de, A, K, KAs, V, VAs> {
+            access: A,
+            marker: PhantomData<(&'de (), K, KAs, V, VAs)>,
+        }
+
+        impl<'de, A, K, KAs, V, VAs> Iterator for SeqIter<'de, A, K, KAs, V, VAs>
+        where
+            A: SeqAccess<'de>,
+            KAs: DeserializeAs<'de, K>,
+            VAs: DeserializeAs<'de, V>,
+        {
+            #[allow(clippy::type_complexity)]
+            type Item = Result<(DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>), A::Error>;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                self.access.next_element().transpose()
+            }
         }
 
         impl<'de, K, KAs, V, VAs> serde::de::Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
@@ -647,21 +668,22 @@ where
             }
 
             #[inline]
-            fn visit_seq<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            fn visit_seq<A>(self, access: A) -> Result<Self::Value, A::Error>
             where
-                A: serde::de::SeqAccess<'de>,
+                A: SeqAccess<'de>,
             {
-                let mut values = BTreeMap::new();
-
-                while let Some((key, value)) = (access.next_element())?.map(
-                    |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
-                        (k.into_inner(), v.into_inner())
-                    },
-                ) {
-                    values.insert(key, value);
-                }
-
-                Ok(values)
+                let iter = SeqIter {
+                    access,
+                    marker: PhantomData,
+                };
+                iter.map(|res| {
+                    res.map(
+                        |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
+                            (k.into_inner(), v.into_inner())
+                        },
+                    )
+                })
+                .collect()
             }
         }
 
