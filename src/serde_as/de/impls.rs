@@ -3,6 +3,7 @@ use crate::serde_as::utils;
 use serde::de::*;
 use std::{
     collections::{BTreeMap, HashMap},
+    convert::From,
     fmt::{self, Display},
     hash::{BuildHasher, Hash},
     str::FromStr,
@@ -353,5 +354,39 @@ where
             marker: PhantomData,
         };
         deserializer.deserialize_seq(visitor)
+    }
+}
+
+impl<'de, Str> DeserializeAs<'de, Option<Str>> for NoneAsEmptyString
+where
+    Str: for<'a> From<&'a str>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Option<Str>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct OptionStringEmptyNone<Str>(PhantomData<Str>);
+        impl<'de, Str> Visitor<'de> for OptionStringEmptyNone<Str>
+        where
+            Str: for<'a> From<&'a str>,
+        {
+            type Value = Option<Str>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("any string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(match value {
+                    "" => None,
+                    v => Some(Str::from(v)),
+                })
+            }
+        }
+
+        deserializer.deserialize_str(OptionStringEmptyNone(PhantomData))
     }
 }

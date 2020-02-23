@@ -1,6 +1,6 @@
 use super::*;
 use serde::de::DeserializeOwned;
-use std::{collections::BTreeMap, fmt::Debug};
+use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
 
 fn is_equal<T>(value: T, s: &str)
 where
@@ -96,5 +96,64 @@ fn test_map_as_tuple_list() {
     is_equal(
         Struct2 { values: map },
         r#"{"values":[[1,"1.2.3.4"],[10,"1.2.3.4"],[200,"255.255.255.255"]]}"#,
+    );
+}
+
+#[test]
+fn test_none_as_empty_string() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct {
+        #[serde(with = "As::<NoneAsEmptyString>")]
+        value: Option<String>,
+    };
+
+    is_equal(Struct { value: None }, r#"{"value":""}"#);
+    is_equal(
+        Struct {
+            value: Some("Hello".to_string()),
+        },
+        r#"{"value":"Hello"}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructRc {
+        #[serde(with = "As::<NoneAsEmptyString>")]
+        value: Option<Rc<str>>,
+    };
+
+    is_equal(StructRc { value: None }, r#"{"value":""}"#);
+    is_equal(
+        StructRc {
+            value: Some("Hello".into()),
+        },
+        r#"{"value":"Hello"}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructArc {
+        #[serde(with = "As::<NoneAsEmptyString>")]
+        value: Option<Arc<str>>,
+    };
+
+    is_equal(StructArc { value: None }, r#"{"value":""}"#);
+    is_equal(
+        StructArc {
+            value: Some("Hello".into()),
+        },
+        r#"{"value":"Hello"}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructBox {
+        #[serde(with = "As::<NoneAsEmptyString>")]
+        value: Option<Box<str>>,
+    };
+
+    is_equal(StructBox { value: None }, r#"{"value":""}"#);
+    is_equal(
+        StructBox {
+            value: Some("Hello".into()),
+        },
+        r#"{"value":"Hello"}"#,
     );
 }

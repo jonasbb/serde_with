@@ -158,3 +158,15 @@ where
         }))
     }
 }
+
+impl<AsRefStr> SerializeAs<Option<AsRefStr>> for NoneAsEmptyString
+where
+    AsRefStr: AsRef<str>,
+{
+    fn serialize_as<S>(source: &Option<AsRefStr>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        crate::rust::string_empty_as_none::serialize(source, serializer)
+    }
+}

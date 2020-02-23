@@ -15,11 +15,13 @@ mod tests;
 mod utils;
 
 // TODO: doc
+#[derive(Copy, Clone, Debug, Default)]
 pub struct SameAs<T>(PhantomData<T>);
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Same;
 
+#[derive(Copy, Clone, Debug, Default)]
 pub struct As<T>(PhantomData<T>);
 
 impl<T> As<T> {
@@ -42,3 +44,6 @@ impl<T> As<T> {
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayString;
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct NoneAsEmptyString;
