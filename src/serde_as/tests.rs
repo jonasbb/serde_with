@@ -22,7 +22,7 @@ where
 fn test_display_fromstr() {
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {
-        #[serde(with = "As::<DisplayString>")]
+        #[serde(with = "As::<DisplayFromStr>")]
         value: u32,
     };
 
@@ -36,7 +36,7 @@ fn test_tuples() {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {
-        #[serde(with = "As::<(DisplayString, DisplayString)>")]
+        #[serde(with = "As::<(DisplayFromStr, DisplayFromStr)>")]
         values: (u32, IpAddr),
     };
     is_equal(
@@ -48,7 +48,7 @@ fn test_tuples() {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2 {
-        #[serde(with = "As::<(SameAs<u32>, DisplayString)>")]
+        #[serde(with = "As::<(SameAs<u32>, DisplayFromStr)>")]
         values: (u32, IpAddr),
     };
     is_equal(
@@ -58,7 +58,7 @@ fn test_tuples() {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct3 {
-        #[serde(with = "As::<(Same, DisplayString)>")]
+        #[serde(with = "As::<(Same, DisplayFromStr)>")]
         values: (u32, IpAddr),
     };
     is_equal(
@@ -75,7 +75,7 @@ fn test_map_as_tuple_list() {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {
-        #[serde(with = "As::<Vec<(DisplayString, DisplayString)>>")]
+        #[serde(with = "As::<Vec<(DisplayFromStr, DisplayFromStr)>>")]
         values: BTreeMap<u32, IpAddr>,
     };
 
@@ -89,7 +89,7 @@ fn test_map_as_tuple_list() {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2 {
-        #[serde(with = "As::<Vec<(Same, DisplayString)>>")]
+        #[serde(with = "As::<Vec<(Same, DisplayFromStr)>>")]
         values: BTreeMap<u32, IpAddr>,
     };
 

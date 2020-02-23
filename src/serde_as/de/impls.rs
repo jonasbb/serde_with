@@ -216,7 +216,7 @@ map_impl2!(
     map,
     HashMap::with_capacity_and_hasher(utils::size_hint_cautious(map.size_hint()), S::default()));
 
-impl<'de, T> DeserializeAs<'de, T> for DisplayString
+impl<'de, T> DeserializeAs<'de, T> for DisplayFromStr
 where
     T: FromStr,
     T::Err: Display,

@@ -43,7 +43,7 @@ impl<T> As<T> {
 }
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct DisplayString;
+pub struct DisplayFromStr;
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct NoneAsEmptyString;

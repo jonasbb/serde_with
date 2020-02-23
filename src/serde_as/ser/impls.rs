@@ -103,7 +103,7 @@ macro_rules! map_impl {
 map_impl!(BTreeMap<K: Ord, V>);
 map_impl!(HashMap<K: Eq + Hash, V, H: BuildHasher>);
 
-impl<T> SerializeAs<T> for DisplayString
+impl<T> SerializeAs<T> for DisplayFromStr
 where
     T: Display,
 {
