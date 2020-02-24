@@ -75,16 +75,62 @@ fn test_tuples() {
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct6 {
-        #[serde(
-            with = "As::<(DisplayFromStr, DisplayFromStr, DisplayFromStr, DisplayFromStr, DisplayFromStr, DisplayFromStr)>"
-        )]
+        #[serde(with = "As::<(Same, Same, Same, Same, Same, Same)>")]
         values: (u8, u16, u32, i8, i16, i32),
     };
     is_equal(
         Struct6 {
             values: (8, 16, 32, -8, 16, -32),
         },
-        r#"{"values":["8","16","32","-8","16","-32"]}"#,
+        r#"{"values":[8,16,32,-8,16,-32]}"#,
+    );
+}
+
+#[test]
+fn test_arrays() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct0a {
+        #[serde(with = "As::<[DisplayFromStr; 0]>")]
+        values: [u32; 0],
+    };
+    is_equal(Struct0a { values: [] }, r#"{"values":[]}"#);
+
+    // Test "non-matching" types.
+    // Arrays of size 0 should allow all convertions
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct0b {
+        #[serde(with = "As::<[u8; 0]>")]
+        values: [String; 0],
+    };
+    is_equal(Struct0b { values: [] }, r#"{"values":[]}"#);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct1 {
+        #[serde(with = "As::<[DisplayFromStr; 1]>")]
+        values: [u32; 1],
+    };
+    is_equal(Struct1 { values: [1] }, r#"{"values":["1"]}"#);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct2 {
+        #[serde(with = "As::<[Same; 2]>")]
+        values: [u32; 2],
+    };
+    is_equal(Struct2 { values: [11, 22] }, r#"{"values":[11,22]}"#);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct32 {
+        #[serde(with = "As::<[Same; 32]>")]
+        values: [u32; 32],
+    };
+    is_equal(
+        Struct32 {
+            values: [
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+                23, 24, 25, 26, 27, 28, 29, 30, 31,
+            ],
+        },
+        r#"{"values":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]}"#,
     );
 }
 

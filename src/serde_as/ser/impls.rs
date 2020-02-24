@@ -153,6 +153,71 @@ tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
+impl<T, As> SerializeAs<[T; 0]> for [As; 0] {
+    fn serialize_as<S>(_array: &[T; 0], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        use serde::ser::SerializeTuple;
+        let arr = serializer.serialize_tuple(0)?;
+        arr.end()
+    }
+}
+
+macro_rules! array_impl {
+    ($len:literal) => {
+        impl<T, As> SerializeAs<[T; $len]> for [As; $len]
+        where
+            As: SerializeAs<T>,
+        {
+            fn serialize_as<S>(array: &[T; $len], serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                use serde::ser::SerializeTuple;
+                let mut arr = serializer.serialize_tuple($len)?;
+                for elem in array {
+                    arr.serialize_element(&SerializeAsWrap::<T, As>::new(elem))?;
+                }
+                arr.end()
+            }
+        }
+    };
+}
+
+array_impl!(1);
+array_impl!(2);
+array_impl!(3);
+array_impl!(4);
+array_impl!(5);
+array_impl!(6);
+array_impl!(7);
+array_impl!(8);
+array_impl!(9);
+array_impl!(10);
+array_impl!(11);
+array_impl!(12);
+array_impl!(13);
+array_impl!(14);
+array_impl!(15);
+array_impl!(16);
+array_impl!(17);
+array_impl!(18);
+array_impl!(19);
+array_impl!(20);
+array_impl!(21);
+array_impl!(22);
+array_impl!(23);
+array_impl!(24);
+array_impl!(25);
+array_impl!(26);
+array_impl!(27);
+array_impl!(28);
+array_impl!(29);
+array_impl!(30);
+array_impl!(31);
+array_impl!(32);
+
 impl<T: Serialize> SerializeAs<T> for Same {
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
