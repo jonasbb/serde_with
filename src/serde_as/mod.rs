@@ -9,6 +9,8 @@ mod chrono;
 pub mod de;
 #[cfg(feature = "hex")]
 pub mod hex;
+#[cfg(feature = "json")]
+pub mod json;
 pub mod ser;
 #[cfg(test)]
 mod tests;

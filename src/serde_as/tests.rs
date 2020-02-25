@@ -2,7 +2,7 @@ use super::*;
 use serde::de::DeserializeOwned;
 use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
 
-fn is_equal<T>(value: T, s: &str)
+pub(crate) fn is_equal<T>(value: T, s: &str)
 where
     T: Debug + DeserializeOwned + PartialEq + Serialize,
 {
