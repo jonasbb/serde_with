@@ -464,7 +464,7 @@ pub mod unwrap_or_skip {
 ///
 /// ```rust
 /// # use std::{collections::HashSet, iter::FromIterator};
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_derive::Deserialize;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
@@ -553,7 +553,7 @@ pub mod sets_duplicate_value_is_error {
 /// # Example
 ///
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_derive::Deserialize;
 /// # use std::collections::HashMap;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -706,7 +706,7 @@ pub mod sets_first_value_wins {
 /// # Example
 ///
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_derive::Deserialize;
 /// # use std::collections::HashMap;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -1111,7 +1111,6 @@ pub mod btreemap_as_tuple_list {
 ///
 /// ```
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_json::json;
 /// #
 /// #[derive(Debug, Deserialize, Serialize, Default)]
 /// struct S {
@@ -1147,7 +1146,6 @@ pub mod btreemap_as_tuple_list {
 ///
 /// ```
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_json::json;
 /// #
 /// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
 /// struct S {
@@ -1256,7 +1254,6 @@ pub mod tuple_list_as_map {
 /// # Example
 /// ```rust
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_json::json;
 /// #
 /// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
 /// struct S {

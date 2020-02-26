@@ -11,14 +11,8 @@
 /// # Examples
 ///
 /// ```
-/// # extern crate chrono;
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
-/// # use chrono::{DateTime, Utc};
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use chrono_crate::{DateTime, Utc};
+/// # use serde_derive::Deserialize;
 /// #
 /// #[derive(Debug, Deserialize)]
 /// struct S {

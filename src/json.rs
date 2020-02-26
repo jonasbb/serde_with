@@ -7,11 +7,6 @@
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// #
 /// #[derive(Deserialize, Serialize)]
@@ -38,7 +33,6 @@ pub mod nested {
         de::{DeserializeOwned, Deserializer, Error, Visitor},
         ser::{self, Serialize, Serializer},
     };
-    use serde_json;
     use std::{fmt, marker::PhantomData};
 
     /// Deserialize value from a string which is valid JSON

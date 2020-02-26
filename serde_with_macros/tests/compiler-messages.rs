@@ -1,6 +1,3 @@
-extern crate rustversion;
-extern crate trybuild;
-
 // This test fails for older compiler versions since the error messages are different.
 #[rustversion::attr(before(1.35), ignore)]
 #[test]
