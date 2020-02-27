@@ -34,7 +34,7 @@ where
         {
             type Value = Option<T>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("option")
             }
 
@@ -94,7 +94,7 @@ where
         {
             type Value = Vec<T>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a sequence")
             }
 
@@ -180,7 +180,7 @@ macro_rules! map_impl2 {
                 {
                     type Value = $ty<K, V $(, $typaram)*>;
 
-                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str("a map")
                     }
 
@@ -248,7 +248,7 @@ macro_rules! tuple_impl {
                 {
                     type Value = ($($t,)+);
 
-                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str(concat!("a tuple of size ", $len))
                     }
 
@@ -304,7 +304,7 @@ impl<'de, T, As> DeserializeAs<'de, [T; 0]> for [As; 0] {
         impl<'de, T, As> Visitor<'de> for ArrayVisitor<DeserializeAsWrap<T, As>> {
             type Value = [T; 0];
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str(concat!("an array of size ", 0))
             }
 
@@ -340,7 +340,7 @@ macro_rules! array_impl {
                 {
                     type Value = [T; $len];
 
-                    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str(concat!("an array of size ", $len))
                     }
 
@@ -450,7 +450,7 @@ where
         {
             type Value = BTreeMap<K, V>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a sequence")
             }
 
@@ -496,7 +496,7 @@ where
         {
             type Value = Option<Str>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("any string")
             }
 

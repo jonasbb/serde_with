@@ -1,29 +1,23 @@
 use crate::serde_as::*;
+use chrono_crate::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-impl SerializeAs<chrono_crate::NaiveDateTime> for chrono_crate::DateTime<chrono_crate::Utc> {
-    fn serialize_as<S>(
-        source: &chrono_crate::NaiveDateTime,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
+impl SerializeAs<NaiveDateTime> for DateTime<Utc> {
+    fn serialize_as<S>(source: &NaiveDateTime, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let datetime =
-            chrono_crate::DateTime::<chrono_crate::Utc>::from_utc(*source, chrono_crate::Utc);
+        let datetime = DateTime::<Utc>::from_utc(*source, Utc);
         datetime.serialize(serializer)
     }
 }
 
-impl<'de> DeserializeAs<'de, chrono_crate::NaiveDateTime>
-    for chrono_crate::DateTime<chrono_crate::Utc>
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<chrono_crate::NaiveDateTime, D::Error>
+impl<'de> DeserializeAs<'de, NaiveDateTime> for DateTime<Utc> {
+    fn deserialize_as<D>(deserializer: D) -> Result<NaiveDateTime, D::Error>
     where
         D: Deserializer<'de>,
     {
-        chrono_crate::DateTime::<chrono_crate::Utc>::deserialize(deserializer)
-            .map(|datetime| datetime.naive_utc())
+        DateTime::<Utc>::deserialize(deserializer).map(|datetime| datetime.naive_utc())
     }
 }
 
@@ -36,13 +30,13 @@ mod tests {
     fn chrono_crate() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
-            #[serde(with = "As::<chrono_crate::DateTime<chrono_crate::Utc>>")]
-            stamp: chrono_crate::NaiveDateTime,
+            #[serde(with = "As::<DateTime<Utc>>")]
+            stamp: NaiveDateTime,
         }
 
         assert_eq!(
             serde_json::to_string(&SomeTime {
-                stamp: chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
+                stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
             })
             .unwrap(),
             "{\"stamp\":\"1994-11-05T08:15:30Z\"}"
@@ -50,7 +44,7 @@ mod tests {
 
         assert_eq!(
             SomeTime {
-                stamp: chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
+                stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
             },
             serde_json::from_str("{\"stamp\":\"1994-11-05T08:15:30Z\"}").unwrap(),
         );
@@ -60,13 +54,13 @@ mod tests {
     fn chrono_crate_opt() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
-            #[serde(with = "As::<Option<chrono_crate::DateTime<chrono_crate::Utc>>>")]
-            stamp: Option<chrono_crate::NaiveDateTime>,
+            #[serde(with = "As::<Option<DateTime<Utc>>>")]
+            stamp: Option<NaiveDateTime>,
         }
 
         assert_eq!(
             serde_json::to_string(&SomeTime {
-                stamp: chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
+                stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
             })
             .unwrap(),
             "{\"stamp\":\"1994-11-05T08:15:30Z\"}"
@@ -74,7 +68,7 @@ mod tests {
 
         assert_eq!(
             SomeTime {
-                stamp: chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
+                stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
             },
             serde_json::from_str("{\"stamp\":\"1994-11-05T08:15:30Z\"}").unwrap(),
         );
@@ -84,15 +78,15 @@ mod tests {
     fn chrono_crate_opt_vec() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
-            #[serde(with = "As::<Vec<Option<chrono_crate::DateTime<chrono_crate::Utc>>>>")]
-            stamps: Vec<Option<chrono_crate::NaiveDateTime>>,
+            #[serde(with = "As::<Vec<Option<DateTime<Utc>>>>")]
+            stamps: Vec<Option<NaiveDateTime>>,
         }
 
         assert_eq!(
             serde_json::to_string(&SomeTime {
                 stamps: vec![
-                    chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
-                    chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
+                    NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
+                    NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
                 ],
             })
             .unwrap(),
@@ -102,8 +96,8 @@ mod tests {
         assert_eq!(
             SomeTime {
                 stamps: vec![
-                    chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
-                    chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
+                    NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
+                    NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
                 ],
             },
             serde_json::from_str(
@@ -117,23 +111,15 @@ mod tests {
     fn chrono_crate_hash_map() {
         #[derive(Debug, Serialize, Deserialize, PartialEq)]
         pub struct SomeTime {
-            #[serde(
-                with = "As::<BTreeMap<SameAs<i32>, chrono_crate::DateTime<chrono_crate::Utc>>>"
-            )]
-            stamps: BTreeMap<i32, chrono_crate::NaiveDateTime>,
+            #[serde(with = "As::<BTreeMap<SameAs<i32>, DateTime<Utc>>>")]
+            stamps: BTreeMap<i32, NaiveDateTime>,
         }
 
         assert_eq!(
             serde_json::to_string(&SomeTime {
                 stamps: [
-                    (
-                        1,
-                        chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
-                    ),
-                    (
-                        2,
-                        chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()
-                    ),
+                    (1, NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()),
+                    (2, NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()),
                 ]
                 .iter()
                 .cloned()
@@ -146,14 +132,8 @@ mod tests {
         assert_eq!(
             SomeTime {
                 stamps: [
-                    (
-                        1,
-                        chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
-                    ),
-                    (
-                        2,
-                        chrono_crate::NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()
-                    ),
+                    (1, NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()),
+                    (2, NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()),
                 ]
                 .iter()
                 .cloned()
