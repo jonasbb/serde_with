@@ -12,11 +12,6 @@
 /// # Examples
 ///
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_json;
-/// # #[macro_use]
-/// # extern crate serde_with;
-/// #
 /// # use serde::Deserialize;
 /// #
 /// // Setup the types
@@ -33,7 +28,7 @@
 ///
 /// // The macro creates custom deserialization code.
 /// // You need to specify a function name and the field name of the flattened field.
-/// flattened_maybe!(deserialize_t, "t");
+/// serde_with::flattened_maybe!(deserialize_t, "t");
 ///
 ///
 /// # fn main() {

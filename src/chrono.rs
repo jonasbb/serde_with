@@ -11,14 +11,8 @@
 /// # Examples
 ///
 /// ```
-/// # extern crate chrono;
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
-/// # use chrono::{DateTime, Utc};
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use chrono_crate::{DateTime, Utc};
+/// # use serde_derive::Deserialize;
 /// #
 /// #[derive(Debug, Deserialize)]
 /// struct S {
@@ -47,7 +41,7 @@ pub mod datetime_utc_ts_seconds_from_any {
         impl<'de> Visitor<'de> for Helper {
             type Value = DateTime<Utc>;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                 formatter.write_str("Invalid timestamp. Must be an integer, float, or string with optional subsecond precision.")
             }
 

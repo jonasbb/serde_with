@@ -1,6 +1,6 @@
 #![deny(
-    missing_debug_implementations,
     missing_copy_implementations,
+    missing_debug_implementations,
     missing_docs,
     trivial_casts,
     trivial_numeric_casts,
@@ -9,7 +9,20 @@
     unused_qualifications,
     variant_size_differences
 )]
-#![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
+#![warn(rust_2018_idioms)]
+#![doc(test(attr(deny(
+    missing_copy_implementations,
+    missing_debug_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces,
+    unused_qualifications,
+    variant_size_differences,
+))))]
+#![doc(test(attr(warn(rust_2018_idioms))))]
+// Not needed for 2018 edition and conflicts with `rust_2018_idioms`
+#![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with/1.4.0")]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
@@ -39,9 +52,6 @@
 //! Annotate your struct or enum to enable the custom de/serializer.
 //!
 //! ```rust
-//! # extern crate serde;
-//! # extern crate serde_derive;
-//! # extern crate serde_with;
 //! # use serde_derive::{Deserialize, Serialize};
 //! #[derive(Deserialize, Serialize)]
 //! struct Foo {
@@ -56,9 +66,6 @@
 //! If you want to mix different helpers, you can write your annotations like
 //!
 //! ```rust
-//! # extern crate serde;
-//! # extern crate serde_derive;
-//! # extern crate serde_with;
 //! # use serde_derive::{Deserialize, Serialize};
 //! # #[cfg(feature = "json")]
 //! #[derive(Deserialize, Serialize)]
@@ -82,14 +89,8 @@
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
 //! [serde#553]: https://github.com/serde-rs/serde/issues/553
 
-#[cfg(feature = "chrono")]
-extern crate chrono as chrono_crate;
 #[doc(hidden)]
 pub extern crate serde;
-#[cfg(feature = "json")]
-extern crate serde_json;
-#[cfg(feature = "macros")]
-extern crate serde_with_macros;
 
 #[cfg(feature = "chrono")]
 pub mod chrono;

@@ -1,9 +1,3 @@
-extern crate pretty_assertions;
-extern crate serde;
-extern crate serde_derive;
-extern crate serde_json;
-extern crate serde_with;
-
 use pretty_assertions::assert_eq;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::json;

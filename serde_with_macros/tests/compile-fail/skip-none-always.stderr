@@ -1,17 +1,23 @@
 error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field: `a`.
- --> $DIR/skip-none-always.rs:7:1
+ --> $DIR/skip-none-always.rs:4:1
   |
-7 | #[skip_serializing_none]
+4 | #[skip_serializing_none]
   | ^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field.
-  --> $DIR/skip-none-always.rs:15:1
+  --> $DIR/skip-none-always.rs:12:1
    |
-15 | #[skip_serializing_none]
+12 | #[skip_serializing_none]
    | ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: `serialize_always` may only be used on fields of type `Option`.
-  --> $DIR/skip-none-always.rs:23:1
+  --> $DIR/skip-none-always.rs:20:1
    |
-23 | #[skip_serializing_none]
+20 | #[skip_serializing_none]
    | ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

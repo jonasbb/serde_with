@@ -1,6 +1,3 @@
-extern crate serde;
-extern crate serde_with_macros;
-
 use serde::Serialize;
 use serde_with_macros::skip_serializing_none;
 

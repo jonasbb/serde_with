@@ -1,6 +1,6 @@
 #![deny(
-    missing_debug_implementations,
     missing_copy_implementations,
+    missing_debug_implementations,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
@@ -8,7 +8,20 @@
     unused_qualifications,
     variant_size_differences
 )]
-#![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
+#![warn(rust_2018_idioms)]
+#![doc(test(attr(deny(
+    missing_copy_implementations,
+    missing_debug_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces,
+    unused_qualifications,
+    variant_size_differences,
+))))]
+#![doc(test(attr(warn(rust_2018_idioms))))]
+// Not needed for 2018 edition and conflicts with `rust_2018_idioms`
+#![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/1.1.0")]
 
 //! proc-macro extensions for [`serde_with`]
@@ -17,10 +30,8 @@
 //!
 //! [`serde_with`]: https://crates.io/crates/serde_with/
 
+#[allow(unused_extern_crates)]
 extern crate proc_macro;
-extern crate proc_macro2;
-extern crate quote;
-extern crate syn;
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;
@@ -43,7 +54,6 @@ use syn::{
 /// Such a data type might look like:
 ///
 /// ```rust
-/// # extern crate serde;
 /// # use serde::Serialize;
 /// #
 /// #[derive(Serialize)]
@@ -63,9 +73,6 @@ use syn::{
 /// Instead the same struct can be written as:
 ///
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_with_macros;
-/// #
 /// # use serde::Serialize;
 /// # use serde_with_macros::skip_serializing_none;
 /// #[skip_serializing_none]
@@ -92,9 +99,6 @@ use syn::{
 /// This cannot be supported, as proc-macros run before type checking, thus it is not possible to determine if a type alias refers to an [`Option`].
 ///
 /// ```rust,ignore
-/// # extern crate serde;
-/// # extern crate serde_with_macros;
-/// #
 /// # use serde::Serialize;
 /// # use serde_with_macros::skip_serializing_none;
 /// type MyOption<T> = Option<T>;
@@ -110,9 +114,6 @@ use syn::{
 /// Here the function `Vec::is_none` does not exist and therefore the example fails to compile.
 ///
 /// ```rust,compile_fail
-/// # extern crate serde;
-/// # extern crate serde_with_macros;
-/// #
 /// # use serde::Serialize;
 /// # use serde_with_macros::skip_serializing_none;
 /// use std::vec::Vec as Option;
@@ -173,12 +174,12 @@ fn is_std_option(path: &Path) -> bool {
 ///
 /// On the example of
 /// `#[serde(skip_serializing_if = "Option::is_none")]`
-//
+///
 /// * `serde` is the outermost path, here namespace
 /// * it contains a Meta::List
 /// * which contains in another Meta a Meta::NameValue
 /// * with the name being `skip_serializing_if`
-#[cfg_attr(feature = "cargo-clippy", allow(cmp_owned))]
+#[allow(clippy::cmp_owned)]
 fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
     // On the example of
     // #[serde(skip_serializing_if = "Option::is_none")]

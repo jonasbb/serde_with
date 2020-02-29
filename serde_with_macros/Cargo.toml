@@ -3,12 +3,14 @@ name = "serde_with_macros"
 version = "1.1.0"
 authors = ["jonasbb"]
 
+categories = ["encoding"]
 description = "proc-macro library for serde_with"
 documentation = "https://docs.rs/serde_with_macros/"
-repository = "https://github.com/jonasbb/serde_with/tree/master/serde_with_macros"
-readme = "README.md"
+edition = "2018"
 keywords = ["serde", "utilities", "serialization", "deserialization"]
 license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/jonasbb/serde_with/tree/master/serde_with_macros"
 
 [lib]
 proc-macro = true

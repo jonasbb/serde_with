@@ -8,12 +8,14 @@ name = "serde_with"
 version = "1.4.0"
 authors = ["jonasbb"]
 
+categories = ["encoding"]
 description = "Custom de/serialization functions for Rust's serde"
 documentation = "https://docs.rs/serde_with/"
-repository = "https://github.com/jonasbb/serde_with"
-readme = "README.md"
+edition = "2018"
 keywords = ["serde", "utilities", "serialization", "deserialization"]
 license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/jonasbb/serde_with"
 
 exclude = [
     ".codecov.yml",
@@ -32,12 +34,13 @@ codecov = { repository = "jonasbb/serde_with", branch = "master", service = "git
 maintenance = { status = "actively-developed" }
 
 [features]
+chrono = [ "chrono_crate" ]
 default = [ "macros" ]
 json = [ "serde_json" ]
 macros = [ "serde_with_macros" ]
 
 [dependencies]
-chrono = { version = "0.4.1", features = [ "serde" ], optional = true }
+chrono_crate = { package = "chrono", version = "0.4.1", features = [ "serde" ], optional = true }
 serde = "1.0.75"
 serde_json = { version = "1.0.1", optional = true }
 serde_with_macros = { path = "./serde_with_macros", version = "1.1.0", optional = true}

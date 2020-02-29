@@ -35,11 +35,13 @@ use serde::{
 /// structs, rather than repeating the fields of `Player` for each prefix.
 ///
 /// ```rust
+/// # #[allow(dead_code)]
 /// struct Match {
 ///     player1: Player,
 ///     player2: Player,
 /// }
 ///
+/// # #[allow(dead_code)]
 /// struct Player {
 ///     name: String,
 ///     votes: u64,
@@ -51,12 +53,7 @@ use serde::{
 /// An implementation of the Challonge API would use `with_prefix!` like this:
 ///
 /// ```rust
-/// extern crate serde_derive;
-/// extern crate serde_json;
-/// extern crate serde_with;
-///
 /// use serde_derive::{Deserialize, Serialize};
-/// use serde_json::json;
 /// use serde_with::with_prefix;
 ///
 /// #[derive(Serialize, Deserialize)]
@@ -469,7 +466,7 @@ where
 {
     type Value = V::Value;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.delegate.expecting(formatter)
     }
 
@@ -525,7 +522,7 @@ where
 {
     type Value = V::Value;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.delegate.expecting(formatter)
     }
 

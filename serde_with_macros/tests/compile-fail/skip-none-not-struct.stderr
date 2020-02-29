@@ -1,5 +1,7 @@
 error: The attribute can only be applied to struct or enum definitions.
- --> $DIR/skip-none-not-struct.rs:5:1
+ --> $DIR/skip-none-not-struct.rs:3:1
   |
-5 | #[skip_serializing_none]
+3 | #[skip_serializing_none]
   | ^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

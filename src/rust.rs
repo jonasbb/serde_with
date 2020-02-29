@@ -1,5 +1,6 @@
 //! De/Serialization for Rust's builtin and std types
 
+use crate::Separator;
 use serde::{
     de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
     ser::{Serialize, SerializeMap, SerializeSeq, Serializer},
@@ -13,7 +14,6 @@ use std::{
     marker::PhantomData,
     str::FromStr,
 };
-use Separator;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
@@ -24,11 +24,6 @@ use Separator;
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use std::net::Ipv4Addr;
 /// #
@@ -73,7 +68,7 @@ pub mod display_fromstr {
         {
             type Value = S;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(formatter, "valid json object")
             }
 
@@ -105,11 +100,6 @@ pub mod display_fromstr {
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// #
 /// use std::collections::BTreeSet;
@@ -174,7 +164,7 @@ pub mod seq_display_fromstr {
         {
             type Value = Vec<S>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(formatter, "a sequence")
             }
 
@@ -227,11 +217,6 @@ pub mod seq_display_fromstr {
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// #
 /// use serde_with::{CommaSeparator, SpaceSeparator};
@@ -319,11 +304,6 @@ where
 /// # Examples
 ///
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// #
 /// # #[derive(Debug, PartialEq, Eq)]
@@ -351,7 +331,7 @@ where
 /// assert_eq!(Doc {a: Some(Some(5))}, serde_json::from_str(s).unwrap());
 /// assert_eq!(s, serde_json::to_string(&Doc {a: Some(Some(5))}).unwrap());
 /// ```
-#[cfg_attr(feature = "cargo-clippy", allow(option_option))]
+#[allow(clippy::option_option)]
 pub mod double_option {
     use super::*;
 
@@ -395,12 +375,6 @@ pub mod double_option {
 /// # Example
 ///
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// # extern crate ron;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -489,13 +463,8 @@ pub mod unwrap_or_skip {
 /// # Example
 ///
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use std::{collections::HashSet, iter::FromIterator};
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_derive::Deserialize;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
@@ -518,7 +487,7 @@ pub mod unwrap_or_skip {
 /// ```
 pub mod sets_duplicate_value_is_error {
     use super::*;
-    use duplicate_key_impls::PreventDuplicateInsertsSet;
+    use crate::duplicate_key_impls::PreventDuplicateInsertsSet;
 
     /// Deserialize a set and return an error on duplicate values
     pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
@@ -539,7 +508,7 @@ pub mod sets_duplicate_value_is_error {
         {
             type Value = T;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a sequence")
             }
 
@@ -584,12 +553,7 @@ pub mod sets_duplicate_value_is_error {
 /// # Example
 ///
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_derive::Deserialize;
 /// # use std::collections::HashMap;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -616,7 +580,7 @@ pub mod sets_duplicate_value_is_error {
 /// ```
 pub mod maps_duplicate_key_is_error {
     use super::*;
-    use duplicate_key_impls::PreventDuplicateInsertsMap;
+    use crate::duplicate_key_impls::PreventDuplicateInsertsMap;
 
     /// Deserialize a map and return an error on duplicate keys
     pub fn deserialize<'de, D, T, K, V>(deserializer: D) -> Result<T, D::Error>
@@ -640,7 +604,7 @@ pub mod maps_duplicate_key_is_error {
         {
             type Value = T;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a map")
             }
 
@@ -681,7 +645,7 @@ pub mod maps_duplicate_key_is_error {
 /// [`BTreeSet`]: std::collections::HashSet
 pub mod sets_first_value_wins {
     use super::*;
-    use duplicate_key_impls::DuplicateInsertsFirstWinsSet;
+    use crate::duplicate_key_impls::DuplicateInsertsFirstWinsSet;
 
     /// Deserialize a set and return an error on duplicate values
     pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
@@ -702,7 +666,7 @@ pub mod sets_first_value_wins {
         {
             type Value = T;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a sequence")
             }
 
@@ -742,12 +706,7 @@ pub mod sets_first_value_wins {
 /// # Example
 ///
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_derive::Deserialize;
 /// # use std::collections::HashMap;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -778,7 +737,7 @@ pub mod sets_first_value_wins {
 /// ```
 pub mod maps_first_key_wins {
     use super::*;
-    use duplicate_key_impls::DuplicateInsertsFirstWinsMap;
+    use crate::duplicate_key_impls::DuplicateInsertsFirstWinsMap;
 
     /// Deserialize a map and return an error on duplicate keys
     pub fn deserialize<'de, D, T, K, V>(deserializer: D) -> Result<T, D::Error>
@@ -802,7 +761,7 @@ pub mod maps_first_key_wins {
         {
             type Value = T;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a map")
             }
 
@@ -838,11 +797,6 @@ pub mod maps_first_key_wins {
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// #
 /// #[derive(Deserialize, Serialize)]
@@ -889,7 +843,7 @@ pub mod string_empty_as_none {
         {
             type Value = Option<S>;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("any string")
             }
 
@@ -952,11 +906,6 @@ pub mod string_empty_as_none {
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use std::collections::HashMap;
@@ -981,12 +930,6 @@ pub mod string_empty_as_none {
 /// The helper is generic over the hasher type of the [`HashMap`] and works with different variants, such as `FnvHashMap`.
 ///
 /// ```
-/// # extern crate fnv;
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// #
@@ -1037,7 +980,7 @@ pub mod hashmap_as_tuple_list {
         deserializer.deserialize_seq(HashMapVisitor(PhantomData))
     }
 
-    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    #[allow(clippy::type_complexity)]
     struct HashMapVisitor<K, V, BH>(PhantomData<fn() -> HashMap<K, V, BH>>);
 
     impl<'de, K, V, BH> Visitor<'de> for HashMapVisitor<K, V, BH>
@@ -1048,7 +991,7 @@ pub mod hashmap_as_tuple_list {
     {
         type Value = HashMap<K, V, BH>;
 
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
             formatter.write_str("a list of key-value pairs")
         }
 
@@ -1079,11 +1022,6 @@ pub mod hashmap_as_tuple_list {
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use std::collections::BTreeMap;
@@ -1131,7 +1069,7 @@ pub mod btreemap_as_tuple_list {
         deserializer.deserialize_seq(BTreeMapVisitor(PhantomData))
     }
 
-    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    #[allow(clippy::type_complexity)]
     struct BTreeMapVisitor<K, V>(PhantomData<fn() -> BTreeMap<K, V>>);
 
     impl<'de, K, V> Visitor<'de> for BTreeMapVisitor<K, V>
@@ -1141,7 +1079,7 @@ pub mod btreemap_as_tuple_list {
     {
         type Value = BTreeMap<K, V>;
 
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
             formatter.write_str("a list of key-value pairs")
         }
 
@@ -1172,13 +1110,7 @@ pub mod btreemap_as_tuple_list {
 /// `Wrapper` does not implement [`Hash`] nor [`Ord`], thus prohibiting the use [`HashMap`] or [`BTreeMap`].
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_json::json;
 /// #
 /// #[derive(Debug, Deserialize, Serialize, Default)]
 /// struct S {
@@ -1213,13 +1145,7 @@ pub mod btreemap_as_tuple_list {
 /// In this example, the serialized format contains duplicate keys, which is not supported with [`HashMap`] or [`BTreeMap`].
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_json::json;
 /// #
 /// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
 /// struct S {
@@ -1275,7 +1201,7 @@ pub mod tuple_list_as_map {
         deserializer.deserialize_map(MapVisitor(PhantomData))
     }
 
-    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    #[allow(clippy::type_complexity)]
     struct MapVisitor<I, K, V>(PhantomData<fn() -> (I, K, V)>);
 
     impl<'de, I, K, V> Visitor<'de> for MapVisitor<I, K, V>
@@ -1286,7 +1212,7 @@ pub mod tuple_list_as_map {
     {
         type Value = I;
 
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
             formatter.write_str("a map")
         }
 
@@ -1327,13 +1253,7 @@ pub mod tuple_list_as_map {
 ///
 /// # Example
 /// ```rust
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_json::json;
 /// #
 /// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
 /// struct S {
@@ -1387,7 +1307,7 @@ pub mod bytes_or_string {
     impl<'de> Visitor<'de> for BytesOrStringVisitor {
         type Value = Vec<u8>;
 
-        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
             formatter.write_str("a list of bytes or a string")
         }
 
@@ -1429,11 +1349,6 @@ pub mod bytes_or_string {
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::Deserialize;
 /// #
 /// #[derive(Deserialize)]
@@ -1460,11 +1375,6 @@ pub mod bytes_or_string {
 /// Deserializing missing values can be supported by adding the `default` field attribute:
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::Deserialize;
 /// #
 /// #[derive(Deserialize)]
@@ -1498,11 +1408,6 @@ pub mod default_on_error {
 /// # Examples
 ///
 /// ```
-/// # extern crate serde;
-/// # extern crate serde_derive;
-/// # extern crate serde_json;
-/// # extern crate serde_with;
-/// #
 /// # use serde_derive::Deserialize;
 /// #
 /// #[derive(Deserialize)]
