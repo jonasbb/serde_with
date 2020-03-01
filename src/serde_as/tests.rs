@@ -167,6 +167,52 @@ fn test_map_as_tuple_list() {
 }
 
 #[test]
+fn test_tuple_list_as_map() {
+    use std::{collections::HashMap, net::IpAddr};
+    let ip = "1.2.3.4".parse().unwrap();
+    let ip2 = "255.255.255.255".parse().unwrap();
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructHashMap {
+        #[serde(with = "As::<HashMap<DisplayFromStr, DisplayFromStr>>")]
+        values: Vec<(u32, IpAddr)>,
+    };
+
+    is_equal(
+        StructHashMap {
+            values: vec![(1, ip), (10, ip), (200, ip2)],
+        },
+        r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructBTreeMap {
+        #[serde(with = "As::<BTreeMap<DisplayFromStr, DisplayFromStr>>")]
+        values: Vec<(u32, IpAddr)>,
+    };
+
+    is_equal(
+        StructBTreeMap {
+            values: vec![(1, ip), (10, ip), (200, ip2)],
+        },
+        r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
+    );
+
+    // #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    // struct StructDeque {
+    //     #[serde(with = "As::<BTreeMap<DisplayFromStr, DisplayFromStr>>")]
+    //     values: VecDeque<(u32, IpAddr)>,
+    // };
+
+    // is_equal(
+    //     StructDeque {
+    //         values: vec![(1, ip), (10, ip), (200, ip2)].into(),
+    //     },
+    //     r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
+    // );
+}
+
+#[test]
 fn test_none_as_empty_string() {
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {

@@ -514,3 +514,147 @@ where
         deserializer.deserialize_str(OptionStringEmptyNone(PhantomData))
     }
 }
+
+impl<'de, K, KAs, V, VAs> DeserializeAs<'de, Vec<(K, V)>> for HashMap<KAs, VAs>
+where
+    KAs: DeserializeAs<'de, K>,
+    VAs: DeserializeAs<'de, V>,
+    K: Ord,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Vec<(K, V)>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MapVisitor<K, KAs, V, VAs> {
+            marker: PhantomData<(K, KAs, V, VAs)>,
+        }
+
+        struct MapIter<'de, A, K, KAs, V, VAs> {
+            access: A,
+            marker: PhantomData<(&'de (), K, KAs, V, VAs)>,
+        }
+
+        impl<'de, A, K, KAs, V, VAs> Iterator for MapIter<'de, A, K, KAs, V, VAs>
+        where
+            A: MapAccess<'de>,
+            KAs: DeserializeAs<'de, K>,
+            VAs: DeserializeAs<'de, V>,
+        {
+            #[allow(clippy::type_complexity)]
+            type Item = Result<(DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>), A::Error>;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                self.access.next_entry().transpose()
+            }
+        }
+
+        impl<'de, K, KAs, V, VAs> Visitor<'de> for MapVisitor<K, KAs, V, VAs>
+        where
+            KAs: DeserializeAs<'de, K>,
+            VAs: DeserializeAs<'de, V>,
+            K: Ord,
+        {
+            type Value = Vec<(K, V)>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a map")
+            }
+
+            #[inline]
+            fn visit_map<A>(self, access: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let iter = MapIter {
+                    access,
+                    marker: PhantomData,
+                };
+                iter.map(|res| {
+                    res.map(
+                        |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
+                            (k.into_inner(), v.into_inner())
+                        },
+                    )
+                })
+                .collect()
+            }
+        }
+
+        let visitor = MapVisitor::<K, KAs, V, VAs> {
+            marker: PhantomData,
+        };
+        deserializer.deserialize_map(visitor)
+    }
+}
+
+impl<'de, K, KAs, V, VAs> DeserializeAs<'de, Vec<(K, V)>> for BTreeMap<KAs, VAs>
+where
+    KAs: DeserializeAs<'de, K>,
+    VAs: DeserializeAs<'de, V>,
+    K: Ord,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Vec<(K, V)>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MapVisitor<K, KAs, V, VAs> {
+            marker: PhantomData<(K, KAs, V, VAs)>,
+        }
+
+        struct MapIter<'de, A, K, KAs, V, VAs> {
+            access: A,
+            marker: PhantomData<(&'de (), K, KAs, V, VAs)>,
+        }
+
+        impl<'de, A, K, KAs, V, VAs> Iterator for MapIter<'de, A, K, KAs, V, VAs>
+        where
+            A: MapAccess<'de>,
+            KAs: DeserializeAs<'de, K>,
+            VAs: DeserializeAs<'de, V>,
+        {
+            #[allow(clippy::type_complexity)]
+            type Item = Result<(DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>), A::Error>;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                self.access.next_entry().transpose()
+            }
+        }
+
+        impl<'de, K, KAs, V, VAs> Visitor<'de> for MapVisitor<K, KAs, V, VAs>
+        where
+            KAs: DeserializeAs<'de, K>,
+            VAs: DeserializeAs<'de, V>,
+            K: Ord,
+        {
+            type Value = Vec<(K, V)>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a map")
+            }
+
+            #[inline]
+            fn visit_map<A>(self, access: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let iter = MapIter {
+                    access,
+                    marker: PhantomData,
+                };
+                iter.map(|res| {
+                    res.map(
+                        |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
+                            (k.into_inner(), v.into_inner())
+                        },
+                    )
+                })
+                .collect()
+            }
+        }
+
+        let visitor = MapVisitor::<K, KAs, V, VAs> {
+            marker: PhantomData,
+        };
+        deserializer.deserialize_map(visitor)
+    }
+}

@@ -256,3 +256,61 @@ where
         crate::rust::string_empty_as_none::serialize(source, serializer)
     }
 }
+
+impl<K, KAs, V, VAs> SerializeAs<Vec<(K, V)>> for HashMap<KAs, VAs>
+where
+    KAs: SerializeAs<K>,
+    VAs: SerializeAs<V>,
+{
+    fn serialize_as<S>(source: &Vec<(K, V)>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_map(source.iter().map(|(k, v)| {
+            (
+                SerializeAsWrap::<K, KAs>::new(k),
+                SerializeAsWrap::<V, VAs>::new(v),
+            )
+        }))
+    }
+}
+
+impl<K, KAs, V, VAs> SerializeAs<Vec<(K, V)>> for BTreeMap<KAs, VAs>
+where
+    KAs: SerializeAs<K>,
+    VAs: SerializeAs<V>,
+{
+    fn serialize_as<S>(source: &Vec<(K, V)>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_map(source.iter().map(|(k, v)| {
+            (
+                SerializeAsWrap::<K, KAs>::new(k),
+                SerializeAsWrap::<V, VAs>::new(v),
+            )
+        }))
+    }
+}
+
+// impl<'a, 'b, Seq, K, KAs, V, VAs> SerializeAs<Seq, (K, V)> for BTreeMap<KAs, VAs>
+// where
+//     'a: 'b,
+//     KAs: SerializeAs<K>,
+//     VAs: SerializeAs<V>,
+//     &'a Seq: IntoIterator<Item = (&'b K, &'b V)> + 'a,
+//     K: 'b,
+//     V: 'b,
+// {
+//     fn serialize_as<'s, S>(source: &'s Seq, serializer: S) -> Result<S::Ok, S::Error>
+//     where
+//         S: Serializer,
+//     {
+//         serializer.collect_map(source.into_iter().map(|(k, v)| {
+//             (
+//                 SerializeAsWrap::<K, KAs>::new(k),
+//                 SerializeAsWrap::<V, VAs>::new(v),
+//             )
+//         }))
+//     }
+// }
