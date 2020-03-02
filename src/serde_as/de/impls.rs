@@ -515,11 +515,12 @@ where
     }
 }
 
-impl<'de, K, KAs, V, VAs> DeserializeAs<'de, Vec<(K, V)>> for HashMap<KAs, VAs>
+impl<'de, K, KAs, V, VAs, BH> DeserializeAs<'de, Vec<(K, V)>> for HashMap<KAs, VAs, BH>
 where
     KAs: DeserializeAs<'de, K>,
     VAs: DeserializeAs<'de, V>,
     K: Ord,
+    BH: BuildHasher,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<(K, V)>, D::Error>
     where

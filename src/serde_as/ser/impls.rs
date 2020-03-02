@@ -257,10 +257,11 @@ where
     }
 }
 
-impl<K, KAs, V, VAs> SerializeAs<Vec<(K, V)>> for HashMap<KAs, VAs>
+impl<K, KAs, V, VAs, BH> SerializeAs<Vec<(K, V)>> for HashMap<KAs, VAs, BH>
 where
     KAs: SerializeAs<K>,
     VAs: SerializeAs<V>,
+    BH: BuildHasher,
 {
     fn serialize_as<S>(source: &Vec<(K, V)>, serializer: S) -> Result<S::Ok, S::Error>
     where
