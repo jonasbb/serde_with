@@ -1,22 +1,9 @@
-use super::*;
-use serde::de::DeserializeOwned;
-use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
+mod utils;
 
-pub(crate) fn is_equal<T>(value: T, s: &str)
-where
-    T: Debug + DeserializeOwned + PartialEq + Serialize,
-{
-    assert_eq!(
-        serde_json::from_str::<T>(s).unwrap(),
-        value,
-        "Deserialization differs from expected value."
-    );
-    assert_eq!(
-        serde_json::to_string(&value).unwrap(),
-        s,
-        "Serialization differs from expected value."
-    );
-}
+use crate::utils::is_equal;
+use serde::{Deserialize, Serialize};
+use serde_with::{As, DisplayFromStr, NoneAsEmptyString, Same, SameAs};
+use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
 
 #[test]
 fn test_display_fromstr() {

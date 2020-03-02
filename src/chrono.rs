@@ -4,6 +4,10 @@
 //!
 //! [chrono]: https://docs.rs/chrono/
 
+use crate::{de::DeserializeAs, ser::SerializeAs};
+use chrono_crate::{DateTime, NaiveDateTime, Utc};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
 /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
 ///
 /// The `DateTime<Utc>` can be serialized from an integer, a float, or a string representing a number.
@@ -150,5 +154,24 @@ pub mod datetime_utc_ts_seconds_from_any {
         }
 
         deserializer.deserialize_any(Helper)
+    }
+}
+
+impl SerializeAs<NaiveDateTime> for DateTime<Utc> {
+    fn serialize_as<S>(source: &NaiveDateTime, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let datetime = DateTime::<Utc>::from_utc(*source, Utc);
+        datetime.serialize(serializer)
+    }
+}
+
+impl<'de> DeserializeAs<'de, NaiveDateTime> for DateTime<Utc> {
+    fn deserialize_as<D>(deserializer: D) -> Result<NaiveDateTime, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        DateTime::<Utc>::deserialize(deserializer).map(|datetime| datetime.naive_utc())
     }
 }

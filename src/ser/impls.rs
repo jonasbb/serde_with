@@ -30,13 +30,13 @@ where
     }
 }
 
-pub(in crate::serde_as) struct SerializeAsWrap<'a, T, U> {
+pub(crate) struct SerializeAsWrap<'a, T, U> {
     value: &'a T,
     marker: PhantomData<U>,
 }
 
 impl<'a, T, U> SerializeAsWrap<'a, T, U> {
-    pub(in crate::serde_as) fn new(value: &'a T) -> Self {
+    pub(crate) fn new(value: &'a T) -> Self {
         Self {
             value,
             marker: PhantomData,

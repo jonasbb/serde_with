@@ -1,5 +1,5 @@
 use super::*;
-use crate::serde_as::utils;
+use crate::utils;
 use serde::de::*;
 use std::{
     collections::{BTreeMap, HashMap},
@@ -123,13 +123,13 @@ where
     }
 }
 
-pub(in crate::serde_as) struct DeserializeAsWrap<T, U> {
+pub(crate) struct DeserializeAsWrap<T, U> {
     value: T,
     marker: PhantomData<U>,
 }
 
 impl<T, U> DeserializeAsWrap<T, U> {
-    pub(in crate::serde_as) fn into_inner(self) -> T {
+    pub(crate) fn into_inner(self) -> T {
         self.value
     }
 }
