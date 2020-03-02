@@ -1,7 +1,7 @@
 #![deny(
-    missing_copy_implementations,
-    missing_debug_implementations,
-    missing_docs,
+    // missing_copy_implementations,
+    // missing_debug_implementations,
+    // missing_docs,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
@@ -9,7 +9,7 @@
     unused_qualifications,
     variant_size_differences
 )]
-#![warn(rust_2018_idioms)]
+// #![warn(rust_2018_idioms)]
 #![doc(test(attr(deny(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -94,18 +94,26 @@ pub extern crate serde;
 
 #[cfg(feature = "chrono")]
 pub mod chrono;
+pub mod de;
 mod duplicate_key_impls;
 mod flatten_maybe;
+#[cfg(feature = "hex")]
+pub mod hex;
 #[cfg(feature = "json")]
 pub mod json;
 pub mod rust;
+pub mod ser;
+mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
 
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
+use crate::{de::DeserializeAs, ser::SerializeAs};
+use serde::{ser::Serialize, Deserializer, Serializer};
 #[cfg(feature = "macros")]
 #[doc(inline)]
 pub use serde_with_macros::*;
+use std::marker::PhantomData;
 
 /// Separator for string-based collection de/serialization
 pub trait Separator {
@@ -134,3 +142,37 @@ impl Separator for CommaSeparator {
         ","
     }
 }
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct As<T>(PhantomData<T>);
+
+impl<T> As<T> {
+    pub fn serialize<S, I>(value: &I, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+        T: SerializeAs<I>,
+    {
+        T::serialize_as(value, serializer)
+    }
+
+    pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>
+    where
+        T: DeserializeAs<'de, I>,
+        D: Deserializer<'de>,
+    {
+        T::deserialize_as(deserializer)
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Same;
+
+// TODO: doc
+#[derive(Copy, Clone, Debug, Default)]
+pub struct SameAs<T>(PhantomData<T>);
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DisplayFromStr;
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct NoneAsEmptyString;

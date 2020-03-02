@@ -2,7 +2,10 @@
 
 use chrono_crate::{DateTime, NaiveDateTime, Utc};
 use pretty_assertions::assert_eq;
+use serde::Serialize;
 use serde_derive::Deserialize;
+use serde_with::{As, SameAs};
+use std::{collections::BTreeMap, str::FromStr};
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
     DateTime::from_utc(NaiveDateTime::from_timestamp(secs, nsecs), Utc)
@@ -43,4 +46,111 @@ fn json_datetime_from_any_to_string_deserialization() {
     assert_eq!(new_datetime(1_478_563_200, 123_000_000), res[6].date);
     assert_eq!(new_datetime(0, 0), res[7].date);
     assert_eq!(new_datetime(-86000, 999_000_000), res[8].date);
+}
+
+#[test]
+fn test_chrono_naive_date_time() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    pub struct SomeTime {
+        #[serde(with = "As::<DateTime<Utc>>")]
+        stamp: NaiveDateTime,
+    }
+    assert_eq!(
+        serde_json::to_string(&SomeTime {
+            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
+        })
+        .unwrap(),
+        "{\"stamp\":\"1994-11-05T08:15:30Z\"}"
+    );
+    assert_eq!(
+        SomeTime {
+            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
+        },
+        serde_json::from_str("{\"stamp\":\"1994-11-05T08:15:30Z\"}").unwrap(),
+    );
+}
+#[test]
+fn test_chrono_option_naive_date_time() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    pub struct SomeTime {
+        #[serde(with = "As::<Option<DateTime<Utc>>>")]
+        stamp: Option<NaiveDateTime>,
+    }
+    assert_eq!(
+        serde_json::to_string(&SomeTime {
+            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
+        })
+        .unwrap(),
+        "{\"stamp\":\"1994-11-05T08:15:30Z\"}"
+    );
+    assert_eq!(
+        SomeTime {
+            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
+        },
+        serde_json::from_str("{\"stamp\":\"1994-11-05T08:15:30Z\"}").unwrap(),
+    );
+}
+#[test]
+fn test_chrono_vec_option_naive_date_time() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    pub struct SomeTime {
+        #[serde(with = "As::<Vec<Option<DateTime<Utc>>>>")]
+        stamps: Vec<Option<NaiveDateTime>>,
+    }
+    assert_eq!(
+        serde_json::to_string(&SomeTime {
+            stamps: vec![
+                NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
+                NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
+            ],
+        })
+        .unwrap(),
+        "{\"stamps\":[\"1994-11-05T08:15:30Z\",\"1994-11-05T08:15:31Z\"]}"
+    );
+    assert_eq!(
+        SomeTime {
+            stamps: vec![
+                NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
+                NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
+            ],
+        },
+        serde_json::from_str("{\"stamps\":[\"1994-11-05T08:15:30Z\",\"1994-11-05T08:15:31Z\"]}")
+            .unwrap(),
+    );
+}
+#[test]
+fn test_chrono_btree_map_naive_date_time() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    pub struct SomeTime {
+        #[serde(with = "As::<BTreeMap<SameAs<i32>, DateTime<Utc>>>")]
+        stamps: BTreeMap<i32, NaiveDateTime>,
+    }
+    assert_eq!(
+        serde_json::to_string(&SomeTime {
+            stamps: [
+                (1, NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()),
+                (2, NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()),
+            ]
+            .iter()
+            .cloned()
+            .collect(),
+        })
+        .unwrap(),
+        "{\"stamps\":{\"1\":\"1994-11-05T08:15:30Z\",\"2\":\"1994-11-05T08:15:31Z\"}}"
+    );
+    assert_eq!(
+        SomeTime {
+            stamps: [
+                (1, NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()),
+                (2, NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()),
+            ]
+            .iter()
+            .cloned()
+            .collect(),
+        },
+        serde_json::from_str(
+            "{\"stamps\":{\"1\":\"1994-11-05T08:15:30Z\",\"2\":\"1994-11-05T08:15:31Z\"}}"
+        )
+        .unwrap(),
+    );
 }
