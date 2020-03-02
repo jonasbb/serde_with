@@ -1,5 +1,8 @@
 #![cfg(feature = "chrono")]
 
+mod utils;
+
+use crate::utils::is_equal;
 use chrono_crate::{DateTime, NaiveDateTime, Utc};
 use pretty_assertions::assert_eq;
 use serde::Serialize;
@@ -55,18 +58,11 @@ fn test_chrono_naive_date_time() {
         #[serde(with = "As::<DateTime<Utc>>")]
         stamp: NaiveDateTime,
     }
-    assert_eq!(
-        serde_json::to_string(&SomeTime {
-            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
-        })
-        .unwrap(),
-        "{\"stamp\":\"1994-11-05T08:15:30Z\"}"
-    );
-    assert_eq!(
+    is_equal(
         SomeTime {
-            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()
+            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap(),
         },
-        serde_json::from_str("{\"stamp\":\"1994-11-05T08:15:30Z\"}").unwrap(),
+        r#"{"stamp":"1994-11-05T08:15:30Z"}"#,
     );
 }
 #[test]
@@ -76,18 +72,11 @@ fn test_chrono_option_naive_date_time() {
         #[serde(with = "As::<Option<DateTime<Utc>>>")]
         stamp: Option<NaiveDateTime>,
     }
-    assert_eq!(
-        serde_json::to_string(&SomeTime {
-            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
-        })
-        .unwrap(),
-        "{\"stamp\":\"1994-11-05T08:15:30Z\"}"
-    );
-    assert_eq!(
+    is_equal(
         SomeTime {
-            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").ok()
+            stamp: NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
         },
-        serde_json::from_str("{\"stamp\":\"1994-11-05T08:15:30Z\"}").unwrap(),
+        r#"{"stamp":"1994-11-05T08:15:30Z"}"#,
     );
 }
 #[test]
@@ -97,25 +86,14 @@ fn test_chrono_vec_option_naive_date_time() {
         #[serde(with = "As::<Vec<Option<DateTime<Utc>>>>")]
         stamps: Vec<Option<NaiveDateTime>>,
     }
-    assert_eq!(
-        serde_json::to_string(&SomeTime {
-            stamps: vec![
-                NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
-                NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
-            ],
-        })
-        .unwrap(),
-        "{\"stamps\":[\"1994-11-05T08:15:30Z\",\"1994-11-05T08:15:31Z\"]}"
-    );
-    assert_eq!(
+    is_equal(
         SomeTime {
             stamps: vec![
                 NaiveDateTime::from_str("1994-11-05T08:15:30").ok(),
-                NaiveDateTime::from_str("1994-11-05T08:15:31").ok()
+                NaiveDateTime::from_str("1994-11-05T08:15:31").ok(),
             ],
         },
-        serde_json::from_str("{\"stamps\":[\"1994-11-05T08:15:30Z\",\"1994-11-05T08:15:31Z\"]}")
-            .unwrap(),
+        r#"{"stamps":["1994-11-05T08:15:30Z","1994-11-05T08:15:31Z"]}"#,
     );
 }
 #[test]
@@ -125,32 +103,15 @@ fn test_chrono_btree_map_naive_date_time() {
         #[serde(with = "As::<BTreeMap<SameAs<i32>, DateTime<Utc>>>")]
         stamps: BTreeMap<i32, NaiveDateTime>,
     }
-    assert_eq!(
-        serde_json::to_string(&SomeTime {
-            stamps: [
-                (1, NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()),
-                (2, NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()),
-            ]
-            .iter()
-            .cloned()
-            .collect(),
-        })
-        .unwrap(),
-        "{\"stamps\":{\"1\":\"1994-11-05T08:15:30Z\",\"2\":\"1994-11-05T08:15:31Z\"}}"
-    );
-    assert_eq!(
+    is_equal(
         SomeTime {
-            stamps: [
+            stamps: vec![
                 (1, NaiveDateTime::from_str("1994-11-05T08:15:30").unwrap()),
                 (2, NaiveDateTime::from_str("1994-11-05T08:15:31").unwrap()),
             ]
-            .iter()
-            .cloned()
+            .into_iter()
             .collect(),
         },
-        serde_json::from_str(
-            "{\"stamps\":{\"1\":\"1994-11-05T08:15:30Z\",\"2\":\"1994-11-05T08:15:31Z\"}}"
-        )
-        .unwrap(),
+        r#"{"stamps":{"1":"1994-11-05T08:15:30Z","2":"1994-11-05T08:15:31Z"}}"#,
     );
 }

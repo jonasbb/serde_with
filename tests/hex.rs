@@ -1,5 +1,8 @@
 #![cfg(feature = "hex")]
 
+mod utils;
+
+use crate::utils::is_equal;
 use serde::{Deserialize, Serialize};
 use serde_with::{hex::Hex, As};
 
@@ -10,19 +13,10 @@ fn hex_vec() {
         #[serde(with = "As::<Vec<Hex>>")]
         bytes: Vec<Vec<u8>>,
     }
-
-    assert_eq!(
-        serde_json::to_string(&SomeBytes {
-            bytes: vec![vec![0, 1, 2, 13], vec![14, 5, 6, 7]]
-        })
-        .unwrap(),
-        "{\"bytes\":[\"0001020d\",\"0e050607\"]}"
-    );
-
-    assert_eq!(
+    is_equal(
         SomeBytes {
-            bytes: vec![vec![0, 1, 2, 13], vec![14, 5, 6, 7]]
+            bytes: vec![vec![0, 1, 2, 13], vec![14, 5, 6, 7]],
         },
-        serde_json::from_str("{\"bytes\":[\"0001020d\",\"0e050607\"]}").unwrap(),
+        r#"{"bytes":["0001020d","0e050607"]}"#,
     );
 }
