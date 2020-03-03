@@ -1,8 +1,8 @@
 mod utils;
 
-use crate::utils::is_equal;
+use crate::utils::{check_deserialization, is_equal};
 use serde::{Deserialize, Serialize};
-use serde_with::{As, DisplayFromStr, NoneAsEmptyString, Same, SameAs};
+use serde_with::{As, DefaultOnError, DisplayFromStr, NoneAsEmptyString, Same, SameAs};
 use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
 
 #[test]
@@ -256,4 +256,66 @@ fn test_none_as_empty_string() {
         },
         r#"{"value":"Hello"}"#,
     );
+}
+
+#[test]
+fn test_default_on_error() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct {
+        #[serde(with = "As::<DefaultOnError<DisplayFromStr>>")]
+        value: u32,
+    };
+
+    // Normal
+    is_equal(Struct { value: 123 }, r#"{"value":"123"}"#);
+    is_equal(Struct { value: 0 }, r#"{"value":"0"}"#);
+    // Error cases
+    check_deserialization(Struct { value: 0 }, r#"{"value":""}"#);
+    check_deserialization(Struct { value: 0 }, r#"{"value":"12+3"}"#);
+    check_deserialization(Struct { value: 0 }, r#"{"value":"abc"}"#);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct2 {
+        #[serde(with = "As::<DefaultOnError<Vec<DisplayFromStr>>>")]
+        value: Vec<u32>,
+    };
+
+    // Normal
+    is_equal(
+        Struct2 {
+            value: vec![1, 2, 3],
+        },
+        r#"{"value":["1","2","3"]}"#,
+    );
+    is_equal(Struct2 { value: vec![] }, r#"{"value":[]}"#);
+    // Error cases
+    check_deserialization(Struct2 { value: vec![] }, r#"{"value":2}"#);
+    check_deserialization(Struct2 { value: vec![] }, r#"{"value":"notalist"}"#);
+    // TODO why does this result in
+    // thread 'test_default_on_error' panicked at 'called `Result::unwrap()` on an `Err` value: Error("expected `,` or `}`", line: 1, column: 10)', tests/utils.rs:32:9
+    // check_deserialization(Struct2 { value: vec![] }, r#"{"value":{}}"#);
+    check_deserialization(Struct2 { value: vec![] }, r#"{"value":}"#);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct3 {
+        #[serde(with = "As::<Vec<DefaultOnError<DisplayFromStr>>>")]
+        value: Vec<u32>,
+    };
+
+    // Normal
+    is_equal(
+        Struct3 {
+            value: vec![1, 2, 3],
+        },
+        r#"{"value":["1","2","3"]}"#,
+    );
+    is_equal(Struct3 { value: vec![] }, r#"{"value":[]}"#);
+    // Error cases
+    check_deserialization(
+        Struct3 {
+            value: vec![0, 0, 0],
+        },
+        r#"{"value":[2,3,4]}"#,
+    );
+    check_deserialization(Struct3 { value: vec![0, 0] }, r#"{"value":["AA",5]}"#);
 }

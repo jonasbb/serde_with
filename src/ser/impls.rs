@@ -315,3 +315,15 @@ where
 //         }))
 //     }
 // }
+
+impl<T, TAs> SerializeAs<T> for DefaultOnError<TAs>
+where
+    TAs: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        TAs::serialize_as(source, serializer)
+    }
+}

@@ -176,3 +176,6 @@ pub struct DisplayFromStr;
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct NoneAsEmptyString;
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DefaultOnError<T>(PhantomData<T>);
