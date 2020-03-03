@@ -107,9 +107,9 @@ mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
 
-// Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 use crate::{de::DeserializeAs, ser::SerializeAs};
 use serde::{ser::Serialize, Deserializer, Serializer};
+// Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
 #[doc(inline)]
 pub use serde_with_macros::*;
@@ -167,7 +167,6 @@ impl<T> As<T> {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Same;
 
-// TODO: doc
 #[derive(Copy, Clone, Debug, Default)]
 pub struct SameAs<T>(PhantomData<T>);
 
