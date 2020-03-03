@@ -16,3 +16,14 @@ where
         "Serialization differs from expected value."
     );
 }
+
+pub fn check_deserialization<T>(value: T, deserialize_from: &str)
+where
+    T: Debug + DeserializeOwned + PartialEq,
+{
+    assert_eq!(
+        serde_json::from_str::<T>(deserialize_from).unwrap(),
+        value,
+        "Deserialization differs from expected value."
+    );
+}

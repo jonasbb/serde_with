@@ -680,3 +680,16 @@ where
         deserializer.deserialize_map(visitor)
     }
 }
+
+impl<'de, T, TAs> DeserializeAs<'de, T> for DefaultOnError<TAs>
+where
+    TAs: DeserializeAs<'de, T>,
+    T: Default,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        TAs::deserialize_as(deserializer).or_else(|_| Ok(Default::default()))
+    }
+}
