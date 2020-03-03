@@ -327,3 +327,12 @@ where
         TAs::serialize_as(source, serializer)
     }
 }
+
+impl SerializeAs<Vec<u8>> for BytesOrString {
+    fn serialize_as<S>(source: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source.serialize(serializer)
+    }
+}

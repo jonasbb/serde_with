@@ -2,7 +2,9 @@ mod utils;
 
 use crate::utils::{check_deserialization, is_equal};
 use serde::{Deserialize, Serialize};
-use serde_with::{As, DefaultOnError, DisplayFromStr, NoneAsEmptyString, Same, SameAs};
+use serde_with::{
+    As, BytesOrString, DefaultOnError, DisplayFromStr, NoneAsEmptyString, Same, SameAs,
+};
 use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
 
 #[test]
@@ -318,4 +320,49 @@ fn test_default_on_error() {
         r#"{"value":[2,3,4]}"#,
     );
     check_deserialization(Struct3 { value: vec![0, 0] }, r#"{"value":["AA",5]}"#);
+}
+
+#[test]
+fn test_bytes_or_string() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct {
+        #[serde(with = "As::<BytesOrString>")]
+        value: Vec<u8>,
+    };
+
+    is_equal(
+        Struct {
+            value: vec![1, 2, 3],
+        },
+        r#"{"value":[1,2,3]}"#,
+    );
+    check_deserialization(
+        Struct {
+            value: vec![72, 101, 108, 108, 111],
+        },
+        r#"{"value":"Hello"}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructVec {
+        #[serde(with = "As::<Vec<BytesOrString>>")]
+        value: Vec<Vec<u8>>,
+    };
+
+    is_equal(
+        StructVec {
+            value: vec![vec![1, 2, 3]],
+        },
+        r#"{"value":[[1,2,3]]}"#,
+    );
+    check_deserialization(
+        StructVec {
+            value: vec![
+                vec![72, 101, 108, 108, 111],
+                vec![87, 111, 114, 108, 100],
+                vec![1, 2, 3],
+            ],
+        },
+        r#"{"value":["Hello","World",[1,2,3]]}"#,
+    );
 }

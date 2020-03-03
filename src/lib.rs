@@ -178,3 +178,6 @@ pub struct NoneAsEmptyString;
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DefaultOnError<T>(PhantomData<T>);
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct BytesOrString;
