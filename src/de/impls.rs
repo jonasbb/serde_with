@@ -693,3 +693,12 @@ where
         TAs::deserialize_as(deserializer).or_else(|_| Ok(Default::default()))
     }
 }
+
+impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
+    fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        crate::rust::bytes_or_string::deserialize(deserializer)
+    }
+}
