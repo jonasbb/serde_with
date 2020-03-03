@@ -1242,6 +1242,13 @@ pub mod tuple_list_as_map {
                 Err(err) => Some(Err(err)),
             }
         }
+
+        fn size_hint(&self) -> (usize, Option<usize>) {
+            match self.0.size_hint() {
+                Some(size) => (size, Some(size)),
+                None => (0, None),
+            }
+        }
     }
 }
 

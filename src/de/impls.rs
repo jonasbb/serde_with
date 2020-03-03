@@ -440,6 +440,13 @@ where
             fn next(&mut self) -> Option<Self::Item> {
                 self.access.next_element().transpose()
             }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                match self.access.size_hint() {
+                    Some(size) => (size, Some(size)),
+                    None => (0, None),
+                }
+            }
         }
 
         impl<'de, K, KAs, V, VAs> Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
@@ -547,6 +554,13 @@ where
             fn next(&mut self) -> Option<Self::Item> {
                 self.access.next_entry().transpose()
             }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                match self.access.size_hint() {
+                    Some(size) => (size, Some(size)),
+                    None => (0, None),
+                }
+            }
         }
 
         impl<'de, K, KAs, V, VAs> Visitor<'de> for MapVisitor<K, KAs, V, VAs>
@@ -618,6 +632,13 @@ where
 
             fn next(&mut self) -> Option<Self::Item> {
                 self.access.next_entry().transpose()
+            }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                match self.access.size_hint() {
+                    Some(size) => (size, Some(size)),
+                    None => (0, None),
+                }
             }
         }
 
