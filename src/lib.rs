@@ -181,3 +181,24 @@ pub struct DefaultOnError<T>(PhantomData<T>);
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;
+
+pub trait Format {}
+pub trait Strictness {}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Integer;
+impl Format for Integer {}
+impl Format for String {}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Strict;
+impl Strictness for Strict {}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Flexible;
+impl Strictness for Flexible {}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationSeconds<FORMAT: Format = Integer, STRICTNESS: Strictness = Strict>(
+    PhantomData<(FORMAT, STRICTNESS)>,
+);
