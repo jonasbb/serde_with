@@ -1,9 +1,12 @@
 mod utils;
 
-use crate::utils::{check_deserialization, is_equal};
+use crate::utils::{
+    check_deserialization, check_error_deserialization, check_serialization, is_equal,
+};
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    As, BytesOrString, DefaultOnError, DisplayFromStr, NoneAsEmptyString, Same, SameAs,
+    As, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds, Flexible, Integer,
+    NoneAsEmptyString, Same, SameAs,
 };
 use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
 
@@ -364,5 +367,94 @@ fn test_bytes_or_string() {
             ],
         },
         r#"{"value":["Hello","World",[1,2,3]]}"#,
+    );
+}
+
+#[test]
+fn test_duration() {
+    use std::time::Duration;
+    let zero = Duration::new(0, 0);
+    let one_second = Duration::new(1, 0);
+    let half_second = Duration::new(0, 500_000_000);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructIntStrict {
+        #[serde(with = "As::<DurationSeconds>")]
+        value: Duration,
+    };
+
+    is_equal(StructIntStrict { value: zero }, r#"{"value":0}"#);
+    is_equal(StructIntStrict { value: one_second }, r#"{"value":1}"#);
+    check_serialization(StructIntStrict { value: half_second }, r#"{"value":1}"#);
+    check_error_deserialization::<StructIntStrict>(
+        r#"{"value":"1"}"#,
+        r#"invalid type: string "1", expected u64 at line 1 column 12"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructIntFlexible {
+        #[serde(with = "As::<DurationSeconds<Integer, Flexible>>")]
+        value: Duration,
+    };
+
+    is_equal(StructIntFlexible { value: zero }, r#"{"value":0}"#);
+    is_equal(StructIntFlexible { value: one_second }, r#"{"value":1}"#);
+    check_serialization(StructIntFlexible { value: half_second }, r#"{"value":1}"#);
+    check_deserialization(
+        StructIntFlexible { value: half_second },
+        r#"{"value":"0.5"}"#,
+    );
+    check_deserialization(StructIntFlexible { value: one_second }, r#"{"value":"1"}"#);
+    check_deserialization(StructIntFlexible { value: zero }, r#"{"value":"0"}"#);
+    check_error_deserialization::<StructIntFlexible>(
+        r#"{"value":"a"}"#,
+        r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructStringStrict {
+        #[serde(with = "As::<DurationSeconds<String>>")]
+        value: Duration,
+    };
+
+    is_equal(StructStringStrict { value: zero }, r#"{"value":"0"}"#);
+    is_equal(StructStringStrict { value: one_second }, r#"{"value":"1"}"#);
+    check_serialization(
+        StructStringStrict { value: half_second },
+        r#"{"value":"1"}"#,
+    );
+    check_error_deserialization::<StructStringStrict>(
+        r#"{"value":1}"#,
+        // TODO the error message should not talk about "json object"
+        r#"invalid type: integer `1`, expected valid json object at line 1 column 10"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructStringFlexible {
+        #[serde(with = "As::<DurationSeconds<String, Flexible>>")]
+        value: Duration,
+    };
+
+    is_equal(StructStringFlexible { value: zero }, r#"{"value":"0"}"#);
+    is_equal(
+        StructStringFlexible { value: one_second },
+        r#"{"value":"1"}"#,
+    );
+    check_serialization(
+        StructStringFlexible { value: half_second },
+        r#"{"value":"1"}"#,
+    );
+    check_deserialization(
+        StructStringFlexible { value: half_second },
+        r#"{"value":"0.5"}"#,
+    );
+    check_deserialization(
+        StructStringFlexible { value: one_second },
+        r#"{"value":"1"}"#,
+    );
+    check_deserialization(StructStringFlexible { value: zero }, r#"{"value":"0"}"#);
+    check_error_deserialization::<StructStringFlexible>(
+        r#"{"value":"a"}"#,
+        r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
     );
 }

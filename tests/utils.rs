@@ -29,3 +29,26 @@ where
         "Deserialization differs from expected value."
     );
 }
+
+pub fn check_serialization<T>(value: T, serialize_to: &str)
+where
+    T: Debug + PartialEq + Serialize,
+{
+    assert_eq!(
+        serde_json::to_string(&value).unwrap(),
+        serialize_to,
+        "Serialization differs from expected value."
+    );
+}
+
+pub fn check_error_deserialization<T>(deserialize_from: &str, error_msg: &str)
+where
+    T: Debug + DeserializeOwned + PartialEq,
+{
+    assert_eq!(
+        serde_json::from_str::<T>(deserialize_from)
+            .unwrap_err()
+            .to_string(),
+        error_msg
+    )
+}

@@ -7,6 +7,7 @@ use std::{
     fmt::{self, Display},
     hash::{BuildHasher, Hash},
     str::FromStr,
+    time::Duration,
 };
 
 impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for SameAs<T> {
@@ -700,5 +701,128 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
         D: Deserializer<'de>,
     {
         crate::rust::bytes_or_string::deserialize(deserializer)
+    }
+}
+
+struct DurationVisitiorFlexible;
+impl<'de> Visitor<'de> for DurationVisitiorFlexible {
+    type Value = Duration;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> ::std::fmt::Result {
+        formatter.write_str("an integer, a float, or a string containing a number")
+    }
+
+    fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        if value >= 0 {
+            Ok(Duration::new(value as u64, 0))
+        } else {
+            Err(Error::custom(format!(
+                "Negative values are not supported for Duration. Found {}",
+                value
+            )))
+        }
+    }
+
+    fn visit_u64<E>(self, secs: u64) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        Ok(Duration::new(secs, 0))
+    }
+
+    fn visit_f64<E>(self, secs: f64) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        const MAX_NANOS_F64: f64 =
+            ((u64::max_value() as u128 + 1) * (utils::NANOS_PER_SEC as u128)) as f64;
+        let nanos = secs * (utils::NANOS_PER_SEC as f64);
+        if !nanos.is_finite() {
+            panic!("got non-finite value when converting float to duration");
+        }
+        if nanos >= MAX_NANOS_F64 {
+            panic!("overflow when converting float to duration");
+        }
+        if nanos < 0.0 {
+            panic!("underflow when converting float to duration");
+        }
+        let nanos = nanos as u128;
+        Ok(Duration::new(
+            (nanos / (utils::NANOS_PER_SEC as u128)) as u64,
+            (nanos % (utils::NANOS_PER_SEC as u128)) as u32,
+        ))
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        let parts: Vec<_> = value.split('.').collect();
+
+        match *parts.as_slice() {
+            [seconds] => {
+                if let Ok(seconds) = u64::from_str_radix(seconds, 10) {
+                    Ok(Duration::new(seconds, 0))
+                } else {
+                    Err(Error::invalid_value(Unexpected::Str(value), &self))
+                }
+            }
+            [seconds, subseconds] => {
+                if let Ok(seconds) = u64::from_str_radix(seconds, 10) {
+                    let subseclen = subseconds.chars().count() as u32;
+                    if subseclen > 9 {
+                        return Err(Error::custom(format!(
+                                    "Duration only support nanosecond precision but '{}' has more than 9 digits.",
+                                    value
+                                )));
+                    }
+
+                    if let Ok(mut subseconds) = u32::from_str_radix(subseconds, 10) {
+                        // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds
+                        subseconds *= 10u32.pow(9 - subseclen);
+                        Ok(Duration::new(seconds, subseconds))
+                    } else {
+                        Err(Error::invalid_value(Unexpected::Str(value), &self))
+                    }
+                } else {
+                    Err(Error::invalid_value(Unexpected::Str(value), &self))
+                }
+            }
+
+            _ => Err(Error::invalid_value(Unexpected::Str(value), &self)),
+        }
+    }
+}
+
+impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<Integer, Strict> {
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        u64::deserialize(deserializer).map(|secs| Duration::new(secs, 0))
+    }
+}
+
+impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSeconds<FORMAT, Flexible>
+where
+    FORMAT: Format,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_any(DurationVisitiorFlexible)
+    }
+}
+
+impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<String, Strict> {
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        crate::rust::display_fromstr::deserialize(deserializer).map(|secs| Duration::new(secs, 0))
     }
 }

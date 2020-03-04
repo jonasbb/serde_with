@@ -4,6 +4,7 @@ use std::{
     fmt::Display,
     hash::{BuildHasher, Hash},
     marker::PhantomData,
+    time::Duration,
 };
 
 impl<T: Serialize> SerializeAs<T> for SameAs<T> {
@@ -334,5 +335,39 @@ impl SerializeAs<Vec<u8>> for BytesOrString {
         S: Serializer,
     {
         source.serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<Integer, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut secs = source.as_secs();
+        // Properly round the value
+        if source.subsec_millis() >= 500 {
+            secs += 1;
+        }
+        secs.serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<String, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut secs = source.as_secs();
+        // Properly round the value
+        if source.subsec_millis() >= 500 {
+            secs += 1;
+        }
+        format!("{}", secs).serialize(serializer)
     }
 }
