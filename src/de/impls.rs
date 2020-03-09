@@ -424,32 +424,6 @@ where
             marker: PhantomData<(K, KAs, V, VAs)>,
         }
 
-        struct SeqIter<'de, A, K, KAs, V, VAs> {
-            access: A,
-            marker: PhantomData<(&'de (), K, KAs, V, VAs)>,
-        }
-
-        impl<'de, A, K, KAs, V, VAs> Iterator for SeqIter<'de, A, K, KAs, V, VAs>
-        where
-            A: SeqAccess<'de>,
-            KAs: DeserializeAs<'de, K>,
-            VAs: DeserializeAs<'de, V>,
-        {
-            #[allow(clippy::type_complexity)]
-            type Item = Result<(DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>), A::Error>;
-
-            fn next(&mut self) -> Option<Self::Item> {
-                self.access.next_element().transpose()
-            }
-
-            fn size_hint(&self) -> (usize, Option<usize>) {
-                match self.access.size_hint() {
-                    Some(size) => (size, Some(size)),
-                    None => (0, None),
-                }
-            }
-        }
-
         impl<'de, K, KAs, V, VAs> Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
         where
             KAs: DeserializeAs<'de, K>,
@@ -467,10 +441,7 @@ where
             where
                 A: SeqAccess<'de>,
             {
-                let iter = SeqIter {
-                    access,
-                    marker: PhantomData,
-                };
+                let iter = utils::SeqIter::new(access);
                 iter.map(|res| {
                     res.map(
                         |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
@@ -611,32 +582,6 @@ macro_rules! tuple_seq_as_map_option_impl {
                     marker: PhantomData<(K, KAs, V, VAs)>,
                 }
 
-                struct MapIter<'de, A, K, KAs, V, VAs> {
-                    access: A,
-                    marker: PhantomData<(&'de (), K, KAs, V, VAs)>,
-                }
-
-                impl<'de, A, K, KAs, V, VAs> Iterator for MapIter<'de, A, K, KAs, V, VAs>
-                where
-                    A: MapAccess<'de>,
-                    KAs: DeserializeAs<'de, K>,
-                    VAs: DeserializeAs<'de, V>,
-                {
-                    #[allow(clippy::type_complexity)]
-                    type Item = Result<(DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>), A::Error>;
-
-                    fn next(&mut self) -> Option<Self::Item> {
-                        self.access.next_entry().transpose()
-                    }
-
-                    fn size_hint(&self) -> (usize, Option<usize>) {
-                        match self.access.size_hint() {
-                            Some(size) => (size, Some(size)),
-                            None => (0, None),
-                        }
-                    }
-                }
-
                 impl<'de, K, KAs, V, VAs> Visitor<'de> for MapVisitor<K, KAs, V, VAs>
                 where
                     KAs: DeserializeAs<'de, K>,
@@ -653,10 +598,7 @@ macro_rules! tuple_seq_as_map_option_impl {
                     where
                         A: MapAccess<'de>,
                     {
-                        let iter = MapIter {
-                            access,
-                            marker: PhantomData,
-                        };
+                        let iter = utils::MapIter::new(access);
                         iter.map(|res| {
                             res.map(
                                 |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
