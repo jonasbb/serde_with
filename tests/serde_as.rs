@@ -8,7 +8,11 @@ use serde_with::{
     As, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds, Flexible, Integer,
     NoneAsEmptyString, Same, SameAs,
 };
-use std::{collections::BTreeMap, fmt::Debug, rc::Rc, sync::Arc};
+use std::{
+    collections::{BTreeMap, LinkedList, VecDeque},
+    rc::Rc,
+    sync::Arc,
+};
 
 #[test]
 fn test_display_fromstr() {
@@ -190,18 +194,45 @@ fn test_tuple_list_as_map() {
         r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
     );
 
-    // #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    // struct StructDeque {
-    //     #[serde(with = "As::<BTreeMap<DisplayFromStr, DisplayFromStr>>")]
-    //     values: VecDeque<(u32, IpAddr)>,
-    // };
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructDeque {
+        #[serde(with = "As::<BTreeMap<DisplayFromStr, DisplayFromStr>>")]
+        values: VecDeque<(u32, IpAddr)>,
+    };
 
-    // is_equal(
-    //     StructDeque {
-    //         values: vec![(1, ip), (10, ip), (200, ip2)].into(),
-    //     },
-    //     r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
-    // );
+    is_equal(
+        StructDeque {
+            values: vec![(1, ip), (10, ip), (200, ip2)].into(),
+        },
+        r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructLinkedList {
+        #[serde(with = "As::<HashMap<DisplayFromStr, DisplayFromStr>>")]
+        values: LinkedList<(u32, IpAddr)>,
+    };
+
+    is_equal(
+        StructDeque {
+            values: vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect(),
+        },
+        r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructOption {
+        #[serde(with = "As::<HashMap<DisplayFromStr, DisplayFromStr>>")]
+        values: Option<(u32, IpAddr)>,
+    };
+
+    is_equal(
+        StructOption {
+            values: Some((1, ip)),
+        },
+        r#"{"values":{"1":"1.2.3.4"}}"#,
+    );
+    is_equal(StructOption { values: None }, r#"{"values":{}}"#);
 }
 
 #[test]
