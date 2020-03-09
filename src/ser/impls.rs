@@ -258,64 +258,51 @@ where
     }
 }
 
-impl<K, KAs, V, VAs, BH> SerializeAs<Vec<(K, V)>> for HashMap<KAs, VAs, BH>
-where
-    KAs: SerializeAs<K>,
-    VAs: SerializeAs<V>,
-    BH: BuildHasher,
-{
-    fn serialize_as<S>(source: &Vec<(K, V)>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.collect_map(source.iter().map(|(k, v)| {
-            (
-                SerializeAsWrap::<K, KAs>::new(k),
-                SerializeAsWrap::<V, VAs>::new(v),
-            )
-        }))
-    }
+macro_rules! tuple_seq_as_map_impl_intern {
+    ($tyorig:ty, $ty:ident <K, V>) => {
+        #[allow(clippy::implicit_hasher)]
+        impl<K, KAs, V, VAs> SerializeAs<$tyorig> for $ty<KAs, VAs>
+        where
+            KAs: SerializeAs<K>,
+            VAs: SerializeAs<V>,
+        {
+            fn serialize_as<S>(source: &$tyorig, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                serializer.collect_map(source.iter().map(|(k, v)| {
+                    (
+                        SerializeAsWrap::<K, KAs>::new(k),
+                        SerializeAsWrap::<V, VAs>::new(v),
+                    )
+                }))
+            }
+        }
+    };
+}
+macro_rules! tuple_seq_as_map_impl {
+    ($($ty:ty $(,)?)+) => {$(
+        tuple_seq_as_map_impl_intern!($ty, BTreeMap<K, V>);
+        tuple_seq_as_map_impl_intern!($ty, HashMap<K, V>);
+    )+}
 }
 
-impl<K, KAs, V, VAs> SerializeAs<Vec<(K, V)>> for BTreeMap<KAs, VAs>
-where
-    KAs: SerializeAs<K>,
-    VAs: SerializeAs<V>,
-{
-    fn serialize_as<S>(source: &Vec<(K, V)>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.collect_map(source.iter().map(|(k, v)| {
-            (
-                SerializeAsWrap::<K, KAs>::new(k),
-                SerializeAsWrap::<V, VAs>::new(v),
-            )
-        }))
-    }
+tuple_seq_as_map_impl! {
+    BinaryHeap<(K, V)>,
+    BTreeSet<(K, V)>,
+    HashSet<(K, V)>,
+    LinkedList<(K, V)>,
+    Option<(K, V)>,
+    Vec<(K, V)>,
+    VecDeque<(K, V)>,
 }
-
-// impl<'a, 'b, Seq, K, KAs, V, VAs> SerializeAs<Seq, (K, V)> for BTreeMap<KAs, VAs>
-// where
-//     'a: 'b,
-//     KAs: SerializeAs<K>,
-//     VAs: SerializeAs<V>,
-//     &'a Seq: IntoIterator<Item = (&'b K, &'b V)> + 'a,
-//     K: 'b,
-//     V: 'b,
-// {
-//     fn serialize_as<'s, S>(source: &'s Seq, serializer: S) -> Result<S::Ok, S::Error>
-//     where
-//         S: Serializer,
-//     {
-//         serializer.collect_map(source.into_iter().map(|(k, v)| {
-//             (
-//                 SerializeAsWrap::<K, KAs>::new(k),
-//                 SerializeAsWrap::<V, VAs>::new(v),
-//             )
-//         }))
-//     }
-// }
+tuple_seq_as_map_impl! {
+    [(K, V); 0], [(K, V); 1], [(K, V); 2], [(K, V); 3], [(K, V); 4], [(K, V); 5], [(K, V); 6],
+    [(K, V); 7], [(K, V); 8], [(K, V); 9], [(K, V); 10], [(K, V); 11], [(K, V); 12], [(K, V); 13],
+    [(K, V); 14], [(K, V); 15], [(K, V); 16], [(K, V); 17], [(K, V); 18], [(K, V); 19], [(K, V); 20],
+    [(K, V); 21], [(K, V); 22], [(K, V); 23], [(K, V); 24], [(K, V); 25], [(K, V); 26], [(K, V); 27],
+    [(K, V); 28], [(K, V); 29], [(K, V); 30], [(K, V); 31], [(K, V); 32],
+}
 
 impl<T, TAs> SerializeAs<T> for DefaultOnError<TAs>
 where
