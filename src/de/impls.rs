@@ -410,55 +410,61 @@ impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
     }
 }
 
-impl<'de, K, KAs, V, VAs> DeserializeAs<'de, BTreeMap<K, V>> for Vec<(KAs, VAs)>
-where
-    KAs: DeserializeAs<'de, K>,
-    VAs: DeserializeAs<'de, V>,
-    K: Ord,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<BTreeMap<K, V>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct SeqVisitor<K, KAs, V, VAs> {
-            marker: PhantomData<(K, KAs, V, VAs)>,
-        }
-
-        impl<'de, K, KAs, V, VAs> Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
+macro_rules! map_as_tuple_seq {
+    ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V>) => {
+        impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $ty<K, V>> for Vec<(KAs, VAs)>
         where
             KAs: DeserializeAs<'de, K>,
             VAs: DeserializeAs<'de, V>,
-            K: Ord,
+            $(K: $kbound1 $(+ $kbound2)*,)*
         {
-            type Value = BTreeMap<K, V>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("a sequence")
-            }
-
-            #[inline]
-            fn visit_seq<A>(self, access: A) -> Result<Self::Value, A::Error>
+            fn deserialize_as<D>(deserializer: D) -> Result<$ty<K, V>, D::Error>
             where
-                A: SeqAccess<'de>,
+                D: Deserializer<'de>,
             {
-                let iter = utils::SeqIter::new(access);
-                iter.map(|res| {
-                    res.map(
-                        |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
-                            (k.into_inner(), v.into_inner())
-                        },
-                    )
-                })
-                .collect()
+                struct SeqVisitor<K, KAs, V, VAs> {
+                    marker: PhantomData<(K, KAs, V, VAs)>,
+                }
+
+                impl<'de, K, KAs, V, VAs> Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
+                where
+                    KAs: DeserializeAs<'de, K>,
+                    VAs: DeserializeAs<'de, V>,
+                    $(K: $kbound1 $(+ $kbound2)*,)*
+                {
+                    type Value = $ty<K, V>;
+
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                        formatter.write_str("a sequence")
+                    }
+
+                    #[inline]
+                    fn visit_seq<A>(self, access: A) -> Result<Self::Value, A::Error>
+                    where
+                        A: SeqAccess<'de>,
+                    {
+                        let iter = utils::SeqIter::new(access);
+                        iter.map(|res| {
+                            res.map(
+                                |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
+                                    (k.into_inner(), v.into_inner())
+                                },
+                            )
+                        })
+                        .collect()
+                    }
+                }
+
+                let visitor = SeqVisitor::<K, KAs, V, VAs> {
+                    marker: PhantomData,
+                };
+                deserializer.deserialize_seq(visitor)
             }
         }
-
-        let visitor = SeqVisitor::<K, KAs, V, VAs> {
-            marker: PhantomData,
-        };
-        deserializer.deserialize_seq(visitor)
-    }
+    };
 }
+map_as_tuple_seq!(BTreeMap<K: Ord, V>);
+map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 
 impl<'de, Str> DeserializeAs<'de, Option<Str>> for NoneAsEmptyString
 where

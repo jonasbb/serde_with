@@ -228,23 +228,29 @@ impl<T: Serialize> SerializeAs<T> for Same {
     }
 }
 
-impl<K, KAs, V, VAs> SerializeAs<BTreeMap<K, V>> for Vec<(KAs, VAs)>
-where
-    KAs: SerializeAs<K>,
-    VAs: SerializeAs<V>,
-{
-    fn serialize_as<S>(source: &BTreeMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.collect_seq(source.iter().map(|(k, v)| {
-            (
-                SerializeAsWrap::<K, KAs>::new(k),
-                SerializeAsWrap::<V, VAs>::new(v),
-            )
-        }))
-    }
+macro_rules! map_as_tuple_seq {
+    ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound:ident)* >) => {
+        impl<K, KAs, V, VAs> SerializeAs<$ty<K, V>> for Vec<(KAs, VAs)>
+        where
+            KAs: SerializeAs<K>,
+            VAs: SerializeAs<V>,
+        {
+            fn serialize_as<S>(source: &$ty<K, V>, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                serializer.collect_seq(source.iter().map(|(k, v)| {
+                    (
+                        SerializeAsWrap::<K, KAs>::new(k),
+                        SerializeAsWrap::<V, VAs>::new(v),
+                    )
+                }))
+            }
+        }
+    };
 }
+map_as_tuple_seq!(BTreeMap<K: Ord, V>);
+map_as_tuple_seq!(HashMap<K: Eq + Hash, V, H: BuildHasher>);
 
 impl<AsRefStr> SerializeAs<Option<AsRefStr>> for NoneAsEmptyString
 where
