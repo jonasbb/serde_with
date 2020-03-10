@@ -188,6 +188,7 @@ pub trait Strictness {}
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Integer;
 impl Format for Integer {}
+impl Format for f64 {}
 impl Format for String {}
 
 #[derive(Copy, Clone, Debug, Default)]

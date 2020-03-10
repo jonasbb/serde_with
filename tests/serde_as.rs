@@ -488,6 +488,40 @@ fn test_duration() {
     );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Structf64Strict {
+        #[serde(with = "As::<DurationSeconds<f64>>")]
+        value: Duration,
+    };
+
+    is_equal(Structf64Strict { value: zero }, r#"{"value":0.0}"#);
+    is_equal(Structf64Strict { value: one_second }, r#"{"value":1.0}"#);
+    is_equal(Structf64Strict { value: half_second }, r#"{"value":0.5}"#);
+    check_error_deserialization::<Structf64Strict>(
+        r#"{"value":"1"}"#,
+        r#"invalid type: string "1", expected f64 at line 1 column 12"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Structf64Flexible {
+        #[serde(with = "As::<DurationSeconds<f64, Flexible>>")]
+        value: Duration,
+    };
+
+    is_equal(Structf64Flexible { value: zero }, r#"{"value":0.0}"#);
+    is_equal(Structf64Flexible { value: one_second }, r#"{"value":1.0}"#);
+    check_serialization(Structf64Flexible { value: half_second }, r#"{"value":0.5}"#);
+    check_deserialization(
+        Structf64Flexible { value: half_second },
+        r#"{"value":"0.5"}"#,
+    );
+    check_deserialization(Structf64Flexible { value: one_second }, r#"{"value":"1"}"#);
+    check_deserialization(Structf64Flexible { value: zero }, r#"{"value":"0"}"#);
+    check_error_deserialization::<Structf64Flexible>(
+        r#"{"value":"a"}"#,
+        r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringStrict {
         #[serde(with = "As::<DurationSeconds<String>>")]
         value: Duration,

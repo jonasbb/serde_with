@@ -751,15 +751,12 @@ impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<Integer, Strict> {
     }
 }
 
-impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSeconds<FORMAT, Flexible>
-where
-    FORMAT: Format,
-{
+impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<f64, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_any(DurationVisitiorFlexible)
+        f64::deserialize(deserializer).map(Duration::from_secs_f64)
     }
 }
 
@@ -769,5 +766,17 @@ impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<String, Strict> {
         D: Deserializer<'de>,
     {
         crate::rust::display_fromstr::deserialize(deserializer).map(|secs| Duration::new(secs, 0))
+    }
+}
+
+impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSeconds<FORMAT, Flexible>
+where
+    FORMAT: Format,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_any(DurationVisitiorFlexible)
     }
 }

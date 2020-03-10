@@ -348,6 +348,18 @@ where
     }
 }
 
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<f64, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source.as_secs_f64().serialize(serializer)
+    }
+}
+
 impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<String, STRICTNESS>
 where
     STRICTNESS: Strictness,
