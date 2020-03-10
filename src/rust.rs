@@ -1375,6 +1375,10 @@ pub mod bytes_or_string {
 /// let a: A = serde_json::from_str(r#"{"value": "123"}"#).unwrap();
 /// assert_eq!(0, a.value);
 ///
+/// // Map is of invalid type
+/// let a: A = serde_json::from_str(r#"{"value": {}}"#).unwrap();
+/// assert_eq!(0, a.value);
+///
 /// // Missing entries still cause errors
 /// assert!(serde_json::from_str::<A>(r#"{  }"#).is_err());
 /// ```
@@ -1403,7 +1407,20 @@ pub mod default_on_error {
         D: Deserializer<'de>,
         T: Deserialize<'de> + Default,
     {
-        T::deserialize(deserializer).or_else(|_| Ok(Default::default()))
+        #[derive(Debug, serde::Deserialize)]
+        #[serde(untagged)]
+        enum GoodOrError<T> {
+            Good(T),
+            // This consumes one "item" when `T` errors while deserializing.
+            // This is necessary to make this work, when instead of having a direct value
+            // like integer or string, the deserializer sees a list or map.
+            Error(serde::de::IgnoredAny),
+        };
+
+        Ok(match Deserialize::deserialize(deserializer) {
+            Ok(GoodOrError::Good(res)) => res,
+            _ => Default::default(),
+        })
     }
 }
 
