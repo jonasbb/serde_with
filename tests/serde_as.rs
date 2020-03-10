@@ -9,7 +9,7 @@ use serde_with::{
     NoneAsEmptyString, Same, SameAs,
 };
 use std::{
-    collections::{BTreeMap, LinkedList, VecDeque},
+    collections::{BTreeMap, HashMap, LinkedList, VecDeque},
     rc::Rc,
     sync::Arc,
 };
@@ -137,28 +137,73 @@ fn test_map_as_tuple_list() {
     let ip2 = "255.255.255.255".parse().unwrap();
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct Struct {
+    struct StructBTree {
         #[serde(with = "As::<Vec<(DisplayFromStr, DisplayFromStr)>>")]
         values: BTreeMap<u32, IpAddr>,
     };
 
     let map: BTreeMap<_, _> = vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect();
     is_equal(
-        Struct {
+        StructBTree {
             values: map.clone(),
         },
         r#"{"values":[["1","1.2.3.4"],["10","1.2.3.4"],["200","255.255.255.255"]]}"#,
     );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct Struct2 {
+    struct StructBTree2 {
         #[serde(with = "As::<Vec<(Same, DisplayFromStr)>>")]
         values: BTreeMap<u32, IpAddr>,
     };
 
     is_equal(
-        Struct2 { values: map },
+        StructBTree2 { values: map },
         r#"{"values":[[1,"1.2.3.4"],[10,"1.2.3.4"],[200,"255.255.255.255"]]}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructHash {
+        #[serde(with = "As::<Vec<(DisplayFromStr, DisplayFromStr)>>")]
+        values: HashMap<u32, IpAddr>,
+    };
+
+    // HashMap serialization tests with more than 1 entry are unrelyable
+    let map1: HashMap<_, _> = vec![(200, ip2)].into_iter().collect();
+    let map: HashMap<_, _> = vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect();
+    is_equal(
+        StructHash {
+            values: map1.clone(),
+        },
+        r#"{"values":[["200","255.255.255.255"]]}"#,
+    );
+    check_deserialization(
+        StructHash {
+            values: map.clone(),
+        },
+        r#"{"values":[["1","1.2.3.4"],["10","1.2.3.4"],["200","255.255.255.255"]]}"#,
+    );
+    check_error_deserialization::<StructHash>(
+        r#"{"values":{"200":"255.255.255.255"}}"#,
+        "invalid type: map, expected a sequence at line 1 column 10",
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructHash2 {
+        #[serde(with = "As::<Vec<(Same, DisplayFromStr)>>")]
+        values: HashMap<u32, IpAddr>,
+    };
+
+    is_equal(
+        StructHash2 { values: map1 },
+        r#"{"values":[[200,"255.255.255.255"]]}"#,
+    );
+    check_deserialization(
+        StructHash2 { values: map },
+        r#"{"values":[[1,"1.2.3.4"],[10,"1.2.3.4"],[200,"255.255.255.255"]]}"#,
+    );
+    check_error_deserialization::<StructHash2>(
+        r#"{"values":1}"#,
+        "invalid type: integer `1`, expected a sequence at line 1 column 11",
     );
 }
 
