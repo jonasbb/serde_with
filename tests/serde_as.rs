@@ -466,6 +466,10 @@ fn test_duration() {
         r#"{"value":"1"}"#,
         r#"invalid type: string "1", expected u64 at line 1 column 12"#,
     );
+    check_error_deserialization::<StructIntStrict>(
+        r#"{"value":-1}"#,
+        r#"invalid value: integer `-1`, expected u64 at line 1 column 11"#,
+    );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntFlexible {
@@ -486,6 +490,10 @@ fn test_duration() {
         r#"{"value":"a"}"#,
         r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
     );
+    check_error_deserialization::<StructIntFlexible>(
+        r#"{"value":-1}"#,
+        r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
+    );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Strict {
@@ -500,6 +508,10 @@ fn test_duration() {
     check_error_deserialization::<Structf64Strict>(
         r#"{"value":"1"}"#,
         r#"invalid type: string "1", expected f64 at line 1 column 12"#,
+    );
+    check_error_deserialization::<Structf64Strict>(
+        r#"{"value":-1.0}"#,
+        r#"underflow when converting float to duration at line 1 column 14"#,
     );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -521,6 +533,10 @@ fn test_duration() {
         r#"{"value":"a"}"#,
         r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
     );
+    check_error_deserialization::<Structf64Flexible>(
+        r#"{"value":-1}"#,
+        r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
+    );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringStrict {
@@ -538,6 +554,10 @@ fn test_duration() {
         r#"{"value":1}"#,
         // TODO the error message should not talk about "json object"
         r#"invalid type: integer `1`, expected valid json object at line 1 column 10"#,
+    );
+    check_error_deserialization::<StructStringStrict>(
+        r#"{"value":-1}"#,
+        r#"invalid type: integer `-1`, expected valid json object at line 1 column 11"#,
     );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -567,5 +587,9 @@ fn test_duration() {
     check_error_deserialization::<StructStringFlexible>(
         r#"{"value":"a"}"#,
         r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
+    );
+    check_error_deserialization::<StructStringFlexible>(
+        r#"{"value":-1}"#,
+        r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
     );
 }
