@@ -356,7 +356,9 @@ where
     where
         S: Serializer,
     {
-        source.as_secs_f64().round().serialize(serializer)
+        utils::duration_as_secs_f64(source)
+            .round()
+            .serialize(serializer)
     }
 }
 
