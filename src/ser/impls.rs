@@ -356,7 +356,7 @@ where
     where
         S: Serializer,
     {
-        source.as_secs_f64().serialize(serializer)
+        source.as_secs_f64().round().serialize(serializer)
     }
 }
 
