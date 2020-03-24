@@ -89,3 +89,26 @@ where
         }
     }
 }
+
+pub(crate) fn duration_as_secs_f64(dur: &std::time::Duration) -> f64 {
+    (dur.as_secs() as f64) + (dur.subsec_nanos() as f64) / (NANOS_PER_SEC as f64)
+}
+
+pub(crate) fn duration_from_secs_f64(secs: f64) -> Result<std::time::Duration, String> {
+    const MAX_NANOS_F64: f64 = ((u64::max_value() as u128 + 1) * (NANOS_PER_SEC as u128)) as f64;
+    let nanos = secs * (NANOS_PER_SEC as f64);
+    if !nanos.is_finite() {
+        return Err("got non-finite value when converting float to duration".into());
+    }
+    if nanos >= MAX_NANOS_F64 {
+        return Err("overflow when converting float to duration".into());
+    }
+    if nanos < 0.0 {
+        return Err("underflow when converting float to duration".into());
+    }
+    let nanos = nanos as u128;
+    Ok(std::time::Duration::new(
+        (nanos / (NANOS_PER_SEC as u128)) as u64,
+        (nanos % (NANOS_PER_SEC as u128)) as u32,
+    ))
+}
