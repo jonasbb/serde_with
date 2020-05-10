@@ -390,8 +390,10 @@ where
     where
         T: ?Sized + Serialize,
     {
-        self.delegate
-            .serialize_entry(&format!("{}{}", self.prefix, key), value)
+        let mut prefixed_key = String::with_capacity(self.prefix.len() + key.len());
+        prefixed_key.push_str(self.prefix);
+        prefixed_key.push_str(key);
+        self.delegate.serialize_entry(&prefixed_key, value)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
