@@ -1,5 +1,15 @@
-on: push
 name: Rust CI
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+    - staging
+    - trying
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: -D warnings
 
 jobs:
   clippy_check:
@@ -26,19 +36,19 @@ jobs:
         name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --no-default-features -- -D warnings
+          args: --workspace --no-default-features -- -D warnings
           name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
       - uses: actions-rs/clippy-check@v1
         name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D warnings
+          args: --workspace -- -D warnings
           name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
       - uses: actions-rs/clippy-check@v1
         name: clippy "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features -- -D warnings
+          args: --workspace --all-features -- -D warnings
           name: clippy "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
 
   rustfmt:
@@ -92,21 +102,22 @@ jobs:
         name: Build (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           command: build
-          args: --all-features
+          args: --all --all-features
       - uses: actions-rs/cargo@v1
         name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           command: test
-          args: --no-default-features
+          args: --all --no-default-features
       - uses: actions-rs/cargo@v1
         name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           command: test
+          args: --all
       - uses: actions-rs/cargo@v1
         name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           command: test
-          args: --all-features
+          args: --all --all-features
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1

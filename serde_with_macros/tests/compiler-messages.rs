@@ -1,5 +1,5 @@
 // This test fails for older compiler versions since the error messages are different.
-#[rustversion::attr(before(1.35), ignore)]
+#[rustversion::attr(before(1.38), ignore)]
 #[test]
 fn compile_test() {
     // This test does not work under tarpaulin, so skip it if detected
