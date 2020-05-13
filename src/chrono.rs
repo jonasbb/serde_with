@@ -4,9 +4,13 @@
 //!
 //! [chrono]: https://docs.rs/chrono/
 
-use crate::{de::DeserializeAs, ser::SerializeAs};
-use chrono_crate::{DateTime, NaiveDateTime, Utc};
+use crate::{
+    de::DeserializeAs, ser::SerializeAs, utils, DurationSeconds, DurationSecondsWithFrac, Format,
+    Integer, Strictness,
+};
+use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use utils::NANOS_PER_SEC;
 
 /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
 ///
@@ -173,5 +177,117 @@ impl<'de> DeserializeAs<'de, NaiveDateTime> for DateTime<Utc> {
         D: Deserializer<'de>,
     {
         DateTime::<Utc>::deserialize(deserializer).map(|datetime| datetime.naive_utc())
+    }
+}
+
+fn duration_subsec_nanos(dur: &Duration) -> u32 {
+    (*dur - Duration::seconds(dur.num_seconds()))
+        .num_nanoseconds()
+        .unwrap() as u32
+}
+
+fn duration_as_secs_f64(dur: &Duration) -> f64 {
+    (dur.num_seconds() as f64) + (duration_subsec_nanos(dur) as f64) / (NANOS_PER_SEC as f64)
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<Integer, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut secs = source.num_seconds();
+        // Properly round the value
+        if duration_subsec_nanos(source) >= 500_000_000 {
+            secs += 1;
+        }
+        secs.serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<f64, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        duration_as_secs_f64(source).round().serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<String, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut secs = source.num_seconds();
+        // Properly round the value
+        if duration_subsec_nanos(source) >= 500_000_000 {
+            secs += 1;
+        }
+        secs.to_string().serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<f64, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        duration_as_secs_f64(source).serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<String, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        duration_as_secs_f64(source)
+            .to_string()
+            .serialize(serializer)
+    }
+}
+
+impl<'de, FORMAT, S> DeserializeAs<'de, Duration> for DurationSeconds<FORMAT, S>
+where
+    FORMAT: Format,
+    S: Strictness,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // deserializer.deserialize_any(DurationVisitiorFlexible)
+        i32::deserialize(deserializer);
+        Ok(Duration::zero())
+    }
+}
+
+impl<'de, FORMAT, S> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<FORMAT, S>
+where
+    FORMAT: Format,
+    S: Strictness,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        // deserializer.deserialize_any(DurationVisitiorFlexible)
+        i32::deserialize(deserializer);
+        Ok(Duration::zero())
     }
 }
