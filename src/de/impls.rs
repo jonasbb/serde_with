@@ -781,3 +781,34 @@ where
         deserializer.deserialize_any(DurationVisitiorFlexible)
     }
 }
+
+impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<f64, Strict> {
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let val = f64::deserialize(deserializer)?;
+        utils::duration_from_secs_f64(val).map_err(Error::custom)
+    }
+}
+
+impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<String, Strict> {
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        crate::rust::display_fromstr::deserialize(deserializer).map(|secs| Duration::new(secs, 0))
+    }
+}
+
+impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<FORMAT, Flexible>
+where
+    FORMAT: Format,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_any(DurationVisitiorFlexible)
+    }
+}
