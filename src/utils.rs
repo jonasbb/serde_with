@@ -96,6 +96,8 @@ pub(crate) fn duration_as_secs_f64(dur: &std::time::Duration) -> f64 {
 
 pub(crate) fn duration_from_secs_f64(secs: f64) -> Result<std::time::Duration, String> {
     const MAX_NANOS_F64: f64 = ((u64::max_value() as u128 + 1) * (NANOS_PER_SEC as u128)) as f64;
+    // TODO why are the seconds converted to nanoseconds first?
+    // Does it make sense to just truncate the value?
     let nanos = secs * (NANOS_PER_SEC as f64);
     if !nanos.is_finite() {
         return Err("got non-finite value when converting float to duration".into());
