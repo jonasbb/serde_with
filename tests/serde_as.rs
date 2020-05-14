@@ -627,11 +627,7 @@ fn test_duration_seconds_with_frac() {
 
     is_equal(Structf64Flexible { value: zero }, r#"{"value":0.0}"#);
     is_equal(Structf64Flexible { value: one_second }, r#"{"value":1.0}"#);
-    check_serialization(Structf64Flexible { value: half_second }, r#"{"value":1.0}"#);
-    check_deserialization(
-        Structf64Flexible { value: half_second },
-        r#"{"value":"0.5"}"#,
-    );
+    is_equal(Structf64Flexible { value: half_second }, r#"{"value":0.5}"#);
     check_deserialization(Structf64Flexible { value: one_second }, r#"{"value":"1"}"#);
     check_deserialization(Structf64Flexible { value: zero }, r#"{"value":"0"}"#);
     check_error_deserialization::<Structf64Flexible>(
@@ -651,18 +647,17 @@ fn test_duration_seconds_with_frac() {
 
     is_equal(StructStringStrict { value: zero }, r#"{"value":"0"}"#);
     is_equal(StructStringStrict { value: one_second }, r#"{"value":"1"}"#);
-    check_serialization(
+    is_equal(
         StructStringStrict { value: half_second },
-        r#"{"value":"1"}"#,
+        r#"{"value":"0.5"}"#,
     );
     check_error_deserialization::<StructStringStrict>(
         r#"{"value":1}"#,
-        // TODO the error message should not talk about "json object"
-        r#"invalid type: integer `1`, expected valid json object at line 1 column 10"#,
+        r#"invalid type: integer `1`, expected a string at line 1 column 10"#,
     );
     check_error_deserialization::<StructStringStrict>(
         r#"{"value":-1}"#,
-        r#"invalid type: integer `-1`, expected valid json object at line 1 column 11"#,
+        r#"invalid type: integer `-1`, expected a string at line 1 column 11"#,
     );
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -676,17 +671,9 @@ fn test_duration_seconds_with_frac() {
         StructStringFlexible { value: one_second },
         r#"{"value":"1"}"#,
     );
-    check_serialization(
-        StructStringFlexible { value: half_second },
-        r#"{"value":"1"}"#,
-    );
-    check_deserialization(
+    is_equal(
         StructStringFlexible { value: half_second },
         r#"{"value":"0.5"}"#,
-    );
-    check_deserialization(
-        StructStringFlexible { value: one_second },
-        r#"{"value":"1"}"#,
     );
     check_deserialization(StructStringFlexible { value: zero }, r#"{"value":"0"}"#);
     check_error_deserialization::<StructStringFlexible>(

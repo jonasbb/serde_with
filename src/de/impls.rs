@@ -781,7 +781,8 @@ impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<String, Stric
     where
         D: Deserializer<'de>,
     {
-        crate::rust::display_fromstr::deserialize(deserializer).map(|secs| Duration::new(secs, 0))
+        let dur = String::deserialize(deserializer)?;
+        DurationVisitiorFlexible.visit_str(&*dur)
     }
 }
 
