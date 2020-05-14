@@ -5,8 +5,8 @@ use crate::utils::{
 };
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    As, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds, Flexible, Integer,
-    NoneAsEmptyString, Same, SameAs,
+    As, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds, DurationSecondsWithFrac,
+    Flexible, Integer, NoneAsEmptyString, Same, SameAs,
 };
 use std::{
     collections::{BTreeMap, HashMap, LinkedList, VecDeque},
@@ -447,7 +447,7 @@ fn test_bytes_or_string() {
 }
 
 #[test]
-fn test_duration() {
+fn test_duration_seconds() {
     use std::time::Duration;
     let zero = Duration::new(0, 0);
     let one_second = Duration::new(1, 0);
@@ -582,6 +582,98 @@ fn test_duration() {
     check_deserialization(
         StructStringFlexible { value: one_second },
         r#"{"value":"1"}"#,
+    );
+    check_deserialization(StructStringFlexible { value: zero }, r#"{"value":"0"}"#);
+    check_error_deserialization::<StructStringFlexible>(
+        r#"{"value":"a"}"#,
+        r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
+    );
+    check_error_deserialization::<StructStringFlexible>(
+        r#"{"value":-1}"#,
+        r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
+    );
+}
+
+#[test]
+fn test_duration_seconds_with_frac() {
+    use std::time::Duration;
+    let zero = Duration::new(0, 0);
+    let one_second = Duration::new(1, 0);
+    let half_second = Duration::new(0, 500_000_000);
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Structf64Strict {
+        #[serde(with = "As::<DurationSecondsWithFrac<f64>>")]
+        value: Duration,
+    };
+
+    is_equal(Structf64Strict { value: zero }, r#"{"value":0.0}"#);
+    is_equal(Structf64Strict { value: one_second }, r#"{"value":1.0}"#);
+    is_equal(Structf64Strict { value: half_second }, r#"{"value":0.5}"#);
+    check_error_deserialization::<Structf64Strict>(
+        r#"{"value":"1"}"#,
+        r#"invalid type: string "1", expected f64 at line 1 column 12"#,
+    );
+    check_error_deserialization::<Structf64Strict>(
+        r#"{"value":-1.0}"#,
+        r#"underflow when converting float to duration at line 1 column 14"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Structf64Flexible {
+        #[serde(with = "As::<DurationSecondsWithFrac<f64, Flexible>>")]
+        value: Duration,
+    };
+
+    is_equal(Structf64Flexible { value: zero }, r#"{"value":0.0}"#);
+    is_equal(Structf64Flexible { value: one_second }, r#"{"value":1.0}"#);
+    is_equal(Structf64Flexible { value: half_second }, r#"{"value":0.5}"#);
+    check_deserialization(Structf64Flexible { value: one_second }, r#"{"value":"1"}"#);
+    check_deserialization(Structf64Flexible { value: zero }, r#"{"value":"0"}"#);
+    check_error_deserialization::<Structf64Flexible>(
+        r#"{"value":"a"}"#,
+        r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
+    );
+    check_error_deserialization::<Structf64Flexible>(
+        r#"{"value":-1}"#,
+        r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructStringStrict {
+        #[serde(with = "As::<DurationSecondsWithFrac<String>>")]
+        value: Duration,
+    };
+
+    is_equal(StructStringStrict { value: zero }, r#"{"value":"0"}"#);
+    is_equal(StructStringStrict { value: one_second }, r#"{"value":"1"}"#);
+    is_equal(
+        StructStringStrict { value: half_second },
+        r#"{"value":"0.5"}"#,
+    );
+    check_error_deserialization::<StructStringStrict>(
+        r#"{"value":1}"#,
+        r#"invalid type: integer `1`, expected a string at line 1 column 10"#,
+    );
+    check_error_deserialization::<StructStringStrict>(
+        r#"{"value":-1}"#,
+        r#"invalid type: integer `-1`, expected a string at line 1 column 11"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructStringFlexible {
+        #[serde(with = "As::<DurationSecondsWithFrac<String, Flexible>>")]
+        value: Duration,
+    };
+
+    is_equal(StructStringFlexible { value: zero }, r#"{"value":"0"}"#);
+    is_equal(
+        StructStringFlexible { value: one_second },
+        r#"{"value":"1"}"#,
+    );
+    is_equal(
+        StructStringFlexible { value: half_second },
+        r#"{"value":"0.5"}"#,
     );
     check_deserialization(StructStringFlexible { value: zero }, r#"{"value":"0"}"#);
     check_error_deserialization::<StructStringFlexible>(

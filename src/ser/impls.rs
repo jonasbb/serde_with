@@ -375,6 +375,32 @@ where
         if source.subsec_millis() >= 500 {
             secs += 1;
         }
-        format!("{}", secs).serialize(serializer)
+        secs.to_string().serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<f64, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        utils::duration_as_secs_f64(source).serialize(serializer)
+    }
+}
+
+impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<String, STRICTNESS>
+where
+    STRICTNESS: Strictness,
+{
+    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        utils::duration_as_secs_f64(source)
+            .to_string()
+            .serialize(serializer)
     }
 }

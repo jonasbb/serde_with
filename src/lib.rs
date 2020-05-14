@@ -203,3 +203,8 @@ impl Strictness for Flexible {}
 pub struct DurationSeconds<FORMAT: Format = Integer, STRICTNESS: Strictness = Strict>(
     PhantomData<(FORMAT, STRICTNESS)>,
 );
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationSecondsWithFrac<FORMAT: Format = f64, STRICTNESS: Strictness = Strict>(
+    PhantomData<(FORMAT, STRICTNESS)>,
+);

@@ -682,23 +682,7 @@ impl<'de> Visitor<'de> for DurationVisitiorFlexible {
     where
         E: Error,
     {
-        const MAX_NANOS_F64: f64 =
-            ((u64::max_value() as u128 + 1) * (utils::NANOS_PER_SEC as u128)) as f64;
-        let nanos = secs * (utils::NANOS_PER_SEC as f64);
-        if !nanos.is_finite() {
-            panic!("got non-finite value when converting float to duration");
-        }
-        if nanos >= MAX_NANOS_F64 {
-            panic!("overflow when converting float to duration");
-        }
-        if nanos < 0.0 {
-            panic!("underflow when converting float to duration");
-        }
-        let nanos = nanos as u128;
-        Ok(Duration::new(
-            (nanos / (utils::NANOS_PER_SEC as u128)) as u64,
-            (nanos % (utils::NANOS_PER_SEC as u128)) as u32,
-        ))
+        utils::duration_from_secs_f64(secs).map_err(Error::custom)
     }
 
     fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
@@ -771,6 +755,38 @@ impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<String, Strict> {
 }
 
 impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSeconds<FORMAT, Flexible>
+where
+    FORMAT: Format,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_any(DurationVisitiorFlexible)
+    }
+}
+
+impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<f64, Strict> {
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let val = f64::deserialize(deserializer)?;
+        utils::duration_from_secs_f64(val).map_err(Error::custom)
+    }
+}
+
+impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<String, Strict> {
+    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let dur = String::deserialize(deserializer)?;
+        DurationVisitiorFlexible.visit_str(&*dur)
+    }
+}
+
+impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<FORMAT, Flexible>
 where
     FORMAT: Format,
 {
