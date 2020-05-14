@@ -108,6 +108,43 @@ mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
 
+// Taken from shepmaster/snafu
+// Originally licensed as MIT+Apache 2
+// https://github.com/shepmaster/snafu/blob/fd37d79d4531ed1d3eebffad0d658928eb860cfe/src/lib.rs#L121-L165
+#[cfg(feature = "guide")]
+macro_rules! generate_guide {
+    (pub mod $name:ident; $($rest:tt)*) => {
+        generate_guide!(@gen ".", pub mod $name { } $($rest)*);
+    };
+    (pub mod $name:ident { $($children:tt)* } $($rest:tt)*) => {
+        generate_guide!(@gen ".", pub mod $name { $($children)* } $($rest)*);
+    };
+    (@gen $prefix:expr, ) => {};
+    (@gen $prefix:expr, pub mod $name:ident; $($rest:tt)*) => {
+        generate_guide!(@gen $prefix, pub mod $name { } $($rest)*);
+    };
+    (@gen $prefix:expr, @code pub mod $name:ident; $($rest:tt)*) => {
+        pub mod $name;
+        generate_guide!(@gen $prefix, $($rest)*);
+    };
+    (@gen $prefix:expr, pub mod $name:ident { $($children:tt)* } $($rest:tt)*) => {
+        doc_comment::doc_comment! {
+            include_str!(concat!($prefix, "/", stringify!($name), ".md")),
+            pub mod $name {
+                generate_guide!(@gen concat!($prefix, "/", stringify!($name)), $($children)*);
+            }
+        }
+        generate_guide!(@gen $prefix, $($rest)*);
+    };
+}
+
+#[cfg(feature = "guide")]
+generate_guide! {
+    pub mod guide {
+        pub mod test;
+    }
+}
+
 #[doc(inline)]
 pub use crate::{de::DeserializeAs, ser::SerializeAs};
 use serde::{ser::Serialize, Deserializer, Serializer};
