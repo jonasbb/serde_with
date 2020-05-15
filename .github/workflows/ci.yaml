@@ -125,7 +125,5 @@ jobs:
         with:
           args: "--workspace --all-features -- --test-threads 1"
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1.0.2
+        uses: codecov/codecov-action@v1
         if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
