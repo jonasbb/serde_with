@@ -22,7 +22,7 @@ features = [ "..." ]
 ```
 
 The crate is divided into different modules.
-They contain helpers for external crates and must be enabled with the correspondig feature.
+They contain helpers for external crates and must be enabled with the corresponding feature.
 
 Annotate your struct or enum to enable the custom de/serializer.
 
