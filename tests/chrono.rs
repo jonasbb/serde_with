@@ -7,10 +7,9 @@ use crate::utils::{
 };
 use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
 use pretty_assertions::assert_eq;
-use serde::{de::DeserializeOwned, Serialize};
-use serde_derive::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_with::{As, DurationSeconds, DurationSecondsWithFrac, Flexible, Integer, SameAs};
-use std::{collections::BTreeMap, fmt::Debug, str::FromStr};
+use std::{collections::BTreeMap, str::FromStr};
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
     DateTime::from_utc(NaiveDateTime::from_timestamp(secs, nsecs), Utc)
@@ -122,9 +121,9 @@ fn test_chrono_btree_map_naive_date_time() {
 fn test_chrono_duration_seconds() {
     let zero = Duration::zero();
     let one_second = Duration::seconds(1);
-    let third_second = Duration::nanoseconds(333_333_333);
+    // let third_second = Duration::nanoseconds(333_333_333);
     let half_second = Duration::nanoseconds(500_000_000);
-    let one_and_third_second = one_second + third_second;
+    // let one_and_third_second = one_second + third_second;
     let minus_one_second = zero - one_second;
     let minus_half_second = zero - half_second;
 
@@ -347,9 +346,9 @@ fn test_chrono_duration_seconds() {
 fn test_chrono_duration_seconds_with_frac() {
     let zero = Duration::zero();
     let one_second = Duration::seconds(1);
-    let third_second = Duration::nanoseconds(333_333_333);
+    // let third_second = Duration::nanoseconds(333_333_333);
     let half_second = Duration::nanoseconds(500_000_000);
-    let one_and_third_second = one_second + third_second;
+    // let one_and_third_second = one_second + third_second;
     let minus_one_second = zero - one_second;
     let minus_half_second = zero - half_second;
 

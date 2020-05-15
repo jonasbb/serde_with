@@ -205,6 +205,7 @@ fn duration_as_secs_f64(dur: Duration) -> f64 {
     (secs as f64) + (subsecs as f64) / (NANOS_PER_SEC as f64)
 }
 
+#[allow(clippy::float_cmp)]
 #[test]
 fn test_duration_as_secs_f64() {
     assert_eq!(duration_as_secs_f64(Duration::seconds(1)), 1.);
