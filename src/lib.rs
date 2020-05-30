@@ -141,7 +141,7 @@ macro_rules! generate_guide {
 #[cfg(feature = "guide")]
 generate_guide! {
     pub mod guide {
-        pub mod test;
+        pub mod migrating;
     }
 }
 
