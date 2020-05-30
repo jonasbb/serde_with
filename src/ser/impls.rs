@@ -1,4 +1,6 @@
 use super::*;
+use crate::Separator;
+use rust::StringWithSeparator;
 use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
     fmt::Display,
@@ -402,5 +404,29 @@ where
         utils::duration_as_secs_f64(source)
             .to_string()
             .serialize(serializer)
+    }
+}
+
+impl<SEPARATOR, I, T> SerializeAs<I> for StringWithSeparator<SEPARATOR, T>
+where
+    SEPARATOR: Separator,
+    for<'a> &'a I: IntoIterator<Item = &'a T>,
+    T: ToString,
+{
+    fn serialize_as<S>(source: &I, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = String::new();
+        for v in source {
+            s.push_str(&*v.to_string());
+            s.push_str(SEPARATOR::separator());
+        }
+        serializer.serialize_str(if !s.is_empty() {
+            // remove trailing separator if present
+            &s[..s.len() - SEPARATOR::separator().len()]
+        } else {
+            &s[..]
+        })
     }
 }

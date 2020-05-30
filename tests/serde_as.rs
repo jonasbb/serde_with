@@ -9,7 +9,7 @@ use serde_with::{
     Flexible, Integer, NoneAsEmptyString, Same, SameAs,
 };
 use std::{
-    collections::{BTreeMap, HashMap, LinkedList, VecDeque},
+    collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
     rc::Rc,
     sync::Arc,
 };
@@ -683,5 +683,38 @@ fn test_duration_seconds_with_frac() {
     check_error_deserialization::<StructStringFlexible>(
         r#"{"value":-1}"#,
         r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
+    );
+}
+
+#[test]
+fn string_with_separator() {
+    use serde_with::{rust::StringWithSeparator, CommaSeparator, SpaceSeparator};
+
+    #[derive(Deserialize, Serialize)]
+    struct A {
+        #[serde(with = "As::<StringWithSeparator::<SpaceSeparator, String>>")]
+        tags: Vec<String>,
+        #[serde(with = "As::<StringWithSeparator::<CommaSeparator, String>>")]
+        // more_tags: Vec<String>,
+        more_tags: BTreeSet<String>,
+    }
+
+    let v: A = serde_json::from_str(
+        r##"{
+    "tags": "#hello #world",
+    "more_tags": "foo,bar,bar"
+}"##,
+    )
+    .unwrap();
+    assert_eq!(vec!["#hello", "#world"], v.tags);
+    assert_eq!(2, v.more_tags.len());
+
+    let x = A {
+        tags: vec!["1".to_string(), "2".to_string(), "3".to_string()],
+        more_tags: Default::default(),
+    };
+    assert_eq!(
+        r#"{"tags":"1 2 3","more_tags":""}"#,
+        serde_json::to_string(&x).unwrap()
     );
 }
