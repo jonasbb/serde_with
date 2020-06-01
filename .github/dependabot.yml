@@ -1,0 +1,16 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: saturday
+    time: '01:00'
+  open-pull-requests-limit: 20
+  ignore:
+  - dependency-name: pretty_assertions
+    versions:
+    - "> 0.5.1"
+  - dependency-name: ron
+    versions:
+    - ">= 0.5.a, < 0.6"
