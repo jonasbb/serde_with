@@ -1,11 +1,13 @@
 use super::*;
 use crate::utils;
+use rust::StringWithSeparator;
 use serde::de::*;
 use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
     convert::From,
     fmt::{self, Display},
     hash::{BuildHasher, Hash},
+    iter::FromIterator,
     str::FromStr,
     time::Duration,
 };
@@ -795,5 +797,28 @@ where
         D: Deserializer<'de>,
     {
         deserializer.deserialize_any(DurationVisitiorFlexible)
+    }
+}
+
+impl<'de, SEPARATOR, I, T> DeserializeAs<'de, I> for StringWithSeparator<SEPARATOR, T>
+where
+    SEPARATOR: Separator,
+    I: FromIterator<T>,
+    T: FromStr,
+    T::Err: Display,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<I, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        if s.is_empty() {
+            Ok(None.into_iter().collect())
+        } else {
+            s.split(SEPARATOR::separator())
+                .map(FromStr::from_str)
+                .collect::<Result<_, _>>()
+                .map_err(Error::custom)
+        }
     }
 }

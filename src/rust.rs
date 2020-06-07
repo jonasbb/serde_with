@@ -244,7 +244,7 @@ pub mod seq_display_fromstr {
 /// assert_eq!(r#"{"tags":"1 2 3","more_tags":""}"#, serde_json::to_string(&x).unwrap());
 /// ```
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
-pub struct StringWithSeparator<Sep>(PhantomData<Sep>);
+pub struct StringWithSeparator<Sep, T = ()>(PhantomData<(Sep, T)>);
 
 impl<Sep> StringWithSeparator<Sep>
 where
