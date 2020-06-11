@@ -255,9 +255,9 @@ where
         self,
         _name: &'static str,
         _variant_index: u32,
-        _variant: &'static str,
+        variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for with_prefix"))
+        self.serialize_str(variant)
     }
 
     fn serialize_newtype_struct<T>(
