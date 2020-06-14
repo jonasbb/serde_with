@@ -35,8 +35,8 @@ maintenance = { status = "actively-developed" }
 
 [features]
 chrono = [ "chrono_crate" ]
-default = [ "macros" ]
-guide = [ "doc-comment" ]
+default = [ "guide", "macros" ]
+guide = [ "doc-comment", "macros" ]
 json = [ "serde_json" ]
 macros = [ "serde_with_macros" ]
 
