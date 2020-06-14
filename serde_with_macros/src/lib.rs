@@ -36,12 +36,14 @@ extern crate proc_macro;
 mod utils;
 
 use crate::utils::IteratorExt as _;
+use darling::FromField;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
-use quote::quote;
+use quote::{quote, ToTokens};
+use std::str::FromStr;
 use syn::{
-    parse::Parser, spanned::Spanned, Attribute, Error, Field, Fields, ItemEnum, ItemStruct, Meta,
-    NestedMeta, Path, Type,
+    parse::Parser, punctuated::Pair, spanned::Spanned, Attribute, Error, Field, Fields,
+    GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path, PathArguments, ReturnType, Type,
 };
 
 /// Apply function on every field of structs or enums
@@ -300,4 +302,176 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
         }
     }
     false
+}
+
+#[proc_macro_attribute]
+pub fn serde_as(_args: TokenStream, input: TokenStream) -> TokenStream {
+    // Convert any error message into a nice compiler error
+    let res = match apply_function_to_struct_and_enum_fields(input, serde_as_add_attr_to_field) {
+        Ok(res) => res,
+        Err(msg) => {
+            let span = Span::call_site();
+            Error::new(span, msg).to_compile_error()
+        }
+    };
+    TokenStream::from(res)
+}
+
+/// Add the skip_serializing_if annotation to each field of the struct
+fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), String> {
+    #[derive(FromField, Debug)]
+    // TODO this can parse different attributes, however, comining them into one struct is probably bad
+    // This does not allow to check if the serde_as is used wrong(has with part) or if both (serde and serde_as) exist
+    #[darling(attributes(serde_as))]
+    struct SerdeAsOptions {
+        #[darling(rename = "as", map = "parse_type_from_string", default)]
+        r#as: Option<Result<Type, Error>>,
+        #[darling(default)]
+        deserialize_as: Option<String>,
+        #[darling(default)]
+        serialize_as: Option<String>,
+    }
+
+    // TODO check for conflicts within the serde_as annotations and with the serde annotations
+    let options = SerdeAsOptions::from_field(field).unwrap();
+    // eprintln!("{:#?}", options);
+    // Err(format!("{:?}", options))
+
+    // Find index of serde_as attribute
+    let serde_as_idx = field.attrs.iter().enumerate().find_map(|(idx, attr)| {
+        if attr.path.is_ident("serde_as") {
+            Some(idx)
+        } else {
+            None
+        }
+    });
+    if serde_as_idx.is_none() {
+        return Ok(());
+    }
+    let serde_as_idx = serde_as_idx.unwrap();
+
+    // serde_as Attribute
+    let _serde_as_attr = field.attrs.remove(serde_as_idx);
+    // eprintln!("{:#?}", serde_as_attr);
+
+    // Add the `skip_serializing_if` attribute
+    // let attr_tokens = quote!(
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // );
+    // TODO replace the InferType types from the *_as fields
+    // TODO place the Types into the placeholder position
+    let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
+        r##"#[serde(with = "::serde_with::As::<{}>")]"##,
+        replace_infer_type_with_type(
+            options.r#as.unwrap().unwrap(),
+            &syn::parse_str("::serde_with::Same").unwrap()
+        )
+        .to_token_stream()
+    ))
+    .unwrap();
+    let parser = Attribute::parse_outer;
+    let attrs = parser
+        .parse2(attr_tokens)
+        .expect("Static attr tokens should not panic");
+    field.attrs.extend(attrs);
+
+    Ok(())
+}
+
+/// Parse a [String][] and return a [Type][]
+fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
+    Some(syn::parse_str(&*s))
+}
+
+/// Recursivly replace all occurences of `_` with `replacement` in a [Type][]
+///
+/// The [serde_as][] macro allows to use the infer type, i.e., `_`, as shortcut for `::serde_with::As`.
+/// This function replaces all occurences of the infer type with another type.
+fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
+    match to_replace {
+        // Base case
+        // Replace the infer type with the actuall replacement type
+        Type::Infer(_) => replacement.clone(),
+
+        // Recursive cases
+        // Iterate through all positions where a type could occur and recursivly call this function
+        Type::Array(mut inner) => {
+            *inner.elem = replace_infer_type_with_type(*inner.elem, replacement);
+            Type::Array(inner)
+        }
+        Type::Group(mut inner) => {
+            *inner.elem = replace_infer_type_with_type(*inner.elem, replacement);
+            Type::Group(inner)
+        }
+        Type::Never(inner) => Type::Never(inner),
+        Type::Paren(mut inner) => {
+            *inner.elem = replace_infer_type_with_type(*inner.elem, replacement);
+            Type::Paren(inner)
+        }
+        Type::Path(mut inner) => {
+            match inner.path.segments.pop() {
+                Some(Pair::End(mut t)) | Some(Pair::Punctuated(mut t, _)) => {
+                    t.arguments = match t.arguments {
+                        PathArguments::None => PathArguments::None,
+                        PathArguments::AngleBracketed(mut inner) => {
+                            // Iterate over the args between the angle brackets
+                            inner.args = inner
+                                .args
+                                .into_iter()
+                                .map(|generic_argument| match generic_argument {
+                                    // replace types within the generics list, but leave other stuff like lifetimes untouched
+                                    GenericArgument::Type(type_) => GenericArgument::Type(
+                                        replace_infer_type_with_type(type_, replacement),
+                                    ),
+                                    ga => ga,
+                                })
+                                .collect();
+                            PathArguments::AngleBracketed(inner)
+                        }
+                        PathArguments::Parenthesized(mut inner) => {
+                            inner.inputs = inner
+                                .inputs
+                                .into_iter()
+                                .map(|type_| replace_infer_type_with_type(type_, replacement))
+                                .collect();
+                            inner.output = match inner.output {
+                                ReturnType::Type(arrow, mut type_) => {
+                                    *type_ = replace_infer_type_with_type(*type_, replacement);
+                                    ReturnType::Type(arrow, type_)
+                                }
+                                default => default,
+                            };
+                            PathArguments::Parenthesized(inner)
+                        }
+                    };
+                    inner.path.segments.push(t);
+                }
+                None => {}
+            }
+            Type::Path(inner)
+        }
+        Type::Ptr(mut inner) => {
+            *inner.elem = replace_infer_type_with_type(*inner.elem, replacement);
+            Type::Ptr(inner)
+        }
+        Type::Reference(mut inner) => {
+            *inner.elem = replace_infer_type_with_type(*inner.elem, replacement);
+            Type::Reference(inner)
+        }
+        Type::Slice(mut inner) => {
+            *inner.elem = replace_infer_type_with_type(*inner.elem, replacement);
+            Type::Slice(inner)
+        }
+        Type::Tuple(mut inner) => {
+            inner.elems = inner
+                .elems
+                .into_iter()
+                .map(|type_| replace_infer_type_with_type(type_, replacement))
+                .collect();
+            Type::Tuple(inner)
+        }
+
+        // Pass unknown types or non-handleable types (e.g., bare Fn) without performing any replacements
+        type_ => type_,
+    }
 }

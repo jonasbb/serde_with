@@ -21,6 +21,7 @@ codecov = { repository = "jonasbb/serde_with", branch = "master", service = "git
 maintenance = { status = "actively-developed" }
 
 [dependencies]
+darling = "0.10.2"
 proc-macro2 = "1.0.1"
 quote = "1.0.0"
 
@@ -29,6 +30,7 @@ version = "1.0.3"
 features = [
     # "extra-traits", # Only for debugging
     "full",
+    "parsing",
 ]
 
 [dev-dependencies]
