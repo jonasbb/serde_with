@@ -18,6 +18,18 @@ impl<T: Serialize> SerializeAs<T> for SameAs<T> {
     }
 }
 
+impl<T, U> SerializeAs<Box<T>> for Box<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Box<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, U>::new(source).serialize(serializer)
+    }
+}
+
 impl<T, U> SerializeAs<Option<T>> for Option<U>
 where
     U: SerializeAs<T>,
@@ -77,7 +89,9 @@ macro_rules! seq_impl {
     }
 }
 
+type BoxedSlice<T> = Box<[T]>;
 seq_impl!(BinaryHeap<T: Ord>);
+seq_impl!(BoxedSlice<T>);
 seq_impl!(BTreeSet<T: Ord>);
 seq_impl!(HashSet<T: Eq + Hash, H: BuildHasher>);
 seq_impl!(LinkedList<T>);

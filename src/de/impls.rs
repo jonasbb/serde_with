@@ -21,6 +21,18 @@ impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for SameAs<T> {
     }
 }
 
+impl<'de, T, U> DeserializeAs<'de, Box<T>> for Box<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Box<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(Box::new(U::deserialize_as(deserializer)?))
+    }
+}
+
 impl<'de, T, U> DeserializeAs<'de, Option<T>> for Option<U>
 where
     U: DeserializeAs<'de, T>,
@@ -78,53 +90,98 @@ where
     }
 }
 
-impl<'de, T, U> DeserializeAs<'de, Vec<T>> for Vec<U>
-where
-    U: DeserializeAs<'de, T>,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct VecVisitor<T, U> {
-            marker: PhantomData<T>,
-            marker2: PhantomData<U>,
-        }
-
-        impl<'de, T, U> Visitor<'de> for VecVisitor<T, U>
+macro_rules! seq_impl {
+    (
+        $ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* >,
+        $access:ident,
+        $with_capacity:expr,
+        $append:ident
+    ) => {
+        impl<'de, T, U> DeserializeAs<'de, $ty<T>> for $ty<U>
         where
             U: DeserializeAs<'de, T>,
+            $(T: $tbound1 $(+ $tbound2)*,)*
         {
-            type Value = Vec<T>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("a sequence")
-            }
-
-            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            fn deserialize_as<D>(deserializer: D) -> Result<$ty<T>, D::Error>
             where
-                A: SeqAccess<'de>,
+                D: Deserializer<'de>,
             {
-                let mut values = Vec::with_capacity(utils::size_hint_cautious(seq.size_hint()));
-
-                while let Some(value) = seq
-                    .next_element()?
-                    .map(|v: DeserializeAsWrap<T, U>| v.into_inner())
-                {
-                    values.push(value);
+                struct SeqVisitor<T, U> {
+                    marker: PhantomData<T>,
+                    marker2: PhantomData<U>,
                 }
 
-                Ok(values)
+                impl<'de, T, U> Visitor<'de> for SeqVisitor<T, U>
+                where
+                    U: DeserializeAs<'de, T>,
+                    $(T: $tbound1 $(+ $tbound2)*,)*
+                {
+                    type Value = $ty<T>;
+
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                        formatter.write_str("a sequence")
+                    }
+
+                    fn visit_seq<A>(self, mut $access: A) -> Result<Self::Value, A::Error>
+                    where
+                        A: SeqAccess<'de>,
+                    {
+                        let mut values = $with_capacity;
+
+                        while let Some(value) = $access
+                            .next_element()?
+                            .map(|v: DeserializeAsWrap<T, U>| v.into_inner())
+                        {
+                            values.$append(value);
+                        }
+
+                        Ok(values.into())
+                    }
+                }
+
+                let visitor = SeqVisitor::<T, U> {
+                    marker: PhantomData,
+                    marker2: PhantomData,
+                };
+                deserializer.deserialize_seq(visitor)
             }
         }
-
-        let visitor = VecVisitor::<T, U> {
-            marker: PhantomData,
-            marker2: PhantomData,
-        };
-        deserializer.deserialize_seq(visitor)
-    }
+    };
 }
+
+type BoxedSlice<T> = Box<[T]>;
+seq_impl!(
+    BinaryHeap<T: Ord>,
+    seq,
+    BinaryHeap::with_capacity(utils::size_hint_cautious(seq.size_hint())),
+    push
+);
+seq_impl!(
+    BoxedSlice<T>,
+    seq,
+    Vec::with_capacity(utils::size_hint_cautious(seq.size_hint())),
+    push
+);
+seq_impl!(BTreeSet<T: Ord>, seq, BTreeSet::new(), insert);
+seq_impl!(
+    HashSet<T: Eq + Hash>,
+    seq,
+    HashSet::with_capacity(utils::size_hint_cautious(seq.size_hint())),
+    insert
+);
+seq_impl!(LinkedList<T>, seq, LinkedList::new(), push_back);
+seq_impl!(
+    Vec<T>,
+    seq,
+    Vec::with_capacity(utils::size_hint_cautious(seq.size_hint())),
+    push
+);
+seq_impl!(
+    VecDeque<T>,
+    seq,
+    VecDeque::with_capacity(utils::size_hint_cautious(seq.size_hint())),
+    push_back
+);
 
 pub(crate) struct DeserializeAsWrap<T, U> {
     value: T,
@@ -155,6 +212,7 @@ where
 macro_rules! map_impl2 {
     (
         $ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >,
+        // We need an external name, such that we can use it in the `with_capacity` expression
         $access:ident,
         $with_capacity:expr
     ) => {
