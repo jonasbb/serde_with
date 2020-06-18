@@ -131,6 +131,69 @@ fn test_arrays() {
 }
 
 #[test]
+fn test_sequence_like_types() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct2 {
+        #[serde(with = "As::<Box<[Same]>>")]
+        values: Box<[u32]>,
+    };
+    is_equal(
+        Struct2 {
+            values: vec![1, 2, 3, 99].into(),
+        },
+        r#"{"values":[1,2,3,99]}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct3 {
+        #[serde(with = "As::<BTreeSet<Same>>")]
+        values: BTreeSet<u32>,
+    };
+    is_equal(
+        Struct3 {
+            values: vec![1, 2, 3, 99].into_iter().collect(),
+        },
+        r#"{"values":[1,2,3,99]}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct4 {
+        #[serde(with = "As::<LinkedList<Same>>")]
+        values: LinkedList<u32>,
+    };
+    is_equal(
+        Struct4 {
+            values: vec![1, 2, 3, 99].into_iter().collect(),
+        },
+        r#"{"values":[1,2,3,99]}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct5 {
+        #[serde(with = "As::<Vec<Same>>")]
+        values: Vec<u32>,
+    };
+    is_equal(
+        Struct5 {
+            values: vec![1, 2, 3, 99],
+        },
+        r#"{"values":[1,2,3,99]}"#,
+    );
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct6 {
+        #[serde(with = "As::<VecDeque<Same>>")]
+        values: VecDeque<u32>,
+    };
+    is_equal(
+        Struct6 {
+            values: vec![1, 2, 3, 99].into(),
+        },
+        r#"{"values":[1,2,3,99]}"#,
+    );
+}
+
+#[test]
 fn test_map_as_tuple_list() {
     use std::net::IpAddr;
     let ip = "1.2.3.4".parse().unwrap();
