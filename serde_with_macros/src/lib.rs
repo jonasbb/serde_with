@@ -23,6 +23,9 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/1.1.0")]
+// FIXME: clippy bug https://github.com/rust-lang/rust-clippy/issues/5704
+#![allow(clippy::unknown_clippy_lints)]
+#![allow(clippy::unnested_or_patterns)]
 
 //! proc-macro extensions for [`serde_with`]
 //!
@@ -309,10 +312,7 @@ pub fn serde_as(_args: TokenStream, input: TokenStream) -> TokenStream {
     // Convert any error message into a nice compiler error
     let res = match apply_function_to_struct_and_enum_fields(input, serde_as_add_attr_to_field) {
         Ok(res) => res,
-        Err(msg) => {
-            let span = Span::call_site();
-            Error::new(span, msg).to_compile_error()
-        }
+        Err(err) => err.to_compile_error(),
     };
     TokenStream::from(res)
 }
@@ -320,22 +320,41 @@ pub fn serde_as(_args: TokenStream, input: TokenStream) -> TokenStream {
 /// Add the skip_serializing_if annotation to each field of the struct
 fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), String> {
     #[derive(FromField, Debug)]
-    // TODO this can parse different attributes, however, comining them into one struct is probably bad
-    // This does not allow to check if the serde_as is used wrong(has with part) or if both (serde and serde_as) exist
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
         #[darling(rename = "as", map = "parse_type_from_string", default)]
         r#as: Option<Result<Type, Error>>,
-        #[darling(default)]
-        deserialize_as: Option<String>,
-        #[darling(default)]
-        serialize_as: Option<String>,
+        #[darling(map = "parse_type_from_string", default)]
+        deserialize_as: Option<Result<Type, Error>>,
+        #[darling(map = "parse_type_from_string", default)]
+        serialize_as: Option<Result<Type, Error>>,
     }
 
-    // TODO check for conflicts within the serde_as annotations and with the serde annotations
-    let options = SerdeAsOptions::from_field(field).unwrap();
-    // eprintln!("{:#?}", options);
-    // Err(format!("{:?}", options))
+    impl SerdeAsOptions {
+        fn has_any_set(&self) -> bool {
+            self.r#as.is_some() || self.deserialize_as.is_some() || self.serialize_as.is_some()
+        }
+    }
+
+    #[derive(FromField, Debug)]
+    #[darling(attributes(serde))]
+    struct SerdeWithOptions {
+        #[darling(default)]
+        with: Option<String>,
+        #[darling(default)]
+        deserialize_with: Option<String>,
+        #[darling(default)]
+        serialize_with: Option<String>,
+    }
+
+    impl SerdeWithOptions {
+        fn has_any_set(&self) -> bool {
+            self.with.is_some() || self.deserialize_with.is_some() || self.serialize_with.is_some()
+        }
+    }
+
+    let serde_as_options = SerdeAsOptions::from_field(field).unwrap();
+    let serde_with_options = SerdeWithOptions::from_field(field).unwrap();
 
     // Find index of serde_as attribute
     let serde_as_idx = field.attrs.iter().enumerate().find_map(|(idx, attr)| {
@@ -351,29 +370,55 @@ fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), String> {
     let serde_as_idx = serde_as_idx.unwrap();
 
     // serde_as Attribute
-    let _serde_as_attr = field.attrs.remove(serde_as_idx);
-    // eprintln!("{:#?}", serde_as_attr);
+    field.attrs.remove(serde_as_idx);
 
-    // Add the `skip_serializing_if` attribute
-    // let attr_tokens = quote!(
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // );
-    // TODO replace the InferType types from the *_as fields
-    // TODO place the Types into the placeholder position
-    let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
-        r##"#[serde(with = "::serde_with::As::<{}>")]"##,
-        replace_infer_type_with_type(
-            options.r#as.unwrap().unwrap(),
-            &syn::parse_str("::serde_with::Same").unwrap()
-        )
-        .to_token_stream()
-    ))
-    .unwrap();
-    let parser = Attribute::parse_outer;
-    let attrs = parser
-        .parse2(attr_tokens)
-        .expect("Static attr tokens should not panic");
-    field.attrs.extend(attrs);
+    // Check if there are any conflicting attributes
+    if serde_as_options.has_any_set() && serde_with_options.has_any_set() {
+        return Err("Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.".into());
+    }
+
+    if serde_as_options.r#as.is_some() && serde_as_options.deserialize_as.is_some() {
+        return Err("Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.".into());
+    } else if serde_as_options.r#as.is_some() && serde_as_options.serialize_as.is_some() {
+        return Err("Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code.".into());
+    }
+
+    if let Some(Ok(type_)) = serde_as_options.r#as {
+        let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
+            r##"#[serde(with = "::serde_with::As::<{}>")]"##,
+            replace_infer_type_with_type(type_, &syn::parse_str("::serde_with::Same").unwrap())
+                .to_token_stream()
+        ))
+        .unwrap();
+        let attrs = Attribute::parse_outer
+            .parse2(attr_tokens)
+            .expect("Static attr tokens should not panic");
+        field.attrs.extend(attrs);
+    }
+    if let Some(Ok(type_)) = serde_as_options.deserialize_as {
+        let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
+            r##"#[serde(deserialize_with = "::serde_with::As::<{}>::deserialize")]"##,
+            replace_infer_type_with_type(type_, &syn::parse_str("::serde_with::Same").unwrap())
+                .to_token_stream()
+        ))
+        .unwrap();
+        let attrs = Attribute::parse_outer
+            .parse2(attr_tokens)
+            .expect("Static attr tokens should not panic");
+        field.attrs.extend(attrs);
+    }
+    if let Some(Ok(type_)) = serde_as_options.serialize_as {
+        let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
+            r##"#[serde(serialize_with = "::serde_with::As::<{}>::serialize")]"##,
+            replace_infer_type_with_type(type_, &syn::parse_str("::serde_with::Same").unwrap())
+                .to_token_stream()
+        ))
+        .unwrap();
+        let attrs = Attribute::parse_outer
+            .parse2(attr_tokens)
+            .expect("Static attr tokens should not panic");
+        field.attrs.extend(attrs);
+    }
 
     Ok(())
 }
