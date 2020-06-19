@@ -1,20 +1,17 @@
 error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field: `a`.
  --> $DIR/skip-none-always.rs:8:5
   |
-8 | /     #[serde(skip_serializing_if = "Option::is_none")]
-9 | |     a: Option<char>,
-  | |___________________^
+8 |     #[serde(skip_serializing_if = "Option::is_none")]
+  |     ^
 
 error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field.
   --> $DIR/skip-none-always.rs:16:5
    |
-16 | /     #[serde(skip_serializing_if = "Option::is_none")]
-17 | |     Option<char>,
-   | |________________^
+16 |     #[serde(skip_serializing_if = "Option::is_none")]
+   |     ^
 
 error: `serialize_always` may only be used on fields of type `Option`.
   --> $DIR/skip-none-always.rs:23:5
    |
-23 | /     #[serialize_always]
-24 | |     a: char,
-   | |___________^
+23 |     #[serialize_always]
+   |     ^
