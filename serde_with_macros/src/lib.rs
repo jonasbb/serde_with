@@ -33,33 +33,44 @@
 #[allow(unused_extern_crates)]
 extern crate proc_macro;
 
+mod utils;
+
+use crate::utils::IteratorExt as _;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parse::Parser, Attribute, Error, Field, Fields, ItemEnum, ItemStruct, Meta, NestedMeta, Path,
-    Type,
+    parse::Parser, spanned::Spanned, Attribute, Error, Field, Fields, ItemEnum, ItemStruct, Meta,
+    NestedMeta, Path, Type,
 };
 
 /// Apply function on every field of structs or enums
 fn apply_function_to_struct_and_enum_fields<F>(
     input: TokenStream,
     function: F,
-) -> Result<proc_macro2::TokenStream, String>
+) -> Result<proc_macro2::TokenStream, Error>
 where
     F: Copy,
     F: Fn(&mut Field) -> Result<(), String>,
 {
     /// Handle a single struct or a single enum variant
-    fn apply_on_fields<F>(fields: &mut Fields, function: F) -> Result<(), String>
+    fn apply_on_fields<F>(fields: &mut Fields, function: F) -> Result<(), Error>
     where
         F: Fn(&mut Field) -> Result<(), String>,
     {
         match fields {
             // simple, no fields, do nothing
             Fields::Unit => Ok(()),
-            Fields::Named(ref mut fields) => fields.named.iter_mut().map(function).collect(),
-            Fields::Unnamed(ref mut fields) => fields.unnamed.iter_mut().map(function).collect(),
+            Fields::Named(ref mut fields) => fields
+                .named
+                .iter_mut()
+                .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
+                .collect_error(),
+            Fields::Unnamed(ref mut fields) => fields
+                .unnamed
+                .iter_mut()
+                .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
+                .collect_error(),
         }
     }
 
@@ -73,10 +84,13 @@ where
             .variants
             .iter_mut()
             .map(|variant| apply_on_fields(&mut variant.fields, function))
-            .collect::<Result<(), _>>()?;
+            .collect_error()?;
         Ok(quote!(#input))
     } else {
-        Err("The attribute can only be applied to struct or enum definitions.".into())
+        Err(Error::new(
+            Span::call_site(),
+            "The attribute can only be applied to struct or enum definitions.",
+        ))
     }
 }
 
@@ -171,10 +185,7 @@ pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStr
         skip_serializing_none_add_attr_to_field,
     ) {
         Ok(res) => res,
-        Err(msg) => {
-            let span = Span::call_site();
-            Error::new(span, msg).to_compile_error()
-        }
+        Err(err) => err.to_compile_error(),
     };
     TokenStream::from(res)
 }

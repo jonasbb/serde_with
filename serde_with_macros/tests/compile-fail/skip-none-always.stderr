@@ -1,23 +1,20 @@
 error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field: `a`.
- --> $DIR/skip-none-always.rs:4:1
+ --> $DIR/skip-none-always.rs:8:5
   |
-4 | #[skip_serializing_none]
-  | ^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+8 | /     #[serde(skip_serializing_if = "Option::is_none")]
+9 | |     a: Option<char>,
+  | |___________________^
 
 error: The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field.
-  --> $DIR/skip-none-always.rs:12:1
+  --> $DIR/skip-none-always.rs:16:5
    |
-12 | #[skip_serializing_none]
-   | ^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+16 | /     #[serde(skip_serializing_if = "Option::is_none")]
+17 | |     Option<char>,
+   | |________________^
 
 error: `serialize_always` may only be used on fields of type `Option`.
-  --> $DIR/skip-none-always.rs:20:1
+  --> $DIR/skip-none-always.rs:23:5
    |
-20 | #[skip_serializing_none]
-   | ^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+23 | /     #[serialize_always]
+24 | |     a: char,
+   | |___________^
