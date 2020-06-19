@@ -60,7 +60,7 @@ assert_eq!(json, serde_json::to_string_pretty(&data).unwrap());
 assert_eq!(data, serde_json::from_str(json).unwrap());
 ```
 
-## 2. A more flexible and composable replacement for the with annotation, called `serde_as` *(v1.6.0+)*
+## 2. A more flexible and composable replacement for the with annotation, called `serde_as` *(v1.5.0+)*
 
 This is an alternative to the with-annotation, which adds flexibility and composability to the scheme.
 The main downside is that it work with fewer types than aboves with-annotations.

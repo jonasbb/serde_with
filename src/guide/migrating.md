@@ -1,6 +1,6 @@
-# Migrating to Version 1.6.0+
+# Migrating to Version 1.5.0+
 
-| Old                             | New (1.6.0+)                                                       |
+| Old                             | New (1.5.0+)                                                       |
 | ------------------------------- | ------------------------------------------------------------------ |
 | [btreemap_as_tuple_list]        | `As::<Vec<(K, V)>>`                                                |
 | [bytes_or_string]               | `As<BytesOrString>`                                                |
