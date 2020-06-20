@@ -57,6 +57,7 @@ fn never<T>(_t: &T) -> bool {
     false
 }
 
+/// Test how [`skip_serializing_none`][] works with existing annotations
 #[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 struct DataExistingAnnotation {

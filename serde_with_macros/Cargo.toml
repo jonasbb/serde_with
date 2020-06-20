@@ -34,6 +34,7 @@ features = [
 ]
 
 [dev-dependencies]
+macrotest = "1.0.2"
 pretty_assertions = "0.6.1"
 rustversion = "1.0.0"
 serde = { version = "1.0.75", features = [ "derive" ] }
