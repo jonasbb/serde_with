@@ -1,6 +1,7 @@
 #![deny(
     missing_copy_implementations,
     missing_debug_implementations,
+    missing_docs,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
@@ -139,6 +140,8 @@ where
 ///     a: Option<String>,
 ///     b: Option<u64>,
 ///     c: Option<String>,
+///     // Always serialize field d even if None
+///     #[serialize_always]
 ///     d: Option<bool>,
 /// }
 /// ```
@@ -307,6 +310,40 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
     false
 }
 
+/// Conveniece macro to use the [`serde_as`] system.
+///
+/// The [`serde_as`] system is designed as a more flexiable alterative to serde's with-annotation.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use serde_with::{serde_as, DisplayFromStr};
+/// use std::collections::HashMap;
+///
+/// #[serde_as]
+/// #[derive(Serialize, Deserialize)]
+/// struct Data {
+///     /// Serialize into number
+///     #[serde_as(as = "_")]
+///     a: u32,
+///
+///     /// Serialize into String
+///     #[serde_as(as = "DisplayFromStr")]
+///     b: u32,
+///
+///     /// Serialize into a map from String to String
+///     #[serde_as(as = "HashMap<DisplayFromStr, _>")]
+///     c: Vec<(u32, String)>,
+/// }
+/// ```
+///
+/// # Limitations
+///
+/// This macro cannot be used outside of the [`serde_with`] crate, since it relies on types defined therein.
+/// The [`serde_with`] crate has to be available in the root namespace under `::serde_with`.
+///
+/// [`serde_as`]: https://docs.rs/serde_with/*/serde_with/guide/index.html
+/// [`serde_with`]: https://crates.io/crates/serde_with/
 #[proc_macro_attribute]
 pub fn serde_as(_args: TokenStream, input: TokenStream) -> TokenStream {
     // Convert any error message into a nice compiler error
