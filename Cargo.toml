@@ -54,5 +54,13 @@ serde_derive = "1.0.75"
 serde_json = { version = "1.0.25", features = [ "preserve_order" ] }
 version-sync = "0.8.1"
 
+[[test]]
+name = "serde_as"
+required-features = ["macros"]
+
+[[test]]
+name = "serde_as_macro"
+required-features = ["macros"]
+
 [package.metadata.docs.rs]
 all-features = true

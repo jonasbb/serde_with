@@ -1,0 +1,71 @@
+error: Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.
+ --> $DIR/serde_as.rs:9:5
+  |
+9 |     a: u32,
+  |     ^
+
+error: Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code.
+  --> $DIR/serde_as.rs:11:5
+   |
+11 |     b: u32,
+   |     ^
+
+error: Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.
+  --> $DIR/serde_as.rs:13:5
+   |
+13 |     c: u32,
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:21:5
+   |
+21 |     #[serde(with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:24:5
+   |
+24 |     #[serde(deserialize_with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:27:5
+   |
+27 |     #[serde(serialize_with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:31:5
+   |
+31 |     #[serde(with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:34:5
+   |
+34 |     #[serde(deserialize_with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:37:5
+   |
+37 |     #[serde(serialize_with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:41:5
+   |
+41 |     #[serde(with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:44:5
+   |
+44 |     #[serde(deserialize_with = "u32")]
+   |     ^
+
+error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
+  --> $DIR/serde_as.rs:47:5
+   |
+47 |     #[serde(serialize_with = "u32")]
+   |     ^
