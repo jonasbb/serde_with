@@ -5,7 +5,6 @@ use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
     fmt::Display,
     hash::{BuildHasher, Hash},
-    marker::PhantomData,
     time::Duration,
 };
 
@@ -42,32 +41,6 @@ where
             Some(ref value) => serializer.serialize_some(&SerializeAsWrap::<T, U>::new(value)),
             None => serializer.serialize_none(),
         }
-    }
-}
-
-pub(crate) struct SerializeAsWrap<'a, T, U> {
-    value: &'a T,
-    marker: PhantomData<U>,
-}
-
-impl<'a, T, U> SerializeAsWrap<'a, T, U> {
-    pub(crate) fn new(value: &'a T) -> Self {
-        Self {
-            value,
-            marker: PhantomData,
-        }
-    }
-}
-
-impl<'a, T, U> Serialize for SerializeAsWrap<'a, T, U>
-where
-    U: SerializeAs<T>,
-{
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        U::serialize_as(self.value, serializer)
     }
 }
 

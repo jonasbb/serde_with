@@ -29,7 +29,9 @@ where
     where
         D: Deserializer<'de>,
     {
-        Ok(Box::new(U::deserialize_as(deserializer)?))
+        Ok(Box::new(
+            DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+        ))
     }
 }
 
@@ -182,32 +184,6 @@ seq_impl!(
     VecDeque::with_capacity(utils::size_hint_cautious(seq.size_hint())),
     push_back
 );
-
-pub(crate) struct DeserializeAsWrap<T, U> {
-    value: T,
-    marker: PhantomData<U>,
-}
-
-impl<T, U> DeserializeAsWrap<T, U> {
-    pub(crate) fn into_inner(self) -> T {
-        self.value
-    }
-}
-
-impl<'de, T, U> Deserialize<'de> for DeserializeAsWrap<T, U>
-where
-    U: DeserializeAs<'de, T>,
-{
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        U::deserialize_as(deserializer).map(|value| Self {
-            value,
-            marker: PhantomData,
-        })
-    }
-}
 
 macro_rules! map_impl2 {
     (
