@@ -5,8 +5,8 @@ use crate::utils::{
 };
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    As, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds, DurationSecondsWithFrac,
-    Flexible, Integer, NoneAsEmptyString, Same, SameAs,
+    serde_as, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds,
+    DurationSecondsWithFrac, Flexible, Integer, NoneAsEmptyString, Same, SameAs,
 };
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
@@ -16,9 +16,10 @@ use std::{
 
 #[test]
 fn test_display_fromstr() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {
-        #[serde(with = "As::<DisplayFromStr>")]
+        #[serde_as(as = "DisplayFromStr")]
         value: u32,
     };
 
@@ -30,16 +31,18 @@ fn test_tuples() {
     use std::net::IpAddr;
     let ip = "1.2.3.4".parse().unwrap();
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct1 {
-        #[serde(with = "As::<(DisplayFromStr,)>")]
+        #[serde_as(as = "(DisplayFromStr,)")]
         values: (u32,),
     };
     is_equal(Struct1 { values: (1,) }, r#"{"values":["1"]}"#);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2a {
-        #[serde(with = "As::<(DisplayFromStr, DisplayFromStr)>")]
+        #[serde_as(as = "(DisplayFromStr, DisplayFromStr)")]
         values: (u32, IpAddr),
     };
     is_equal(
@@ -49,9 +52,10 @@ fn test_tuples() {
         r#"{"values":["555888","1.2.3.4"]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2b {
-        #[serde(with = "As::<(SameAs<u32>, DisplayFromStr)>")]
+        #[serde_as(as = "(SameAs<u32>, DisplayFromStr)")]
         values: (u32, IpAddr),
     };
     is_equal(
@@ -59,9 +63,10 @@ fn test_tuples() {
         r#"{"values":[987,"1.2.3.4"]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2c {
-        #[serde(with = "As::<(Same, DisplayFromStr)>")]
+        #[serde_as(as = "(Same, DisplayFromStr)")]
         values: (u32, IpAddr),
     };
     is_equal(
@@ -69,9 +74,10 @@ fn test_tuples() {
         r#"{"values":[987,"1.2.3.4"]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct6 {
-        #[serde(with = "As::<(Same, Same, Same, Same, Same, Same)>")]
+        #[serde_as(as = "(Same, Same, Same, Same, Same, Same)")]
         values: (u8, u16, u32, i8, i16, i32),
     };
     is_equal(
@@ -84,39 +90,44 @@ fn test_tuples() {
 
 #[test]
 fn test_arrays() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct0a {
-        #[serde(with = "As::<[DisplayFromStr; 0]>")]
+        #[serde_as(as = "[DisplayFromStr; 0]")]
         values: [u32; 0],
     };
     is_equal(Struct0a { values: [] }, r#"{"values":[]}"#);
 
     // Test "non-matching" types.
     // Arrays of size 0 should allow all convertions
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct0b {
-        #[serde(with = "As::<[u8; 0]>")]
+        #[serde_as(as = "[u8; 0]")]
         values: [String; 0],
     };
     is_equal(Struct0b { values: [] }, r#"{"values":[]}"#);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct1 {
-        #[serde(with = "As::<[DisplayFromStr; 1]>")]
+        #[serde_as(as = "[DisplayFromStr; 1]")]
         values: [u32; 1],
     };
     is_equal(Struct1 { values: [1] }, r#"{"values":["1"]}"#);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2 {
-        #[serde(with = "As::<[Same; 2]>")]
+        #[serde_as(as = "[Same; 2]")]
         values: [u32; 2],
     };
     is_equal(Struct2 { values: [11, 22] }, r#"{"values":[11,22]}"#);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct32 {
-        #[serde(with = "As::<[Same; 32]>")]
+        #[serde_as(as = "[Same; 32]")]
         values: [u32; 32],
     };
     is_equal(
@@ -132,9 +143,10 @@ fn test_arrays() {
 
 #[test]
 fn test_sequence_like_types() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2 {
-        #[serde(with = "As::<Box<[Same]>>")]
+        #[serde_as(as = "Box<[Same]>")]
         values: Box<[u32]>,
     };
     is_equal(
@@ -144,9 +156,10 @@ fn test_sequence_like_types() {
         r#"{"values":[1,2,3,99]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct3 {
-        #[serde(with = "As::<BTreeSet<Same>>")]
+        #[serde_as(as = "BTreeSet<Same>")]
         values: BTreeSet<u32>,
     };
     is_equal(
@@ -156,9 +169,10 @@ fn test_sequence_like_types() {
         r#"{"values":[1,2,3,99]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct4 {
-        #[serde(with = "As::<LinkedList<Same>>")]
+        #[serde_as(as = "LinkedList<Same>")]
         values: LinkedList<u32>,
     };
     is_equal(
@@ -168,9 +182,10 @@ fn test_sequence_like_types() {
         r#"{"values":[1,2,3,99]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct5 {
-        #[serde(with = "As::<Vec<Same>>")]
+        #[serde_as(as = "Vec<Same>")]
         values: Vec<u32>,
     };
     is_equal(
@@ -180,9 +195,10 @@ fn test_sequence_like_types() {
         r#"{"values":[1,2,3,99]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct6 {
-        #[serde(with = "As::<VecDeque<Same>>")]
+        #[serde_as(as = "VecDeque<Same>")]
         values: VecDeque<u32>,
     };
     is_equal(
@@ -199,9 +215,10 @@ fn test_map_as_tuple_list() {
     let ip = "1.2.3.4".parse().unwrap();
     let ip2 = "255.255.255.255".parse().unwrap();
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructBTree {
-        #[serde(with = "As::<Vec<(DisplayFromStr, DisplayFromStr)>>")]
+        #[serde_as(as = "Vec<(DisplayFromStr, DisplayFromStr)>")]
         values: BTreeMap<u32, IpAddr>,
     };
 
@@ -213,9 +230,10 @@ fn test_map_as_tuple_list() {
         r#"{"values":[["1","1.2.3.4"],["10","1.2.3.4"],["200","255.255.255.255"]]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructBTree2 {
-        #[serde(with = "As::<Vec<(Same, DisplayFromStr)>>")]
+        #[serde_as(as = "Vec<(Same, DisplayFromStr)>")]
         values: BTreeMap<u32, IpAddr>,
     };
 
@@ -224,9 +242,10 @@ fn test_map_as_tuple_list() {
         r#"{"values":[[1,"1.2.3.4"],[10,"1.2.3.4"],[200,"255.255.255.255"]]}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructHash {
-        #[serde(with = "As::<Vec<(DisplayFromStr, DisplayFromStr)>>")]
+        #[serde_as(as = "Vec<(DisplayFromStr, DisplayFromStr)>")]
         values: HashMap<u32, IpAddr>,
     };
 
@@ -250,9 +269,10 @@ fn test_map_as_tuple_list() {
         "invalid type: map, expected a sequence at line 1 column 10",
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructHash2 {
-        #[serde(with = "As::<Vec<(Same, DisplayFromStr)>>")]
+        #[serde_as(as = "Vec<(Same, DisplayFromStr)>")]
         values: HashMap<u32, IpAddr>,
     };
 
@@ -276,9 +296,10 @@ fn test_tuple_list_as_map() {
     let ip = "1.2.3.4".parse().unwrap();
     let ip2 = "255.255.255.255".parse().unwrap();
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructHashMap {
-        #[serde(with = "As::<HashMap<DisplayFromStr, DisplayFromStr>>")]
+        #[serde_as(as = "HashMap<DisplayFromStr, DisplayFromStr>")]
         values: Vec<(u32, IpAddr)>,
     };
 
@@ -289,9 +310,10 @@ fn test_tuple_list_as_map() {
         r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructBTreeMap {
-        #[serde(with = "As::<BTreeMap<DisplayFromStr, DisplayFromStr>>")]
+        #[serde_as(as = "BTreeMap<DisplayFromStr, DisplayFromStr>")]
         values: Vec<(u32, IpAddr)>,
     };
 
@@ -302,9 +324,10 @@ fn test_tuple_list_as_map() {
         r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructDeque {
-        #[serde(with = "As::<BTreeMap<DisplayFromStr, DisplayFromStr>>")]
+        #[serde_as(as = "BTreeMap<DisplayFromStr, DisplayFromStr>")]
         values: VecDeque<(u32, IpAddr)>,
     };
 
@@ -315,9 +338,10 @@ fn test_tuple_list_as_map() {
         r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructLinkedList {
-        #[serde(with = "As::<HashMap<DisplayFromStr, DisplayFromStr>>")]
+        #[serde_as(as = "HashMap<DisplayFromStr, DisplayFromStr>")]
         values: LinkedList<(u32, IpAddr)>,
     };
 
@@ -328,9 +352,10 @@ fn test_tuple_list_as_map() {
         r#"{"values":{"1":"1.2.3.4","10":"1.2.3.4","200":"255.255.255.255"}}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructOption {
-        #[serde(with = "As::<HashMap<DisplayFromStr, DisplayFromStr>>")]
+        #[serde_as(as = "HashMap<DisplayFromStr, DisplayFromStr>")]
         values: Option<(u32, IpAddr)>,
     };
 
@@ -345,9 +370,10 @@ fn test_tuple_list_as_map() {
 
 #[test]
 fn test_none_as_empty_string() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {
-        #[serde(with = "As::<NoneAsEmptyString>")]
+        #[serde_as(as = "NoneAsEmptyString")]
         value: Option<String>,
     };
 
@@ -359,9 +385,10 @@ fn test_none_as_empty_string() {
         r#"{"value":"Hello"}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructRc {
-        #[serde(with = "As::<NoneAsEmptyString>")]
+        #[serde_as(as = "NoneAsEmptyString")]
         value: Option<Rc<str>>,
     };
 
@@ -373,9 +400,10 @@ fn test_none_as_empty_string() {
         r#"{"value":"Hello"}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructArc {
-        #[serde(with = "As::<NoneAsEmptyString>")]
+        #[serde_as(as = "NoneAsEmptyString")]
         value: Option<Arc<str>>,
     };
 
@@ -387,9 +415,10 @@ fn test_none_as_empty_string() {
         r#"{"value":"Hello"}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructBox {
-        #[serde(with = "As::<NoneAsEmptyString>")]
+        #[serde_as(as = "NoneAsEmptyString")]
         value: Option<Box<str>>,
     };
 
@@ -404,9 +433,10 @@ fn test_none_as_empty_string() {
 
 #[test]
 fn test_default_on_error() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {
-        #[serde(with = "As::<DefaultOnError<DisplayFromStr>>")]
+        #[serde_as(as = "DefaultOnError<DisplayFromStr>")]
         value: u32,
     };
 
@@ -418,9 +448,10 @@ fn test_default_on_error() {
     check_deserialization(Struct { value: 0 }, r#"{"value":"12+3"}"#);
     check_deserialization(Struct { value: 0 }, r#"{"value":"abc"}"#);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2 {
-        #[serde(with = "As::<DefaultOnError<Vec<DisplayFromStr>>>")]
+        #[serde_as(as = "DefaultOnError<Vec<DisplayFromStr>>")]
         value: Vec<u32>,
     };
 
@@ -440,9 +471,10 @@ fn test_default_on_error() {
     // check_deserialization(Struct2 { value: vec![] }, r#"{"value":{}}"#);
     check_deserialization(Struct2 { value: vec![] }, r#"{"value":}"#);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct3 {
-        #[serde(with = "As::<Vec<DefaultOnError<DisplayFromStr>>>")]
+        #[serde_as(as = "Vec<DefaultOnError<DisplayFromStr>>")]
         value: Vec<u32>,
     };
 
@@ -466,9 +498,10 @@ fn test_default_on_error() {
 
 #[test]
 fn test_bytes_or_string() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct {
-        #[serde(with = "As::<BytesOrString>")]
+        #[serde_as(as = "BytesOrString")]
         value: Vec<u8>,
     };
 
@@ -485,9 +518,10 @@ fn test_bytes_or_string() {
         r#"{"value":"Hello"}"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructVec {
-        #[serde(with = "As::<Vec<BytesOrString>>")]
+        #[serde_as(as = "Vec<BytesOrString>")]
         value: Vec<Vec<u8>>,
     };
 
@@ -516,9 +550,10 @@ fn test_duration_seconds() {
     let one_second = Duration::new(1, 0);
     let half_second = Duration::new(0, 500_000_000);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntStrict {
-        #[serde(with = "As::<DurationSeconds>")]
+        #[serde_as(as = "DurationSeconds")]
         value: Duration,
     };
 
@@ -534,9 +569,10 @@ fn test_duration_seconds() {
         r#"invalid value: integer `-1`, expected u64 at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntFlexible {
-        #[serde(with = "As::<DurationSeconds<Integer, Flexible>>")]
+        #[serde_as(as = "DurationSeconds<Integer, Flexible>")]
         value: Duration,
     };
 
@@ -558,9 +594,10 @@ fn test_duration_seconds() {
         r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Strict {
-        #[serde(with = "As::<DurationSeconds<f64>>")]
+        #[serde_as(as = "DurationSeconds<f64>")]
         value: Duration,
     };
 
@@ -577,9 +614,10 @@ fn test_duration_seconds() {
         r#"underflow when converting float to duration at line 1 column 14"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Flexible {
-        #[serde(with = "As::<DurationSeconds<f64, Flexible>>")]
+        #[serde_as(as = "DurationSeconds<f64, Flexible>")]
         value: Duration,
     };
 
@@ -601,9 +639,10 @@ fn test_duration_seconds() {
         r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringStrict {
-        #[serde(with = "As::<DurationSeconds<String>>")]
+        #[serde_as(as = "DurationSeconds<String>")]
         value: Duration,
     };
 
@@ -623,9 +662,10 @@ fn test_duration_seconds() {
         r#"invalid type: integer `-1`, expected valid json object at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringFlexible {
-        #[serde(with = "As::<DurationSeconds<String, Flexible>>")]
+        #[serde_as(as = "DurationSeconds<String, Flexible>")]
         value: Duration,
     };
 
@@ -664,9 +704,10 @@ fn test_duration_seconds_with_frac() {
     let one_second = Duration::new(1, 0);
     let half_second = Duration::new(0, 500_000_000);
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Strict {
-        #[serde(with = "As::<DurationSecondsWithFrac<f64>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<f64>")]
         value: Duration,
     };
 
@@ -682,9 +723,10 @@ fn test_duration_seconds_with_frac() {
         r#"underflow when converting float to duration at line 1 column 14"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Flexible {
-        #[serde(with = "As::<DurationSecondsWithFrac<f64, Flexible>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<f64, Flexible>")]
         value: Duration,
     };
 
@@ -702,9 +744,10 @@ fn test_duration_seconds_with_frac() {
         r#"Negative values are not supported for Duration. Found -1 at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringStrict {
-        #[serde(with = "As::<DurationSecondsWithFrac<String>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<String>")]
         value: Duration,
     };
 
@@ -723,9 +766,10 @@ fn test_duration_seconds_with_frac() {
         r#"invalid type: integer `-1`, expected a string at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringFlexible {
-        #[serde(with = "As::<DurationSecondsWithFrac<String, Flexible>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<String, Flexible>")]
         value: Duration,
     };
 
@@ -753,11 +797,12 @@ fn test_duration_seconds_with_frac() {
 fn string_with_separator() {
     use serde_with::{rust::StringWithSeparator, CommaSeparator, SpaceSeparator};
 
+    #[serde_as]
     #[derive(Deserialize, Serialize)]
     struct A {
-        #[serde(with = "As::<StringWithSeparator::<SpaceSeparator, String>>")]
+        #[serde_as(as = "StringWithSeparator::<SpaceSeparator, String>")]
         tags: Vec<String>,
-        #[serde(with = "As::<StringWithSeparator::<CommaSeparator, String>>")]
+        #[serde_as(as = "StringWithSeparator::<CommaSeparator, String>")]
         // more_tags: Vec<String>,
         more_tags: BTreeSet<String>,
     }

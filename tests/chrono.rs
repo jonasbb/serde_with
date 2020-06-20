@@ -8,7 +8,7 @@ use crate::utils::{
 use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
-use serde_with::{As, DurationSeconds, DurationSecondsWithFrac, Flexible, Integer, SameAs};
+use serde_with::{serde_as, DurationSeconds, DurationSecondsWithFrac, Flexible, Integer, SameAs};
 use std::{collections::BTreeMap, str::FromStr};
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
@@ -54,9 +54,10 @@ fn json_datetime_from_any_to_string_deserialization() {
 
 #[test]
 fn test_chrono_naive_date_time() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct SomeTime {
-        #[serde(with = "As::<DateTime<Utc>>")]
+        #[serde_as(as = "DateTime<Utc>")]
         stamp: NaiveDateTime,
     }
     is_equal(
@@ -68,9 +69,10 @@ fn test_chrono_naive_date_time() {
 }
 #[test]
 fn test_chrono_option_naive_date_time() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct SomeTime {
-        #[serde(with = "As::<Option<DateTime<Utc>>>")]
+        #[serde_as(as = "Option<DateTime<Utc>>")]
         stamp: Option<NaiveDateTime>,
     }
     is_equal(
@@ -82,9 +84,10 @@ fn test_chrono_option_naive_date_time() {
 }
 #[test]
 fn test_chrono_vec_option_naive_date_time() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct SomeTime {
-        #[serde(with = "As::<Vec<Option<DateTime<Utc>>>>")]
+        #[serde_as(as = "Vec<Option<DateTime<Utc>>>")]
         stamps: Vec<Option<NaiveDateTime>>,
     }
     is_equal(
@@ -99,9 +102,10 @@ fn test_chrono_vec_option_naive_date_time() {
 }
 #[test]
 fn test_chrono_btree_map_naive_date_time() {
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct SomeTime {
-        #[serde(with = "As::<BTreeMap<SameAs<i32>, DateTime<Utc>>>")]
+        #[serde_as(as = "BTreeMap<SameAs<i32>, DateTime<Utc>>")]
         stamps: BTreeMap<i32, NaiveDateTime>,
     }
     is_equal(
@@ -127,9 +131,10 @@ fn test_chrono_duration_seconds() {
     let minus_one_second = zero - one_second;
     let minus_half_second = zero - half_second;
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntStrict {
-        #[serde(with = "As::<DurationSeconds>")]
+        #[serde_as(as = "DurationSeconds")]
         value: Duration,
     };
 
@@ -157,9 +162,10 @@ fn test_chrono_duration_seconds() {
         r#"invalid value: integer `9223372036854775808`, expected i64 at line 1 column 28"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntFlexible {
-        #[serde(with = "As::<DurationSeconds<Integer, Flexible>>")]
+        #[serde_as(as = "DurationSeconds<Integer, Flexible>")]
         value: Duration,
     };
 
@@ -195,9 +201,10 @@ fn test_chrono_duration_seconds() {
         r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Strict {
-        #[serde(with = "As::<DurationSeconds<f64>>")]
+        #[serde_as(as = "DurationSeconds<f64>")]
         value: Duration,
     };
 
@@ -228,9 +235,10 @@ fn test_chrono_duration_seconds() {
         r#"invalid type: string "1", expected f64 at line 1 column 12"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Flexible {
-        #[serde(with = "As::<DurationSeconds<f64, Flexible>>")]
+        #[serde_as(as = "DurationSeconds<f64, Flexible>")]
         value: Duration,
     };
 
@@ -272,9 +280,10 @@ fn test_chrono_duration_seconds() {
         r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringStrict {
-        #[serde(with = "As::<DurationSeconds<String>>")]
+        #[serde_as(as = "DurationSeconds<String>")]
         value: Duration,
     };
 
@@ -306,9 +315,10 @@ fn test_chrono_duration_seconds() {
         r#"invalid type: integer `-1`, expected valid json object at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringFlexible {
-        #[serde(with = "As::<DurationSeconds<String, Flexible>>")]
+        #[serde_as(as = "DurationSeconds<String, Flexible>")]
         value: Duration,
     };
 
@@ -352,9 +362,10 @@ fn test_chrono_duration_seconds_with_frac() {
     let minus_one_second = zero - one_second;
     let minus_half_second = zero - half_second;
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Strict {
-        #[serde(with = "As::<DurationSecondsWithFrac<f64>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<f64>")]
         value: Duration,
     };
 
@@ -378,9 +389,10 @@ fn test_chrono_duration_seconds_with_frac() {
         r#"invalid type: string "1", expected f64 at line 1 column 12"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Structf64Flexible {
-        #[serde(with = "As::<DurationSecondsWithFrac<f64, Flexible>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<f64, Flexible>")]
         value: Duration,
     };
 
@@ -415,9 +427,10 @@ fn test_chrono_duration_seconds_with_frac() {
         r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 12"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringStrict {
-        #[serde(with = "As::<DurationSecondsWithFrac<String>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<String>")]
         value: Duration,
     };
 
@@ -448,9 +461,10 @@ fn test_chrono_duration_seconds_with_frac() {
         r#"invalid type: integer `-1`, expected a string at line 1 column 11"#,
     );
 
+    #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructStringFlexible {
-        #[serde(with = "As::<DurationSecondsWithFrac<String, Flexible>>")]
+        #[serde_as(as = "DurationSecondsWithFrac<String, Flexible>")]
         value: Duration,
     };
 
