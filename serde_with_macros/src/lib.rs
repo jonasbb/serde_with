@@ -510,8 +510,13 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
         Type::Tuple(mut inner) => {
             inner.elems = inner
                 .elems
-                .into_iter()
-                .map(|type_| replace_infer_type_with_type(type_, replacement))
+                .into_pairs()
+                .map(|pair| match pair {
+                    Pair::Punctuated(type_, p) => {
+                        Pair::Punctuated(replace_infer_type_with_type(type_, replacement), p)
+                    }
+                    Pair::End(type_) => Pair::End(replace_infer_type_with_type(type_, replacement)),
+                })
                 .collect();
             Type::Tuple(inner)
         }
