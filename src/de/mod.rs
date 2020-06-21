@@ -66,6 +66,7 @@ use serde::Deserialize;
 /// [`FromStr`]: std::str::FromStr
 /// [impl-deserialize]: https://serde.rs/impl-deserialize.html
 pub trait DeserializeAs<'de, T>: Sized {
+    /// Deserialize this value from the given Serde deserializer.
     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>;

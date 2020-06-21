@@ -63,10 +63,11 @@ use super::*;
 ///
 /// [`BTreeMap`]: std::collections::BTreeMap
 /// [`Deserialize`]: serde::Deserialize
+/// [`Display`]: std::fmt::Display
 /// [`Duration`]: std::time::Duration
-/// [`FromStr`]: std::str::FromStr
 /// [impl-serialize]: https://serde.rs/impl-serialize.html
 pub trait SerializeAs<T> {
+    /// Serialize this value into the given Serde serializer.
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer;
