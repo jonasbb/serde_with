@@ -108,7 +108,8 @@ mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
 
-use crate::{de::DeserializeAs, ser::SerializeAs};
+#[doc(inline)]
+pub use crate::{de::DeserializeAs, ser::SerializeAs};
 use serde::{ser::Serialize, Deserializer, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
