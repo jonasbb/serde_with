@@ -15,15 +15,6 @@ use std::{
     time::Duration,
 };
 
-impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for SameAs<T> {
-    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        T::deserialize(deserializer)
-    }
-}
-
 impl<'de, T, U> DeserializeAs<'de, Box<T>> for Box<U>
 where
     U: DeserializeAs<'de, T>,

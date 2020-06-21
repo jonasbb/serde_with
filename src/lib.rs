@@ -170,9 +170,6 @@ impl<T> As<T> {
 pub struct Same;
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct SameAs<T>(PhantomData<T>);
-
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayFromStr;
 
 #[derive(Copy, Clone, Debug, Default)]

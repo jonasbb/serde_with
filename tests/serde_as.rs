@@ -6,7 +6,7 @@ use crate::utils::{
 use serde::{Deserialize, Serialize};
 use serde_with::{
     formats::Flexible, serde_as, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds,
-    DurationSecondsWithFrac, NoneAsEmptyString, Same, SameAs,
+    DurationSecondsWithFrac, NoneAsEmptyString, Same,
 };
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
@@ -55,7 +55,7 @@ fn test_tuples() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2b {
-        #[serde_as(as = "(SameAs<u32>, DisplayFromStr)")]
+        #[serde_as(as = "(_, DisplayFromStr)")]
         values: (u32, IpAddr),
     };
     is_equal(

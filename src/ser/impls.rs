@@ -7,15 +7,6 @@ use std::{
     time::Duration,
 };
 
-impl<T: Serialize> SerializeAs<T> for SameAs<T> {
-    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        source.serialize(serializer)
-    }
-}
-
 impl<T, U> SerializeAs<Box<T>> for Box<U>
 where
     U: SerializeAs<T>,
