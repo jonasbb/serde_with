@@ -1,6 +1,5 @@
 use super::*;
-use crate::Separator;
-use rust::StringWithSeparator;
+use crate::{formats::Strictness, rust::StringWithSeparator, Separator};
 use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
     fmt::Display,
@@ -320,7 +319,7 @@ impl SerializeAs<Vec<u8>> for BytesOrString {
     }
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<Integer, STRICTNESS>
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<u64, STRICTNESS>
 where
     STRICTNESS: Strictness,
 {

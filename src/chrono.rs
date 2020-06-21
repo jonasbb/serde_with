@@ -5,8 +5,10 @@
 //! [chrono]: https://docs.rs/chrono/
 
 use crate::{
-    de::DeserializeAs, ser::SerializeAs, utils, DurationSeconds, DurationSecondsWithFrac, Flexible,
-    Format, Integer, Strict, Strictness,
+    de::DeserializeAs,
+    formats::{Flexible, Format, Strict, Strictness},
+    ser::SerializeAs,
+    utils, DurationSeconds, DurationSecondsWithFrac,
 };
 use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
 use serde::{
@@ -219,7 +221,7 @@ fn test_duration_as_secs_f64() {
     );
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<Integer, STRICTNESS>
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<i64, STRICTNESS>
 where
     STRICTNESS: Strictness,
 {
@@ -404,7 +406,7 @@ impl<'de> Visitor<'de> for DurationVisitiorFlexible {
     }
 }
 
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<Integer, Strict> {
+impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<i64, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
@@ -444,7 +446,7 @@ where
     }
 }
 
-impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<Integer, Strict> {
+impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<i64, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,

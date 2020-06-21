@@ -1,6 +1,9 @@
 use super::*;
-use crate::utils;
-use rust::StringWithSeparator;
+use crate::{
+    formats::{Flexible, Format, Strict},
+    rust::StringWithSeparator,
+    utils,
+};
 use serde::de::*;
 use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
@@ -762,7 +765,7 @@ impl<'de> Visitor<'de> for DurationVisitiorFlexible {
     }
 }
 
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<Integer, Strict> {
+impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<u64, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
