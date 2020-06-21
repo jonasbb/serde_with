@@ -8,7 +8,7 @@ use crate::utils::{
 use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DurationSeconds, DurationSecondsWithFrac, Flexible, Integer, SameAs};
+use serde_with::{formats::Flexible, serde_as, DurationSeconds, DurationSecondsWithFrac};
 use std::{collections::BTreeMap, str::FromStr};
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
@@ -105,7 +105,7 @@ fn test_chrono_btree_map_naive_date_time() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct SomeTime {
-        #[serde_as(as = "BTreeMap<SameAs<i32>, DateTime<Utc>>")]
+        #[serde_as(as = "BTreeMap<_, DateTime<Utc>>")]
         stamps: BTreeMap<i32, NaiveDateTime>,
     }
     is_equal(
@@ -134,7 +134,7 @@ fn test_chrono_duration_seconds() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntStrict {
-        #[serde_as(as = "DurationSeconds")]
+        #[serde_as(as = "DurationSeconds<i64>")]
         value: Duration,
     };
 
@@ -165,7 +165,7 @@ fn test_chrono_duration_seconds() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntFlexible {
-        #[serde_as(as = "DurationSeconds<Integer, Flexible>")]
+        #[serde_as(as = "DurationSeconds<i64, Flexible>")]
         value: Duration,
     };
 

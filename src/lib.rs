@@ -97,6 +97,7 @@ pub mod chrono;
 pub mod de;
 mod duplicate_key_impls;
 mod flatten_maybe;
+pub mod formats;
 #[cfg(feature = "hex")]
 pub mod hex;
 #[cfg(feature = "json")]
@@ -107,7 +108,8 @@ mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
 
-use crate::{de::DeserializeAs, ser::SerializeAs};
+#[doc(inline)]
+pub use crate::{de::DeserializeAs, ser::SerializeAs};
 use serde::{ser::Serialize, Deserializer, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
@@ -168,9 +170,6 @@ impl<T> As<T> {
 pub struct Same;
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct SameAs<T>(PhantomData<T>);
-
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayFromStr;
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -182,29 +181,14 @@ pub struct DefaultOnError<T>(PhantomData<T>);
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;
 
-pub trait Format {}
-pub trait Strictness {}
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationSeconds<
+    FORMAT: formats::Format = u64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Integer;
-impl Format for Integer {}
-impl Format for f64 {}
-impl Format for String {}
-
-#[derive(Copy, Clone, Debug, Default)]
-pub struct Strict;
-impl Strictness for Strict {}
-
-#[derive(Copy, Clone, Debug, Default)]
-pub struct Flexible;
-impl Strictness for Flexible {}
-
-#[derive(Copy, Clone, Debug, Default)]
-pub struct DurationSeconds<FORMAT: Format = Integer, STRICTNESS: Strictness = Strict>(
-    PhantomData<(FORMAT, STRICTNESS)>,
-);
-
-#[derive(Copy, Clone, Debug, Default)]
-pub struct DurationSecondsWithFrac<FORMAT: Format = f64, STRICTNESS: Strictness = Strict>(
-    PhantomData<(FORMAT, STRICTNESS)>,
-);
+pub struct DurationSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);

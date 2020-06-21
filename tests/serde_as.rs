@@ -5,8 +5,8 @@ use crate::utils::{
 };
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    serde_as, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds,
-    DurationSecondsWithFrac, Flexible, Integer, NoneAsEmptyString, Same, SameAs,
+    formats::Flexible, serde_as, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds,
+    DurationSecondsWithFrac, NoneAsEmptyString, Same,
 };
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
@@ -55,7 +55,7 @@ fn test_tuples() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct2b {
-        #[serde_as(as = "(SameAs<u32>, DisplayFromStr)")]
+        #[serde_as(as = "(_, DisplayFromStr)")]
         values: (u32, IpAddr),
     };
     is_equal(
@@ -572,7 +572,7 @@ fn test_duration_seconds() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct StructIntFlexible {
-        #[serde_as(as = "DurationSeconds<Integer, Flexible>")]
+        #[serde_as(as = "DurationSeconds<u64, Flexible>")]
         value: Duration,
     };
 

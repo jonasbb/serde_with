@@ -1,21 +1,11 @@
 use super::*;
-use crate::Separator;
-use rust::StringWithSeparator;
+use crate::{formats::Strictness, rust::StringWithSeparator, Separator};
 use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
     fmt::Display,
     hash::{BuildHasher, Hash},
     time::Duration,
 };
-
-impl<T: Serialize> SerializeAs<T> for SameAs<T> {
-    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        source.serialize(serializer)
-    }
-}
 
 impl<T, U> SerializeAs<Box<T>> for Box<U>
 where
@@ -320,7 +310,7 @@ impl SerializeAs<Vec<u8>> for BytesOrString {
     }
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<Integer, STRICTNESS>
+impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<u64, STRICTNESS>
 where
     STRICTNESS: Strictness,
 {
