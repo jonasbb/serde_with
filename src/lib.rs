@@ -142,6 +142,7 @@ macro_rules! generate_guide {
 generate_guide! {
     pub mod guide {
         pub mod migrating;
+        pub mod feature_flags;
     }
 }
 

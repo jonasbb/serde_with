@@ -33,13 +33,15 @@ exclude = [
 codecov = { repository = "jonasbb/serde_with", branch = "master", service = "github" }
 maintenance = { status = "actively-developed" }
 
+# When adding new features update the documentation in feature-flags.md
 [features]
 chrono = [ "chrono_crate" ]
-default = [ "guide", "macros" ]
+default = [ "macros" ]
 guide = [ "doc-comment", "macros" ]
 json = [ "serde_json" ]
 macros = [ "serde_with_macros" ]
 
+# When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
 chrono_crate = { package = "chrono", version = "0.4.1", features = [ "serde" ], optional = true }
 doc-comment = { version = "0.3.3", optional = true }
