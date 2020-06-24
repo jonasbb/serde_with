@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add `serde_as` macro. Refer to the `serde_with` crate for details.
+
 ### Changed
 
 * Convert the code to use 2018 edition.

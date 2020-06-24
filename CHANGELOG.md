@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* The largest addition to this release is the addition of the `serde_as` de/serialization scheme.
+    It's goal is it to be a more flexiable replacement to serde's with-annotation, by being more composable than before.
+    No longer is it a problem to add a custom de/serialization adapter is the type is within an `Option` or a `Vec`.
+
+    Thanks to `@markazmierczak` for the design of the trait without whom this wouldn't be possible.
+
+    More details about this new scheme can be found in the also new [user guide](https://docs.rs/serde_with/*/serde_with/guide/index.html)
+* This release also features a detailed userguide.
+    The guide focusses more on how to use this crate by providing examples.
+    For example, it includes a section about the available feature flags of this crate and how you can migrate to the shiny new `serde_as` scheme.
+* The crate now features de/serialization adaptors for the std and chrono's `Duration` types. #56 #104
+
 ### Changed
 
 * Convert the code to use 2018 edition.
+* @peterjoel improved the performance of `with_prefix!`. #101
+
+### Fixed
+
+* The `with_prefix!` macro, to add a string prefixes during serialization, now also works with unit variant enum types. #115 #116
 
 ## [1.4.0]
 
