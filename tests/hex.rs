@@ -1,5 +1,3 @@
-#![cfg(feature = "hex")]
-
 mod utils;
 
 use crate::utils::is_equal;

@@ -1,5 +1,3 @@
-#![cfg(feature = "chrono")]
-
 mod utils;
 
 use crate::utils::{
