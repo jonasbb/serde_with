@@ -5,7 +5,7 @@
 //!
 //! You can find more details on how to implement this trait for your types in the documentation of the [`SerializeAs`][] trait and details about the usage in the [user guide][].
 //!
-//! [user guide]: serde_with::guide
+//! [user guide]: crate::guide
 
 mod impls;
 

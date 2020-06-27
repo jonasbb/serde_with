@@ -15,6 +15,7 @@ use std::{
     str::FromStr,
 };
 
+// FIXME Examples are bad as they can be directly serialized. Maybe use Url, ints, or mime.
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
 /// This allows to deserialize a string as a number.
