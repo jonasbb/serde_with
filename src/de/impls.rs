@@ -72,14 +72,6 @@ where
             {
                 U::deserialize_as(deserializer).map(Some)
             }
-
-            #[doc(hidden)]
-            fn __private_visit_untagged_option<D>(self, deserializer: D) -> Result<Self::Value, ()>
-            where
-                D: Deserializer<'de>,
-            {
-                Ok(U::deserialize_as(deserializer).ok())
-            }
         }
 
         deserializer.deserialize_option(OptionVisitor::<T, U>(PhantomData))
