@@ -60,15 +60,15 @@ version-sync = "0.8.1"
 
 [[test]]
 name = "chrono"
-required-features = ["chrono, macros"]
+required-features = ["chrono", "macros"]
 
 [[test]]
 name = "hex"
-required-features = ["hex, macros"]
+required-features = ["hex", "macros"]
 
 [[test]]
 name = "json"
-required-features = ["json, macros"]
+required-features = ["json", "macros"]
 
 [[test]]
 name = "serde_as"
