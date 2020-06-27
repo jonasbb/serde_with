@@ -1,5 +1,3 @@
-#![cfg(feature = "json")]
-
 mod utils;
 
 use crate::utils::is_equal;

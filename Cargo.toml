@@ -59,6 +59,18 @@ serde_json = { version = "1.0.25", features = [ "preserve_order" ] }
 version-sync = "0.8.1"
 
 [[test]]
+name = "chrono"
+required-features = ["chrono, macros"]
+
+[[test]]
+name = "hex"
+required-features = ["hex, macros"]
+
+[[test]]
+name = "json"
+required-features = ["json, macros"]
+
+[[test]]
 name = "serde_as"
 required-features = ["macros"]
 

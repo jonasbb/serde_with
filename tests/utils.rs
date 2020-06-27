@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use pretty_assertions::assert_eq;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fmt::Debug;
 
