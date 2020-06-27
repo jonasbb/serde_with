@@ -25,7 +25,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies.serde_with]
-version = "1.4.0"
+version = "1.5.0-alpha.1"
 features = [ "..." ]
 ```
 

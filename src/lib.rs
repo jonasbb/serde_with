@@ -23,7 +23,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with/1.4.0")]
+#![doc(html_root_url = "https://docs.rs/serde_with/1.5.0-alpha.1")]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
@@ -50,7 +50,7 @@
 //!
 //! ```toml
 //! [dependencies.serde_with]
-//! version = "1.4.0"
+//! version = "1.5.0-alpha.1"
 //! features = [ "..." ]
 //! ```
 //!
