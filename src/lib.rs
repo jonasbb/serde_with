@@ -294,10 +294,42 @@ impl Separator for CommaSeparator {
     }
 }
 
+/// Adapter to convert from `serde_as` to the serde traits.
+///
+/// The `As` type adapter allows to use types implementing [`DeserializeAs`][] or [`SerializeAs`][] in place of serde's with-annotation.
+/// The with-annotation allows to run custom code when de/serializing, however it is quite inflexible.
+/// The traits [`DeserializeAs`][]/[`SerializeAs`][] are more flexible, as they allow composition and nesting of types to create more complex de/serialization behavior.
+/// However, they are not directly compatible with serde, as they are not provided by serde.
+/// The `As` type adapter makes them compatible, by forwarding the function calls to `serialize`/`deserialize` to the corresponding functions `serialize_as` and `deserialize_as`.
+///
+/// It is not required to use this type directly.
+/// Instead, it is highly encouraged to use the [`#[serde_as]`][serde_as] attribute since it includes further usability improvements.
+/// If the use of the use of the proc-macro is not acceptable, then `As` can be used directly with serde.
+///
+/// ```rust,ignore
+/// // Serialize numbers as sequence of strings, using Display and FromStr
+/// #[serde(with = "As::<Vec<DisplayFromStr>>")]
+/// field: Vec<u8>,
+/// ```
+/// If the normal `Deserialize`/`Serialize` traits should be used, the placeholder type [`Same`] can be used.
+/// It implements [`DeserializeAs`][]/[`SerializeAs`][], when the underlying type implements `Deserialize`/`Serialize`.
+///
+/// ```rust,ignore
+/// // Serialize map, turn keys into strings but keep type of value
+/// #[serde(with = "As::<BTreeMap<DisplayFromStr, Same>>")]
+/// field: BTreeMap<u8, i32>,
+/// ```
+///
+/// [serde_as]: https://docs.rs/serde_with/*/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct As<T>(PhantomData<T>);
 
 impl<T> As<T> {
+    /// Serialize type `T` using [`SerializeAs`][]
+    ///
+    /// The function signature is compatible with [serde's with-annotation][with-annotation].
+    ///
+    /// [with-annotation]: https://serde.rs/field-attrs.html#with
     pub fn serialize<S, I>(value: &I, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -306,6 +338,11 @@ impl<T> As<T> {
         T::serialize_as(value, serializer)
     }
 
+    /// Deserialize type `T` using [`DeserializeAs`][]
+    ///
+    /// The function signature is compatible with [serde's with-annotation][with-annotation].
+    ///
+    /// [with-annotation]: https://serde.rs/field-attrs.html#with
     pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>
     where
         T: DeserializeAs<'de, I>,
@@ -315,6 +352,11 @@ impl<T> As<T> {
     }
 }
 
+/// Adapter to convert from `serde_as` to the serde traits.
+///
+/// This is the counter-type to [`As`][].
+/// It can be used whenever a type implementing [`DeserializeAs`][]/[`SerializeAs`][] is required but the normal `Deserialize`/`Serialize` traits should be used.
+/// Check [`As`] for an example.
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Same;
 
