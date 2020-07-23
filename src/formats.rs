@@ -15,6 +15,16 @@ macro_rules! impl_format {
         )*
     };
 }
+macro_rules! create_format {
+    ($(#[$attr:meta] $t:ident)*) => {
+        $(
+            #[$attr]
+            #[derive(Copy, Clone, Debug, Default)]
+            pub struct $t;
+            impl_format!(#[$attr] $t);
+        )*
+    };
+}
 impl_format!(
     /// Serialize into an i8
     i8
@@ -50,6 +60,13 @@ serde::serde_if_integer128!(impl_format!(
     /// Serialize into a u128
     u128
 ););
+
+create_format!(
+    /// Use uppercase characters
+    Uppercase
+    /// Use lowercase characters
+    Lowercase
+);
 
 /// Specify how lenient the deserialization process should be
 ///
