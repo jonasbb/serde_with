@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     Thanks to `@markazmierczak` for the design of the trait without whom this wouldn't be possible.
 
-    More details about this new scheme can be found in the also new [user guide](https://docs.rs/serde_with/*/serde_with/guide/index.html)
+    More details about this new scheme can be found in the also new [user guide](https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/index.html)
 * This release also features a detailed user guide.
     The guide focusses more on how to use this crate by providing examples.
     For example, it includes a section about the available feature flags of this crate and how you can migrate to the shiny new `serde_as` scheme.
