@@ -374,7 +374,7 @@ fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), String> {
     }
 
     #[derive(FromField, Debug)]
-    #[darling(attributes(serde))]
+    #[darling(attributes(serde), allow_unknown_fields)]
     struct SerdeWithOptions {
         #[darling(default)]
         with: Option<String>,
