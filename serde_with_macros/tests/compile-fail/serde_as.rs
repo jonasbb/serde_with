@@ -48,4 +48,16 @@ struct ConflictingWithAnnotations {
     i: u32,
 }
 
+/// Test error message for unknown fields for the [serde_as] macro
+#[serde_as]
+#[derive(Serialize)]
+struct ConflictingAsAnnotations {
+    #[serde_as(as = "_")]
+    normal_field: u32,
+    #[serde_as(does_not_exist = "123")]
+    unknown: u32,
+    #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
+    two_unkowns: u32,
+}
+
 fn main() {}

@@ -40,7 +40,7 @@ extern crate proc_macro;
 mod utils;
 
 use crate::utils::IteratorExt as _;
-use darling::FromField;
+use darling::{Error as DarlingError, FromField};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::{quote, ToTokens};
@@ -97,6 +97,89 @@ where
             Span::call_site(),
             "The attribute can only be applied to struct or enum definitions.",
         ))
+    }
+}
+
+/// Like [apply_function_to_struct_and_enum_fields] but for darling errors
+fn apply_function_to_struct_and_enum_fields_darling<F>(
+    input: TokenStream,
+    function: F,
+) -> Result<proc_macro2::TokenStream, DarlingError>
+where
+    F: Copy,
+    F: Fn(&mut Field) -> Result<(), DarlingError>,
+{
+    /// Handle a single struct or a single enum variant
+    fn apply_on_fields<F>(fields: &mut Fields, function: F) -> Result<(), DarlingError>
+    where
+        F: Fn(&mut Field) -> Result<(), DarlingError>,
+    {
+        match fields {
+            // simple, no fields, do nothing
+            Fields::Unit => Ok(()),
+            Fields::Named(ref mut fields) => {
+                let errors: Vec<DarlingError> = fields
+                    .named
+                    .iter_mut()
+                    .map(|field| function(field).map_err(|err| err.with_span(&field)))
+                    // turn the Err variant into the Some, such that we only collect errors
+                    .filter_map(|res| match res {
+                        Err(e) => Some(e),
+                        Ok(()) => None,
+                    })
+                    .collect();
+                if errors.is_empty() {
+                    Ok(())
+                } else {
+                    Err(DarlingError::multiple(errors))
+                }
+            }
+            Fields::Unnamed(ref mut fields) => {
+                let errors: Vec<DarlingError> = fields
+                    .unnamed
+                    .iter_mut()
+                    .map(|field| function(field).map_err(|err| err.with_span(&field)))
+                    // turn the Err variant into the Some, such that we only collect errors
+                    .filter_map(|res| match res {
+                        Err(e) => Some(e),
+                        Ok(()) => None,
+                    })
+                    .collect();
+                if errors.is_empty() {
+                    Ok(())
+                } else {
+                    Err(DarlingError::multiple(errors))
+                }
+            }
+        }
+    }
+
+    // For each field in the struct given by `input`, add the `skip_serializing_if` attribute,
+    // if and only if, it is of type `Option`
+    if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
+        apply_on_fields(&mut input.fields, function)?;
+        Ok(quote!(#input))
+    } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
+        let errors: Vec<DarlingError> = input
+            .variants
+            .iter_mut()
+            .map(|variant| apply_on_fields(&mut variant.fields, function))
+            // turn the Err variant into the Some, such that we only collect errors
+            .filter_map(|res| match res {
+                Err(e) => Some(e),
+                Ok(()) => None,
+            })
+            .collect();
+        if errors.is_empty() {
+            Ok(quote!(#input))
+        } else {
+            Err(DarlingError::multiple(errors))
+        }
+    } else {
+        Err(DarlingError::custom(
+            "The attribute can only be applied to struct or enum definitions.",
+        )
+        .with_span(&Span::call_site()))
     }
 }
 
@@ -347,15 +430,16 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 #[proc_macro_attribute]
 pub fn serde_as(_args: TokenStream, input: TokenStream) -> TokenStream {
     // Convert any error message into a nice compiler error
-    let res = match apply_function_to_struct_and_enum_fields(input, serde_as_add_attr_to_field) {
-        Ok(res) => res,
-        Err(err) => err.to_compile_error(),
-    };
+    let res =
+        match apply_function_to_struct_and_enum_fields_darling(input, serde_as_add_attr_to_field) {
+            Ok(res) => res,
+            Err(err) => err.write_errors(),
+        };
     TokenStream::from(res)
 }
 
 /// Add the skip_serializing_if annotation to each field of the struct
-fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), String> {
+fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), DarlingError> {
     #[derive(FromField, Debug)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
@@ -390,8 +474,8 @@ fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), String> {
         }
     }
 
-    let serde_as_options = SerdeAsOptions::from_field(field).unwrap();
-    let serde_with_options = SerdeWithOptions::from_field(field).unwrap();
+    let serde_as_options = SerdeAsOptions::from_field(field)?;
+    let serde_with_options = SerdeWithOptions::from_field(field)?;
 
     // Find index of serde_as attribute
     let serde_as_idx = field.attrs.iter().enumerate().find_map(|(idx, attr)| {
@@ -404,20 +488,20 @@ fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), String> {
     if serde_as_idx.is_none() {
         return Ok(());
     }
-    let serde_as_idx = serde_as_idx.unwrap();
+    let serde_as_idx = serde_as_idx.expect("Just checked that the value is Some");
 
     // serde_as Attribute
     field.attrs.remove(serde_as_idx);
 
     // Check if there are any conflicting attributes
     if serde_as_options.has_any_set() && serde_with_options.has_any_set() {
-        return Err("Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.".into());
+        return Err(DarlingError::custom("Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`."));
     }
 
     if serde_as_options.r#as.is_some() && serde_as_options.deserialize_as.is_some() {
-        return Err("Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.".into());
+        return Err(DarlingError::custom("Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code."));
     } else if serde_as_options.r#as.is_some() && serde_as_options.serialize_as.is_some() {
-        return Err("Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code.".into());
+        return Err(DarlingError::custom("Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code."));
     }
 
     if let Some(Ok(type_)) = serde_as_options.r#as {
