@@ -25,7 +25,7 @@ jobs:
         ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2.3.1
+      - uses: actions/checkout@v2.3.2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -59,7 +59,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v2.3.1
+      - uses: actions/checkout@v2.3.2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -92,7 +92,7 @@ jobs:
         ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2.3.1
+      - uses: actions/checkout@v2.3.2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
