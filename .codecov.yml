@@ -18,20 +18,40 @@ coverage:
       # disable the default status that measures entire project
       default: false
 
-      # declare a new status context "tests"
-      tests:
-        # We cannot require 100%, as tarpaulin has some issues in counting lines
-        target: 90%
-        # Only include coverage of the "tests/" folder
-        paths: "tests/"
+      # declare a new status context "serde_with"
+      serde_with:
+        paths:
+          - "src"
+        # Use the coverage from the base commit as baseline
+        target: auto
         # Allow the coverage to change by up to 5%
         threshold: "5%"
 
-      # declare a new status context "crate"
-      crate:
-        paths: "src/"
-        # Use the coverage from the base commit as baseline
-        target: auto
+      # declare a new status context "serde_with_tests"
+      serde_with_tests:
+        # Only include coverage of the "tests/" folder
+        paths:
+          - "tests"
+        # We cannot require 100%, as tarpaulin has some issues in counting lines
+        # Require at least 90% to pass this check
+        target: 90%
+        # Allow the coverage to change by up to 5%
+        threshold: "5%"
+
+      # serde_with_macros has basically no important coverage
+      # declare a new status context "serde_with_macros"
+      serde_with_macros:
+        paths:
+          - "serde_with_macros/src"
+        informational: true
+
+      # declare a new status context "serde_with_macros_test"
+      serde_with_macros_test:
+        paths:
+          - "serde_with_macros/tests"
+        # We cannot require 100%, as tarpaulin has some issues in counting lines
+        # Require at least 90% to pass this check
+        target: 90%
         # Allow the coverage to change by up to 5%
         threshold: "5%"
 
