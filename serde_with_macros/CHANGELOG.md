@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.0-alpha.2]
+
+### Fixed
+
+* The `serde_as` macro now supports serde attributes and no longer panic on unrecognized values in the attribute.
+
 ## [1.2.0-alpha.1]
 
 ### Added
