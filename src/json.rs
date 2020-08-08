@@ -92,9 +92,9 @@ pub mod nested {
 /// # Examples
 ///
 /// ```
-/// # #[cfg(features = "macros")] {
+/// # #[cfg(feature = "macros")] {
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_derive::{serde_as, json::JsonString};
+/// # use serde_with::{serde_as, json::JsonString};
 /// #
 /// #[serde_as]
 /// #[derive(Deserialize, Serialize)]
