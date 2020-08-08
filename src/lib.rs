@@ -360,6 +360,51 @@ impl<T> As<T> {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Same;
 
+/// De/Serialize using [`Display`] and [`FromStr`] implementation
+///
+/// This allows to deserialize a string as a number.
+/// It can be very useful for serialization formats like JSON, which do not support integer
+/// numbers and have to resort to strings to represent them.
+///
+/// Another use case is types with [`Display`] and [`FromStr`] implementations, but without serde
+/// support, which can be found in some crates.
+///
+/// The same functionality is also available as [`serde_with::rust::display_fromstr`][crate::rust::display_fromstr] compatible with serde's with-annotation.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DisplayFromStr};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "DisplayFromStr")]
+///     mime: mime::Mime,
+///     #[serde_as(as = "DisplayFromStr")]
+///     number: u32,
+/// }
+///
+/// let v: A = serde_json::from_value(json!({
+///     "mime": "text/plain",
+///     "number": "159",
+/// })).unwrap();
+/// assert_eq!(mime::TEXT_PLAIN, v.mime);
+/// assert_eq!(159, v.number);
+///
+/// let x = A {
+///     mime: mime::STAR_STAR,
+///     number: 777,
+/// };
+/// assert_eq!(json!({ "mime": "*/*", "number": "777" }), serde_json::to_value(&x).unwrap());
+/// # }
+/// ```
+///
+/// [`Display`]: std::fmt::Display
+/// [`FromStr`]: std::str::FromStr
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayFromStr;
 

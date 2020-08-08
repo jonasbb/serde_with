@@ -52,6 +52,7 @@ serde_with_macros = { path = "./serde_with_macros", version = "1.2.0-alpha.2", o
 
 [dev-dependencies]
 fnv = "1.0.6"
+mime = "0.3.16"
 pretty_assertions = "0.6.1"
 ron = "0.6"
 serde_derive = "1.0.75"

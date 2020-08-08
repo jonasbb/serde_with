@@ -15,39 +15,39 @@ use std::{
     str::FromStr,
 };
 
-// FIXME Examples are bad as they can be directly serialized. Maybe use Url, ints, or mime.
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
 /// This allows to deserialize a string as a number.
 /// It can be very useful for serialization formats like JSON, which do not support integer
 /// numbers and have to resort to strings to represent them.
 ///
+/// The same functionality is also available as [`serde_with::DisplayFromStr`][crate::DisplayFromStr] compatible with serde's with-annotation.
+///
 /// # Examples
 ///
-/// ```
+/// ```rust
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use std::net::Ipv4Addr;
 /// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
 ///     #[serde(with = "serde_with::rust::display_fromstr")]
-///     address: Ipv4Addr,
+///     mime: mime::Mime,
 ///     #[serde(with = "serde_with::rust::display_fromstr")]
-///     b: bool,
+///     number: u32,
 /// }
 ///
 /// let v: A = serde_json::from_str(r#"{
-///     "address": "192.168.2.1",
-///     "b": "true"
+///     "mime": "text/plain",
+///     "number": "159"
 /// }"#).unwrap();
-/// assert_eq!(Ipv4Addr::new(192, 168, 2, 1), v.address);
-/// assert!(v.b);
+/// assert_eq!(mime::TEXT_PLAIN, v.mime);
+/// assert_eq!(159, v.number);
 ///
 /// let x = A {
-///     address: Ipv4Addr::new(127, 53, 0, 1),
-///     b: false,
+///     mime: mime::STAR_STAR,
+///     number: 777,
 /// };
-/// assert_eq!(r#"{"address":"127.53.0.1","b":"false"}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(r#"{"mime":"*/*","number":"777"}"#, serde_json::to_string(&x).unwrap());
 /// ```
 pub mod display_fromstr {
     use super::*;
@@ -97,6 +97,24 @@ pub mod display_fromstr {
 /// De/Serialize sequences using [`FromIterator`] and [`IntoIterator`] implementation for it and [`Display`] and [`FromStr`] implementation for each element
 ///
 /// This allows to serialize and deserialize collections with elements which can be represented as strings.
+///
+/// This can be expressed more intuitivly using the `serde_as` macro.
+/// Instead of
+/// ```rust,ignore
+/// #[serde(with = "serde_with::rust::seq_display_fromstr")]
+/// addresses: BTreeSet<Ipv4Addr>,
+/// ```
+/// you can write:
+/// ```rust,ignore
+/// #[serde_as(as = "BTreeSet<DisplayFromStr>")]
+/// addresses: BTreeSet<Ipv4Addr>,
+/// ```
+///
+/// This works for any container type, so also for `Vec`:
+/// ```rust,ignore
+/// #[serde_as(as = "Vec<DisplayFromStr>")]
+/// bs: Vec<bool>,
+/// ```
 ///
 /// # Examples
 ///
