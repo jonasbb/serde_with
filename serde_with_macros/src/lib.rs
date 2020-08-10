@@ -551,7 +551,7 @@ fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
 
 /// Recursivly replace all occurences of `_` with `replacement` in a [Type][]
 ///
-/// The [serde_as][] macro allows to use the infer type, i.e., `_`, as shortcut for `::serde_with::As`.
+/// The [serde_as][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for `::serde_with::As`.
 /// This function replaces all occurences of the infer type with another type.
 fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
     match to_replace {
