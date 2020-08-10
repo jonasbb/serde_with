@@ -98,8 +98,11 @@ pub mod display_fromstr {
 ///
 /// This allows to serialize and deserialize collections with elements which can be represented as strings.
 ///
-/// This can be expressed more intuitivly using the `serde_as` macro.
+/// ## Converting to `serde_as`:
+///
+/// The same functionality can be expressed more clearly using the `serde_as` macro.
 /// Instead of
+///
 /// ```rust,ignore
 /// #[serde(with = "serde_with::rust::seq_display_fromstr")]
 /// addresses: BTreeSet<Ipv4Addr>,
@@ -918,6 +921,24 @@ pub mod string_empty_as_none {
 ///
 /// If you need to de/serialize a [`BTreeMap`] then use [`btreemap_as_tuple_list`].
 ///
+/// ## Converting to `serde_as`:
+///
+/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
+///
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::serde_as;
+/// # use std::collections::HashMap;
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "Vec<(_, _)>")]
+///     s: HashMap<(String, u32), u32>,
+/// }
+/// ```
+///
 /// # Examples
 ///
 /// ```
@@ -1034,6 +1055,24 @@ pub mod hashmap_as_tuple_list {
 ///
 /// If you need to de/serialize a [`HashMap`] then use [`hashmap_as_tuple_list`].
 ///
+/// ## Converting to `serde_as`:
+///
+/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
+///
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::serde_as;
+/// # use std::collections::BTreeMap;
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "Vec<(_, _)>")]
+///     s: BTreeMap<(String, u32), u32>,
+/// }
+/// ```
+///
 /// # Examples
 ///
 /// ```
@@ -1119,6 +1158,24 @@ pub mod btreemap_as_tuple_list {
 ///
 /// The implementation is generic using the [`FromIterator`] and [`IntoIterator`] traits.
 /// Therefore, all of [`Vec`], [`VecDeque`](std::collections::VecDeque), and [`LinkedList`](std::collections::LinkedList) and anything which implements those are supported.
+///
+/// ## Converting to `serde_as`:
+///
+/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
+///
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::serde_as;
+/// # use std::collections::BTreeMap;
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct S {
+///     #[serde_as(as = "BTreeMap<_, _>")] // HashMap will also work
+///     s: BTreeMap<(String, u32), u32>,
+/// }
+/// ```
 ///
 /// # Examples
 ///
