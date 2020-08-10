@@ -804,41 +804,41 @@ pub mod maps_first_key_wins {
     }
 }
 
-/// De/Serialize a [`Option`]`<String>` type while transforming the empty string to [`None`]
+/// De/Serialize a [`Option`]`<`[`String`]`>` type while transforming the empty string to [`None`]
 ///
-/// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<str>` implementations.
+/// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<`[`str`]`>` implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
+///
+/// The same functionality is also available as [`serde_with::NoneAsEmptyString`][crate::NoneAsEmptyString] compatible with serde's with-annotation.
 ///
 /// # Examples
 ///
 /// ```
 /// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::rust::string_empty_as_none;
 /// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
-///     #[serde(with = "serde_with::rust::string_empty_as_none")]
+///     #[serde(with = "string_empty_as_none")]
 ///     tags: Option<String>,
 /// }
 ///
-/// let v: A = serde_json::from_str(r##"{
-///     "tags": ""
-/// }"##).unwrap();
-/// assert!(v.tags.is_none());
+/// let v: A = serde_json::from_value(json!({ "tags": "" })).unwrap();
+/// assert_eq!(None, v.tags);
 ///
-/// let v: A = serde_json::from_str(r##"{
-///     "tags": "Hi"
-/// }"##).unwrap();
+/// let v: A = serde_json::from_value(json!({ "tags": "Hi" })).unwrap();
 /// assert_eq!(Some("Hi".to_string()), v.tags);
 ///
 /// let x = A {
 ///     tags: Some("This is text".to_string()),
 /// };
-/// assert_eq!(r#"{"tags":"This is text"}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(json!({ "tags": "This is text" }), serde_json::to_value(&x).unwrap());
 ///
 /// let x = A {
 ///     tags: None,
 /// };
-/// assert_eq!(r#"{"tags":""}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(json!({ "tags": "" }), serde_json::to_value(&x).unwrap());
 /// ```
 pub mod string_empty_as_none {
     use super::*;

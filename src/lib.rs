@@ -408,6 +408,47 @@ pub struct Same;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayFromStr;
 
+/// De/Serialize a [`Option`]`<`[`String`]`>` type while transforming the empty string to [`None`]
+///
+/// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<`[`str`]`>` implementations.
+/// An empty string is deserialized as [`None`] and a [`None`] vice versa.
+///
+/// The same functionality is also available as [`serde_with::rust::string_empty_as_none`][crate::rust::string_empty_as_none] compatible with serde's with-annotation.
+///
+/// # Examples
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, NoneAsEmptyString};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "NoneAsEmptyString")]
+///     tags: Option<String>,
+/// }
+///
+/// let v: A = serde_json::from_value(json!({ "tags": "" })).unwrap();
+/// assert_eq!(None, v.tags);
+///
+/// let v: A = serde_json::from_value(json!({ "tags": "Hi" })).unwrap();
+/// assert_eq!(Some("Hi".to_string()), v.tags);
+///
+/// let x = A {
+///     tags: Some("This is text".to_string()),
+/// };
+/// assert_eq!(json!({ "tags": "This is text" }), serde_json::to_value(&x).unwrap());
+///
+/// let x = A {
+///     tags: None,
+/// };
+/// assert_eq!(json!({ "tags": "" }), serde_json::to_value(&x).unwrap());
+/// # }
+/// ```
+///
+/// [`FromStr`]: std::str::FromStr
 #[derive(Copy, Clone, Debug, Default)]
 pub struct NoneAsEmptyString;
 
