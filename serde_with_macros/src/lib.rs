@@ -242,7 +242,7 @@ where
 /// Type aliasing an [`Option`] and giving it another name, will cause this field to be ignored.
 /// This cannot be supported, as proc-macros run before type checking, thus it is not possible to determine if a type alias refers to an [`Option`].
 ///
-/// ```rust,ignore
+/// ```rust
 /// # use serde::Serialize;
 /// # use serde_with_macros::skip_serializing_none;
 /// type MyOption<T> = Option<T>;

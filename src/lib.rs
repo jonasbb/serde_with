@@ -306,18 +306,32 @@ impl Separator for CommaSeparator {
 /// Instead, it is highly encouraged to use the [`#[serde_as]`][serde_as] attribute since it includes further usability improvements.
 /// If the use of the use of the proc-macro is not acceptable, then `As` can be used directly with serde.
 ///
-/// ```rust,ignore
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::{As, DisplayFromStr, Same};
+/// # use std::collections::BTreeMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// # struct S {
 /// // Serialize numbers as sequence of strings, using Display and FromStr
 /// #[serde(with = "As::<Vec<DisplayFromStr>>")]
 /// field: Vec<u8>,
+/// # }
 /// ```
 /// If the normal `Deserialize`/`Serialize` traits should be used, the placeholder type [`Same`] can be used.
 /// It implements [`DeserializeAs`][]/[`SerializeAs`][], when the underlying type implements `Deserialize`/`Serialize`.
 ///
-/// ```rust,ignore
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::{As, DisplayFromStr, Same};
+/// # use std::collections::BTreeMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// # struct S {
 /// // Serialize map, turn keys into strings but keep type of value
 /// #[serde(with = "As::<BTreeMap<DisplayFromStr, Same>>")]
 /// field: BTreeMap<u8, i32>,
+/// # }
 /// ```
 ///
 /// [serde_as]: https://docs.rs/serde_with/*/serde_with/attr.serde_as.html
