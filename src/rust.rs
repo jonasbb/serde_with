@@ -927,6 +927,7 @@ pub mod string_empty_as_none {
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
 ///
 /// ```rust
+/// # #[cfg(feature = "macros")] {
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// # use std::collections::HashMap;
@@ -937,6 +938,7 @@ pub mod string_empty_as_none {
 ///     #[serde_as(as = "Vec<(_, _)>")]
 ///     s: HashMap<(String, u32), u32>,
 /// }
+/// # }
 /// ```
 ///
 /// # Examples
@@ -1061,6 +1063,7 @@ pub mod hashmap_as_tuple_list {
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
 ///
 /// ```rust
+/// # #[cfg(feature = "macros")] {
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// # use std::collections::BTreeMap;
@@ -1071,6 +1074,7 @@ pub mod hashmap_as_tuple_list {
 ///     #[serde_as(as = "Vec<(_, _)>")]
 ///     s: BTreeMap<(String, u32), u32>,
 /// }
+/// # }
 /// ```
 ///
 /// # Examples
@@ -1165,6 +1169,7 @@ pub mod btreemap_as_tuple_list {
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
 ///
 /// ```rust
+/// # #[cfg(feature = "macros")] {
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// # use std::collections::BTreeMap;
@@ -1175,6 +1180,7 @@ pub mod btreemap_as_tuple_list {
 ///     #[serde_as(as = "BTreeMap<_, _>")] // HashMap will also work
 ///     s: BTreeMap<(String, u32), u32>,
 /// }
+/// # }
 /// ```
 ///
 /// # Examples
