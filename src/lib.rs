@@ -294,10 +294,56 @@ impl Separator for CommaSeparator {
     }
 }
 
+/// Adapter to convert from `serde_as` to the serde traits.
+///
+/// The `As` type adapter allows to use types implementing [`DeserializeAs`][] or [`SerializeAs`][] in place of serde's with-annotation.
+/// The with-annotation allows to run custom code when de/serializing, however it is quite inflexible.
+/// The traits [`DeserializeAs`][]/[`SerializeAs`][] are more flexible, as they allow composition and nesting of types to create more complex de/serialization behavior.
+/// However, they are not directly compatible with serde, as they are not provided by serde.
+/// The `As` type adapter makes them compatible, by forwarding the function calls to `serialize`/`deserialize` to the corresponding functions `serialize_as` and `deserialize_as`.
+///
+/// It is not required to use this type directly.
+/// Instead, it is highly encouraged to use the [`#[serde_as]`][serde_as] attribute since it includes further usability improvements.
+/// If the use of the use of the proc-macro is not acceptable, then `As` can be used directly with serde.
+///
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::{As, DisplayFromStr, Same};
+/// # use std::collections::BTreeMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// # struct S {
+/// // Serialize numbers as sequence of strings, using Display and FromStr
+/// #[serde(with = "As::<Vec<DisplayFromStr>>")]
+/// field: Vec<u8>,
+/// # }
+/// ```
+/// If the normal `Deserialize`/`Serialize` traits should be used, the placeholder type [`Same`] can be used.
+/// It implements [`DeserializeAs`][]/[`SerializeAs`][], when the underlying type implements `Deserialize`/`Serialize`.
+///
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::{As, DisplayFromStr, Same};
+/// # use std::collections::BTreeMap;
+/// #
+/// #[derive(Deserialize, Serialize)]
+/// # struct S {
+/// // Serialize map, turn keys into strings but keep type of value
+/// #[serde(with = "As::<BTreeMap<DisplayFromStr, Same>>")]
+/// field: BTreeMap<u8, i32>,
+/// # }
+/// ```
+///
+/// [serde_as]: https://docs.rs/serde_with/*/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct As<T>(PhantomData<T>);
 
 impl<T> As<T> {
+    /// Serialize type `T` using [`SerializeAs`][]
+    ///
+    /// The function signature is compatible with [serde's with-annotation][with-annotation].
+    ///
+    /// [with-annotation]: https://serde.rs/field-attrs.html#with
     pub fn serialize<S, I>(value: &I, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -306,6 +352,11 @@ impl<T> As<T> {
         T::serialize_as(value, serializer)
     }
 
+    /// Deserialize type `T` using [`DeserializeAs`][]
+    ///
+    /// The function signature is compatible with [serde's with-annotation][with-annotation].
+    ///
+    /// [with-annotation]: https://serde.rs/field-attrs.html#with
     pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>
     where
         T: DeserializeAs<'de, I>,
@@ -315,12 +366,103 @@ impl<T> As<T> {
     }
 }
 
+/// Adapter to convert from `serde_as` to the serde traits.
+///
+/// This is the counter-type to [`As`][].
+/// It can be used whenever a type implementing [`DeserializeAs`][]/[`SerializeAs`][] is required but the normal `Deserialize`/`Serialize` traits should be used.
+/// Check [`As`] for an example.
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Same;
 
+/// De/Serialize using [`Display`] and [`FromStr`] implementation
+///
+/// This allows to deserialize a string as a number.
+/// It can be very useful for serialization formats like JSON, which do not support integer
+/// numbers and have to resort to strings to represent them.
+///
+/// Another use case is types with [`Display`] and [`FromStr`] implementations, but without serde
+/// support, which can be found in some crates.
+///
+/// The same functionality is also available as [`serde_with::rust::display_fromstr`][crate::rust::display_fromstr] compatible with serde's with-annotation.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DisplayFromStr};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "DisplayFromStr")]
+///     mime: mime::Mime,
+///     #[serde_as(as = "DisplayFromStr")]
+///     number: u32,
+/// }
+///
+/// let v: A = serde_json::from_value(json!({
+///     "mime": "text/plain",
+///     "number": "159",
+/// })).unwrap();
+/// assert_eq!(mime::TEXT_PLAIN, v.mime);
+/// assert_eq!(159, v.number);
+///
+/// let x = A {
+///     mime: mime::STAR_STAR,
+///     number: 777,
+/// };
+/// assert_eq!(json!({ "mime": "*/*", "number": "777" }), serde_json::to_value(&x).unwrap());
+/// # }
+/// ```
+///
+/// [`Display`]: std::fmt::Display
+/// [`FromStr`]: std::str::FromStr
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayFromStr;
 
+/// De/Serialize a [`Option`]`<`[`String`]`>` type while transforming the empty string to [`None`]
+///
+/// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<`[`str`]`>` implementations.
+/// An empty string is deserialized as [`None`] and a [`None`] vice versa.
+///
+/// The same functionality is also available as [`serde_with::rust::string_empty_as_none`][crate::rust::string_empty_as_none] compatible with serde's with-annotation.
+///
+/// # Examples
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, NoneAsEmptyString};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "NoneAsEmptyString")]
+///     tags: Option<String>,
+/// }
+///
+/// let v: A = serde_json::from_value(json!({ "tags": "" })).unwrap();
+/// assert_eq!(None, v.tags);
+///
+/// let v: A = serde_json::from_value(json!({ "tags": "Hi" })).unwrap();
+/// assert_eq!(Some("Hi".to_string()), v.tags);
+///
+/// let x = A {
+///     tags: Some("This is text".to_string()),
+/// };
+/// assert_eq!(json!({ "tags": "This is text" }), serde_json::to_value(&x).unwrap());
+///
+/// let x = A {
+///     tags: None,
+/// };
+/// assert_eq!(json!({ "tags": "" }), serde_json::to_value(&x).unwrap());
+/// # }
+/// ```
+///
+/// [`FromStr`]: std::str::FromStr
 #[derive(Copy, Clone, Debug, Default)]
 pub struct NoneAsEmptyString;
 
