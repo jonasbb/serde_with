@@ -102,7 +102,7 @@
 //! # #[cfg(feature = "macros")]
 //! # use serde_derive::{Deserialize, Serialize};
 //! # #[cfg(feature = "macros")]
-//! # use serde_with::{skip_serializing_none, DisplayFromStr};
+//! # use serde_with::skip_serializing_none;
 //! # #[cfg(feature = "macros")]
 //! #[skip_serializing_none]
 //! # #[derive(Debug, Eq, PartialEq)]
@@ -308,8 +308,7 @@ impl Separator for CommaSeparator {
 ///
 /// ```rust
 /// # use serde_derive::{Deserialize, Serialize};
-/// # use serde_with::{As, DisplayFromStr, Same};
-/// # use std::collections::BTreeMap;
+/// # use serde_with::{As, DisplayFromStr};
 /// #
 /// #[derive(Deserialize, Serialize)]
 /// # struct S {
