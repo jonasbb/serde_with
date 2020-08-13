@@ -477,6 +477,7 @@ pub struct NoneAsEmptyString;
 /// # Examples
 ///
 /// ```
+/// # #[cfg(feature = "macros")] {
 /// # use serde_derive::Deserialize;
 /// # use serde_with::{serde_as, DefaultOnError};
 /// #
@@ -504,11 +505,13 @@ pub struct NoneAsEmptyString;
 ///
 /// // Missing entries still cause errors
 /// assert!(serde_json::from_str::<A>(r#"{  }"#).is_err());
+/// # }
 /// ```
 ///
 /// Deserializing missing values can be supported by adding the `default` field attribute:
 ///
 /// ```
+/// # #[cfg(feature = "macros")] {
 /// # use serde_derive::Deserialize;
 /// # use serde_with::{serde_as, DefaultOnError};
 /// #
@@ -523,6 +526,7 @@ pub struct NoneAsEmptyString;
 ///
 /// let b: B = serde_json::from_str(r#"{  }"#).unwrap();
 /// assert_eq!(0, b.value);
+/// # }
 /// ```
 ///
 /// `DefaultOnError` can be combined with other convertion methods.
@@ -530,6 +534,7 @@ pub struct NoneAsEmptyString;
 /// If the string does not parse as a number, then we get the default value of 0.
 ///
 /// ```rust
+/// # #[cfg(feature = "macros")] {
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DefaultOnError, DisplayFromStr};
@@ -545,6 +550,7 @@ pub struct NoneAsEmptyString;
 ///     "value": ["1", "2", "a3", "", {}, "6"]
 /// })).unwrap();
 /// assert_eq!(vec![1, 2, 0, 0, 0, 6], c.value);
+/// # }
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DefaultOnError<T = Same>(PhantomData<T>);
