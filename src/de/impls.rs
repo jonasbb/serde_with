@@ -658,7 +658,27 @@ where
     where
         D: Deserializer<'de>,
     {
-        TAs::deserialize_as(deserializer).or_else(|_| Ok(Default::default()))
+        #[derive(serde::Deserialize)]
+        #[serde(
+            untagged,
+            bound(deserialize = "DeserializeAsWrap<T, TAs>: Deserialize<'de>")
+        )]
+        enum GoodOrError<'a, T, TAs>
+        where
+            TAs: DeserializeAs<'a, T>,
+        {
+            Good(DeserializeAsWrap<T, TAs>),
+            // This consumes one "item" when `T` errors while deserializing.
+            // This is necessary to make this work, when instead of having a direct value
+            // like integer or string, the deserializer sees a list or map.
+            Error(IgnoredAny),
+            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
+        };
+
+        Ok(match Deserialize::deserialize(deserializer) {
+            Ok(GoodOrError::<T, TAs>::Good(res)) => res.into_inner(),
+            _ => Default::default(),
+        })
     }
 }
 
