@@ -466,8 +466,88 @@ pub struct DisplayFromStr;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct NoneAsEmptyString;
 
+/// Deserialize value and return [`Default`] on error
+///
+/// The main use case is ignoring error while deserializing.
+/// Instead of erroring, it simply deserializes the [`Default`] variant of the type.
+/// It is not possible to find the error location, i.e., which field had a deserialization error, with this method.
+///
+/// The same functionality is also available as [`serde_with::rust::default_on_error`][crate::rust::default_on_error] compatible with serde's with-annotation.
+///
+/// # Examples
+///
+/// ```
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, DefaultOnError};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize,  Debug)]
+/// struct A {
+///     #[serde_as(deserialize_as = "DefaultOnError")]
+///     value: u32,
+/// }
+///
+/// let a: A = serde_json::from_str(r#"{"value": 123}"#).unwrap();
+/// assert_eq!(123, a.value);
+///
+/// // null is of invalid type
+/// let a: A = serde_json::from_str(r#"{"value": null}"#).unwrap();
+/// assert_eq!(0, a.value);
+///
+/// // String is of invalid type
+/// let a: A = serde_json::from_str(r#"{"value": "123"}"#).unwrap();
+/// assert_eq!(0, a.value);
+///
+/// // Map is of invalid type
+/// let a: A = dbg!(serde_json::from_str(r#"{"value": {}}"#)).unwrap();
+/// assert_eq!(0, a.value);
+///
+/// // Missing entries still cause errors
+/// assert!(serde_json::from_str::<A>(r#"{  }"#).is_err());
+/// ```
+///
+/// Deserializing missing values can be supported by adding the `default` field attribute:
+///
+/// ```
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, DefaultOnError};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize)]
+/// struct B {
+///     #[serde_as(deserialize_as = "DefaultOnError")]
+///     #[serde(default)]
+///     value: u32,
+/// }
+///
+///
+/// let b: B = serde_json::from_str(r#"{  }"#).unwrap();
+/// assert_eq!(0, b.value);
+/// ```
+///
+/// `DefaultOnError` can be combined with other convertion methods.
+/// In this example we deserialize a `Vec`, each element is deserialized from a string.
+/// If the string does not parse as a number, then we get the default value of 0.
+///
+/// ```rust
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DefaultOnError, DisplayFromStr};
+/// #
+/// #[serde_as]
+/// #[derive(Serialize, Deserialize)]
+/// struct C {
+///     #[serde_as(as = "Vec<DefaultOnError<DisplayFromStr>>")]
+///     value: Vec<u32>,
+/// };
+///
+/// let c: C = serde_json::from_value(json!({
+///     "value": ["1", "2", "a3", "", {}, "6"]
+/// })).unwrap();
+/// assert_eq!(vec![1, 2, 0, 0, 0, 6], c.value);
+/// ```
 #[derive(Copy, Clone, Debug, Default)]
-pub struct DefaultOnError<T>(PhantomData<T>);
+pub struct DefaultOnError<T = Same>(PhantomData<T>);
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;

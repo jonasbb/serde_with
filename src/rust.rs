@@ -1431,6 +1431,25 @@ pub mod bytes_or_string {
 /// Instead of erroring, it simply deserializes the [`Default`] variant of the type.
 /// It is not possible to find the error location, i.e., which field had a deserialization error, with this method.
 ///
+/// ## Converting to `serde_as`:
+///
+/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, DefaultOnError};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde_as(deserialize_as = "DefaultOnError<_>")]
+///     value: u32,
+/// }
+/// # }
+/// ```
+///
 /// # Examples
 ///
 /// ```
