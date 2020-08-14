@@ -55,6 +55,7 @@ fnv = "1.0.6"
 mime = "0.3.16"
 pretty_assertions = "0.6.1"
 ron = "0.6"
+rustversion = "1.0.0"
 serde_derive = "1.0.75"
 serde_json = { version = "1.0.25", features = [ "preserve_order" ] }
 version-sync = "0.8.1"
