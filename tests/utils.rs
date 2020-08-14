@@ -4,6 +4,7 @@ use pretty_assertions::assert_eq;
 use serde::{de::DeserializeOwned, Serialize};
 use std::fmt::Debug;
 
+#[rustversion::attr(since(1.46), track_caller)]
 pub fn is_equal<T>(value: T, s: &str)
 where
     T: Debug + DeserializeOwned + PartialEq + Serialize,
@@ -20,6 +21,7 @@ where
     );
 }
 
+#[rustversion::attr(since(1.46), track_caller)]
 pub fn check_deserialization<T>(value: T, deserialize_from: &str)
 where
     T: Debug + DeserializeOwned + PartialEq,
@@ -31,6 +33,7 @@ where
     );
 }
 
+#[rustversion::attr(since(1.46), track_caller)]
 pub fn check_serialization<T>(value: T, serialize_to: &str)
 where
     T: Debug + PartialEq + Serialize,
@@ -42,6 +45,7 @@ where
     );
 }
 
+#[rustversion::attr(since(1.46), track_caller)]
 pub fn check_error_deserialization<T>(deserialize_from: &str, error_msg: &str)
 where
     T: Debug + DeserializeOwned + PartialEq,
