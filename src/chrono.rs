@@ -420,7 +420,7 @@ impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<f64, Strict> {
     where
         D: Deserializer<'de>,
     {
-        let val = f64::deserialize(deserializer)?;
+        let val = f64::deserialize(deserializer)?.round();
         duration_from_secs_f64(val).map_err(Error::custom)
     }
 }

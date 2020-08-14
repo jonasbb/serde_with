@@ -1330,9 +1330,9 @@ pub mod tuple_list_as_map {
     }
 }
 
-/// Deserialize from bytes or String
+/// Deserialize from bytes or string
 ///
-/// Any Rust [`String`] can be converted into bytes ([`Vec`]`<u8>`).
+/// Any Rust [`String`] can be converted into bytes, i.e., `Vec<u8>`.
 /// Accepting both as formats while deserializing can be helpful while interacting with language
 /// which have a looser definition of string than Rust.
 ///
@@ -1365,7 +1365,7 @@ pub mod tuple_list_as_map {
 /// // and serialization works too.
 /// assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
 ///
-/// // But we also support deserializing from String
+/// // But we also support deserializing from a String
 /// let from = r#"{
 ///   "bos": "✨Works!"
 /// }"#;
