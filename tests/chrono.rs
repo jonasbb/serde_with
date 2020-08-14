@@ -221,10 +221,10 @@ fn test_chrono_duration_seconds() {
         },
         r#"{"value":-1.0}"#,
     );
-    check_deserialization(Structf64Strict { value: half_second }, r#"{"value":0.5}"#);
+    check_deserialization(Structf64Strict { value: one_second }, r#"{"value":0.5}"#);
     check_deserialization(
         Structf64Strict {
-            value: minus_half_second,
+            value: minus_one_second,
         },
         r#"{"value":-0.5}"#,
     );

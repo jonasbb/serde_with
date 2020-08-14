@@ -604,7 +604,7 @@ fn test_duration_seconds() {
     is_equal(Structf64Strict { value: zero }, r#"{"value":0.0}"#);
     is_equal(Structf64Strict { value: one_second }, r#"{"value":1.0}"#);
     check_serialization(Structf64Strict { value: half_second }, r#"{"value":1.0}"#);
-    check_deserialization(Structf64Strict { value: half_second }, r#"{"value":0.5}"#);
+    check_deserialization(Structf64Strict { value: one_second }, r#"{"value":0.5}"#);
     check_error_deserialization::<Structf64Strict>(
         r#"{"value":"1"}"#,
         r#"invalid type: string "1", expected f64 at line 1 column 12"#,

@@ -137,7 +137,6 @@
 //! This example is mainly supposed to highlight the flexibility of the `serde_as`-annotation compared to [serde's with-annotation][with-annotation].
 //! More details about `serde_as` can be found in the [user guide][].
 //!
-//!
 //! ```rust
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! # use {
@@ -554,15 +553,315 @@ pub struct NoneAsEmptyString;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DefaultOnError<T = Same>(PhantomData<T>);
 
+/// Deserialize from bytes or string
+///
+/// Any Rust [`String`] can be converted into bytes, i.e., `Vec<u8>`.
+/// Accepting both as formats while deserializing can be helpful while interacting with language
+/// which have a looser definition of string than Rust.
+///
+/// # Example
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, BytesOrString};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     // #[serde_as(deserialize_as = "serde_with::rust::bytes_or_string::deserialize")]
+///     #[serde_as(as = "BytesOrString")]
+///     bytes_or_string: Vec<u8>,
+/// }
+///
+/// // Here we deserialize from a byte array ...
+/// let j = json!({
+///   "bytes_or_string": [
+///     0,
+///     1,
+///     2,
+///     3
+///   ]
+/// });
+///
+/// let a: A = serde_json::from_value(j.clone()).unwrap();
+/// assert_eq!(vec![0, 1, 2, 3], a.bytes_or_string);
+///
+/// // and serialization works too.
+/// assert_eq!(j, serde_json::to_value(&a).unwrap());
+///
+/// // But we also support deserializing from a String
+/// let j = json!({
+///   "bytes_or_string": "✨Works!"
+/// });
+///
+/// let a: A = serde_json::from_value(j).unwrap();
+/// assert_eq!("✨Works!".as_bytes(), &*a.bytes_or_string);
+/// # }
+/// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;
 
+/// De/Serialize Durations as seconds since the UNIX epoch
+///
+/// De/serialize durations as seconds since the UNIX epoch.
+/// Subsecond precision is *only* supported for [`DurationSecondsWithFrac`], but not for [`DurationSeconds`].
+/// You can configure the serialization format between integers, floats, and stringified numbers with the `FORMAT` specifier and configure the deserialization with the `STRICTNESS` specifier.
+///
+/// The `STRICTNESS` specifier can either be [`formats::Strict`] or [`formats::Flexible`] and defaults to [`formats::Strict`].
+/// [`formats::Strict`] means that deserialization only supports the type given in `FORMAT`, e.g., if `FORMAT` is `u64` deserialization from a `f64` will error.
+/// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct duration and allows deserialization from any type.
+/// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as a integer number.
+///
+/// This type also supports `chrono::Duration` with the `chrono`-[feature flag].
+///
+/// | Duration Type         | Converter                 | Available `FORMAT`s    |
+/// | --------------------- | ------------------------- | ---------------------- |
+/// | `std::time::Duration` | `DurationSeconds`         | `u64`, `f64`, `String` |
+/// | `std::time::Duration` | `DurationSecondsWithFrac` | `f64`, `String`        |
+/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String` |
+/// | `chrono::Duration`    | `DurationSecondsWithFrac` | `f64`, `String`        |
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DurationSeconds};
+/// use std::time::Duration;
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Durations {
+///     #[serde_as(as = "DurationSeconds<u64>")]
+///     d_u64: Duration,
+///     #[serde_as(as = "DurationSeconds<f64>")]
+///     d_f64: Duration,
+///     #[serde_as(as = "DurationSeconds<String>")]
+///     d_string: Duration,
+/// };
+///
+/// // Serialization
+/// // See how the values get rounded, since subsecond precision is not allowed.
+///
+/// let d = Durations {
+///     d_u64: Duration::new(12345, 0), // Create from seconds and nanoseconds
+///     d_f64: Duration::new(12345, 500_000_000),
+///     d_string: Duration::new(12345, 999_999_999),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "d_u64": 12345,
+///     "d_f64": 12346.0,
+///     "d_string": "12346",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+///
+/// // Deserialization works too
+/// // Subsecond precision in numbers will be rounded away
+///
+/// let json = json!({
+///     "d_u64": 12345,
+///     "d_f64": 12345.5,
+///     "d_string": "12346",
+/// });
+/// let expected = Durations {
+///     d_u64: Duration::new(12345, 0), // Create from seconds and nanoseconds
+///     d_f64: Duration::new(12346, 0),
+///     d_string: Duration::new(12346, 0),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [`chrono::Duration`] is also supported when using the `chrono` feature.
+/// It is a signed duration, thus can be de/serialized as an `i64` instead of a `u64`.
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DurationSeconds};
+/// # use chrono_crate::Duration;
+/// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
+/// use chrono::Duration;
+/// # */
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Durations {
+///     #[serde_as(as = "DurationSeconds<i64>")]
+///     d_i64: Duration,
+///     #[serde_as(as = "DurationSeconds<f64>")]
+///     d_f64: Duration,
+///     #[serde_as(as = "DurationSeconds<String>")]
+///     d_string: Duration,
+/// };
+///
+/// // Serialization
+/// // See how the values get rounded, since subsecond precision is not allowed.
+///
+/// let d = Durations {
+///     d_i64: Duration::seconds(-12345),
+///     d_f64: Duration::seconds(-12345) + Duration::milliseconds(500),
+///     d_string: Duration::seconds(12345) + Duration::nanoseconds(999_999_999),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "d_i64": -12345,
+///     "d_f64": -12345.0,
+///     "d_string": "12346",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+///
+/// // Deserialization works too
+/// // Subsecond precision in numbers will be rounded away
+///
+/// let json = json!({
+///     "d_i64": -12345,
+///     "d_f64": -12345.5,
+///     "d_string": "12346",
+/// });
+/// let expected = Durations {
+///     d_i64: Duration::seconds(-12345),
+///     d_f64: Duration::seconds(-12346),
+///     d_string: Duration::seconds(12346),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [feature flag]: https://docs.rs/serde_with/*/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
 
+/// De/Serialize Durations as seconds since the UNIX epoch
+///
+/// De/serialize durations as seconds since the UNIX epoch.
+/// Subsecond precision is *only* supported for [`DurationSecondsWithFrac`], but not for [`DurationSeconds`].
+/// You can configure the serialization format between integers, floats, and stringified numbers with the `FORMAT` specifier and configure the deserialization with the `STRICTNESS` specifier.
+///
+/// The `STRICTNESS` specifier can either be [`formats::Strict`] or [`formats::Flexible`] and defaults to [`formats::Strict`].
+/// [`formats::Strict`] means that deserialization only supports the type given in `FORMAT`, e.g., if `FORMAT` is `u64` deserialization from a `f64` will error.
+/// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct duration and allows deserialization from any type.
+/// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as a integer number.
+///
+/// This type also supports `chrono::Duration` with the `chrono`-[feature flag].
+///
+/// | Duration Type         | Converter                 | Available `FORMAT`s    |
+/// | --------------------- | ------------------------- | ---------------------- |
+/// | `std::time::Duration` | `DurationSeconds`         | `u64`, `f64`, `String` |
+/// | `std::time::Duration` | `DurationSecondsWithFrac` | `f64`, `String`        |
+/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String` |
+/// | `chrono::Duration`    | `DurationSecondsWithFrac` | `f64`, `String`        |
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DurationSecondsWithFrac};
+/// use std::time::Duration;
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Durations {
+///     #[serde_as(as = "DurationSecondsWithFrac<f64>")]
+///     d_f64: Duration,
+///     #[serde_as(as = "DurationSecondsWithFrac<String>")]
+///     d_string: Duration,
+/// };
+///
+/// // Serialization
+/// // See how the values get rounded, since subsecond precision is not allowed.
+///
+/// let d = Durations {
+///     d_f64: Duration::new(12345, 500_000_000), // Create from seconds and nanoseconds
+///     d_string: Duration::new(12345, 999_999_999),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "d_f64": 12345.5,
+///     "d_string": "12345.999999999",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+///
+/// // Deserialization works too
+/// // Subsecond precision in numbers will be rounded away
+///
+/// let json = json!({
+///     "d_f64": 12345.5,
+///     "d_string": "12345.987654",
+/// });
+/// let expected = Durations {
+///     d_f64: Duration::new(12345, 500_000_000), // Create from seconds and nanoseconds
+///     d_string: Duration::new(12345, 987_654_000),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [`chrono::Duration`] is also supported when using the `chrono` feature.
+/// It is a signed duration, thus can be de/serialized as an `i64` instead of a `u64`.
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DurationSecondsWithFrac};
+/// # use chrono_crate::Duration;
+/// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
+/// use chrono::Duration;
+/// # */
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Durations {
+///     #[serde_as(as = "DurationSecondsWithFrac<f64>")]
+///     d_f64: Duration,
+///     #[serde_as(as = "DurationSecondsWithFrac<String>")]
+///     d_string: Duration,
+/// };
+///
+/// // Serialization
+/// // See how the values get rounded, since subsecond precision is not allowed.
+///
+/// let d = Durations {
+///     d_f64: Duration::seconds(-12345) + Duration::milliseconds(500),
+///     d_string: Duration::seconds(12345) + Duration::nanoseconds(999_999_999),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "d_f64": -12344.5,
+///     "d_string": "12345.999999999",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+///
+/// // Deserialization works too
+/// // Subsecond precision in numbers will be rounded away
+///
+/// let json = json!({
+///     "d_f64": -12344.5,
+///     "d_string": "12345.987",
+/// });
+/// let expected = Durations {
+///     d_f64: Duration::seconds(-12345) + Duration::milliseconds(500),
+///     d_string: Duration::seconds(12345) + Duration::milliseconds(987),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [feature flag]: https://docs.rs/serde_with/*/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
