@@ -7,7 +7,7 @@
 
 ---
 
-This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][]-annotation.
+This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][user guide]-annotation.
 Some common use cases are:
 
 * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
@@ -84,7 +84,6 @@ Foo {a: None, b: None, c: None, d: Some(4), e: None, f: None, g: Some(7)}
 This example is mainly supposed to highlight the flexibility of the `serde_as`-annotation compared to [serde's with-annotation][with-annotation].
 More details about `serde_as` can be found in the [user guide][].
 
-
 ```rust
 #[serde_as]
 #[derive(Deserialize, Serialize)]
@@ -120,14 +119,13 @@ Foo {
 }
 ```
 
-[`DisplayFromStr`]: https://docs.rs/serde_with/*/serde_with/struct.DisplayFromStr.html
-[`serde_as`]: https://docs.rs/serde_with/*/serde_with/guide/index.html
-[`with_prefix!`]: https://docs.rs/serde_with/*/serde_with/macro.with_prefix.html
-[display_fromstr]: https://docs.rs/serde_with/*/serde_with/rust/display_fromstr/index.html
-[feature flags]: https://docs.rs/serde_with/*/serde_with/guide/feature_flags/index.html
-[skip_serializing_none]: https://docs.rs/serde_with/*/serde_with/attr.skip_serializing_none.html
-[StringWithSeparator]: https://docs.rs/serde_with/*/serde_with/rust/struct.StringWithSeparator.html
-[user guide]: https://docs.rs/serde_with/*/serde_with/guide/index.html
+[`DisplayFromStr`]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/struct.DisplayFromStr.html
+[`with_prefix!`]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/macro.with_prefix.html
+[display_fromstr]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/rust/display_fromstr/index.html
+[feature flags]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/feature_flags/index.html
+[skip_serializing_none]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/attr.skip_serializing_none.html
+[StringWithSeparator]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/rust/struct.StringWithSeparator.html
+[user guide]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/index.html
 [with-annotation]: https://serde.rs/field-attrs.html#with
 
 ## License

@@ -32,7 +32,7 @@
 //!
 //! ---
 //!
-//! This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][]-annotation.
+//! This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][user guide]-annotation.
 //! Some common use cases are:
 //!
 //! * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
@@ -189,14 +189,13 @@
 //! # }
 //! ```
 //!
-//! [`DisplayFromStr`]: https://docs.rs/serde_with/*/serde_with/struct.DisplayFromStr.html
-//! [`serde_as`]: https://docs.rs/serde_with/*/serde_with/guide/index.html
-//! [`with_prefix!`]: https://docs.rs/serde_with/*/serde_with/macro.with_prefix.html
-//! [display_fromstr]: https://docs.rs/serde_with/*/serde_with/rust/display_fromstr/index.html
-//! [feature flags]: https://docs.rs/serde_with/*/serde_with/guide/feature_flags/index.html
-//! [skip_serializing_none]: https://docs.rs/serde_with/*/serde_with/attr.skip_serializing_none.html
-//! [StringWithSeparator]: https://docs.rs/serde_with/*/serde_with/rust/struct.StringWithSeparator.html
-//! [user guide]: https://docs.rs/serde_with/*/serde_with/guide/index.html
+//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/struct.DisplayFromStr.html
+//! [`with_prefix!`]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/macro.with_prefix.html
+//! [display_fromstr]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/rust/display_fromstr/index.html
+//! [feature flags]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/feature_flags/index.html
+//! [skip_serializing_none]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/attr.skip_serializing_none.html
+//! [StringWithSeparator]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/rust/struct.StringWithSeparator.html
+//! [user guide]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
 
 #[doc(hidden)]
@@ -332,7 +331,7 @@ impl Separator for CommaSeparator {
 /// # }
 /// ```
 ///
-/// [serde_as]: https://docs.rs/serde_with/*/serde_with/attr.serde_as.html
+/// [serde_as]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct As<T>(PhantomData<T>);
 
@@ -734,7 +733,7 @@ pub struct BytesOrString;
 /// # }
 /// ```
 ///
-/// [feature flag]: https://docs.rs/serde_with/*/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
@@ -861,7 +860,7 @@ pub struct DurationSeconds<
 /// # }
 /// ```
 ///
-/// [feature flag]: https://docs.rs/serde_with/*/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
