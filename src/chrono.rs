@@ -321,11 +321,11 @@ fn duration_from_secs_f64(secs: f64) -> Result<Duration, String> {
     Ok(secs + subsec)
 }
 
-struct DurationVisitiorFlexible;
-impl<'de> Visitor<'de> for DurationVisitiorFlexible {
+struct DurationVisitorFlexible;
+impl<'de> Visitor<'de> for DurationVisitorFlexible {
     type Value = Duration;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> ::std::fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> ::std::fmt::Result {
         formatter.write_str("an integer, a float, or a string containing a number")
     }
 
@@ -442,7 +442,7 @@ where
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_any(DurationVisitiorFlexible)
+        deserializer.deserialize_any(DurationVisitorFlexible)
     }
 }
 
@@ -471,7 +471,7 @@ impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<String, Stric
         D: Deserializer<'de>,
     {
         let dur = String::deserialize(deserializer)?;
-        DurationVisitiorFlexible.visit_str(&*dur)
+        DurationVisitorFlexible.visit_str(&*dur)
         // crate::rust::display_fromstr::deserialize(deserializer)
         //     .and_then(|val| duration_from_secs_f64(val).map_err(Error::custom))
     }
@@ -485,6 +485,6 @@ where
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_any(DurationVisitiorFlexible)
+        deserializer.deserialize_any(DurationVisitorFlexible)
     }
 }

@@ -691,11 +691,11 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
     }
 }
 
-struct DurationVisitiorFlexible;
-impl<'de> Visitor<'de> for DurationVisitiorFlexible {
+struct DurationVisitorFlexible;
+impl<'de> Visitor<'de> for DurationVisitorFlexible {
     type Value = Duration;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> ::std::fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> ::std::fmt::Result {
         formatter.write_str("an integer, a float, or a string containing a number")
     }
 
@@ -804,7 +804,7 @@ where
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_any(DurationVisitiorFlexible)
+        deserializer.deserialize_any(DurationVisitorFlexible)
     }
 }
 
@@ -824,7 +824,7 @@ impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<String, Stric
         D: Deserializer<'de>,
     {
         let dur = String::deserialize(deserializer)?;
-        DurationVisitiorFlexible.visit_str(&*dur)
+        DurationVisitorFlexible.visit_str(&*dur)
     }
 }
 
@@ -836,7 +836,7 @@ where
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_any(DurationVisitiorFlexible)
+        deserializer.deserialize_any(DurationVisitorFlexible)
     }
 }
 

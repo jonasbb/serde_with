@@ -1,0 +1,23 @@
+{
+    "cSpell.words": [
+        "Deque",
+        "Deserialization",
+        "Deserializes",
+        "NANOS",
+        "btreemap",
+        "chrono",
+        "clippy",
+        "codecov",
+        "concat",
+        "datatypes",
+        "datetime",
+        "fromstr",
+        "hasher",
+        "serde's",
+        "structs",
+        "subsec",
+        "subsecond",
+        "subseconds",
+        "subsecs"
+    ]
+}
