@@ -1,7 +1,7 @@
 #![deny(
-    // missing_copy_implementations,
-    // missing_debug_implementations,
-    // missing_docs,
+    missing_copy_implementations,
+    missing_debug_implementations,
+    missing_docs,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
@@ -9,7 +9,7 @@
     unused_qualifications,
     variant_size_differences
 )]
-// #![warn(rust_2018_idioms)]
+#![warn(rust_2018_idioms)]
 #![doc(test(attr(deny(
     missing_copy_implementations,
     missing_debug_implementations,
@@ -526,7 +526,7 @@ pub struct NoneAsEmptyString;
 /// # }
 /// ```
 ///
-/// `DefaultOnError` can be combined with other convertion methods.
+/// `DefaultOnError` can be combined with other conversion methods.
 /// In this example we deserialize a `Vec`, each element is deserialized from a string.
 /// If the string does not parse as a number, then we get the default value of 0.
 ///
@@ -832,7 +832,6 @@ pub struct DurationSeconds<
 /// };
 ///
 /// // Serialization
-/// // See how the values get rounded, since subsecond precision is not allowed.
 ///
 /// let d = Durations {
 ///     d_f64: Duration::seconds(-12345) + Duration::milliseconds(500),
@@ -846,7 +845,6 @@ pub struct DurationSeconds<
 /// assert_eq!(expected, serde_json::to_value(&d).unwrap());
 ///
 /// // Deserialization works too
-/// // Subsecond precision in numbers will be rounded away
 ///
 /// let json = json!({
 ///     "d_f64": -12344.5,

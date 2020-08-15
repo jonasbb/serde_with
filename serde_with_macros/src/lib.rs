@@ -24,9 +24,6 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/1.2.0-alpha.2")]
-// FIXME: clippy bug https://github.com/rust-lang/rust-clippy/issues/5704
-#![allow(clippy::unknown_clippy_lints)]
-#![allow(clippy::unnested_or_patterns)]
 
 //! proc-macro extensions for [`serde_with`]
 //!
