@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.0-alpha.2]
+
+### Added
+
+* Add a `hex` module, which allows formatting bytes (i.e. `Vec<u8>`) as a hexadecimal string.
+    The formatting supports different arguments how the formatting is happening.
+* Add two derive macros, `SerializeDisplay` and `DeserializeFromStr`, which implement the `Serialize`/`Deserialize` traits based on `Display` and `FromStr`.
+    This is in addition to the already existing methods like `DisplayFromStr`, which act locally, whereas the derive macros provide the traits expected by the rest of the ecosystem.
+
+    This is part of `serde_with_macros` v1.2.0-alpha.3.
+
+### Fixed
+
+* The `serde_as` macro now supports serde attributes and no longer panic on unrecognized values in the attribute.
+    This is part of `serde_with_macros` v1.2.0-alpha.2.
+
 ## [1.5.0-alpha.1]
 
 ### Added
