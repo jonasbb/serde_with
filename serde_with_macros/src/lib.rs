@@ -43,8 +43,9 @@ use proc_macro2::Span;
 use quote::{quote, ToTokens};
 use std::str::FromStr;
 use syn::{
-    parse::Parser, punctuated::Pair, spanned::Spanned, Attribute, Error, Field, Fields,
-    GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path, PathArguments, ReturnType, Type,
+    parse::Parser, punctuated::Pair, spanned::Spanned, Attribute, DeriveInput, Error, Field,
+    Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path, PathArguments,
+    ReturnType, Type,
 };
 
 /// Apply function on every field of structs or enums
@@ -642,4 +643,167 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
         // Pass unknown types or non-handleable types (e.g., bare Fn) without performing any replacements
         type_ => type_,
     }
+}
+
+/// Deserialize value by using it's [`FromStr`] implementation
+///
+/// This is an alternative way to implement `Deserialize` for types which also implement [`FromStr`] by deserializing the type from string.
+/// Ensure that the struct/enum also implements [`FromStr`].
+/// If the implementation is missing you will get a error message like
+/// ```text
+/// error[E0277]: the trait bound `Struct: std::str::FromStr` is not satisfied
+/// ```
+/// Additionally, `FromStr::Err` **must** implement [`Display`] as otherwise you will see a rather unhelpful error message
+///
+/// Serialization with [`Display`] is available with the matching [`SerializeDisplay`] derive.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use std::str::FromStr;
+///
+/// #[derive(DeserializeFromStr)]
+/// struct A {
+///     a: u32,
+///     b: bool,
+/// }
+///
+/// impl FromStr for A {
+///     type Err = String;
+///
+///     /// Parse a value like `123<>true`
+///     fn from_str(s: &str) -> Result<Self, Self::Err> {
+///         let mut parts = s.split("<>");
+///         let number = parts
+///             .next()
+///             .ok_or_else(|| "Missing first value".to_string())?
+///             .parse()
+///             .map_err(|err: ParseIntError| err.to_string())?;
+///         let bool = parts
+///             .next()
+///             .ok_or_else(|| "Missing second value".to_string())?
+///             .parse()
+///             .map_err(|err: ParseBoolError| err.to_string())?;
+///         Ok(Self { a: number, b: bool })
+///     }
+/// }
+///
+/// let a: A = serde_json::from_str("\"159<>true\"").unwrap();
+/// assert_eq!(A { a: 159, b: true }, a);
+/// ```
+///
+/// [`Display`]: std::fmt::Display
+/// [`FromStr`]: std::str::FromStr
+#[proc_macro_derive(DeserializeFromStr)]
+pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
+    // Convert any error message into a nice compiler error
+    let res = match deserialize_fromstr(item) {
+        Ok(res) => res,
+        Err(err) => err.to_compile_error(),
+    };
+    TokenStream::from(res)
+}
+
+fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Error> {
+    let input = syn::parse::<DeriveInput>(item)?;
+    let ident = input.ident;
+    Ok(quote! {
+        #[automatically_derived]
+        impl<'de> serde::Deserialize<'de> for #ident
+        where
+            Self: std::str::FromStr,
+            <Self as FromStr>::Err: std::fmt::Display,
+        {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                struct Helper<S>(std::marker::PhantomData<S>);
+
+                impl<'de, S> serde::de::Visitor<'de> for Helper<S>
+                where
+                    S: FromStr,
+                    <S as std::str::FromStr>::Err: std::fmt::Display,
+                {
+                    type Value = S;
+
+                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                        write!(formatter, "string")
+                    }
+
+                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        value.parse::<Self::Value>().map_err(serde::de::Error::custom)
+                    }
+                }
+
+                deserializer.deserialize_str(Helper(std::marker::PhantomData))
+            }
+        }
+    })
+}
+
+/// Serialize value by using it's [`Display`] implementation
+///
+/// This is an alternative way to implement `Serialize` for types which also implement [`Display`] by serializing the type as string.
+/// Ensure that the struct/enum also implements [`Display`].
+/// If the implementation is missing you will get a error message like
+/// ```text
+/// error[E0277]: `Struct` doesn't implement `std::fmt::Display`
+/// ```
+///
+/// Deserialization with [`FromStr`] is available with the matching [`DeserializeFromStr`] derive.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use std::fmt;
+///
+/// #[derive(SerializeDisplay)]
+/// struct A {
+///     a: u32,
+///     b: bool,
+/// }
+///
+/// impl fmt::Display for A {
+///     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+///         write!(f, "{}<>{}", self.a, self.b)
+///     }
+/// }
+///
+/// let a = A { a: 123, b: false };
+/// assert_eq!(r#""123<>false""#, serde_json::to_string(&a).unwrap());
+/// ```
+///
+/// [`Display`]: std::fmt::Display
+/// [`FromStr`]: std::str::FromStr
+#[proc_macro_derive(SerializeDisplay)]
+pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
+    // Convert any error message into a nice compiler error
+    let res = match serialize_display(item) {
+        Ok(res) => res,
+        Err(err) => err.to_compile_error(),
+    };
+    TokenStream::from(res)
+}
+
+fn serialize_display(item: TokenStream) -> Result<proc_macro2::TokenStream, Error> {
+    let input = syn::parse::<DeriveInput>(item)?;
+    let ident = input.ident;
+    Ok(quote! {
+        #[automatically_derived]
+        impl<'de> serde::Serialize for #ident
+        where
+            Self: std::fmt::Display,
+        {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                serializer.serialize_str(&self.to_string())
+            }
+        }
+    })
 }

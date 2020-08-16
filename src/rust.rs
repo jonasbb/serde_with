@@ -21,6 +21,9 @@ use std::{
 /// It can be very useful for serialization formats like JSON, which do not support integer
 /// numbers and have to resort to strings to represent them.
 ///
+/// If you control the type you want to de/serialize, you can instead use the two derive macros, [`SerializeDisplay`] and [`DeserializeFromStr`].
+/// They properly implement the traits [`Serialize`] and [`Deserialize`] such that user of the type no longer have to use the with-attribute.
+///
 /// The same functionality is also available as [`serde_with::DisplayFromStr`][crate::DisplayFromStr] compatible with serde's with-annotation.
 ///
 /// # Examples

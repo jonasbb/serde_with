@@ -380,6 +380,9 @@ pub struct Same;
 /// Another use case is types with [`Display`] and [`FromStr`] implementations, but without serde
 /// support, which can be found in some crates.
 ///
+/// If you control the type you want to de/serialize, you can instead use the two derive macros, [`SerializeDisplay`] and [`DeserializeFromStr`].
+/// They properly implement the traits [`Serialize`] and [`Deserialize`] such that user of the type no longer have to use the `serde_as` system.
+///
 /// The same functionality is also available as [`serde_with::rust::display_fromstr`][crate::rust::display_fromstr] compatible with serde's with-annotation.
 ///
 /// # Examples
