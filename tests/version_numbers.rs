@@ -36,7 +36,7 @@ fn test_docs_rs_url_point_to_current_version() -> Result<(), Box<dyn std::error:
     ))?;
     let mut error = false;
 
-    for entry in glob::glob("**/*.rs")?.chain(glob::glob("**/*.md")?) {
+    for entry in glob::glob("**/*.rs")?.chain(glob::glob("**/README.md")?) {
         let entry = entry?;
         let content = std::fs::read_to_string(&entry)?;
         for (line_number, line) in content.split('\n').enumerate() {

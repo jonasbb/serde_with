@@ -23,7 +23,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with/1.5.0-alpha.1")]
+#![doc(html_root_url = "https://docs.rs/serde_with/1.5.0-alpha.2")]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
@@ -50,7 +50,7 @@
 //!
 //! ```toml
 //! [dependencies.serde_with]
-//! version = "1.5.0-alpha.1"
+//! version = "1.5.0-alpha.2"
 //! features = [ "..." ]
 //! ```
 //!
@@ -189,13 +189,13 @@
 //! # }
 //! ```
 //!
-//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/struct.DisplayFromStr.html
-//! [`with_prefix!`]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/macro.with_prefix.html
-//! [display_fromstr]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/rust/display_fromstr/index.html
-//! [feature flags]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/feature_flags/index.html
-//! [skip_serializing_none]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/attr.skip_serializing_none.html
-//! [StringWithSeparator]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/rust/struct.StringWithSeparator.html
-//! [user guide]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/index.html
+//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/struct.DisplayFromStr.html
+//! [`with_prefix!`]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/macro.with_prefix.html
+//! [display_fromstr]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/rust/display_fromstr/index.html
+//! [feature flags]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
+//! [skip_serializing_none]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/attr.skip_serializing_none.html
+//! [StringWithSeparator]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/rust/struct.StringWithSeparator.html
+//! [user guide]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
 
 #[doc(hidden)]
@@ -331,7 +331,7 @@ impl Separator for CommaSeparator {
 /// # }
 /// ```
 ///
-/// [serde_as]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/attr.serde_as.html
+/// [serde_as]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct As<T>(PhantomData<T>);
 
@@ -736,7 +736,7 @@ pub struct BytesOrString;
 /// # }
 /// ```
 ///
-/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
@@ -861,7 +861,7 @@ pub struct DurationSeconds<
 /// # }
 /// ```
 ///
-/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
