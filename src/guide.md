@@ -1,10 +1,10 @@
 # `serde_with` User Guide
 
 This crate provides helper functions to extend and change how [`serde`] serializes different datatypes.
-For example, you can serialize [a map as a sequence of tuples][btreemap_as_tuple_list], serialize [using the `Display` and `FromStr` traits][display_fromstr], or serialize [an empty `String` like `None`][string_empty_as_none].
+For example, you can serialize [a map as a sequence of tuples][crate::guide::serde_as#maps-to-vec-of-tuples], serialize [using the `Display` and `FromStr` traits][`DisplayFromStr`], or serialize [an empty `String` like `None`][NoneAsEmptyString].
 `serde_with` covers types from the Rust Standard Library and some common crates like [`chrono`][serde_with_chrono].
 
-The crate offers three types of functionality.
+The crate offers four types of functionality.
 
 ## 1. Integration with serde's with-annotation
 
@@ -66,7 +66,8 @@ This is an alternative to the with-annotation, which adds flexibility and compos
 The main downside is that it work with fewer types than aboves with-annotations.
 However, all types from the Rust Standard Library should be supported in all combinations and any missing entry is a bug.
 
-The `serde_as` scheme is based on two new traits: [`SerializeAs`][] and [`DeserializeAs`][].
+The `serde_as` scheme is based on two new traits: [`SerializeAs`] and [`DeserializeAs`].  
+[Check out the detailed page about `serde_as` and the available features.](crate::guide::serde_as)
 
 ### Example
 
@@ -118,19 +119,22 @@ assert_eq!(data, serde_json::from_str(json).unwrap());
 The proc-macros are an optional addition and improve the user exerience for common tasks.
 We have already seen how the `serde_as` attribute is used to define the serialization instructions.
 
-The proc-macro attributes are defined in the [`serde_with_macros`][] crate and re-exported from the root of this crate.
+The proc-macro attributes are defined in the [`serde_with_macros`] crate and re-exported from the root of this crate.
 The proc-macros are optional, but enabled by default.
 For futher details, please refer to the documentation of each proc-macro.
 
+## 4. Derive macros to implement `Deserialize` and `Serialize`
+
+The derive macros work similar to the serde provided ones but they do implement other de/serialization schemes.
+For example, the derives [`DeserializeFromStr`] and [`SerializeDisplay`] require that the type also implement [`FromStr`] and [`Display`] and de/serializes from/to a string instead of the usual way of iterating over all fields.
+
 ## Migrating from the with-annotations to `serde_as`
 
-The `serde_as` scheme is the new addition to this crate and often more flexible than the with-annotations.
-Information on how to migrate to the newer scheme are in the dedicated [migration guide][].
+Each old style module explains how it can be converted to `serde_as`.
+Not all modules have such a description since not all are migrated and some are hard to implement in the `serde_as` system.
 
-[btreemap_as_tuple_list]: crate::rust::btreemap_as_tuple_list
-[display_fromstr]: crate::rust::display_fromstr
-[migration guide]: crate::guide::migrating
-[serde_with_chrono]: crate::chrono
-[string_empty_as_none]: crate::rust::string_empty_as_none
-[with-annotation]: https://serde.rs/field-attrs.html#with
+[`Display`]: std::fmt::Display
+[`FromStr`]: std::str::FromStr
 [`serde_with_macros`]: serde_with_macros
+[serde_with_chrono]: crate::chrono
+[with-annotation]: https://serde.rs/field-attrs.html#with

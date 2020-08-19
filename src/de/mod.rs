@@ -10,7 +10,6 @@
 pub(crate) mod impls;
 
 use super::*;
-use serde::Deserialize;
 
 /// A **data structure** that can be deserialized from any data format supported by Serde, analoge to [`Deserialize`].
 ///
@@ -61,7 +60,6 @@ use serde::Deserialize;
 /// These two changes are usually enough to make a container type implement [`DeserializeAs`][].
 ///
 /// [`BTreeMap`]: std::collections::BTreeMap
-/// [`Deserialize`]: serde::Deserialize
 /// [`Duration`]: std::time::Duration
 /// [`FromStr`]: std::str::FromStr
 /// [impl-deserialize]: https://serde.rs/impl-deserialize.html

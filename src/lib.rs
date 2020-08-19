@@ -250,14 +250,14 @@ macro_rules! generate_guide {
 #[cfg(feature = "guide")]
 generate_guide! {
     pub mod guide {
-        pub mod migrating;
         pub mod feature_flags;
+        pub mod serde_as;
     }
 }
 
 #[doc(inline)]
-pub use crate::{de::DeserializeAs, ser::SerializeAs};
-use serde::{ser::Serialize, Deserializer, Serializer};
+pub use crate::{de::DeserializeAs, rust::StringWithSeparator, ser::SerializeAs};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
 #[doc(inline)]
@@ -571,7 +571,6 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 /// #[serde_as]
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
-///     // #[serde_as(deserialize_as = "serde_with::rust::bytes_or_string::deserialize")]
 ///     #[serde_as(as = "BytesOrString")]
 ///     bytes_or_string: Vec<u8>,
 /// }
