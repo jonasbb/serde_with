@@ -17,7 +17,7 @@ use super::*;
 /// It can and should the implemented using the same code structure as the [`Serialize`] trait.
 /// As such, the same advice for [implementing `Serialize`][impl-serialize] applies here.
 ///
-/// # Differences to [`Deserialize`]
+/// # Differences to [`Serialize`]
 ///
 /// The trait is only required for container-like types or types implementing specific conversion functions.
 /// Container-like types are [`Vec`][], [`BTreeMap`][], but also [`Option`][] and [`Box`][].
@@ -62,7 +62,6 @@ use super::*;
 /// These two changes are usually enough to make a container type implement [`SerializeAs`][].
 ///
 /// [`BTreeMap`]: std::collections::BTreeMap
-/// [`Deserialize`]: serde::Deserialize
 /// [`Display`]: std::fmt::Display
 /// [`Duration`]: std::time::Duration
 /// [impl-serialize]: https://serde.rs/impl-serialize.html

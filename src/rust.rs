@@ -24,7 +24,23 @@ use std::{
 /// If you control the type you want to de/serialize, you can instead use the two derive macros, [`SerializeDisplay`] and [`DeserializeFromStr`].
 /// They properly implement the traits [`Serialize`] and [`Deserialize`] such that user of the type no longer have to use the with-attribute.
 ///
-/// The same functionality is also available as [`serde_with::DisplayFromStr`][crate::DisplayFromStr] compatible with serde's with-annotation.
+/// ## Converting to `serde_as`
+///
+/// The same functionality can be more clearly expressed via [`DisplayFromStr`] and using the [`serde_as`] macro.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, DisplayFromStr};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde_as(as = "DisplayFromStr")]
+///     value: mime::Mime,
+/// }
+/// # }
+/// ```
 ///
 /// # Examples
 ///
@@ -52,6 +68,11 @@ use std::{
 /// };
 /// assert_eq!(r#"{"mime":"*/*","number":"777"}"#, serde_json::to_string(&x).unwrap());
 /// ```
+///
+/// [`DeserializeFromStr`]: serde_with_macros::DeserializeFromStr
+/// [`DisplayFromStr`]: crate::DisplayFromStr
+/// [`serde_as`]: crate::guide::serde_as
+/// [`SerializeDisplay`]: serde_with_macros::SerializeDisplay
 pub mod display_fromstr {
     use super::*;
     use std::str::FromStr;
@@ -101,9 +122,9 @@ pub mod display_fromstr {
 ///
 /// This allows to serialize and deserialize collections with elements which can be represented as strings.
 ///
-/// ## Converting to `serde_as`:
+/// ## Converting to `serde_as`
 ///
-/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The same functionality can be more clearly expressed via [`DisplayFromStr`] and using the [`serde_as`] macro.
 /// Instead of
 ///
 /// ```rust,ignore
@@ -160,6 +181,9 @@ pub mod display_fromstr {
 /// };
 /// assert_eq!(r#"{"addresses":["127.53.0.1","127.53.0.2","127.53.1.1"],"bs":["false","true"]}"#, serde_json::to_string(&x).unwrap());
 /// ```
+///
+/// [`DisplayFromStr`]: crate::DisplayFromStr
+/// [`serde_as`]: crate::guide::serde_as
 pub mod seq_display_fromstr {
     use serde::{
         de::{Deserializer, Error, SeqAccess, Visitor},
@@ -239,6 +263,26 @@ pub mod seq_display_fromstr {
 ///
 /// An empty string deserializes as an empty collection.
 ///
+/// ## Converting to `serde_as`
+///
+/// The same functionality can also be expressed using the [`serde_as`] macro.
+/// The usage is slightly different.
+/// `StringWithSeparator` takes a second type, which needs to implement [`Display`]+[`FromStr`] and constitutes the inner type of the collection.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, SpaceSeparator, StringWithSeparator};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde_as(as = "StringWithSeparator::<SpaceSeparator, String>")]
+///     tags: Vec<String>,
+/// }
+/// # }
+/// ```
+///
 /// # Examples
 ///
 /// ```
@@ -268,6 +312,8 @@ pub mod seq_display_fromstr {
 /// };
 /// assert_eq!(r#"{"tags":"1 2 3","more_tags":""}"#, serde_json::to_string(&x).unwrap());
 /// ```
+///
+/// [`serde_as`]: crate::guide::serde_as
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct StringWithSeparator<Sep, T = ()>(PhantomData<(Sep, T)>);
 
@@ -815,7 +861,23 @@ pub mod maps_first_key_wins {
 /// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<`[`str`]`>` implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
-/// The same functionality is also available as [`serde_with::NoneAsEmptyString`][crate::NoneAsEmptyString] compatible with serde's with-annotation.
+/// ## Converting to `serde_as`
+///
+/// The same functionality can be more clearly expressed via [`NoneAsEmptyString`] and using the [`serde_as`] macro.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, NoneAsEmptyString};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde_as(as = "NoneAsEmptyString")]
+///     value: Option<String>,
+/// }
+/// # }
+/// ```
 ///
 /// # Examples
 ///
@@ -846,6 +908,9 @@ pub mod maps_first_key_wins {
 /// };
 /// assert_eq!(json!({ "tags": "" }), serde_json::to_value(&x).unwrap());
 /// ```
+///
+/// [`NoneAsEmptyString`]: crate::NoneAsEmptyString
+/// [`serde_as`]: crate::guide::serde_as
 pub mod string_empty_as_none {
     use super::*;
 
@@ -924,9 +989,9 @@ pub mod string_empty_as_none {
 ///
 /// If you need to de/serialize a [`BTreeMap`] then use [`btreemap_as_tuple_list`].
 ///
-/// ## Converting to `serde_as`:
+/// ## Converting to `serde_as`
 ///
-/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The same functionality can be more clearly expressed using the [`serde_as`] macro.
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
 ///
 /// ```rust
@@ -992,6 +1057,8 @@ pub mod string_empty_as_none {
 /// assert_eq!(2, v.s.len());
 /// assert_eq!(true, v.s[&1]);
 /// ```
+///
+/// [`serde_as`]: crate::guide::serde_as
 pub mod hashmap_as_tuple_list {
     use super::{SerializeSeq, *}; // Needed to remove the unused import warning in the parent scope
 
@@ -1060,9 +1127,9 @@ pub mod hashmap_as_tuple_list {
 ///
 /// If you need to de/serialize a [`HashMap`] then use [`hashmap_as_tuple_list`].
 ///
-/// ## Converting to `serde_as`:
+/// ## Converting to `serde_as`
 ///
-/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The same functionality can be more clearly expressed using the [`serde_as`] macro.
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
 ///
 /// ```rust
@@ -1103,6 +1170,8 @@ pub mod hashmap_as_tuple_list {
 /// assert_eq!(2, v.s.len());
 /// assert_eq!(1, v.s[&("World".to_string(), 456)]);
 /// ```
+///
+/// [`serde_as`]: crate::guide::serde_as
 pub mod btreemap_as_tuple_list {
     use super::*;
 
@@ -1166,9 +1235,9 @@ pub mod btreemap_as_tuple_list {
 /// The implementation is generic using the [`FromIterator`] and [`IntoIterator`] traits.
 /// Therefore, all of [`Vec`], [`VecDeque`](std::collections::VecDeque), and [`LinkedList`](std::collections::LinkedList) and anything which implements those are supported.
 ///
-/// ## Converting to `serde_as`:
+/// ## Converting to `serde_as`
 ///
-/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The same functionality can be more clearly expressed using the [`serde_as`] macro.
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
 ///
 /// ```rust
@@ -1251,6 +1320,8 @@ pub mod btreemap_as_tuple_list {
 /// assert_eq!(expected, res);
 /// assert_eq!(from, serde_json::to_string_pretty(&expected).unwrap());
 /// ```
+///
+/// [`serde_as`]: crate::guide::serde_as
 pub mod tuple_list_as_map {
     use super::{SerializeMap, *}; // Needed to remove the unused import warning in the parent scope
 
@@ -1339,6 +1410,24 @@ pub mod tuple_list_as_map {
 /// Accepting both as formats while deserializing can be helpful while interacting with language
 /// which have a looser definition of string than Rust.
 ///
+/// ## Converting to `serde_as`
+///
+/// The same functionality can be more clearly expressed via [`BytesOrString`] and using the [`serde_as`] macro.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, BytesOrString};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde_as(as = "BytesOrString")]
+///     bos: Vec<u8>,
+/// }
+/// # }
+/// ```
+///
 /// # Example
 /// ```rust
 /// # use serde_derive::{Deserialize, Serialize};
@@ -1379,6 +1468,9 @@ pub mod tuple_list_as_map {
 /// let res: S = serde_json::from_str(from).unwrap();
 /// assert_eq!(expected, res);
 /// ```
+///
+/// [`BytesOrString`]: crate::BytesOrString
+/// [`serde_as`]: crate::guide::serde_as
 pub mod bytes_or_string {
     use super::*;
 
@@ -1434,9 +1526,9 @@ pub mod bytes_or_string {
 /// Instead of erroring, it simply deserializes the [`Default`] variant of the type.
 /// It is not possible to find the error location, i.e., which field had a deserialization error, with this method.
 ///
-/// ## Converting to `serde_as`:
+/// ## Converting to `serde_as`
 ///
-/// The same functionality can be expressed more clearly using the `serde_as` macro.
+/// The same functionality can be more clearly expressed via [`DefaultOnError`] and using the [`serde_as`] macro.
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
 ///
 /// ```rust
@@ -1447,11 +1539,14 @@ pub mod bytes_or_string {
 /// #[serde_as]
 /// #[derive(Deserialize)]
 /// struct A {
-///     #[serde_as(deserialize_as = "DefaultOnError<_>")]
+///     #[serde_as(as = "DefaultOnError")]
 ///     value: u32,
 /// }
 /// # }
 /// ```
+///
+/// [`DefaultOnError`]: crate::DefaultOnError
+/// [`serde_as`]: crate::guide::serde_as
 ///
 /// # Examples
 ///
