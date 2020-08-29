@@ -1,6 +1,7 @@
 mod utils;
 
-use crate::utils::is_equal;
+use crate::utils::is_equal_expect;
+use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{json::JsonString, serde_as, DisplayFromStr};
 
@@ -20,10 +21,13 @@ fn test_nested_json() {
         value: u32,
     }
 
-    is_equal(
+    is_equal_expect(
         Struct {
             value: Nested { value: 444 },
         },
-        r#"{"value":"{\"value\":\"444\"}"}"#,
+        expect![[r#"
+            {
+              "value": "{\"value\":\"444\"}"
+            }"#]],
     );
 }
