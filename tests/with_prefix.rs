@@ -1,8 +1,13 @@
-use pretty_assertions::assert_eq;
+mod utils;
+
+use crate::utils::is_equal_expect;
+use expect_test::expect;
 use serde_derive::{Deserialize, Serialize};
-use serde_json::json;
 use serde_with::with_prefix;
-use std::collections::HashMap;
+use std::{
+    collections::{BTreeMap, HashMap},
+    iter::FromIterator,
+};
 
 #[test]
 fn test_flatten_with_prefix() {
@@ -39,25 +44,20 @@ fn test_flatten_with_prefix() {
             votes: 2,
         }),
         player3: None,
-        tags: {
-            let mut tags = HashMap::new();
-            tags.insert("t".to_owned(), "T".to_owned());
-            tags
-        },
+        tags: HashMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
     };
 
-    let expected = json!({
-        "player1_name": "name1",
-        "player1_votes": 1,
-        "player2_name": "name2",
-        "player2_votes": 2,
-        "tag_t": "T"
-    });
-
-    let j = serde_json::to_string(&m).unwrap();
-    assert_eq!(j, expected.to_string());
-
-    assert_eq!(m, serde_json::from_str(&j).unwrap());
+    is_equal_expect(
+        m,
+        expect![[r#"
+            {
+              "player1_name": "name1",
+              "player1_votes": 1,
+              "player2_name": "name2",
+              "player2_votes": 2,
+              "tag_t": "T"
+            }"#]],
+    );
 }
 
 #[test]
@@ -95,39 +95,32 @@ fn test_plain_with_prefix() {
             votes: 2,
         }),
         player3: None,
-        tags: {
-            let mut tags = HashMap::new();
-            tags.insert("t".to_owned(), "T".to_owned());
-            tags
-        },
+        tags: HashMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
     };
 
-    let expected = json!({
-        "player1": {
+    is_equal_expect(
+        m,
+        expect![[r#"
+        {
+          "player1": {
             "player1_name": "name1",
-            "player1_votes": 1,
-        },
-        "player2": {
+            "player1_votes": 1
+          },
+          "player2": {
             "player2_name": "name2",
-            "player2_votes": 2,
-        },
-        "player3": null,
-        "tags": {
+            "player2_votes": 2
+          },
+          "player3": null,
+          "tags": {
             "tag_t": "T"
-        }
-    });
-
-    let j = serde_json::to_string(&m).unwrap();
-    assert_eq!(j, expected.to_string());
-
-    assert_eq!(m, serde_json::from_str(&j).unwrap());
+          }
+        }"#]],
+    );
 }
 
 /// Ensure that with_prefix works for unit type enum variants.
 #[test]
 fn test_enum_unit_variant_with_prefix() {
-    use std::collections::BTreeMap;
-
     #[derive(Hash, PartialEq, Eq, Debug, Serialize, Deserialize, Ord, PartialOrd)]
     enum Foo {
         One,
@@ -144,25 +137,19 @@ fn test_enum_unit_variant_with_prefix() {
     }
     with_prefix!(foo "foo_");
 
-    let mut my_foo = BTreeMap::new();
-    my_foo.insert(Foo::One, 1);
-    my_foo.insert(Foo::Two, 2);
-    my_foo.insert(Foo::Three, 3);
-
     let d = Data {
         stuff: "Stuff".to_owned(),
-        foo: my_foo,
+        foo: BTreeMap::from_iter(vec![(Foo::One, 1), (Foo::Two, 2), (Foo::Three, 3)]),
     };
 
-    let expected = json!({
-        "stuff": "Stuff",
-        "foo_One": 1,
-        "foo_Two": 2,
-        "foo_Three": 3,
-    });
-
-    let j = serde_json::to_string(&d).unwrap();
-    assert_eq!(j, expected.to_string());
-
-    assert_eq!(d, serde_json::from_str(&j).unwrap());
+    is_equal_expect(
+        d,
+        expect![[r#"
+        {
+          "stuff": "Stuff",
+          "foo_One": 1,
+          "foo_Two": 2,
+          "foo_Three": 3
+        }"#]],
+    );
 }
