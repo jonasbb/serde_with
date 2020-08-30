@@ -3,7 +3,7 @@ mod utils;
 use crate::utils::{check_deserialization, check_error_deserialization_expect, is_equal_expect};
 use expect_test::expect;
 use fnv::{FnvHashMap as HashMap, FnvHashSet as HashSet};
-use serde_derive::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_with::CommaSeparator;
 use std::{
     collections::{BTreeMap, BTreeSet, LinkedList, VecDeque},
@@ -413,4 +413,63 @@ fn tuple_list_as_map_vecdeque() {
         r#"null"#,
         expect![[r#"invalid type: null, expected a map at line 1 column 4"#]],
     );
+}
+
+#[test]
+fn test_default_on_error() {
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S<T>(#[serde(with = "serde_with::rust::default_on_error")] T)
+    where
+        T: Default + Serialize + DeserializeOwned;
+
+    is_equal_expect(S(123), expect![[r#"123"#]]);
+    is_equal_expect(S("Hello World".to_string()), expect![[r#""Hello World""#]]);
+    is_equal_expect(
+        S(vec![1, 2, 3]),
+        expect![[r#"
+        [
+          1,
+          2,
+          3
+        ]"#]],
+    );
+
+    check_deserialization(S(0), r#"{}"#);
+    check_deserialization(S(0), r#"[]"#);
+    check_deserialization(S(0), r#"null"#);
+    check_deserialization(S(0), r#""A""#);
+
+    check_deserialization(S("".to_string()), r#"{}"#);
+    check_deserialization(S("".to_string()), r#"[]"#);
+    check_deserialization(S("".to_string()), r#"null"#);
+    check_deserialization(S("".to_string()), r#"0"#);
+
+    check_deserialization(S::<Vec<i32>>(vec![]), r#"{}"#);
+    check_deserialization(S::<Vec<i32>>(vec![]), r#"null"#);
+    check_deserialization(S::<Vec<i32>>(vec![]), r#"0"#);
+    check_deserialization(S::<Vec<i32>>(vec![]), r#""A""#);
+}
+
+#[test]
+fn test_default_on_null() {
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S<T>(#[serde(with = "serde_with::rust::default_on_null")] T)
+    where
+        T: Default + Serialize + DeserializeOwned;
+
+    is_equal_expect(S(123), expect![[r#"123"#]]);
+    is_equal_expect(S("Hello World".to_string()), expect![[r#""Hello World""#]]);
+    is_equal_expect(
+        S(vec![1, 2, 3]),
+        expect![[r#"
+        [
+          1,
+          2,
+          3
+        ]"#]],
+    );
+
+    check_deserialization(S(0), r#"null"#);
+    check_deserialization(S("".to_string()), r#"null"#);
+    check_deserialization(S::<Vec<i32>>(vec![]), r#"null"#);
 }
