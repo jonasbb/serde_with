@@ -4,10 +4,12 @@ on:
     paths:
       - Cargo.toml'
       - '**/Cargo.toml'
+  # Bors related branches
   push:
-    paths:
-      - 'Cargo.toml'
-      - '**/Cargo.toml'
+    branches:
+    - master
+    - staging
+    - trying
   schedule:
     - cron: '0 0 * * *'
 jobs:
