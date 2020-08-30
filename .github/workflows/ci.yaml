@@ -1,11 +1,16 @@
 name: Rust CI
 on:
+  # Always test pull requests
   pull_request:
+  # Bors related branches
   push:
     branches:
     - master
     - staging
     - trying
+  # Test once per week: Monday at 00:00
+  schedule:
+    - cron: "0 0 * * 1"
 
 env:
   CARGO_INCREMENTAL: 0
@@ -14,6 +19,7 @@ env:
 jobs:
   clippy_check:
     strategy:
+      fail-fast: false
       matrix:
         os: [
           "ubuntu-latest",
@@ -74,10 +80,6 @@ jobs:
 
   build_and_test:
     name: Build and Test
-    needs: [
-      "rustfmt",
-      "clippy_check",
-    ]
     strategy:
       matrix:
         os: [
@@ -86,6 +88,8 @@ jobs:
         ]
         rust: [
           "1.36.0",
+          "1.40.0",
+          "1.45.2",
           "stable",
           "beta",
           "nightly",
@@ -126,4 +130,23 @@ jobs:
           args: "--workspace --all-features -- --test-threads 1"
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1.0.13
-        if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
+        if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
+
+  # Added to summarize the matrix (otherwise we would need to list every single
+  # job in bors.toml)
+  # https://forum.bors.tech/t/bors-with-github-workflows/426
+  tests-result:
+    name: Tests result
+    if: always()
+    needs:
+      - rustfmt
+      - clippy_check
+      - build_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark the job as a success
+        if: needs.tests.result == 'success'
+        run: exit 0
+      - name: Mark the job as a failure
+        if: needs.tests.result == 'failure'
+        run: exit 1
