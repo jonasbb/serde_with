@@ -145,8 +145,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
-        if: needs.tests.result == 'success'
+        if: success()
         run: exit 0
       - name: Mark the job as a failure
-        if: needs.tests.result == 'failure'
+        if: failure()
         run: exit 1
