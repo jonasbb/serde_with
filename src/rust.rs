@@ -602,6 +602,15 @@ pub mod sets_duplicate_value_is_error {
         };
         deserializer.deserialize_seq(visitor)
     }
+
+    /// Serialize the set with the default serializer
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        value.serialize(serializer)
+    }
 }
 
 /// Ensure no duplicate keys exist in a map.
@@ -699,6 +708,15 @@ pub mod maps_duplicate_key_is_error {
         };
         deserializer.deserialize_map(visitor)
     }
+
+    /// Serialize the map with the default serializer
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        value.serialize(serializer)
+    }
 }
 
 /// Ensure that the first value is taken, if duplicate values exist
@@ -757,6 +775,15 @@ pub mod sets_first_value_wins {
             set_item_type: PhantomData,
         };
         deserializer.deserialize_seq(visitor)
+    }
+
+    /// Serialize the set with the default serializer
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        value.serialize(serializer)
     }
 }
 
@@ -853,6 +880,15 @@ pub mod maps_first_key_wins {
             map_value_type: PhantomData,
         };
         deserializer.deserialize_map(visitor)
+    }
+
+    /// Serialize the map with the default serializer
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        value.serialize(serializer)
     }
 }
 
@@ -1617,6 +1653,15 @@ pub mod default_on_error {
             _ => Default::default(),
         })
     }
+
+    /// Serialize value with the default serializer
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        value.serialize(serializer)
+    }
 }
 
 /// Deserialize default value if encountering `null`.
@@ -1654,5 +1699,14 @@ pub mod default_on_null {
         T: Deserialize<'de> + Default,
     {
         Ok(Option::deserialize(deserializer)?.unwrap_or_default())
+    }
+
+    /// Serialize value with the default serializer
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        value.serialize(serializer)
     }
 }

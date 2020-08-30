@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Added some `serialize` functions to modules which previously had none.
+    This makes it easier to use the conversion when also deriving `Serialialize`.
+    The functions simply pass through to the underlying `Serialize` implementation.
+    This affects `sets_duplicate_value_is_error`, `maps_duplicate_key_is_error`, `sets_first_value_wins`, `maps_first_key_wins`, `default_on_error`, and `default_on_null`.
+
 ## [1.5.0-alpha.2]
 
 ### Added
