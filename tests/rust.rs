@@ -3,9 +3,11 @@ mod utils;
 use crate::utils::{check_deserialization, check_error_deserialization_expect, is_equal_expect};
 use expect_test::expect;
 use fnv::{FnvHashMap as HashMap, FnvHashSet as HashSet};
+use pretty_assertions::assert_eq;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_with::CommaSeparator;
 use std::{
+    cmp,
     collections::{BTreeMap, BTreeSet, LinkedList, VecDeque},
     iter::FromIterator as _,
 };
@@ -217,6 +219,191 @@ fn duplicate_key_first_wins_btreemap() {
         S(BTreeMap::from_iter(vec![(1, 1), (2, 2)])),
         r#"{"1": 1, "2": 2, "1": 3}"#,
     );
+}
+
+#[test]
+fn duplicate_value_first_wins_hashset() {
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S(HashSet<W>);
+    // struct S(#[serde(with = "::serde_with::rust::sets_first_value_wins")] HashSet<W>);
+
+    #[derive(Debug, Eq, Deserialize, Serialize)]
+    struct W(i32, bool);
+    impl PartialEq for W {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+    impl std::hash::Hash for W {
+        fn hash<H>(&self, state: &mut H)
+        where
+            H: std::hash::Hasher,
+        {
+            self.0.hash(state)
+        }
+    }
+
+    // Different values always work
+    is_equal_expect(
+        S(HashSet::from_iter(vec![
+            W(1, true),
+            W(2, false),
+            W(3, true),
+        ])),
+        expect![[r#"
+            [
+              [
+                1,
+                true
+              ],
+              [
+                3,
+                true
+              ],
+              [
+                2,
+                false
+              ]
+            ]"#]],
+    );
+
+    let value: S = serde_json::from_str(
+        r#"[
+        [1, false],
+        [1, true],
+        [2, true],
+        [2, false]
+    ]"#,
+    )
+    .unwrap();
+    let entries: Vec<_> = value.0.into_iter().collect();
+    assert_eq!(1, entries[0].0);
+    assert_eq!(false, entries[0].1);
+    assert_eq!(2, entries[1].0);
+    assert_eq!(true, entries[1].1);
+}
+
+#[test]
+fn duplicate_value_last_wins_hashset() {
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S(#[serde(with = "::serde_with::rust::sets_last_value_wins")] HashSet<W>);
+
+    #[derive(Debug, Eq, Deserialize, Serialize)]
+    struct W(i32, bool);
+    impl PartialEq for W {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+    impl std::hash::Hash for W {
+        fn hash<H>(&self, state: &mut H)
+        where
+            H: std::hash::Hasher,
+        {
+            self.0.hash(state)
+        }
+    }
+
+    // Different values always work
+    is_equal_expect(
+        S(HashSet::from_iter(vec![
+            W(1, true),
+            W(2, false),
+            W(3, true),
+        ])),
+        expect![[r#"
+            [
+              [
+                1,
+                true
+              ],
+              [
+                3,
+                true
+              ],
+              [
+                2,
+                false
+              ]
+            ]"#]],
+    );
+
+    let value: S = serde_json::from_str(
+        r#"[
+        [1, false],
+        [1, true],
+        [2, true],
+        [2, false]
+    ]"#,
+    )
+    .unwrap();
+    let entries: Vec<_> = value.0.into_iter().collect();
+    assert_eq!(1, entries[0].0);
+    assert_eq!(true, entries[0].1);
+    assert_eq!(2, entries[1].0);
+    assert_eq!(false, entries[1].1);
+}
+
+#[test]
+fn duplicate_value_last_wins_btreeset() {
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S(#[serde(with = "::serde_with::rust::sets_last_value_wins")] BTreeSet<W>);
+    #[derive(Debug, Eq, Deserialize, Serialize)]
+    struct W(i32, bool);
+    impl PartialEq for W {
+        fn eq(&self, other: &Self) -> bool {
+            self.0 == other.0
+        }
+    }
+    impl Ord for W {
+        fn cmp(&self, other: &Self) -> cmp::Ordering {
+            self.0.cmp(&other.0)
+        }
+    }
+    impl PartialOrd for W {
+        fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+
+    // Different values always work
+    is_equal_expect(
+        S(BTreeSet::from_iter(vec![
+            W(1, true),
+            W(2, false),
+            W(3, true),
+        ])),
+        expect![[r#"
+            [
+              [
+                1,
+                true
+              ],
+              [
+                2,
+                false
+              ],
+              [
+                3,
+                true
+              ]
+            ]"#]],
+    );
+
+    let value: S = serde_json::from_str(
+        r#"[
+        [1, false],
+        [1, true],
+        [2, true],
+        [2, false]
+    ]"#,
+    )
+    .unwrap();
+    let entries: Vec<_> = value.0.into_iter().collect();
+    assert_eq!(1, entries[0].0);
+    assert_eq!(true, entries[0].1);
+    assert_eq!(2, entries[1].0);
+    assert_eq!(false, entries[1].1);
 }
 
 #[test]

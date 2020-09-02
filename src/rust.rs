@@ -719,20 +719,17 @@ pub mod maps_duplicate_key_is_error {
     }
 }
 
-/// Ensure that the first value is taken, if duplicate values exist
+/// *DEPRECATED* Ensure that the first value is taken, if duplicate values exist
 ///
-/// By default serde has a last-value-wins implementation, if duplicate keys for a set exist.
-/// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
-///
-/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
-///
-/// [`HashSet`]: std::collections::HashSet
-/// [`BTreeSet`]: std::collections::HashSet
+/// This module implements the default behavior in serde.
+#[deprecated = "This module does nothing. Remove the attribute. Serde's default behavior is to use the first value when deserializing a set."]
+#[allow(deprecated)]
 pub mod sets_first_value_wins {
     use super::*;
     use crate::duplicate_key_impls::DuplicateInsertsFirstWinsSet;
 
-    /// Deserialize a set and return an error on duplicate values
+    /// Deserialize a set and keep the first of equal values
+    #[deprecated = "This function does nothing. Remove the attribute. Serde's default behavior is to use the first value when deserializing a set."]
     pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
     where
         T: DuplicateInsertsFirstWinsSet<V>,
@@ -764,6 +761,75 @@ pub mod sets_first_value_wins {
 
                 while let Some(value) = access.next_element()? {
                     values.insert(value);
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = SeqVisitor {
+            marker: PhantomData,
+            set_item_type: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
+    }
+
+    /// Serialize the set with the default serializer
+    #[deprecated = "This function does nothing. Remove the attribute. Serde's default behavior is to use the first value when deserializing a set."]
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        value.serialize(serializer)
+    }
+}
+
+/// Ensure that the last value is taken, if duplicate values exist
+///
+/// By default serde has a first-value-wins implementation, if duplicate keys for a set exist.
+/// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
+///
+/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
+///
+/// [`HashSet`]: std::collections::HashSet
+/// [`BTreeSet`]: std::collections::HashSet
+pub mod sets_last_value_wins {
+    use super::*;
+    use crate::duplicate_key_impls::DuplicateInsertsLastWinsSet;
+
+    /// Deserialize a set and keep the last of equal values
+    pub fn deserialize<'de, D, T, V>(deserializer: D) -> Result<T, D::Error>
+    where
+        T: DuplicateInsertsLastWinsSet<V>,
+        V: Deserialize<'de>,
+        D: Deserializer<'de>,
+    {
+        struct SeqVisitor<T, V> {
+            marker: PhantomData<T>,
+            set_item_type: PhantomData<V>,
+        };
+
+        impl<'de, T, V> Visitor<'de> for SeqVisitor<T, V>
+        where
+            T: DuplicateInsertsLastWinsSet<V>,
+            V: Deserialize<'de>,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            #[inline]
+            fn visit_seq<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut values = Self::Value::new(access.size_hint());
+
+                while let Some(value) = access.next_element()? {
+                    values.replace(value);
                 }
 
                 Ok(values)
