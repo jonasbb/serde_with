@@ -12,7 +12,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Added some `serialize` functions to modules which previously had none.
     This makes it easier to use the conversion when also deriving `Serialialize`.
     The functions simply pass through to the underlying `Serialize` implementation.
-    This affects `sets_duplicate_value_is_error`, `maps_duplicate_key_is_error`, `sets_first_value_wins`, `maps_first_key_wins`, `default_on_error`, and `default_on_null`.
+    This affects `sets_duplicate_value_is_error`, `maps_duplicate_key_is_error`, `maps_first_key_wins`, `default_on_error`, and `default_on_null`.
+* `sets_last_value_wins` as a replacement for `sets_first_value_wins` which is deprecated now.
+    The default behavior of serde is to prefer the first value of a set so the opposite is taking the last value.
+
+### Changed
+
+* Deprecate `sets_first_value_wins`.
+    The default behavior of serde is to take the first value, so this module is not necessary.
 
 ## [1.5.0-alpha.2]
 
