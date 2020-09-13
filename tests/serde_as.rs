@@ -15,6 +15,41 @@ use std::{
 };
 
 #[test]
+fn test_box() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct {
+        #[serde_as(as = "Box<DisplayFromStr>")]
+        value: Box<u32>,
+    };
+
+    is_equal(
+        Struct {
+            value: Box::new(123),
+        },
+        r#"{"value":"123"}"#,
+    );
+}
+
+#[test]
+fn test_option() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct {
+        #[serde_as(as = "_")]
+        value: Option<u32>,
+    };
+
+    is_equal(Struct { value: None }, r#"{"value":null}"#);
+    is_equal(Struct { value: Some(9) }, r#"{"value":9}"#);
+    check_error_deserialization::<Struct>(
+        r#"{"value":{}}"#,
+        "invalid type: map, expected u32 at line 1 column 9",
+    );
+    check_error_deserialization::<Struct>(r#"{}"#, "missing field `value` at line 1 column 2");
+}
+
+#[test]
 fn test_display_fromstr() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
