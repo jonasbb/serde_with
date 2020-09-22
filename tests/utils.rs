@@ -11,13 +11,13 @@ where
     T: Debug + DeserializeOwned + PartialEq + Serialize,
 {
     assert_eq!(
-        serde_json::from_str::<T>(s).unwrap(),
         value,
+        serde_json::from_str::<T>(s).unwrap(),
         "Deserialization differs from expected value."
     );
     assert_eq!(
-        serde_json::to_string(&value).unwrap(),
         s,
+        serde_json::to_string(&value).unwrap(),
         "Serialization differs from expected value."
     );
 }
@@ -30,8 +30,8 @@ where
     let serialized = serde_json::to_string_pretty(&value).unwrap();
     expected.assert_eq(&serialized);
     assert_eq!(
-        serde_json::from_str::<T>(&serialized).unwrap(),
         value,
+        serde_json::from_str::<T>(&serialized).unwrap(),
         "Deserialization differs from expected value."
     );
 }
@@ -42,8 +42,8 @@ where
     T: Debug + DeserializeOwned + PartialEq,
 {
     assert_eq!(
-        serde_json::from_str::<T>(deserialize_from).unwrap(),
         value,
+        serde_json::from_str::<T>(deserialize_from).unwrap(),
         "Deserialization differs from expected value."
     );
 }
@@ -54,8 +54,8 @@ where
     T: Debug + PartialEq + Serialize,
 {
     assert_eq!(
-        serde_json::to_string(&value).unwrap(),
         serialize_to,
+        serde_json::to_string(&value).unwrap(),
         "Serialization differs from expected value."
     );
 }
@@ -74,10 +74,10 @@ where
     T: Debug + DeserializeOwned + PartialEq,
 {
     assert_eq!(
+        error_msg,
         serde_json::from_str::<T>(deserialize_from)
             .unwrap_err()
             .to_string(),
-        error_msg
     )
 }
 
