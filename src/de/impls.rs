@@ -317,33 +317,6 @@ tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
-impl<'de, T, As> DeserializeAs<'de, [T; 0]> for [As; 0] {
-    fn deserialize_as<D>(deserializer: D) -> Result<[T; 0], D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct ArrayVisitor<T>(PhantomData<T>);
-
-        impl<'de, T, As> Visitor<'de> for ArrayVisitor<DeserializeAsWrap<T, As>> {
-            type Value = [T; 0];
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str(concat!("an array of size ", 0))
-            }
-
-            #[allow(non_snake_case)]
-            fn visit_seq<A>(self, _seq: A) -> Result<Self::Value, A::Error>
-            where
-                A: SeqAccess<'de>,
-            {
-                Ok([])
-            }
-        };
-
-        deserializer.deserialize_tuple(0, ArrayVisitor::<DeserializeAsWrap<T, As>>(PhantomData))
-    }
-}
-
 macro_rules! array_impl {
     ($len:literal $($idx:tt)*) => {
         impl<'de, T, As> DeserializeAs<'de, [T; $len]> for [As; $len]
@@ -368,6 +341,8 @@ macro_rules! array_impl {
                     }
 
                     #[allow(non_snake_case)]
+                    // Because of 0-size arrays
+                    #[allow(unused_variables, unused_mut)]
                     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
                     where
                         A: SeqAccess<'de>,
@@ -390,6 +365,7 @@ macro_rules! array_impl {
     };
 }
 
+array_impl!(0);
 array_impl!(1 0);
 array_impl!(2 0 1);
 array_impl!(3 0 1 2);
