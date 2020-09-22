@@ -133,17 +133,6 @@ tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
-impl<T, As> SerializeAs<[T; 0]> for [As; 0] {
-    fn serialize_as<S>(_array: &[T; 0], serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        use serde::ser::SerializeTuple;
-        let arr = serializer.serialize_tuple(0)?;
-        arr.end()
-    }
-}
-
 macro_rules! array_impl {
     ($len:literal) => {
         impl<T, As> SerializeAs<[T; $len]> for [As; $len]
@@ -165,6 +154,7 @@ macro_rules! array_impl {
     };
 }
 
+array_impl!(0);
 array_impl!(1);
 array_impl!(2);
 array_impl!(3);

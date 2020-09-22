@@ -133,16 +133,6 @@ fn test_arrays() {
     };
     is_equal(Struct0a { values: [] }, r#"{"values":[]}"#);
 
-    // Test "non-matching" types.
-    // Arrays of size 0 should allow all convertions
-    #[serde_as]
-    #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct Struct0b {
-        #[serde_as(as = "[u8; 0]")]
-        values: [String; 0],
-    };
-    is_equal(Struct0b { values: [] }, r#"{"values":[]}"#);
-
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Struct1 {
