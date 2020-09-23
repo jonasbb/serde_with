@@ -302,6 +302,10 @@ fn test_chrono_duration_seconds_with_frac() {
         StructStringStrict(minus_half_second),
         expect![[r#""-0.5""#]],
     );
+    is_equal_expect(
+        StructStringStrict(minus_half_second),
+        expect![[r#""-0.5""#]],
+    );
     check_error_deserialization_expect::<StructStringStrict>(
         r#"1"#,
         expect![[r#"invalid type: integer `1`, expected a string at line 1 column 1"#]],
@@ -321,6 +325,10 @@ fn test_chrono_duration_seconds_with_frac() {
     is_equal_expect(StructStringFlexible(one_second), expect![[r#""1""#]]);
     is_equal_expect(StructStringFlexible(minus_one_second), expect![[r#""-1""#]]);
     is_equal_expect(StructStringFlexible(half_second), expect![[r#""0.5""#]]);
+    is_equal_expect(
+        StructStringFlexible(minus_half_second),
+        expect![[r#""-0.5""#]],
+    );
     check_deserialization(StructStringFlexible(one_second), r#""1""#);
     check_deserialization(StructStringFlexible(zero), r#""0""#);
     check_error_deserialization_expect::<StructStringFlexible>(
