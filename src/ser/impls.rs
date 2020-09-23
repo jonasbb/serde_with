@@ -1,10 +1,12 @@
+use utils::duration::DurationSigned;
+
 use super::*;
 use crate::{formats::Strictness, rust::StringWithSeparator, Separator};
 use std::{
     collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
     fmt::Display,
     hash::{BuildHasher, Hash},
-    time::Duration,
+    time::{Duration, SystemTime},
 };
 
 impl<T, U> SerializeAs<Box<T>> for Box<U>
@@ -300,80 +302,6 @@ impl SerializeAs<Vec<u8>> for BytesOrString {
     }
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<u64, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut secs = source.as_secs();
-        // Properly round the value
-        if source.subsec_millis() >= 500 {
-            secs += 1;
-        }
-        secs.serialize(serializer)
-    }
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<f64, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        utils::duration_as_secs_f64(source)
-            .round()
-            .serialize(serializer)
-    }
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<String, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut secs = source.as_secs();
-        // Properly round the value
-        if source.subsec_millis() >= 500 {
-            secs += 1;
-        }
-        secs.to_string().serialize(serializer)
-    }
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<f64, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        utils::duration_as_secs_f64(source).serialize(serializer)
-    }
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<String, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        utils::duration_as_secs_f64(source)
-            .to_string()
-            .serialize(serializer)
-    }
-}
-
 impl<SEPARATOR, I, T> SerializeAs<I> for StringWithSeparator<SEPARATOR, T>
 where
     SEPARATOR: Separator,
@@ -397,3 +325,64 @@ where
         })
     }
 }
+
+macro_rules! use_signed_duration {
+    (
+        $ty:ty =>
+        $main_trait:ident $internal_trait:ident =>
+        $converter:ident =>
+        $({
+            $format:ty, $strictness:ty =>
+            $($tbound:ident: $bound:ident)*
+        })*
+    ) => {
+        $(
+            impl<$($tbound,)*> SerializeAs<$ty> for $main_trait<$format, $strictness>
+            where
+                $($tbound: $bound,)*
+            {
+                fn serialize_as<S>(source: &$ty, serializer: S) -> Result<S::Ok, S::Error>
+                where
+                    S: Serializer,
+                {
+                    $internal_trait::<$format, $strictness>::serialize_as(
+                        &DurationSigned::from(source),
+                        serializer,
+                    )
+                }
+            }
+        )*
+    };
+}
+
+use_signed_duration!(
+    Duration =>
+    DurationSeconds DurationSeconds =>
+    to_std_duration =>
+    {u64, STRICTNESS => STRICTNESS: Strictness}
+    {f64, STRICTNESS => STRICTNESS: Strictness}
+    {String, STRICTNESS => STRICTNESS: Strictness}
+);
+use_signed_duration!(
+    Duration =>
+    DurationSecondsWithFrac DurationSecondsWithFrac =>
+    to_std_duration =>
+    {f64, STRICTNESS => STRICTNESS: Strictness}
+    {String, STRICTNESS => STRICTNESS: Strictness}
+);
+
+use_signed_duration!(
+    SystemTime =>
+    TimestampSeconds DurationSeconds =>
+    to_system_time =>
+    {i64, STRICTNESS => STRICTNESS: Strictness}
+    {f64, STRICTNESS => STRICTNESS: Strictness}
+    {String, STRICTNESS => STRICTNESS: Strictness}
+);
+use_signed_duration!(
+    SystemTime =>
+    TimestampSecondsWithFrac DurationSecondsWithFrac =>
+    to_system_time =>
+    {f64, STRICTNESS => STRICTNESS: Strictness}
+    {String, STRICTNESS => STRICTNESS: Strictness}
+);
