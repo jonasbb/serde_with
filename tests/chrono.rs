@@ -7,7 +7,9 @@ use crate::utils::{
 use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
-use serde_with::{formats::Flexible, serde_as, DurationSeconds, DurationSecondsWithFrac};
+use serde_with::{
+    formats::Flexible, serde_as, DurationSeconds, DurationSecondsWithFrac, TimestampSeconds,
+};
 use std::{collections::BTreeMap, iter::FromIterator, str::FromStr};
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
@@ -321,6 +323,142 @@ fn test_chrono_duration_seconds_with_frac() {
     is_equal_expect(StructStringFlexible(half_second), expect![[r#""0.5""#]]);
     check_deserialization(StructStringFlexible(one_second), r#""1""#);
     check_deserialization(StructStringFlexible(zero), r#""0""#);
+    check_error_deserialization_expect::<StructStringFlexible>(
+        r#""a""#,
+        expect![[
+            r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 3"#
+        ]],
+    );
+}
+
+#[test]
+fn test_chrono_timestamp_seconds() {
+    let zero = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc);
+    let one_second = zero + Duration::seconds(1);
+    let half_second = zero + Duration::nanoseconds(500_000_000);
+    let minus_one_second = zero - Duration::seconds(1);
+    let minus_half_second = zero - Duration::nanoseconds(500_000_000);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructIntStrict(#[serde_as(as = "TimestampSeconds")] DateTime<Utc>);
+
+    is_equal_expect(StructIntStrict(zero), expect![[r#"0"#]]);
+    is_equal_expect(StructIntStrict(one_second), expect![[r#"1"#]]);
+    is_equal_expect(StructIntStrict(minus_one_second), expect![[r#"-1"#]]);
+    check_serialization_expect(StructIntStrict(half_second), expect![[r#"1"#]]);
+    check_serialization_expect(StructIntStrict(minus_half_second), expect![[r#"-1"#]]);
+    check_error_deserialization_expect::<StructIntStrict>(
+        r#""1""#,
+        expect![[r#"invalid type: string "1", expected i64 at line 1 column 3"#]],
+    );
+    check_error_deserialization_expect::<StructIntStrict>(
+        r#"0.123"#,
+        expect![[r#"invalid type: floating point `0.123`, expected i64 at line 1 column 5"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructIntFlexible(#[serde_as(as = "TimestampSeconds<i64, Flexible>")] DateTime<Utc>);
+
+    is_equal_expect(StructIntFlexible(zero), expect![[r#"0"#]]);
+    is_equal_expect(StructIntFlexible(one_second), expect![[r#"1"#]]);
+    is_equal_expect(StructIntFlexible(minus_one_second), expect![[r#"-1"#]]);
+    check_serialization_expect(StructIntFlexible(half_second), expect![[r#"1"#]]);
+    check_serialization_expect(StructIntFlexible(minus_half_second), expect![[r#"-1"#]]);
+    check_deserialization(StructIntFlexible(one_second), r#""1""#);
+    check_deserialization(StructIntFlexible(one_second), r#"1.0"#);
+    check_deserialization(StructIntFlexible(minus_half_second), r#""-0.5""#);
+    check_deserialization(StructIntFlexible(half_second), r#"0.5"#);
+    check_error_deserialization_expect::<StructIntFlexible>(
+        r#""a""#,
+        expect![[
+            r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 3"#
+        ]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Structf64Strict(#[serde_as(as = "TimestampSeconds<f64>")] DateTime<Utc>);
+
+    is_equal_expect(Structf64Strict(zero), expect![[r#"0.0"#]]);
+    is_equal_expect(Structf64Strict(one_second), expect![[r#"1.0"#]]);
+    is_equal_expect(Structf64Strict(minus_one_second), expect![[r#"-1.0"#]]);
+    check_serialization_expect(Structf64Strict(half_second), expect![[r#"1.0"#]]);
+    check_serialization_expect(Structf64Strict(minus_half_second), expect![[r#"-1.0"#]]);
+    check_deserialization(Structf64Strict(one_second), r#"0.5"#);
+    check_error_deserialization_expect::<Structf64Strict>(
+        r#""1""#,
+        expect![[r#"invalid type: string "1", expected f64 at line 1 column 3"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Structf64Flexible(#[serde_as(as = "TimestampSeconds<f64, Flexible>")] DateTime<Utc>);
+
+    is_equal_expect(Structf64Flexible(zero), expect![[r#"0.0"#]]);
+    is_equal_expect(Structf64Flexible(one_second), expect![[r#"1.0"#]]);
+    is_equal_expect(Structf64Flexible(minus_one_second), expect![[r#"-1.0"#]]);
+    check_serialization_expect(Structf64Flexible(half_second), expect![[r#"1.0"#]]);
+    check_serialization_expect(Structf64Flexible(minus_half_second), expect![[r#"-1.0"#]]);
+    check_deserialization(Structf64Flexible(one_second), r#""1""#);
+    check_deserialization(Structf64Flexible(one_second), r#"1.0"#);
+    check_deserialization(Structf64Flexible(minus_half_second), r#""-0.5""#);
+    check_deserialization(Structf64Flexible(half_second), r#"0.5"#);
+    check_error_deserialization_expect::<Structf64Flexible>(
+        r#""a""#,
+        expect![[
+            r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 3"#
+        ]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructStringStrict(#[serde_as(as = "TimestampSeconds<String>")] DateTime<Utc>);
+
+    is_equal_expect(StructStringStrict(zero), expect![[r#""0""#]]);
+    is_equal_expect(StructStringStrict(one_second), expect![[r#""1""#]]);
+    is_equal_expect(StructStringStrict(minus_one_second), expect![[r#""-1""#]]);
+    check_serialization_expect(StructStringStrict(half_second), expect![[r#""1""#]]);
+    check_serialization_expect(StructStringStrict(minus_half_second), expect![[r#""-1""#]]);
+    check_deserialization(StructStringStrict(one_second), r#""1""#);
+    check_error_deserialization_expect::<StructStringStrict>(
+        r#""0.5""#,
+        expect![[r#"invalid digit found in string at line 1 column 5"#]],
+    );
+    check_error_deserialization_expect::<StructStringStrict>(
+        r#""-0.5""#,
+        expect![[r#"invalid digit found in string at line 1 column 6"#]],
+    );
+    check_error_deserialization_expect::<StructStringStrict>(
+        r#"1"#,
+        expect![[r#"invalid type: integer `1`, expected valid json object at line 1 column 1"#]],
+    );
+    check_error_deserialization_expect::<StructStringStrict>(
+        r#"0.0"#,
+        expect![[
+            r#"invalid type: floating point `0`, expected valid json object at line 1 column 3"#
+        ]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct StructStringFlexible(
+        #[serde_as(as = "TimestampSeconds<String, Flexible>")] DateTime<Utc>,
+    );
+
+    is_equal_expect(StructStringFlexible(zero), expect![[r#""0""#]]);
+    is_equal_expect(StructStringFlexible(one_second), expect![[r#""1""#]]);
+    is_equal_expect(StructStringFlexible(minus_one_second), expect![[r#""-1""#]]);
+    check_serialization_expect(StructStringFlexible(half_second), expect![[r#""1""#]]);
+    check_serialization_expect(
+        StructStringFlexible(minus_half_second),
+        expect![[r#""-1""#]],
+    );
+    check_deserialization(StructStringFlexible(one_second), r#"1"#);
+    check_deserialization(StructStringFlexible(one_second), r#"1.0"#);
+    check_deserialization(StructStringFlexible(minus_half_second), r#""-0.5""#);
+    check_deserialization(StructStringFlexible(half_second), r#"0.5"#);
     check_error_deserialization_expect::<StructStringFlexible>(
         r#""a""#,
         expect![[
