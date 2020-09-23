@@ -56,6 +56,11 @@ impl DurationSigned {
         }
     }
 
+    #[cfg(feature = "chrono")]
+    pub(crate) fn with_duration(sign: Sign, duration: Duration) -> Self {
+        Self { sign, duration }
+    }
+
     pub(crate) fn to_system_time<'de, D>(&self) -> Result<SystemTime, D::Error>
     where
         D: Deserializer<'de>,

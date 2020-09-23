@@ -8,15 +8,21 @@ use crate::{
     de::DeserializeAs,
     formats::{Flexible, Format, Strict, Strictness},
     ser::SerializeAs,
-    utils, DurationSeconds, DurationSecondsWithFrac,
+    utils, DurationSeconds, DurationSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
-use serde::{
-    de::{Error, Unexpected, Visitor},
-    Deserialize, Deserializer, Serialize, Serializer,
-};
-use std::fmt;
-use utils::NANOS_PER_SEC;
+use chrono_crate::{DateTime, Duration, Local, NaiveDateTime, Utc};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use utils::duration::{DurationSigned, Sign};
+
+/// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
+fn unix_epoch_utc() -> DateTime<Utc> {
+    DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc)
+}
+
+/// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
+fn unix_epoch_local() -> DateTime<Local> {
+    DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc).with_timezone(&Local)
+}
 
 /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
 ///
@@ -186,305 +192,200 @@ impl<'de> DeserializeAs<'de, NaiveDateTime> for DateTime<Utc> {
     }
 }
 
-fn duration_subsec_nanos(mut dur: Duration) -> u32 {
-    if dur < Duration::zero() {
-        dur = Duration::zero() - dur;
-    }
-    (dur - Duration::seconds(dur.num_seconds()))
-        .num_nanoseconds()
-        .unwrap() as u32
-}
-
-fn duration_as_secs_f64(dur: Duration) -> f64 {
-    let mut secs = dur.num_seconds();
-    let subsecs = duration_subsec_nanos(dur);
-
-    // Properly round the value
-    if dur < Duration::zero() && subsecs > 0 {
-        secs -= 1;
-    }
-
-    (secs as f64) + (subsecs as f64) / (NANOS_PER_SEC as f64)
-}
-
-#[allow(clippy::float_cmp)]
-#[test]
-fn test_duration_as_secs_f64() {
-    assert_eq!(duration_as_secs_f64(Duration::seconds(1)), 1.);
-    assert_eq!(
-        duration_as_secs_f64(Duration::nanoseconds(500_000_000)),
-        0.5
-    );
-    assert_eq!(
-        duration_as_secs_f64(Duration::nanoseconds(-500_000_000)),
-        -0.5
-    );
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<i64, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut secs = source.num_seconds();
-        let subsecs = duration_subsec_nanos(*source);
-
-        // Properly round the value
-        if subsecs >= 500_000_000 {
-            if *source < Duration::zero() {
-                secs -= 1;
+/// Convert a [`chrono::Duration`] into a [`DurationSigned`]
+fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
+    match dur.to_std() {
+        Ok(dur) => DurationSigned::with_duration(Sign::Positive, dur),
+        Err(_) => {
+            if let Ok(dur) = (-*dur).to_std() {
+                DurationSigned::with_duration(Sign::Negative, dur)
             } else {
-                secs += 1;
+                panic!("A chrono Duration should be convertable to a DurationSigned")
             }
         }
-        secs.serialize(serializer)
     }
 }
 
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<f64, STRICTNESS>
+/// Convert a [`DurationSigned`] into a [`chrono::Duration`]
+fn duration_from_duration_signed<'de, D>(dur: DurationSigned) -> Result<Duration, D::Error>
 where
-    STRICTNESS: Strictness,
+    D: Deserializer<'de>,
 {
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        duration_as_secs_f64(*source).round().serialize(serializer)
-    }
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSeconds<String, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut secs = source.num_seconds();
-        let subsecs = duration_subsec_nanos(*source);
-
-        // Properly round the value
-        if subsecs >= 500_000_000 {
-            if *source < Duration::zero() {
-                secs -= 1;
-            } else {
-                secs += 1;
-            }
-        }
-        secs.to_string().serialize(serializer)
-    }
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<f64, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        duration_as_secs_f64(*source).serialize(serializer)
-    }
-}
-
-impl<STRICTNESS> SerializeAs<Duration> for DurationSecondsWithFrac<String, STRICTNESS>
-where
-    STRICTNESS: Strictness,
-{
-    fn serialize_as<S>(source: &Duration, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        duration_as_secs_f64(*source)
-            .to_string()
-            .serialize(serializer)
-    }
-}
-fn duration_from_secs_f64(secs: f64) -> Result<Duration, String> {
-    const MAX_NANOS_F64: f64 = ((i64::max_value() as i128 + 1) * (NANOS_PER_SEC as i128)) as f64;
-    // TODO why are the seconds converted to nanoseconds first?
-    // Does it make sense to just truncate the value?
-    let nanos = secs * (NANOS_PER_SEC as f64);
-    if !nanos.is_finite() {
-        return Err("got non-finite value when converting float to duration".into());
-    }
-    if nanos >= MAX_NANOS_F64 || nanos < -MAX_NANOS_F64 {
-        return Err("overflow when converting float to duration".into());
-    }
-    let nanos = nanos as i128;
-    let secs = Duration::seconds((nanos / (NANOS_PER_SEC as i128)) as i64);
-    let subsec = Duration::nanoseconds((nanos % (NANOS_PER_SEC as i128)) as i64);
-    Ok(secs + subsec)
-}
-
-struct DurationVisitorFlexible;
-impl<'de> Visitor<'de> for DurationVisitorFlexible {
-    type Value = Duration;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> ::std::fmt::Result {
-        formatter.write_str("an integer, a float, or a string containing a number")
-    }
-
-    fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        Ok(Duration::seconds(value))
-    }
-
-    fn visit_u64<E>(self, secs: u64) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        if secs <= i64::max_value() as u64 {
-            Ok(Duration::seconds(secs as i64))
-        } else {
-            Err(Error::custom(format!(
-                "Seconds larger than {} are not supported for chrono::Duration. Found {}",
-                i64::max_value(),
-                secs,
+    let mut chrono_dur = match Duration::from_std(dur.duration) {
+        Ok(dur) => dur,
+        Err(msg) => {
+            return Err(de::Error::custom(format!(
+                "Duration is outside of the representable range: {}",
+                msg
             )))
         }
+    };
+    if dur.sign.is_negative() {
+        chrono_dur = -chrono_dur;
     }
+    Ok(chrono_dur)
+}
 
-    fn visit_f64<E>(self, secs: f64) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        duration_from_secs_f64(secs).map_err(Error::custom)
-    }
-
-    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        let parts: Vec<_> = value.split('.').collect();
-
-        match *parts.as_slice() {
-            [seconds] => {
-                if let Ok(seconds) = i64::from_str_radix(seconds, 10) {
-                    Ok(Duration::seconds(seconds))
-                } else {
-                    Err(Error::invalid_value(Unexpected::Str(value), &self))
+macro_rules! use_duration_signed_ser {
+    (
+        $ty:ty =>
+        $main_trait:ident $internal_trait:ident =>
+        $source_to_dur:ident =>
+        $({
+            $format:ty, $strictness:ty =>
+            $($tbound:ident: $bound:path $(,)?)*
+        })*
+    ) => {
+        $(
+            impl<$($tbound ,)*> SerializeAs<$ty> for $main_trait<$format, $strictness>
+            where
+                $($tbound: $bound,)*
+            {
+                fn serialize_as<S>(source: &$ty, serializer: S) -> Result<S::Ok, S::Error>
+                where
+                    S: Serializer,
+                {
+                    let dur: DurationSigned = $source_to_dur(source);
+                    $internal_trait::<$format, $strictness>::serialize_as(
+                        &dur,
+                        serializer,
+                    )
                 }
             }
-            [seconds, subseconds] => {
-                if let Ok(mut seconds) = i64::from_str_radix(seconds, 10) {
-                    let subseclen = subseconds.chars().count() as u32;
-                    if subseclen > 9 {
-                        return Err(Error::custom(format!(
-                                    "Duration only support nanosecond precision but '{}' has more than 9 digits.",
-                                    value
-                                )));
-                    }
+        )*
+    };
+}
 
-                    if let Ok(mut subseconds) = u32::from_str_radix(subseconds, 10) {
-                        // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds
-                        subseconds *= 10u32.pow(9 - subseclen);
+fn datetime_to_duration<TZ>(source: &DateTime<TZ>) -> DurationSigned
+where
+    TZ: chrono_crate::TimeZone,
+{
+    duration_into_duration_signed(&source.clone().signed_duration_since(unix_epoch_utc()))
+}
 
-                        // Check if first char of seconds part is negative sign
-                        if parts[0].starts_with('-') {
-                            seconds -= 1;
-                        }
+use_duration_signed_ser!(
+    Duration =>
+    DurationSeconds DurationSeconds =>
+    duration_into_duration_signed =>
+    {i64, STRICTNESS => STRICTNESS: Strictness}
+    {f64, STRICTNESS => STRICTNESS: Strictness}
+    {String, STRICTNESS => STRICTNESS: Strictness}
+);
+use_duration_signed_ser!(
+    DateTime<TZ> =>
+    TimestampSeconds DurationSeconds =>
+    datetime_to_duration =>
+    {i64, STRICTNESS => TZ: chrono_crate::offset::TimeZone, STRICTNESS: Strictness}
+    {f64, STRICTNESS => TZ: chrono_crate::offset::TimeZone, STRICTNESS: Strictness}
+    {String, STRICTNESS => TZ: chrono_crate::offset::TimeZone, STRICTNESS: Strictness}
+);
+use_duration_signed_ser!(
+    Duration =>
+    DurationSecondsWithFrac DurationSecondsWithFrac =>
+    duration_into_duration_signed =>
+    {f64, STRICTNESS => STRICTNESS: Strictness}
+    {String, STRICTNESS => STRICTNESS: Strictness}
+);
+use_duration_signed_ser!(
+    DateTime<TZ> =>
+    TimestampSecondsWithFrac DurationSecondsWithFrac =>
+    datetime_to_duration =>
+    {f64, STRICTNESS => TZ: chrono_crate::offset::TimeZone, STRICTNESS: Strictness}
+    {String, STRICTNESS => TZ: chrono_crate::offset::TimeZone, STRICTNESS: Strictness}
+);
 
-                        Ok(Duration::seconds(seconds)
-                            + Duration::nanoseconds(i64::from(subseconds)))
-                    } else {
-                        Err(Error::invalid_value(Unexpected::Str(value), &self))
-                    }
-                } else {
-                    Err(Error::invalid_value(Unexpected::Str(value), &self))
+macro_rules! use_duration_signed_de {
+    (
+        $ty:ty =>
+        $main_trait:ident $internal_trait:ident =>
+        $dur_to_result:ident =>
+        $({
+            $format:ty, $strictness:ty =>
+            $($tbound:ident: $bound:ident)*
+        })*
+    ) => {
+        $(
+            impl<'de, $($tbound,)*> DeserializeAs<'de, $ty> for $main_trait<$format, $strictness>
+            where
+                $($tbound: $bound,)*
+            {
+                fn deserialize_as<D>(deserializer: D) -> Result<$ty, D::Error>
+                where
+                    D: Deserializer<'de>,
+                {
+                    let dur: DurationSigned = $internal_trait::<$format, $strictness>::deserialize_as(deserializer)?;
+                    $dur_to_result::<D>(dur)
                 }
             }
-
-            _ => Err(Error::invalid_value(Unexpected::Str(value), &self)),
-        }
-    }
+        )*
+    };
 }
 
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<i64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        i64::deserialize(deserializer).map(Duration::seconds)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<f64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let val = f64::deserialize(deserializer)?.round();
-        duration_from_secs_f64(val).map_err(Error::custom)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<String, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        crate::rust::display_fromstr::deserialize(deserializer).map(Duration::seconds)
-    }
-}
-
-impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSeconds<FORMAT, Flexible>
+fn duration_to_datetime_utc<'de, D>(dur: DurationSigned) -> Result<DateTime<Utc>, D::Error>
 where
-    FORMAT: Format,
+    D: Deserializer<'de>,
 {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_any(DurationVisitorFlexible)
-    }
+    Ok(unix_epoch_utc() + duration_from_duration_signed::<D>(dur)?)
 }
 
-impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<i64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        i64::deserialize(deserializer).map(Duration::seconds)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<f64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let val = f64::deserialize(deserializer)?;
-        duration_from_secs_f64(val).map_err(Error::custom)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<String, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let dur = String::deserialize(deserializer)?;
-        DurationVisitorFlexible.visit_str(&*dur)
-        // crate::rust::display_fromstr::deserialize(deserializer)
-        //     .and_then(|val| duration_from_secs_f64(val).map_err(Error::custom))
-    }
-}
-
-impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<FORMAT, Flexible>
+fn duration_to_datetime_local<'de, D>(dur: DurationSigned) -> Result<DateTime<Local>, D::Error>
 where
-    FORMAT: Format,
+    D: Deserializer<'de>,
 {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_any(DurationVisitorFlexible)
-    }
+    Ok(unix_epoch_local() + duration_from_duration_signed::<D>(dur)?)
 }
+
+// No subsecond precision
+use_duration_signed_de!(
+    Duration =>
+    DurationSeconds DurationSeconds =>
+    duration_from_duration_signed =>
+    {i64, Strict =>}
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+use_duration_signed_de!(
+    DateTime<Utc> =>
+    TimestampSeconds DurationSeconds =>
+    duration_to_datetime_utc =>
+    {i64, Strict =>}
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+use_duration_signed_de!(
+    DateTime<Local> =>
+    TimestampSeconds DurationSeconds =>
+    duration_to_datetime_local =>
+    {i64, Strict =>}
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+
+// Duration/Timestamp WITH FRACTIONS
+use_duration_signed_de!(
+    Duration =>
+    DurationSecondsWithFrac DurationSecondsWithFrac =>
+    duration_from_duration_signed =>
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+use_duration_signed_de!(
+    DateTime<Utc> =>
+    TimestampSecondsWithFrac DurationSecondsWithFrac =>
+    duration_to_datetime_utc =>
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+use_duration_signed_de!(
+    DateTime<Local> =>
+    TimestampSecondsWithFrac DurationSecondsWithFrac =>
+    duration_to_datetime_local =>
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
