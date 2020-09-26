@@ -489,6 +489,8 @@ where
 {
     type Error = A::Error;
 
+    // Use `strip_prefix` with Rust 1.45
+    #[allow(clippy::manual_strip)]
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
     where
         K: DeserializeSeed<'de>,
@@ -579,6 +581,8 @@ where
 {
     type Error = A::Error;
 
+    // Use `strip_prefix` with Rust 1.45
+    #[allow(clippy::manual_strip)]
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
     where
         K: DeserializeSeed<'de>,
