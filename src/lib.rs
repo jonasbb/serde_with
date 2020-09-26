@@ -24,6 +24,8 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with/1.5.0-alpha.2")]
+// Rust 1.45: introduction of `strip_prefix` used by clippy::manual_strip
+#![allow(clippy::unknown_clippy_lints)]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
