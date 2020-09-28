@@ -1085,7 +1085,7 @@ pub mod string_empty_as_none {
 ///
 /// Some formats, like JSON, have limitations on the type of keys for maps.
 /// In case of JSON, keys are restricted to strings.
-/// Rust features more powerfull keys, for example tuple, which can not be serialized to JSON.
+/// Rust features more powerful keys, for example tuple, which can not be serialized to JSON.
 ///
 /// This helper serializes the [`HashMap`] into a list of tuples, which does not have the same type restrictions.
 ///
@@ -1223,7 +1223,7 @@ pub mod hashmap_as_tuple_list {
 ///
 /// Some formats, like JSON, have limitations on the type of keys for maps.
 /// In case of JSON, keys are restricted to strings.
-/// Rust features more powerfull keys, for example tuple, which can not be serialized to JSON.
+/// Rust features more powerful keys, for example tuple, which can not be serialized to JSON.
 ///
 /// This helper serializes the [`BTreeMap`] into a list of tuples, which does not have the same type restrictions.
 ///

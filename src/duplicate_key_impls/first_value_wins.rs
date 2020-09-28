@@ -34,7 +34,7 @@ where
 
     #[inline]
     fn insert(&mut self, value: T) {
-        // Hashset already fullfils the contract and always keeps the first value
+        // Hashset already fulfils the contract and always keeps the first value
         self.insert(value);
     }
 }
@@ -51,7 +51,7 @@ where
 
     #[inline]
     fn insert(&mut self, value: T) {
-        // BTreeSet already fullfils the contract and always keeps the first value
+        // BTreeSet already fulfils the contract and always keeps the first value
         self.insert(value);
     }
 }

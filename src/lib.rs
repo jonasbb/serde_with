@@ -40,7 +40,7 @@
 //! * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
 //!      Check [`DisplayFromStr`][] or [`serde_with::rust::display_fromstr`][display_fromstr] for details.
 //! * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
-//! * Apply a prefix to each fieldname of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
+//! * Apply a prefix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
 //! * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
 //!      Check the documentation for [`serde_with::rust::StringWithSeparator::<CommaSeparator>`][StringWithSeparator].
 //!

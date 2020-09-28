@@ -109,7 +109,7 @@ fn test_chrono_vec_option_naive_date_time() {
 }
 
 #[test]
-fn test_chrono_btree_map_naive_date_time() {
+fn test_chrono_btreemap_naive_date_time() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct S(#[serde_as(as = "BTreeMap<_, DateTime<Utc>>")] BTreeMap<i32, NaiveDateTime>);

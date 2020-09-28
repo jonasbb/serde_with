@@ -25,7 +25,7 @@ where
 
     #[inline]
     fn replace(&mut self, value: T) {
-        // Hashset already fullfils the contract
+        // Hashset already fulfils the contract
         self.replace(value);
     }
 }
@@ -41,7 +41,7 @@ where
 
     #[inline]
     fn replace(&mut self, value: T) {
-        // BTreeSet already fullfils the contract
+        // BTreeSet already fulfils the contract
         self.replace(value);
     }
 }

@@ -200,7 +200,7 @@ fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
             if let Ok(dur) = (-*dur).to_std() {
                 DurationSigned::with_duration(Sign::Negative, dur)
             } else {
-                panic!("A chrono Duration should be convertable to a DurationSigned")
+                panic!("A chrono Duration should be convertible to a DurationSigned")
             }
         }
     }
