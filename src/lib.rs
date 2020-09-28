@@ -605,16 +605,16 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;
 
-/// De/Serialize Durations as seconds since the UNIX epoch
+/// De/Serialize Durations as number of seconds.
 ///
-/// De/serialize durations as seconds since the UNIX epoch.
+/// De/serialize durations as number of seconds with subsecond precision.
 /// Subsecond precision is *only* supported for [`DurationSecondsWithFrac`], but not for [`DurationSeconds`].
 /// You can configure the serialization format between integers, floats, and stringified numbers with the `FORMAT` specifier and configure the deserialization with the `STRICTNESS` specifier.
 ///
 /// The `STRICTNESS` specifier can either be [`formats::Strict`] or [`formats::Flexible`] and defaults to [`formats::Strict`].
 /// [`formats::Strict`] means that deserialization only supports the type given in `FORMAT`, e.g., if `FORMAT` is `u64` deserialization from a `f64` will error.
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct duration and allows deserialization from any type.
-/// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as a integer number.
+/// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
 /// This type also supports `chrono::Duration` with the `chrono`-[feature flag].
 ///
@@ -737,6 +737,7 @@ pub struct BytesOrString;
 /// # }
 /// ```
 ///
+/// [`chrono::Duration`]: chrono_crate::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
@@ -744,16 +745,16 @@ pub struct DurationSeconds<
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
 
-/// De/Serialize Durations as seconds since the UNIX epoch
+/// De/Serialize Durations as number of seconds.
 ///
-/// De/serialize durations as seconds since the UNIX epoch.
+/// De/serialize durations as number of seconds with subsecond precision.
 /// Subsecond precision is *only* supported for [`DurationSecondsWithFrac`], but not for [`DurationSeconds`].
 /// You can configure the serialization format between integers, floats, and stringified numbers with the `FORMAT` specifier and configure the deserialization with the `STRICTNESS` specifier.
 ///
 /// The `STRICTNESS` specifier can either be [`formats::Strict`] or [`formats::Flexible`] and defaults to [`formats::Strict`].
 /// [`formats::Strict`] means that deserialization only supports the type given in `FORMAT`, e.g., if `FORMAT` is `u64` deserialization from a `f64` will error.
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct duration and allows deserialization from any type.
-/// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as a integer number.
+/// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
 /// This type also supports `chrono::Duration` with the `chrono`-[feature flag].
 ///
@@ -862,6 +863,7 @@ pub struct DurationSeconds<
 /// # }
 /// ```
 ///
+/// [`chrono::Duration`]: chrono_crate::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
