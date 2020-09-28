@@ -277,7 +277,7 @@ fn test_map_as_tuple_list() {
         values: HashMap<u32, IpAddr>,
     };
 
-    // HashMap serialization tests with more than 1 entry are unrelyable
+    // HashMap serialization tests with more than 1 entry are unreliable
     let map1: HashMap<_, _> = vec![(200, ip2)].into_iter().collect();
     let map: HashMap<_, _> = vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect();
     is_equal(
@@ -493,7 +493,7 @@ fn test_default_on_error() {
     is_equal(Struct2 { value: vec![] }, r#"{"value":[]}"#);
     // Error cases
     check_deserialization(Struct2 { value: vec![] }, r#"{"value":2}"#);
-    check_deserialization(Struct2 { value: vec![] }, r#"{"value":"notalist"}"#);
+    check_deserialization(Struct2 { value: vec![] }, r#"{"value":"not_a_list"}"#);
     // TODO why does this result in
     // thread 'test_default_on_error' panicked at 'called `Result::unwrap()` on an `Err` value: Error("expected `,` or `}`", line: 1, column: 10)', tests/utils.rs:32:9
     // check_deserialization(Struct2 { value: vec![] }, r#"{"value":{}}"#);

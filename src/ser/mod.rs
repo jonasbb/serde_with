@@ -11,9 +11,9 @@ mod impls;
 
 use super::*;
 
-/// A **data structure** that can be serialized into any data format supported by Serde, analoge to [`Serialize`].
+/// A **data structure** that can be serialized into any data format supported by Serde, analogue to [`Serialize`].
 ///
-/// The trait is analoge to the [`serde::Serialize`][`Serialize`] trait, with the same meaning of input and output arguments.
+/// The trait is analogue to the [`serde::Serialize`][`Serialize`] trait, with the same meaning of input and output arguments.
 /// It can and should the implemented using the same code structure as the [`Serialize`] trait.
 /// As such, the same advice for [implementing `Serialize`][impl-serialize] applies here.
 ///
@@ -57,7 +57,7 @@ use super::*;
 /// }
 /// ```
 ///
-/// It uses two type parameters, `T` and `U` instead of only one and performs the serialization step using the `SerialzieAsWrap` type.
+/// It uses two type parameters, `T` and `U` instead of only one and performs the serialization step using the `SerializeAsWrap` type.
 /// The `T` type is the on the Rust side before serialization, whereas the `U` type determines how the value will be serialized.
 /// These two changes are usually enough to make a container type implement [`SerializeAs`][].
 ///

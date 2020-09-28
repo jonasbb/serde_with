@@ -391,9 +391,9 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
     false
 }
 
-/// Conveniece macro to use the [`serde_as`] system.
+/// Convenience macro to use the [`serde_as`] system.
 ///
-/// The [`serde_as`] system is designed as a more flexiable alterative to serde's with-annotation.
+/// The [`serde_as`] system is designed as a more flexible alterative to serde's with-annotation.
 ///
 /// # Example
 ///
@@ -547,18 +547,18 @@ fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
     Some(syn::parse_str(&*s))
 }
 
-/// Recursivly replace all occurences of `_` with `replacement` in a [Type][]
+/// Recursively replace all occurrences of `_` with `replacement` in a [Type][]
 ///
 /// The [serde_as][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for `::serde_with::As`.
-/// This function replaces all occurences of the infer type with another type.
+/// This function replaces all occurrences of the infer type with another type.
 fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
     match to_replace {
         // Base case
-        // Replace the infer type with the actuall replacement type
+        // Replace the infer type with the actual replacement type
         Type::Infer(_) => replacement.clone(),
 
         // Recursive cases
-        // Iterate through all positions where a type could occur and recursivly call this function
+        // Iterate through all positions where a type could occur and recursively call this function
         Type::Array(mut inner) => {
             *inner.elem = replace_infer_type_with_type(*inner.elem, replacement);
             Type::Array(inner)
