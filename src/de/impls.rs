@@ -3,6 +3,7 @@ use crate::{
     formats::{Flexible, Format, Strict},
     rust::StringWithSeparator,
     utils,
+    utils::duration::DurationSigned,
 };
 use serde::de::*;
 use std::{
@@ -12,7 +13,7 @@ use std::{
     hash::{BuildHasher, Hash},
     iter::FromIterator,
     str::FromStr,
-    time::Duration,
+    time::{Duration, SystemTime},
 };
 
 impl<'de, T, U> DeserializeAs<'de, Box<T>> for Box<U>
@@ -667,155 +668,6 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
     }
 }
 
-struct DurationVisitorFlexible;
-impl<'de> Visitor<'de> for DurationVisitorFlexible {
-    type Value = Duration;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> ::std::fmt::Result {
-        formatter.write_str("an integer, a float, or a string containing a number")
-    }
-
-    fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        if value >= 0 {
-            Ok(Duration::new(value as u64, 0))
-        } else {
-            Err(Error::custom(format!(
-                "Negative values are not supported for Duration. Found {}",
-                value
-            )))
-        }
-    }
-
-    fn visit_u64<E>(self, secs: u64) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        Ok(Duration::new(secs, 0))
-    }
-
-    fn visit_f64<E>(self, secs: f64) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        utils::duration_from_secs_f64(secs).map_err(Error::custom)
-    }
-
-    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-    where
-        E: Error,
-    {
-        let parts: Vec<_> = value.split('.').collect();
-
-        match *parts.as_slice() {
-            [seconds] => {
-                if let Ok(seconds) = u64::from_str_radix(seconds, 10) {
-                    Ok(Duration::new(seconds, 0))
-                } else {
-                    Err(Error::invalid_value(Unexpected::Str(value), &self))
-                }
-            }
-            [seconds, subseconds] => {
-                if let Ok(seconds) = u64::from_str_radix(seconds, 10) {
-                    let subseclen = subseconds.chars().count() as u32;
-                    if subseclen > 9 {
-                        return Err(Error::custom(format!(
-                                    "Duration only support nanosecond precision but '{}' has more than 9 digits.",
-                                    value
-                                )));
-                    }
-
-                    if let Ok(mut subseconds) = u32::from_str_radix(subseconds, 10) {
-                        // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds
-                        subseconds *= 10u32.pow(9 - subseclen);
-                        Ok(Duration::new(seconds, subseconds))
-                    } else {
-                        Err(Error::invalid_value(Unexpected::Str(value), &self))
-                    }
-                } else {
-                    Err(Error::invalid_value(Unexpected::Str(value), &self))
-                }
-            }
-
-            _ => Err(Error::invalid_value(Unexpected::Str(value), &self)),
-        }
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<u64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        u64::deserialize(deserializer).map(|secs| Duration::new(secs, 0))
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<f64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let val = f64::deserialize(deserializer)?.round();
-        utils::duration_from_secs_f64(val).map_err(Error::custom)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSeconds<String, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        crate::rust::display_fromstr::deserialize(deserializer).map(|secs| Duration::new(secs, 0))
-    }
-}
-
-impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSeconds<FORMAT, Flexible>
-where
-    FORMAT: Format,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_any(DurationVisitorFlexible)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<f64, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let val = f64::deserialize(deserializer)?;
-        utils::duration_from_secs_f64(val).map_err(Error::custom)
-    }
-}
-
-impl<'de> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<String, Strict> {
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let dur = String::deserialize(deserializer)?;
-        DurationVisitorFlexible.visit_str(&*dur)
-    }
-}
-
-impl<'de, FORMAT> DeserializeAs<'de, Duration> for DurationSecondsWithFrac<FORMAT, Flexible>
-where
-    FORMAT: Format,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<Duration, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        deserializer.deserialize_any(DurationVisitorFlexible)
-    }
-}
-
 impl<'de, SEPARATOR, I, T> DeserializeAs<'de, I> for StringWithSeparator<SEPARATOR, T>
 where
     SEPARATOR: Separator,
@@ -838,3 +690,66 @@ where
         }
     }
 }
+
+macro_rules! use_signed_duration {
+    (
+        $ty:ty =>
+        $main_trait:ident $internal_trait:ident =>
+        $converter:ident =>
+        $({
+            $format:ty, $strictness:ty =>
+            $($tbound:ident: $bound:ident)*
+        })*
+    ) => {
+        $(
+            impl<'de, $($tbound,)*> DeserializeAs<'de, $ty> for $main_trait<$format, $strictness>
+            where
+                $($tbound: $bound,)*
+            {
+                fn deserialize_as<D>(deserializer: D) -> Result<$ty, D::Error>
+                where
+                    D: Deserializer<'de>,
+                {
+                    let dur: DurationSigned = $internal_trait::<$format, $strictness>::deserialize_as(deserializer)?;
+                    dur.$converter::<D>()
+                }
+            }
+        )*
+    };
+}
+
+use_signed_duration!(
+    Duration =>
+    DurationSeconds DurationSeconds =>
+    to_std_duration =>
+    {u64, Strict =>}
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+use_signed_duration!(
+    Duration =>
+    DurationSecondsWithFrac DurationSecondsWithFrac =>
+    to_std_duration =>
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+
+use_signed_duration!(
+    SystemTime =>
+    TimestampSeconds DurationSeconds =>
+    to_system_time =>
+    {i64, Strict =>}
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);
+use_signed_duration!(
+    SystemTime =>
+    TimestampSecondsWithFrac DurationSecondsWithFrac =>
+    to_system_time =>
+    {f64, Strict =>}
+    {String, Strict =>}
+    {FORMAT, Flexible => FORMAT: Format}
+);

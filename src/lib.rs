@@ -870,3 +870,17 @@ pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// TODO
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampSeconds<
+    FORMAT: formats::Format = i64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// TODO
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
