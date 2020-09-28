@@ -871,14 +871,270 @@ pub struct DurationSecondsWithFrac<
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
 
-/// TODO
+/// De/Serialize timestamps as seconds since the UNIX epoch
+///
+/// De/serialize timestamps as seconds since the UNIX epoch.
+/// Subsecond precision is *only* supported for [`TimestampSecondsWithFrac`], but not for [`TimestampSeconds`].
+/// You can configure the serialization format between integers, floats, and stringified numbers with the `FORMAT` specifier and configure the deserialization with the `STRICTNESS` specifier.
+///
+/// The `STRICTNESS` specifier can either be [`formats::Strict`] or [`formats::Flexible`] and defaults to [`formats::Strict`].
+/// [`formats::Strict`] means that deserialization only supports the type given in `FORMAT`, e.g., if `FORMAT` is `i64` deserialization from a `f64` will error.
+/// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct timestamp and allows deserialization from any type.
+/// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
+///
+/// This type also supports `chrono::DateTime` with the `chrono`-[feature flag].
+///
+/// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
+/// | ------------------------- | -------------------------- | ---------------------- |
+/// | `std::time::SystemTime`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
+/// | `std::time::SystemTime`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
+/// | `chrono::DateTime<Utc>`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
+/// | `chrono::DateTime<Utc>`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
+/// | `chrono::DateTime<Local>` | `TimestampSeconds`         | `i64`, `f64`, `String` |
+/// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | `f64`, `String`        |
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, TimestampSeconds};
+/// use std::time::{Duration, SystemTime};
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Timestamps {
+///     #[serde_as(as = "TimestampSeconds<i64>")]
+///     st_i64: SystemTime,
+///     #[serde_as(as = "TimestampSeconds<f64>")]
+///     st_f64: SystemTime,
+///     #[serde_as(as = "TimestampSeconds<String>")]
+///     st_string: SystemTime,
+/// };
+///
+/// // Serialization
+/// // See how the values get rounded, since subsecond precision is not allowed.
+///
+/// let ts = Timestamps {
+///     st_i64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 0)).unwrap(),
+///     st_f64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 500_000_000)).unwrap(),
+///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 999_999_999)).unwrap(),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "st_i64": 12345,
+///     "st_f64": 12346.0,
+///     "st_string": "12346",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+///
+/// // Deserialization works too
+/// // Subsecond precision in numbers will be rounded away
+///
+/// let json = json!({
+///     "st_i64": 12345,
+///     "st_f64": 12345.5,
+///     "st_string": "12346",
+/// });
+/// let expected  = Timestamps {
+///     st_i64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 0)).unwrap(),
+///     st_f64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12346, 0)).unwrap(),
+///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12346, 0)).unwrap(),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] are also supported when using the `chrono` feature.
+/// Like [`SystemTime`], it is a signed timestamp, thus can be de/serialized as an `i64`.
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, TimestampSeconds};
+/// # use chrono_crate::{DateTime, Local, TimeZone, Utc};
+/// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
+/// use chrono::{DateTime, Local, TimeZone, Utc};
+/// # */
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Timestamps {
+///     #[serde_as(as = "TimestampSeconds<i64>")]
+///     dt_i64: DateTime<Utc>,
+///     #[serde_as(as = "TimestampSeconds<f64>")]
+///     dt_f64: DateTime<Local>,
+///     #[serde_as(as = "TimestampSeconds<String>")]
+///     dt_string: DateTime<Utc>,
+/// };
+///
+/// // Serialization
+/// // See how the values get rounded, since subsecond precision is not allowed.
+///
+/// let ts = Timestamps {
+///     dt_i64: Utc.timestamp(-12345, 0),
+///     dt_f64: Local.timestamp(-12345, 500_000_000),
+///     dt_string: Utc.timestamp(12345, 999_999_999),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "dt_i64": -12345,
+///     "dt_f64": -12345.0,
+///     "dt_string": "12346",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+///
+/// // Deserialization works too
+/// // Subsecond precision in numbers will be rounded away
+///
+/// let json = json!({
+///     "dt_i64": -12345,
+///     "dt_f64": -12345.5,
+///     "dt_string": "12346",
+/// });
+/// let expected = Timestamps {
+///     dt_i64: Utc.timestamp(-12345, 0),
+///     dt_f64: Local.timestamp(-12346, 0),
+///     dt_string: Utc.timestamp(12346, 0),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [`SystemTime`]: std::time::SystemTime
+/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
 
-/// TODO
+/// De/Serialize timestamps as seconds since the UNIX epoch
+///
+/// De/serialize timestamps as seconds since the UNIX epoch.
+/// Subsecond precision is *only* supported for [`TimestampSecondsWithFrac`], but not for [`TimestampSeconds`].
+/// You can configure the serialization format between integers, floats, and stringified numbers with the `FORMAT` specifier and configure the deserialization with the `STRICTNESS` specifier.
+///
+/// The `STRICTNESS` specifier can either be [`formats::Strict`] or [`formats::Flexible`] and defaults to [`formats::Strict`].
+/// [`formats::Strict`] means that deserialization only supports the type given in `FORMAT`, e.g., if `FORMAT` is `i64` deserialization from a `f64` will error.
+/// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct timestamp and allows deserialization from any type.
+/// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
+///
+/// This type also supports `chrono::DateTime` with the `chrono`-[feature flag].
+///
+/// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
+/// | ------------------------- | -------------------------- | ---------------------- |
+/// | `std::time::SystemTime`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
+/// | `std::time::SystemTime`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
+/// | `chrono::DateTime<Utc>`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
+/// | `chrono::DateTime<Utc>`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
+/// | `chrono::DateTime<Local>` | `TimestampSeconds`         | `i64`, `f64`, `String` |
+/// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | `f64`, `String`        |
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, TimestampSecondsWithFrac};
+/// use std::time::{Duration, SystemTime};
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Timestamps {
+///     #[serde_as(as = "TimestampSecondsWithFrac<f64>")]
+///     st_f64: SystemTime,
+///     #[serde_as(as = "TimestampSecondsWithFrac<String>")]
+///     st_string: SystemTime,
+/// };
+///
+/// // Serialization
+/// // See how the values get rounded, since subsecond precision is not allowed.
+///
+/// let ts = Timestamps {
+///     st_f64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 500_000_000)).unwrap(),
+///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 999_999_999)).unwrap(),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "st_f64": 12345.5,
+///     "st_string": "12345.999999999",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+///
+/// // Deserialization works too
+/// // Subsecond precision in numbers will be rounded away
+///
+/// let json = json!({
+///     "st_f64": 12345.5,
+///     "st_string": "12345.987654",
+/// });
+/// let expected = Timestamps {
+///     st_f64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 500_000_000)).unwrap(),
+///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 987_654_000)).unwrap(),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] are also supported when using the `chrono` feature.
+/// Like [`SystemTime`], it is a signed timestamp, thus can be de/serialized as an `i64`.
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, TimestampSecondsWithFrac};
+/// # use chrono_crate::{DateTime, Local, TimeZone, Utc};
+/// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
+/// use chrono::{DateTime, Local, TimeZone, Utc};
+/// # */
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Timestamps {
+///     #[serde_as(as = "TimestampSecondsWithFrac<f64>")]
+///     dt_f64: DateTime<Utc>,
+///     #[serde_as(as = "TimestampSecondsWithFrac<String>")]
+///     dt_string: DateTime<Local>,
+/// };
+///
+/// // Serialization
+///
+/// let ts = Timestamps {
+///     dt_f64: Utc.timestamp(-12345, 500_000_000),
+///     dt_string: Local.timestamp(12345, 999_999_999),
+/// };
+/// // Observe the different datatypes
+/// let expected = json!({
+///     "dt_f64": -12344.5,
+///     "dt_string": "12345.999999999",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+///
+/// // Deserialization works too
+///
+/// let json = json!({
+///     "dt_f64": -12344.5,
+///     "dt_string": "12345.987",
+/// });
+/// let expected = Timestamps {
+///     dt_f64: Utc.timestamp(-12345, 500_000_000),
+///     dt_string: Local.timestamp(12345, 987_000_000),
+/// };
+/// assert_eq!(expected, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
+///
+/// [`SystemTime`]: std::time::SystemTime
+/// [feature flag]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,
