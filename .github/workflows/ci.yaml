@@ -5,9 +5,9 @@ on:
   # Bors related branches
   push:
     branches:
-    - master
-    - staging
-    - trying
+      - master
+      - staging
+      - trying
   # Test once per week: Monday at 00:00
   schedule:
     - cron: "0 0 * * 1"
@@ -21,14 +21,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [
-          "ubuntu-latest",
-          "windows-latest",
-        ]
-        rust: [
-          "stable",
-          "nightly",
-        ]
+        os: ["ubuntu-latest", "windows-latest"]
+        rust: ["stable", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2.3.3
@@ -82,18 +76,8 @@ jobs:
     name: Build and Test
     strategy:
       matrix:
-        os: [
-          "ubuntu-latest",
-          "windows-latest",
-        ]
-        rust: [
-          "1.36.0",
-          "1.40.0",
-          "1.45.2",
-          "stable",
-          "beta",
-          "nightly",
-        ]
+        os: ["ubuntu-latest", "windows-latest"]
+        rust: ["1.36.0", "1.40.0", "1.45.2", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2.3.3
@@ -145,8 +129,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
-        if: success()
+        if: "needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success'"
         run: exit 0
       - name: Mark the job as a failure
-        if: failure()
+        if: "!(needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success')"
         run: exit 1
