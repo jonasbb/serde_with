@@ -19,8 +19,9 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
     5. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
     6. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
     7. [`None` as empty `String`](#none-as-empty-string)
-    8. [Value into JSON String](#value-into-json-string)
-    9. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+    8. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+    9. [Value into JSON String](#value-into-json-string)
+    10. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Switching from serde's with to `serde_as`
 
@@ -137,6 +138,17 @@ value: Duration,
 "value": 1.234,
 ```
 
+Different serialization formats are possible:
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::DurationSecondsWithFrac<String>")]
+value: Duration,
+
+// JSON
+"value": "1.234",
+```
+
 The same conversions are also implemented for [`chrono::Duration`] with the `chrono` feature.
 
 ### Ignore deserialization errors
@@ -188,6 +200,43 @@ value: Option<String>,
 "value": "Hello World!", // converts to Some
 ```
 
+### Timestamps as seconds since UNIX epoch
+
+[`TimestampSeconds`]
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::TimestampSeconds<i64>")]
+value: SystemTime,
+
+// JSON
+"value": 86400,
+```
+
+[`TimestampSecondsWithFrac`] supports subsecond precision:
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::TimestampSecondsWithFrac<f64>")]
+value: SystemTime,
+
+// JSON
+"value": 1.234,
+```
+
+Different serialization formats are possible:
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::TimestampSecondsWithFrac<String>")]
+value: SystemTime,
+
+// JSON
+"value": "1.234",
+```
+
+The same conversions are also implemented for [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] with the `chrono` feature.
+
 ### Value into JSON String
 
 Some JSON APIs are weird and return a JSON encoded string in a JSON response
@@ -226,7 +275,9 @@ value: Vec<String, u32>,
 
 The [inverse operation](#maps-to-vec-of-tuples) is also available.
 
-[`chrono::Duration`]: chrono::Duration
+[`chrono::DateTime<Utc>`]: chrono_crate::DateTime
+[`chrono::DateTime<Local>`]: chrono_crate::DateTime
+[`chrono::Duration`]: https://docs.rs/chrono/latest/chrono/struct.Duration.html
 [`DefaultOnError`]: crate::DefaultOnError
 [`DeserializeAs`]: crate::DeserializeAs
 [`DisplayFromStr`]: crate::DisplayFromStr
