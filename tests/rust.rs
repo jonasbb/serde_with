@@ -1,6 +1,6 @@
 mod utils;
 
-use crate::utils::{check_deserialization, check_error_deserialization_expect, is_equal_expect};
+use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
 use expect_test::expect;
 use fnv::{FnvHashMap as HashMap, FnvHashSet as HashSet};
 use pretty_assertions::assert_eq;
@@ -19,8 +19,8 @@ fn string_collection() {
         #[serde(with = "serde_with::rust::StringWithSeparator::<CommaSeparator>")] Vec<String>,
     );
 
-    is_equal_expect(S(vec![]), expect![[r#""""#]]);
-    is_equal_expect(
+    is_equal(S(vec![]), expect![[r#""""#]]);
+    is_equal(
         S(vec![
             "A".to_string(),
             "B".to_string(),
@@ -29,11 +29,11 @@ fn string_collection() {
         ]),
         expect![[r#""A,B,c,D""#]],
     );
-    is_equal_expect(
+    is_equal(
         S(vec!["".to_string(), "".to_string(), "".to_string()]),
         expect![[r#"",,""#]],
     );
-    is_equal_expect(
+    is_equal(
         S(vec!["AVeryLongString".to_string()]),
         expect![[r#""AVeryLongString""#]],
     );
@@ -44,7 +44,7 @@ fn prohibit_duplicate_value_hashset() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     struct S(#[serde(with = "::serde_with::rust::sets_duplicate_value_is_error")] HashSet<usize>);
 
-    is_equal_expect(
+    is_equal(
         S(HashSet::from_iter(vec![1, 2, 3, 4])),
         expect![[r#"
             [
@@ -54,7 +54,7 @@ fn prohibit_duplicate_value_hashset() {
               2
             ]"#]],
     );
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"[1, 2, 3, 4, 1]"#,
         expect![[r#"invalid entry: found duplicate value at line 1 column 15"#]],
     );
@@ -65,7 +65,7 @@ fn prohibit_duplicate_value_btreeset() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     struct S(#[serde(with = "::serde_with::rust::sets_duplicate_value_is_error")] BTreeSet<usize>);
 
-    is_equal_expect(
+    is_equal(
         S(BTreeSet::from_iter(vec![1, 2, 3, 4])),
         expect![[r#"
             [
@@ -75,7 +75,7 @@ fn prohibit_duplicate_value_btreeset() {
               4
             ]"#]],
     );
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"[1, 2, 3, 4, 1]"#,
         expect![[r#"invalid entry: found duplicate value at line 1 column 15"#]],
     );
@@ -89,7 +89,7 @@ fn prohibit_duplicate_key_hashmap() {
     );
 
     // Different value and key always works
-    is_equal_expect(
+    is_equal(
         S(HashMap::from_iter(vec![(1, 1), (2, 2), (3, 3)])),
         expect![[r#"
             {
@@ -100,7 +100,7 @@ fn prohibit_duplicate_key_hashmap() {
     );
 
     // Same value for different keys is ok
-    is_equal_expect(
+    is_equal(
         S(HashMap::from_iter(vec![(1, 1), (2, 1), (3, 1)])),
         expect![[r#"
             {
@@ -111,7 +111,7 @@ fn prohibit_duplicate_key_hashmap() {
     );
 
     // Duplicate keys are an error
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"{"1": 1, "2": 2, "1": 3}"#,
         expect![[r#"invalid entry: found duplicate key at line 1 column 24"#]],
     );
@@ -125,7 +125,7 @@ fn prohibit_duplicate_key_btreemap() {
     );
 
     // Different value and key always works
-    is_equal_expect(
+    is_equal(
         S(BTreeMap::from_iter(vec![(1, 1), (2, 2), (3, 3)])),
         expect![[r#"
             {
@@ -136,7 +136,7 @@ fn prohibit_duplicate_key_btreemap() {
     );
 
     // Same value for different keys is ok
-    is_equal_expect(
+    is_equal(
         S(BTreeMap::from_iter(vec![(1, 1), (2, 1), (3, 1)])),
         expect![[r#"
             {
@@ -147,7 +147,7 @@ fn prohibit_duplicate_key_btreemap() {
     );
 
     // Duplicate keys are an error
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"{"1": 1, "2": 2, "1": 3}"#,
         expect![[r#"invalid entry: found duplicate key at line 1 column 24"#]],
     );
@@ -159,7 +159,7 @@ fn duplicate_key_first_wins_hashmap() {
     struct S(#[serde(with = "::serde_with::rust::maps_first_key_wins")] HashMap<usize, usize>);
 
     // Different value and key always works
-    is_equal_expect(
+    is_equal(
         S(HashMap::from_iter(vec![(1, 1), (2, 2), (3, 3)])),
         expect![[r#"
             {
@@ -170,7 +170,7 @@ fn duplicate_key_first_wins_hashmap() {
     );
 
     // Same value for different keys is ok
-    is_equal_expect(
+    is_equal(
         S(HashMap::from_iter(vec![(1, 1), (2, 1), (3, 1)])),
         expect![[r#"
             {
@@ -193,7 +193,7 @@ fn duplicate_key_first_wins_btreemap() {
     struct S(#[serde(with = "::serde_with::rust::maps_first_key_wins")] BTreeMap<usize, usize>);
 
     // Different value and key always works
-    is_equal_expect(
+    is_equal(
         S(BTreeMap::from_iter(vec![(1, 1), (2, 2), (3, 3)])),
         expect![[r#"
             {
@@ -204,7 +204,7 @@ fn duplicate_key_first_wins_btreemap() {
     );
 
     // Same value for different keys is ok
-    is_equal_expect(
+    is_equal(
         S(BTreeMap::from_iter(vec![(1, 1), (2, 1), (3, 1)])),
         expect![[r#"
             {
@@ -244,7 +244,7 @@ fn duplicate_value_first_wins_hashset() {
     }
 
     // Different values always work
-    is_equal_expect(
+    is_equal(
         S(HashSet::from_iter(vec![
             W(1, true),
             W(2, false),
@@ -305,7 +305,7 @@ fn duplicate_value_last_wins_hashset() {
     }
 
     // Different values always work
-    is_equal_expect(
+    is_equal(
         S(HashSet::from_iter(vec![
             W(1, true),
             W(2, false),
@@ -367,7 +367,7 @@ fn duplicate_value_last_wins_btreeset() {
     }
 
     // Different values always work
-    is_equal_expect(
+    is_equal(
         S(BTreeSet::from_iter(vec![
             W(1, true),
             W(2, false),
@@ -411,7 +411,7 @@ fn test_hashmap_as_tuple_list() {
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     struct S(#[serde(with = "serde_with::rust::hashmap_as_tuple_list")] HashMap<String, u8>);
 
-    is_equal_expect(
+    is_equal(
         S(HashMap::from_iter(vec![
             ("ABC".to_string(), 1),
             ("Hello".to_string(), 0),
@@ -433,7 +433,7 @@ fn test_hashmap_as_tuple_list() {
               ]
             ]"#]],
     );
-    is_equal_expect(
+    is_equal(
         S(HashMap::from_iter(vec![("Hello".to_string(), 0)])),
         expect![[r#"
             [
@@ -443,10 +443,10 @@ fn test_hashmap_as_tuple_list() {
               ]
             ]"#]],
     );
-    is_equal_expect(S(HashMap::default()), expect![[r#"[]"#]]);
+    is_equal(S(HashMap::default()), expect![[r#"[]"#]]);
 
     // Test parse error, only single element instead of tuple
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"[ [1] ]"#,
         expect![[r#"invalid type: integer `1`, expected a string at line 1 column 4"#]],
     );
@@ -457,7 +457,7 @@ fn test_btreemap_as_tuple_list() {
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
     struct S(#[serde(with = "serde_with::rust::btreemap_as_tuple_list")] BTreeMap<String, u8>);
 
-    is_equal_expect(
+    is_equal(
         S(BTreeMap::from_iter(vec![
             ("ABC".to_string(), 1),
             ("Hello".to_string(), 0),
@@ -479,7 +479,7 @@ fn test_btreemap_as_tuple_list() {
               ]
             ]"#]],
     );
-    is_equal_expect(
+    is_equal(
         S(BTreeMap::from_iter(vec![("Hello".to_string(), 0)])),
         expect![[r#"
             [
@@ -489,10 +489,10 @@ fn test_btreemap_as_tuple_list() {
               ]
             ]"#]],
     );
-    is_equal_expect(S(BTreeMap::default()), expect![[r#"[]"#]]);
+    is_equal(S(BTreeMap::default()), expect![[r#"[]"#]]);
 
     // Test parse error, only single element instead of tuple
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"[ [1] ]"#,
         expect![[r#"invalid type: integer `1`, expected a string at line 1 column 4"#]],
     );
@@ -508,7 +508,7 @@ fn tuple_list_as_map_vec() {
     #[serde(transparent)]
     struct Wrapper<T>(T);
 
-    is_equal_expect(
+    is_equal(
         S(vec![
             (Wrapper(1), Wrapper("Hi".into())),
             (Wrapper(2), Wrapper("Cake".into())),
@@ -521,12 +521,12 @@ fn tuple_list_as_map_vec() {
               "99": "Lie"
             }"#]],
     );
-    is_equal_expect(S(Vec::new()), expect![[r#"{}"#]]);
-    check_error_deserialization_expect::<S>(
+    is_equal(S(Vec::new()), expect![[r#"{}"#]]);
+    check_error_deserialization::<S>(
         r#"[]"#,
         expect![[r#"invalid type: sequence, expected a map at line 1 column 0"#]],
     );
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"null"#,
         expect![[r#"invalid type: null, expected a map at line 1 column 4"#]],
     );
@@ -543,7 +543,7 @@ fn tuple_list_as_map_linkedlist() {
     #[serde(transparent)]
     struct Wrapper<T>(T);
 
-    is_equal_expect(
+    is_equal(
         S(LinkedList::from_iter(vec![
             (Wrapper(1), Wrapper("Hi".into())),
             (Wrapper(2), Wrapper("Cake".into())),
@@ -556,12 +556,12 @@ fn tuple_list_as_map_linkedlist() {
               "99": "Lie"
             }"#]],
     );
-    is_equal_expect(S(LinkedList::new()), expect![[r#"{}"#]]);
-    check_error_deserialization_expect::<S>(
+    is_equal(S(LinkedList::new()), expect![[r#"{}"#]]);
+    check_error_deserialization::<S>(
         r#"[]"#,
         expect![[r#"invalid type: sequence, expected a map at line 1 column 0"#]],
     );
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"null"#,
         expect![[r#"invalid type: null, expected a map at line 1 column 4"#]],
     );
@@ -578,7 +578,7 @@ fn tuple_list_as_map_vecdeque() {
     #[serde(transparent)]
     struct Wrapper<T>(T);
 
-    is_equal_expect(
+    is_equal(
         S(VecDeque::from_iter(vec![
             (Wrapper(1), Wrapper("Hi".into())),
             (Wrapper(2), Wrapper("Cake".into())),
@@ -591,12 +591,12 @@ fn tuple_list_as_map_vecdeque() {
               "99": "Lie"
             }"#]],
     );
-    is_equal_expect(S(VecDeque::new()), expect![[r#"{}"#]]);
-    check_error_deserialization_expect::<S>(
+    is_equal(S(VecDeque::new()), expect![[r#"{}"#]]);
+    check_error_deserialization::<S>(
         r#"[]"#,
         expect![[r#"invalid type: sequence, expected a map at line 1 column 0"#]],
     );
-    check_error_deserialization_expect::<S>(
+    check_error_deserialization::<S>(
         r#"null"#,
         expect![[r#"invalid type: null, expected a map at line 1 column 4"#]],
     );
@@ -609,9 +609,9 @@ fn test_default_on_error() {
     where
         T: Default + Serialize + DeserializeOwned;
 
-    is_equal_expect(S(123), expect![[r#"123"#]]);
-    is_equal_expect(S("Hello World".to_string()), expect![[r#""Hello World""#]]);
-    is_equal_expect(
+    is_equal(S(123), expect![[r#"123"#]]);
+    is_equal(S("Hello World".to_string()), expect![[r#""Hello World""#]]);
+    is_equal(
         S(vec![1, 2, 3]),
         expect![[r#"
         [
@@ -644,9 +644,9 @@ fn test_default_on_null() {
     where
         T: Default + Serialize + DeserializeOwned;
 
-    is_equal_expect(S(123), expect![[r#"123"#]]);
-    is_equal_expect(S("Hello World".to_string()), expect![[r#""Hello World""#]]);
-    is_equal_expect(
+    is_equal(S(123), expect![[r#"123"#]]);
+    is_equal(S("Hello World".to_string()), expect![[r#""Hello World""#]]);
+    is_equal(
         S(vec![1, 2, 3]),
         expect![[r#"
         [

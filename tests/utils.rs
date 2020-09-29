@@ -6,24 +6,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::fmt::Debug;
 
 #[rustversion::attr(since(1.46), track_caller)]
-pub fn is_equal<T>(value: T, s: &str)
-where
-    T: Debug + DeserializeOwned + PartialEq + Serialize,
-{
-    assert_eq!(
-        value,
-        serde_json::from_str::<T>(s).unwrap(),
-        "Deserialization differs from expected value."
-    );
-    assert_eq!(
-        s,
-        serde_json::to_string(&value).unwrap(),
-        "Serialization differs from expected value."
-    );
-}
-
-#[rustversion::attr(since(1.46), track_caller)]
-pub fn is_equal_expect<T>(value: T, expected: Expect)
+pub fn is_equal<T>(value: T, expected: Expect)
 where
     T: Debug + DeserializeOwned + PartialEq + Serialize,
 {
@@ -49,19 +32,7 @@ where
 }
 
 #[rustversion::attr(since(1.46), track_caller)]
-pub fn check_serialization<T>(value: T, serialize_to: &str)
-where
-    T: Debug + PartialEq + Serialize,
-{
-    assert_eq!(
-        serialize_to,
-        serde_json::to_string(&value).unwrap(),
-        "Serialization differs from expected value."
-    );
-}
-
-#[rustversion::attr(since(1.46), track_caller)]
-pub fn check_serialization_expect<T>(value: T, serialize_to: Expect)
+pub fn check_serialization<T>(value: T, serialize_to: Expect)
 where
     T: Debug + PartialEq + Serialize,
 {
@@ -69,20 +40,7 @@ where
 }
 
 #[rustversion::attr(since(1.46), track_caller)]
-pub fn check_error_deserialization<T>(deserialize_from: &str, error_msg: &str)
-where
-    T: Debug + DeserializeOwned + PartialEq,
-{
-    assert_eq!(
-        error_msg,
-        serde_json::from_str::<T>(deserialize_from)
-            .unwrap_err()
-            .to_string(),
-    )
-}
-
-#[rustversion::attr(since(1.46), track_caller)]
-pub fn check_error_deserialization_expect<T>(deserialize_from: &str, error_msg: Expect)
+pub fn check_error_deserialization<T>(deserialize_from: &str, error_msg: Expect)
 where
     T: Debug + DeserializeOwned + PartialEq,
 {
