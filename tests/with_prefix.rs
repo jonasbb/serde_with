@@ -1,6 +1,6 @@
 mod utils;
 
-use crate::utils::is_equal_expect;
+use crate::utils::is_equal;
 use expect_test::expect;
 use serde_derive::{Deserialize, Serialize};
 use serde_with::with_prefix;
@@ -47,7 +47,7 @@ fn test_flatten_with_prefix() {
         tags: HashMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
     };
 
-    is_equal_expect(
+    is_equal(
         m,
         expect![[r#"
             {
@@ -98,7 +98,7 @@ fn test_plain_with_prefix() {
         tags: HashMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
     };
 
-    is_equal_expect(
+    is_equal(
         m,
         expect![[r#"
         {
@@ -142,7 +142,7 @@ fn test_enum_unit_variant_with_prefix() {
         foo: BTreeMap::from_iter(vec![(Foo::One, 1), (Foo::Two, 2), (Foo::Three, 3)]),
     };
 
-    is_equal_expect(
+    is_equal(
         d,
         expect![[r#"
         {

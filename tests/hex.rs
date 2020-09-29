@@ -1,6 +1,6 @@
 mod utils;
 
-use crate::utils::{check_deserialization, check_error_deserialization_expect, is_equal_expect};
+use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
@@ -15,7 +15,7 @@ fn hex_vec() {
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct B(#[serde_as(as = "Vec<Hex>")] Vec<Vec<u8>>);
 
-    is_equal_expect(
+    is_equal(
         B(vec![vec![0, 1, 2, 13], vec![14, 5, 6, 7]]),
         expect![[r#"
             [
@@ -30,11 +30,11 @@ fn hex_vec() {
         r#"["aaBCff","E07d"]"#,
     );
 
-    check_error_deserialization_expect::<B>(
+    check_error_deserialization::<B>(
         r#"["0"]"#,
         expect![[r#"Odd number of digits at line 1 column 5"#]],
     );
-    check_error_deserialization_expect::<B>(
+    check_error_deserialization::<B>(
         r#"["zz"]"#,
         expect![[r#"Invalid character 'z' at position 0 at line 1 column 6"#]],
     );
@@ -46,7 +46,7 @@ fn hex_vec_lowercase() {
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct B(#[serde_as(as = "Vec<Hex<Lowercase>>")] Vec<Vec<u8>>);
 
-    is_equal_expect(
+    is_equal(
         B(vec![vec![0, 1, 2, 13], vec![14, 5, 6, 7]]),
         expect![[r#"
             [
@@ -68,7 +68,7 @@ fn hex_vec_uppercase() {
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     pub struct B(#[serde_as(as = "Vec<Hex<Uppercase>>")] Vec<Vec<u8>>);
 
-    is_equal_expect(
+    is_equal(
         B(vec![vec![0, 1, 2, 13], vec![14, 5, 6, 7]]),
         expect![[r#"
             [
