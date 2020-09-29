@@ -789,12 +789,12 @@ pub struct DurationSeconds<
 ///
 /// let d = Durations {
 ///     d_f64: Duration::new(12345, 500_000_000), // Create from seconds and nanoseconds
-///     d_string: Duration::new(12345, 999_999_999),
+///     d_string: Duration::new(12345, 999_999_000),
 /// };
 /// // Observe the different datatypes
 /// let expected = json!({
 ///     "d_f64": 12345.5,
-///     "d_string": "12345.999999999",
+///     "d_string": "12345.999999",
 /// });
 /// assert_eq!(expected, serde_json::to_value(&d).unwrap());
 ///
@@ -840,12 +840,12 @@ pub struct DurationSeconds<
 ///
 /// let d = Durations {
 ///     d_f64: Duration::seconds(-12345) + Duration::milliseconds(500),
-///     d_string: Duration::seconds(12345) + Duration::nanoseconds(999_999_999),
+///     d_string: Duration::seconds(12345) + Duration::nanoseconds(999_999_000),
 /// };
 /// // Observe the different datatypes
 /// let expected = json!({
 ///     "d_f64": -12344.5,
-///     "d_string": "12345.999999999",
+///     "d_string": "12345.999999",
 /// });
 /// assert_eq!(expected, serde_json::to_value(&d).unwrap());
 ///
@@ -1059,12 +1059,12 @@ pub struct TimestampSeconds<
 ///
 /// let ts = Timestamps {
 ///     st_f64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 500_000_000)).unwrap(),
-///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 999_999_999)).unwrap(),
+///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 999_999_000)).unwrap(),
 /// };
 /// // Observe the different datatypes
 /// let expected = json!({
 ///     "st_f64": 12345.5,
-///     "st_string": "12345.999999999",
+///     "st_string": "12345.999999",
 /// });
 /// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
 ///
@@ -1110,12 +1110,12 @@ pub struct TimestampSeconds<
 ///
 /// let ts = Timestamps {
 ///     dt_f64: Utc.timestamp(-12345, 500_000_000),
-///     dt_string: Local.timestamp(12345, 999_999_999),
+///     dt_string: Local.timestamp(12345, 999_999_000),
 /// };
 /// // Observe the different datatypes
 /// let expected = json!({
 ///     "dt_f64": -12344.5,
-///     "dt_string": "12345.999999999",
+///     "dt_string": "12345.999999",
 /// });
 /// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
 ///
