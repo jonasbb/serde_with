@@ -4,9 +4,9 @@ members = [
 ]
 
 [package]
+authors = ["Jonas Bushart"]
 name = "serde_with"
 version = "1.5.0-alpha.2"
-authors = ["jonasbb"]
 
 categories = ["encoding"]
 description = "Custom de/serialization functions for Rust's serde"
@@ -17,38 +17,27 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/jonasbb/serde_with"
 
-exclude = [
-    ".codecov.yml",
-    ".github",
-    ".gitignore",
-    ".pre-commit-config.yaml",
-    ".travis.yml",
-    "bors.toml",
-    "README.tpl",
-    "rustfmt.toml",
-]
+include = ["src/**/*", "LICENSE-*", "README.*", "CHANGELOG.md"]
 
 [badges]
-# github-actions = { repository = "jonasbb/serde_with", workflow = "Rust CI" }
-codecov = { repository = "jonasbb/serde_with", branch = "master", service = "github" }
-maintenance = { status = "actively-developed" }
+maintenance = {status = "actively-developed"}
 
 # When adding new features update the documentation in feature-flags.md
 [features]
-chrono = [ "chrono_crate" ]
-default = [ "macros" ]
-guide = [ "doc-comment", "macros" ]
-json = [ "serde_json" ]
-macros = [ "serde_with_macros" ]
+chrono = ["chrono_crate"]
+default = ["macros"]
+guide = ["doc-comment", "macros"]
+json = ["serde_json"]
+macros = ["serde_with_macros"]
 
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
-chrono_crate = { package = "chrono", version = "0.4.1", features = [ "serde" ], optional = true }
-doc-comment = { version = "0.3.3", optional = true }
-hex = { version = "0.4.2", optional = true }
+chrono_crate = {package = "chrono", version = "0.4.1", features = ["serde"], optional = true}
+doc-comment = {version = "0.3.3", optional = true}
+hex = {version = "0.4.2", optional = true}
 serde = "1.0.75"
-serde_json = { version = "1.0.1", optional = true }
-serde_with_macros = { path = "./serde_with_macros", version = "1.2.0-alpha.3", optional = true }
+serde_json = {version = "1.0.1", optional = true}
+serde_with_macros = {path = "./serde_with_macros", version = "1.2.0-alpha.3", optional = true}
 
 [dev-dependencies]
 expect-test = "1.0.0"
@@ -56,31 +45,36 @@ fnv = "1.0.6"
 glob = "0.3.0"
 mime = "0.3.16"
 pretty_assertions = "0.6.1"
-regex = { version = "1.3.9", default-features = false, features=["std"] }
+regex = {version = "1.3.9", default-features = false, features = ["std"]}
 ron = "0.6"
 rustversion = "1.0.0"
 serde_derive = "1.0.75"
-serde_json = { version = "1.0.25", features = [ "preserve_order" ] }
+serde_json = {version = "1.0.25", features = ["preserve_order"]}
 version-sync = "0.8.1"
 
 [[test]]
 name = "chrono"
+path = "tests/chrono.rs"
 required-features = ["chrono", "macros"]
 
 [[test]]
 name = "hex"
+path = "tests/hex.rs"
 required-features = ["hex", "macros"]
 
 [[test]]
 name = "json"
+path = "tests/json.rs"
 required-features = ["json", "macros"]
 
 [[test]]
 name = "serde_as"
+path = "tests/serde_as.rs"
 required-features = ["macros"]
 
 [[test]]
 name = "serde_as_macro"
+path = "tests/serde_as_macro.rs"
 required-features = ["macros"]
 
 [package.metadata.docs.rs]
