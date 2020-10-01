@@ -6,7 +6,7 @@ members = [
 [package]
 authors = ["Jonas Bushart"]
 name = "serde_with"
-version = "1.5.0-alpha.2"
+version = "1.5.0"
 
 categories = ["encoding"]
 description = "Custom de/serialization functions for Rust's serde"
@@ -37,7 +37,7 @@ doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.2", optional = true}
 serde = "1.0.75"
 serde_json = {version = "1.0.1", optional = true}
-serde_with_macros = {path = "./serde_with_macros", version = "1.2.0-alpha.3", optional = true}
+serde_with_macros = {path = "./serde_with_macros", version = "1.2.0", optional = true}
 
 [dev-dependencies]
 expect-test = "1.0.0"

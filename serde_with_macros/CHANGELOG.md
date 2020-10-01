@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.0]
+
+### Added
+
+* Add `serde_as` macro. Refer to the `serde_with` crate for details.
+* Add two derive macros, `SerializeDisplay` and `DeserializeFromStr`, which implement the `Serialize`/`Deserialize` traits based on `Display` and `FromStr`.
+    This is in addition to the already existing methods like `DisplayFromStr`, which act locally, whereas the derive macros provide the traits expected by the rest of the ecosystem.
+
+### Changed
+
+* Convert the code to use 2018 edition.
+
+### Fixed
+
+* The `serde_as` macro now supports serde attributes and no longer panic on unrecognized values in the attribute.
+
 ## [1.2.0-alpha.3]
 
 ### Added

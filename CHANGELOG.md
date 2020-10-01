@@ -7,16 +7,52 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.0]
+
 ### Added
 
+* The largest addition to this release is the addition of the `serde_as` de/serialization scheme.
+    It's goal is it to be a more flexible replacement to serde's with-annotation, by being more composable than before.
+    No longer is it a problem to add a custom de/serialization adapter is the type is within an `Option` or a `Vec`.
+
+    Thanks to `@markazmierczak` for the design of the trait without whom this wouldn't be possible.
+
+    More details about this new scheme can be found in the also new [user guide](https://docs.rs/serde_with/1.5.0/serde_with/guide/index.html)
+* This release also features a detailed user guide.
+    The guide focusses more on how to use this crate by providing examples.
+    For example, it includes a section about the available feature flags of this crate and how you can migrate to the shiny new `serde_as` scheme.
+* The crate now features de/serialization adaptors for the std and chrono's `Duration` types. #56 #104
+* Add a `hex` module, which allows formatting bytes (i.e. `Vec<u8>`) as a hexadecimal string.
+    The formatting supports different arguments how the formatting is happening.
+* Add two derive macros, `SerializeDisplay` and `DeserializeFromStr`, which implement the `Serialize`/`Deserialize` traits based on `Display` and `FromStr`.
+    This is in addition to the already existing methods like `DisplayFromStr`, which act locally, whereas the derive macros provide the traits expected by the rest of the ecosystem.
+
+    This is part of `serde_with_macros` v1.2.0.
 * Added some `serialize` functions to modules which previously had none.
     This makes it easier to use the conversion when also deriving `Serialialize`.
     The functions simply pass through to the underlying `Serialize` implementation.
     This affects `sets_duplicate_value_is_error`, `maps_duplicate_key_is_error`, `maps_first_key_wins`, `default_on_error`, and `default_on_null`.
-* `sets_last_value_wins` as a replacement for `sets_first_value_wins` which is deprecated now.
+* Added `sets_last_value_wins` as a replacement for `sets_first_value_wins` which is deprecated now.
     The default behavior of serde is to prefer the first value of a set so the opposite is taking the last value.
+* Added `#[serde_as]` compatible conversion methods for serializing durations and timestamps as numbers.
+    The four types `DurationSeconds`, `DurationSecondsWithFrac`, `TimestampSeconds`, `TimestampSecondsWithFrac` provide the serialization conversion with optional subsecond precision.
+    There is support for `std::time::Duration`, `chrono::Duration`, `std::time::SystemTime` and `chrono::DateTime`.
+    Timestamps are serialized as a duration since the UNIX epoch.
+    The serialization can be customized.
+    It supports multiple formats, such as `i64`, `f64`, or `String`, and the deserialization can be tweaked if it should be strict or lenient when accepting formats.
 
 ### Changed
+
+* Convert the code to use 2018 edition.
+* @peterjoel improved the performance of `with_prefix!`. #101
+
+### Fixed
+
+* The `with_prefix!` macro, to add a string prefixes during serialization, now also works with unit variant enum types. #115 #116
+* The `serde_as` macro now supports serde attributes and no longer panic on unrecognized values in the attribute.
+    This is part of `serde_with_macros` v1.2.0.
+
+### Deprecated
 
 * Deprecate `sets_first_value_wins`.
     The default behavior of serde is to take the first value, so this module is not necessary.

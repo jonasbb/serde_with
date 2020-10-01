@@ -13,7 +13,7 @@ Some common use cases are:
 * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
      Check [`DisplayFromStr`][] or [`serde_with::rust::display_fromstr`][display_fromstr] for details.
 * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
-* Apply a prefix to each fieldname of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
+* Apply a prefix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
 * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
      Check the documentation for [`serde_with::rust::StringWithSeparator::<CommaSeparator>`][StringWithSeparator].
 
@@ -25,7 +25,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies.serde_with]
-version = "1.5.0-alpha.2"
+version = "1.5.0"
 features = [ "..." ]
 ```
 
@@ -119,13 +119,13 @@ Foo {
 }
 ```
 
-[`DisplayFromStr`]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/struct.DisplayFromStr.html
-[`with_prefix!`]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/macro.with_prefix.html
-[display_fromstr]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/rust/display_fromstr/index.html
-[feature flags]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/feature_flags/index.html
-[skip_serializing_none]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/attr.skip_serializing_none.html
-[StringWithSeparator]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/rust/struct.StringWithSeparator.html
-[user guide]: https://docs.rs/serde_with/1.5.0-alpha.2/serde_with/guide/index.html
+[`DisplayFromStr`]: https://docs.rs/serde_with/1.5.0/serde_with/struct.DisplayFromStr.html
+[`with_prefix!`]: https://docs.rs/serde_with/1.5.0/serde_with/macro.with_prefix.html
+[display_fromstr]: https://docs.rs/serde_with/1.5.0/serde_with/rust/display_fromstr/index.html
+[feature flags]: https://docs.rs/serde_with/1.5.0/serde_with/guide/feature_flags/index.html
+[skip_serializing_none]: https://docs.rs/serde_with/1.5.0/serde_with/attr.skip_serializing_none.html
+[StringWithSeparator]: https://docs.rs/serde_with/1.5.0/serde_with/rust/struct.StringWithSeparator.html
+[user guide]: https://docs.rs/serde_with/1.5.0/serde_with/guide/index.html
 [with-annotation]: https://serde.rs/field-attrs.html#with
 
 ## License
