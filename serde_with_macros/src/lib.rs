@@ -712,9 +712,9 @@ fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Er
         impl<'de> serde::Deserialize<'de> for #ident
         where
             Self: std::str::FromStr,
-            <Self as FromStr>::Err: std::fmt::Display,
+            <Self as std::str::FromStr>::Err: std::fmt::Display,
         {
-            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
             where
                 D: serde::Deserializer<'de>,
             {
@@ -722,7 +722,7 @@ fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Er
 
                 impl<'de, S> serde::de::Visitor<'de> for Helper<S>
                 where
-                    S: FromStr,
+                    S: std::str::FromStr,
                     <S as std::str::FromStr>::Err: std::fmt::Display,
                 {
                     type Value = S;
@@ -731,7 +731,7 @@ fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Er
                         write!(formatter, "string")
                     }
 
-                    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+                    fn visit_str<E>(self, value: &str) -> std::result::Result<Self::Value, E>
                     where
                         E: serde::de::Error,
                     {
@@ -798,7 +798,7 @@ fn serialize_display(item: TokenStream) -> Result<proc_macro2::TokenStream, Erro
         where
             Self: std::fmt::Display,
         {
-            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
             where
                 S: serde::Serializer,
             {
