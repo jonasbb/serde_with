@@ -6,6 +6,7 @@ use serde_with_macros::{DeserializeFromStr, SerializeDisplay};
 #[allow(dead_code)]
 type Result = ();
 
+#[allow(dead_code)]
 #[derive(DeserializeFromStr, SerializeDisplay)]
 struct A;
 
