@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.1]
+
+### Fixed
+
+* The derive macros `SerializeDisplay` and `DeserializeFromStr` now use the properly namespaced types and traits.
+    This solves conflicts with `Result` if `Result` is not `std::result::Result`, e.g., a type alias.
+    Additionally, the code assumed that `FromStr` was in scope, which is now also not required.
+
+    Thanks goes to @adwhit for reporting and fixing the problem in #186.
+
 ## [1.2.0]
 
 ### Added

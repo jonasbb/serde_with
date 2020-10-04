@@ -23,7 +23,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with_macros/1.2.0")]
+#![doc(html_root_url = "https://docs.rs/serde_with_macros/1.2.1")]
 
 //! proc-macro extensions for [`serde_with`]
 //!
