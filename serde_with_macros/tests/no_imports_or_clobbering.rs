@@ -11,8 +11,6 @@ struct A;
 
 impl std::str::FromStr for A {
     type Err = String;
-
-    /// Parse a value like `123<>true`
     fn from_str(_: &str) -> std::result::Result<Self, Self::Err> {
         unimplemented!()
     }
