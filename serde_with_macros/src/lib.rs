@@ -712,7 +712,7 @@ fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Er
         impl<'de> serde::Deserialize<'de> for #ident
         where
             Self: std::str::FromStr,
-            <Self as FromStr>::Err: std::fmt::Display,
+            <Self as std::str::FromStr>::Err: std::fmt::Display,
         {
             fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
             where
@@ -722,7 +722,7 @@ fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Er
 
                 impl<'de, S> serde::de::Visitor<'de> for Helper<S>
                 where
-                    S: FromStr,
+                    S: std::str::FromStr,
                     <S as std::str::FromStr>::Err: std::fmt::Display,
                 {
                     type Value = S;
