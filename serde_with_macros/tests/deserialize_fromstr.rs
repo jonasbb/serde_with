@@ -42,6 +42,46 @@ fn test_deserialize_fromstr() {
 }
 
 #[test]
+fn test_deserialize_from_bytes() {
+    use serde::de::{value::Error, Deserialize, Deserializer, Visitor};
+
+    // Unfortunately serde_json is too clever (i.e. handles bytes gracefully)
+    // so instead create a custom deserializer which can only deserialize bytes.
+    // All other deserialize_* fns are forwarded to deserialize_bytes
+    struct ByteDeserializer(&'static [u8]);
+
+    impl<'de> Deserializer<'de> for ByteDeserializer {
+        type Error = Error;
+
+        fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+        where
+            V: Visitor<'de>,
+        {
+            self.deserialize_bytes(visitor)
+        }
+
+        fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+        where
+            V: Visitor<'de>,
+        {
+            visitor.visit_bytes(self.0)
+        }
+
+        serde::forward_to_deserialize_any! {
+            bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+            byte_buf option unit unit_struct newtype_struct seq tuple
+            tuple_struct map struct enum identifier ignored_any
+        }
+    }
+
+    // callstack: A::deserialize -> deserialize_str -> deserialize_any ->
+    // deserialize_bytes -> visit_bytes -> visit_str -> success!
+    let a = A::deserialize(ByteDeserializer(b"159<>true")).unwrap();
+
+    assert_eq!(A { a: 159, b: true }, a);
+}
+
+#[test]
 fn test_deserialize_fromstr_in_vec() {
     let json = r#"[
   "123<>false",
