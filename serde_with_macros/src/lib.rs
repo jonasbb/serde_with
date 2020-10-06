@@ -737,6 +737,14 @@ fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Er
                     {
                         value.parse::<Self::Value>().map_err(serde::de::Error::custom)
                     }
+
+                    fn visit_bytes<E>(self, value: &[u8]) -> std::result::Result<Self::Value, E>
+                    where
+                        E: serde::de::Error,
+                    {
+                        let utf8 = std::str::from_utf8(value).map_err(serde::de::Error::custom)?;
+                        self.visit_str(utf8)
+                    }
                 }
 
                 deserializer.deserialize_str(Helper(std::marker::PhantomData))
