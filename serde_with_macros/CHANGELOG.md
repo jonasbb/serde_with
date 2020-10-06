@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.2]
+
+### Fixed
+
+* @adwhit contributed an improvement to `DeserializeFromStr` which allows it to deserialize from bytes (#186).
+    This makes the derived implementation applicable in more situations.
+
 ## [1.2.1]
 
 ### Fixed
