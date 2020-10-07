@@ -423,7 +423,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// This macro cannot be used outside of the [`serde_with`] crate, since it relies on types defined therein.
 /// The [`serde_with`] crate has to be available in the root namespace under `::serde_with`.
 ///
-/// [`serde_as`]: https://docs.rs/serde_with/1.5.0/serde_with/guide/index.html
+/// [`serde_as`]: https://docs.rs/serde_with/1.5.1/serde_with/guide/index.html
 /// [`serde_with`]: https://crates.io/crates/serde_with/
 #[proc_macro_attribute]
 pub fn serde_as(_args: TokenStream, input: TokenStream) -> TokenStream {
