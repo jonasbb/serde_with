@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Depend on serde with the `derive` feature enabled.
+    The `derive` feature is required to deserliaze untagged enums which are used in the `DefaultOnError` helpers.
+    This fixes compilation of `serde_with` in scenarios where no other crate enables the `derive` feature.
+
 ## [1.5.0]
 
 ### Added
