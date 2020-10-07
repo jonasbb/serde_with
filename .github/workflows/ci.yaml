@@ -88,9 +88,17 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         name: Build (${{ matrix.os }} / ${{ matrix.rust }})
+        if: matrix.rust != 'nightly'
         with:
           command: build
           args: --all --all-features
+      - uses: actions-rs/cargo@v1
+        name: Build (${{ matrix.os }} / ${{ matrix.rust }})
+        if: matrix.rust == 'nightly'
+        with:
+          command: build
+          # https://github.com/rust-lang/cargo/issues/8088 for unstable-options
+          args: --all --all-features -Zunstable-options -Zfeatures=dev_dep,host_dep
       - uses: actions-rs/cargo@v1
         name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
