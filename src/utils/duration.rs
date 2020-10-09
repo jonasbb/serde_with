@@ -69,7 +69,9 @@ impl DurationSigned {
             Sign::Positive => SystemTime::UNIX_EPOCH.checked_add(self.duration),
             Sign::Negative => SystemTime::UNIX_EPOCH.checked_sub(self.duration),
         }
-        .ok_or_else(|| de::Error::custom(""))
+        .ok_or_else(|| {
+            de::Error::custom("timestamp is outside the range for std::time::SystemTime")
+        })
     }
 
     pub(crate) fn to_std_duration<'de, D>(&self) -> Result<Duration, D::Error>
@@ -107,7 +109,6 @@ impl From<&SystemTime> for DurationSigned {
     }
 }
 
-// FIXME merge this with the serde_as implementation and maybe also the chrono implementation
 impl<STRICTNESS> SerializeAs<DurationSigned> for DurationSeconds<u64, STRICTNESS>
 where
     STRICTNESS: Strictness,
@@ -136,7 +137,6 @@ where
     }
 }
 
-// FIXME merge this with the serde_as implementation and maybe also the chrono implementation
 impl<STRICTNESS> SerializeAs<DurationSigned> for DurationSeconds<i64, STRICTNESS>
 where
     STRICTNESS: Strictness,
