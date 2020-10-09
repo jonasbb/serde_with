@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.1]
+
 ### Fixed
 
 * Depend on serde with the `derive` feature enabled.
