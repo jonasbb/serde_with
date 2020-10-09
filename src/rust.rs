@@ -77,7 +77,7 @@ pub mod display_fromstr {
     use super::*;
     use std::str::FromStr;
 
-    /// Deserialize T using [FromStr]
+    /// Deserialize T using [`FromStr`]
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,
@@ -94,7 +94,7 @@ pub mod display_fromstr {
             type Value = S;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(formatter, "valid json object")
+                write!(formatter, "a string")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>

@@ -62,7 +62,8 @@ pub mod datetime_utc_ts_seconds_from_any {
             type Value = DateTime<Utc>;
 
             fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                formatter.write_str("Invalid timestamp. Must be an integer, float, or string with optional subsecond precision.")
+                formatter
+                    .write_str("an integer, float, or string with optional subsecond precision.")
             }
 
             fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
@@ -74,7 +75,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
                     Err(Error::custom(format!(
-                        "Invalid or out of range value '{}' for DateTime",
+                        "a timestamp which can be represented in a DateTime but received '{}'",
                         value
                     )))
                 }
@@ -89,7 +90,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
                     Err(Error::custom(format!(
-                        "Invalid or out of range value '{}' for DateTime",
+                        "a timestamp which can be represented in a DateTime but received '{}'",
                         value
                     )))
                 }
@@ -106,7 +107,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
                     Err(Error::custom(format!(
-                        "Invalid or out of range value '{}' for DateTime",
+                        "a timestamp which can be represented in a DateTime but received '{}'",
                         value
                     )))
                 }
@@ -126,7 +127,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                                 Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                             } else {
                                 Err(Error::custom(format!(
-                                    "Invalid or out of range value '{}' for DateTime",
+                                    "a timestamp which can be represented in a DateTime but received '{}'",
                                     value
                                 )))
                             }
@@ -152,7 +153,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                                 } else {
                                     Err(Error::custom(format!(
-                                        "Invalid or out of range value '{}' for DateTime",
+                                        "a timestamp which can be represented in a DateTime but received '{}'",
                                         value
                                     )))
                                 }
