@@ -222,12 +222,15 @@ fn test_chrono_duration_seconds() {
     check_serialization(StructStringStrict(minus_half_second), expect![[r#""-1""#]]);
     check_error_deserialization::<StructStringStrict>(
         r#"1"#,
-        // TODO the error message should not talk about "json object"
-        expect![[r#"invalid type: integer `1`, expected valid json object at line 1 column 1"#]],
+        expect![[
+            r#"invalid type: integer `1`, expected a string containing a number at line 1 column 1"#
+        ]],
     );
     check_error_deserialization::<StructStringStrict>(
         r#"-1"#,
-        expect![[r#"invalid type: integer `-1`, expected valid json object at line 1 column 2"#]],
+        expect![[
+            r#"invalid type: integer `-1`, expected a string containing a number at line 1 column 2"#
+        ]],
     );
 
     #[serde_as]
@@ -440,12 +443,14 @@ fn test_chrono_timestamp_seconds() {
     );
     check_error_deserialization::<StructStringStrict>(
         r#"1"#,
-        expect![[r#"invalid type: integer `1`, expected valid json object at line 1 column 1"#]],
+        expect![[
+            r#"invalid type: integer `1`, expected a string containing a number at line 1 column 1"#
+        ]],
     );
     check_error_deserialization::<StructStringStrict>(
         r#"0.0"#,
         expect![[
-            r#"invalid type: floating point `0`, expected valid json object at line 1 column 3"#
+            r#"invalid type: floating point `0`, expected a string containing a number at line 1 column 3"#
         ]],
     );
 

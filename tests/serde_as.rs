@@ -527,11 +527,15 @@ fn test_default_on_error() {
     // Error cases
     check_deserialization(S2(vec![]), r#"2"#);
     check_deserialization(S2(vec![]), r#""not_a_list""#);
-    // TODO why does this result in
-    // thread 'test_default_on_error' panicked at 'called `Result::unwrap()` on an `Err`  Error("expected `,` or `}`", line: 1, column: 10)', tests/utils.rs:32:9
-    // check_deserialization(S2( vec![] ), r#"{"value":{}}"#);
-    // TODO this requires a struct
-    check_deserialization(S2(vec![]), r#"{"value":}"#);
+    check_deserialization(S2(vec![]), r#"{}"#);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct2 {
+        #[serde_as(as = "DefaultOnError<Vec<DisplayFromStr>>")]
+        value: Vec<u32>,
+    };
+    check_deserialization(Struct2 { value: vec![] }, r#"{"value":}"#);
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -686,12 +690,15 @@ fn test_duration_seconds() {
     check_serialization(StringStrict(half_second), expect![[r#""1""#]]);
     check_error_deserialization::<StringStrict>(
         r#"1"#,
-        // TODO the error message should not talk about "json object"
-        expect![[r#"invalid type: integer `1`, expected valid json object at line 1 column 1"#]],
+        expect![[
+            r#"invalid type: integer `1`, expected a string containing a number at line 1 column 1"#
+        ]],
     );
     check_error_deserialization::<StringStrict>(
         r#"-1"#,
-        expect![[r#"invalid type: integer `-1`, expected valid json object at line 1 column 2"#]],
+        expect![[
+            r#"invalid type: integer `-1`, expected a string containing a number at line 1 column 2"#
+        ]],
     );
 
     #[serde_as]
@@ -938,12 +945,14 @@ fn test_timestamp_seconds_systemtime() {
     );
     check_error_deserialization::<StructStringStrict>(
         r#"1"#,
-        expect![[r#"invalid type: integer `1`, expected valid json object at line 1 column 1"#]],
+        expect![[
+            r#"invalid type: integer `1`, expected a string containing a number at line 1 column 1"#
+        ]],
     );
     check_error_deserialization::<StructStringStrict>(
         r#"0.0"#,
         expect![[
-            r#"invalid type: floating point `0`, expected valid json object at line 1 column 3"#
+            r#"invalid type: floating point `0`, expected a string containing a number at line 1 column 3"#
         ]],
     );
 
