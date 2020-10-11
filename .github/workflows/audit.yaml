@@ -2,7 +2,7 @@ name: Security audit
 on:
   pull_request:
     paths:
-      - Cargo.toml'
+      - 'Cargo.toml'
       - '**/Cargo.toml'
   # Bors related branches
   push:
