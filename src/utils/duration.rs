@@ -2,7 +2,9 @@
 
 use crate::{
     formats::{Flexible, Format, Strict, Strictness},
-    utils, DeserializeAs, DurationSeconds, DurationSecondsWithFrac, SerializeAs,
+    utils, DeserializeAs, DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
+    DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
+    DurationSeconds, DurationSecondsWithFrac, SerializeAs,
 };
 use serde::{
     de::{self, Unexpected, Visitor},
@@ -14,7 +16,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Sign {
     Positive,
     Negative,
@@ -42,7 +44,7 @@ impl Sign {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub(crate) struct DurationSigned {
     pub(crate) sign: Sign,
     pub(crate) duration: Duration,
@@ -106,6 +108,36 @@ impl From<&SystemTime> for DurationSigned {
                 duration: err.duration(),
             },
         }
+    }
+}
+
+impl std::ops::Mul<u32> for DurationSigned {
+    type Output = DurationSigned;
+
+    fn mul(mut self, rhs: u32) -> Self::Output {
+        self.duration *= rhs;
+        self
+    }
+}
+
+impl std::ops::MulAssign<u32> for DurationSigned {
+    fn mul_assign(&mut self, rhs: u32) {
+        self.duration *= rhs;
+    }
+}
+
+impl std::ops::Div<u32> for DurationSigned {
+    type Output = DurationSigned;
+
+    fn div(mut self, rhs: u32) -> Self::Output {
+        self.duration /= rhs;
+        self
+    }
+}
+
+impl std::ops::DivAssign<u32> for DurationSigned {
+    fn div_assign(&mut self, rhs: u32) {
+        self.duration /= rhs;
     }
 }
 
@@ -233,6 +265,54 @@ where
             .serialize(serializer)
     }
 }
+
+macro_rules! duration_impls {
+    ($($inner:ident { $($factor:literal => $outer:ident,)+ })+) => {
+        $($(
+
+        impl<FORMAT, STRICTNESS> SerializeAs<DurationSigned> for $outer<FORMAT, STRICTNESS>
+        where
+            FORMAT: Format,
+            STRICTNESS: Strictness,
+            $inner<FORMAT, STRICTNESS>: SerializeAs<DurationSigned>
+        {
+            fn serialize_as<S>(source: &DurationSigned, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                $inner::<FORMAT, STRICTNESS>::serialize_as(&(*source * $factor), serializer)
+            }
+        }
+
+        impl<'de, FORMAT, STRICTNESS> DeserializeAs<'de, DurationSigned> for $outer<FORMAT, STRICTNESS>
+        where
+            FORMAT: Format,
+            STRICTNESS: Strictness,
+            $inner<FORMAT, STRICTNESS>: DeserializeAs<'de, DurationSigned>,
+        {
+            fn deserialize_as<D>(deserializer: D) -> Result<DurationSigned, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                let dur = $inner::<FORMAT, STRICTNESS>::deserialize_as(deserializer)?;
+                Ok(dur / $factor)
+            }
+        }
+
+        )+)+    };
+}
+duration_impls!(
+    DurationSeconds {
+        1000u32 => DurationMilliSeconds,
+        1_000_000u32 => DurationMicroSeconds,
+        1_000_000_000u32 => DurationNanoSeconds,
+    }
+    DurationSecondsWithFrac {
+        1000u32 => DurationMilliSecondsWithFrac,
+        1_000_000u32 => DurationMicroSecondsWithFrac,
+        1_000_000_000u32 => DurationNanoSecondsWithFrac,
+    }
+);
 
 struct DurationVisitorFlexible;
 impl<'de> Visitor<'de> for DurationVisitorFlexible {

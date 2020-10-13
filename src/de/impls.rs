@@ -693,13 +693,14 @@ where
 
 macro_rules! use_signed_duration {
     (
-        $ty:ty =>
         $main_trait:ident $internal_trait:ident =>
-        $converter:ident =>
-        $({
-            $format:ty, $strictness:ty =>
-            $($tbound:ident: $bound:ident)*
-        })*
+        {
+            $ty:ty; $converter:ident =>
+            $({
+                $format:ty, $strictness:ty =>
+                $($tbound:ident: $bound:ident)*
+            })*
+        }
     ) => {
         $(
             impl<'de, $($tbound,)*> DeserializeAs<'de, $ty> for $main_trait<$format, $strictness>
@@ -716,42 +717,63 @@ macro_rules! use_signed_duration {
             }
         )*
     };
+    (
+        $( $main_trait:ident $internal_trait:ident, )+ => $rest:tt
+    ) => {
+        $( use_signed_duration!($main_trait $internal_trait => $rest); )+
+    };
 }
 
 use_signed_duration!(
-    Duration =>
-    DurationSeconds DurationSeconds =>
-    to_std_duration =>
-    {u64, Strict =>}
-    {f64, Strict =>}
-    {String, Strict =>}
-    {FORMAT, Flexible => FORMAT: Format}
+    DurationSeconds DurationSeconds,
+    DurationMilliSeconds DurationMilliSeconds,
+    DurationMicroSeconds DurationMicroSeconds,
+    DurationNanoSeconds DurationNanoSeconds,
+    => {
+        Duration; to_std_duration =>
+        {u64, Strict =>}
+        {f64, Strict =>}
+        {String, Strict =>}
+        {FORMAT, Flexible => FORMAT: Format}
+    }
 );
 use_signed_duration!(
-    Duration =>
-    DurationSecondsWithFrac DurationSecondsWithFrac =>
-    to_std_duration =>
-    {f64, Strict =>}
-    {String, Strict =>}
-    {FORMAT, Flexible => FORMAT: Format}
+    DurationSecondsWithFrac DurationSecondsWithFrac,
+    DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
+    DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
+    DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
+    => {
+        Duration; to_std_duration =>
+        {f64, Strict =>}
+        {String, Strict =>}
+        {FORMAT, Flexible => FORMAT: Format}
+    }
 );
 
 use_signed_duration!(
-    SystemTime =>
-    TimestampSeconds DurationSeconds =>
-    to_system_time =>
-    {i64, Strict =>}
-    {f64, Strict =>}
-    {String, Strict =>}
-    {FORMAT, Flexible => FORMAT: Format}
+    TimestampSeconds DurationSeconds,
+    TimestampMilliSeconds DurationMilliSeconds,
+    TimestampMicroSeconds DurationMicroSeconds,
+    TimestampNanoSeconds DurationNanoSeconds,
+    => {
+        SystemTime; to_system_time =>
+        {i64, Strict =>}
+        {f64, Strict =>}
+        {String, Strict =>}
+        {FORMAT, Flexible => FORMAT: Format}
+    }
 );
 use_signed_duration!(
-    SystemTime =>
-    TimestampSecondsWithFrac DurationSecondsWithFrac =>
-    to_system_time =>
-    {f64, Strict =>}
-    {String, Strict =>}
-    {FORMAT, Flexible => FORMAT: Format}
+    TimestampSecondsWithFrac DurationSecondsWithFrac,
+    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
+    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
+    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
+    => {
+        SystemTime; to_system_time =>
+        {f64, Strict =>}
+        {String, Strict =>}
+        {FORMAT, Flexible => FORMAT: Format}
+    }
 );
 
 impl<'de, T, U> DeserializeAs<'de, T> for DefaultOnNull<U>

@@ -932,6 +932,60 @@ pub struct DurationSecondsWithFrac<
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
 
+/// Equivalent to [`DurationSeconds`] with milli-seconds as base unit.
+///
+/// This type is equivalent to [`DurationSeconds`] except that the each unit represents 1 milli-second instead of 1 second for [`DurationSeconds`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationMilliSeconds<
+    FORMAT: formats::Format = u64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`DurationSecondsWithFrac`] with milli-seconds as base unit.
+///
+/// This type is equivalent to [`DurationSecondsWithFrac`] except that the each unit represents 1 milli-second instead of 1 second for [`DurationSecondsWithFrac`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationMilliSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`DurationSeconds`] with micro-seconds as base unit.
+///
+/// This type is equivalent to [`DurationSeconds`] except that the each unit represents 1 micro-second instead of 1 second for [`DurationSeconds`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationMicroSeconds<
+    FORMAT: formats::Format = u64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`DurationSecondsWithFrac`] with micro-seconds as base unit.
+///
+/// This type is equivalent to [`DurationSecondsWithFrac`] except that the each unit represents 1 micro-second instead of 1 second for [`DurationSecondsWithFrac`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationMicroSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`DurationSeconds`] with nano-seconds as base unit.
+///
+/// This type is equivalent to [`DurationSeconds`] except that the each unit represents 1 nano-second instead of 1 second for [`DurationSeconds`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationNanoSeconds<
+    FORMAT: formats::Format = u64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`DurationSecondsWithFrac`] with nano-seconds as base unit.
+///
+/// This type is equivalent to [`DurationSecondsWithFrac`] except that the each unit represents 1 nano-second instead of 1 second for [`DurationSecondsWithFrac`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DurationNanoSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
 /// De/Serialize timestamps as seconds since the UNIX epoch
 ///
 /// De/serialize timestamps as seconds since the UNIX epoch.
@@ -1200,6 +1254,60 @@ pub struct TimestampSeconds<
 /// [feature flag]: https://docs.rs/serde_with/1.6.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`TimestampSeconds`] with milli-seconds as base unit.
+///
+/// This type is equivalent to [`TimestampSeconds`] except that the each unit represents 1 milli-second instead of 1 second for [`TimestampSeconds`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampMilliSeconds<
+    FORMAT: formats::Format = i64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`TimestampSecondsWithFrac`] with milli-seconds as base unit.
+///
+/// This type is equivalent to [`TimestampSecondsWithFrac`] except that the each unit represents 1 milli-second instead of 1 second for [`TimestampSecondsWithFrac`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampMilliSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`TimestampSeconds`] with micro-seconds as base unit.
+///
+/// This type is equivalent to [`TimestampSeconds`] except that the each unit represents 1 micro-second instead of 1 second for [`TimestampSeconds`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampMicroSeconds<
+    FORMAT: formats::Format = i64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`TimestampSecondsWithFrac`] with micro-seconds as base unit.
+///
+/// This type is equivalent to [`TimestampSecondsWithFrac`] except that the each unit represents 1 micro-second instead of 1 second for [`TimestampSecondsWithFrac`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampMicroSecondsWithFrac<
+    FORMAT: formats::Format = f64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`TimestampSeconds`] with nano-seconds as base unit.
+///
+/// This type is equivalent to [`TimestampSeconds`] except that the each unit represents 1 nano-second instead of 1 second for [`TimestampSeconds`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampNanoSeconds<
+    FORMAT: formats::Format = i64,
+    STRICTNESS: formats::Strictness = formats::Strict,
+>(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Equivalent to [`TimestampSecondsWithFrac`] with nano-seconds as base unit.
+///
+/// This type is equivalent to [`TimestampSecondsWithFrac`] except that the each unit represents 1 nano-second instead of 1 second for [`TimestampSecondsWithFrac`].
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TimestampNanoSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
