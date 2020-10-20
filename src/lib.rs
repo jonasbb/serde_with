@@ -1556,3 +1556,11 @@ pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomDat
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct PickFirst<T>(PhantomData<T>);
+
+/// TODO
+#[derive(Debug)]
+pub struct FromInto<T>(PhantomData<T>);
+
+/// TODO
+#[derive(Debug)]
+pub struct TryFromInto<T>(PhantomData<T>);

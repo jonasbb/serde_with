@@ -4,6 +4,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
 mod default_on;
+mod frominto;
 mod map_tuple_list;
 mod pickfirst;
 mod serde_as_macro;

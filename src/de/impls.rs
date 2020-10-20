@@ -7,7 +7,7 @@ use serde::de::*;
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
-use std::convert::From;
+use std::convert::{From, TryInto};
 use std::fmt::{self, Display};
 use std::hash::{BuildHasher, Hash};
 use std::iter::FromIterator;
@@ -1185,6 +1185,35 @@ where
             Helper::Forth(forth) => Ok(forth.into_inner()),
             Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
         }
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, T> for FromInto<U>
+where
+    U: Into<T>,
+    U: Deserialize<'de>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(U::deserialize(deserializer)?.into())
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, T> for TryFromInto<U>
+where
+    U: TryInto<T>,
+    <U as TryInto<T>>::Error: Display,
+    U: Deserialize<'de>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        U::deserialize(deserializer)?
+            .try_into()
+            .map_err(Error::custom)
     }
 }
 
