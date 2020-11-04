@@ -10,7 +10,8 @@ This site contains some general advice how to use this crate and then lists the 
 The basic design of the system was done by [@markazmierczak](https://github.com/markazmierczak).
 
 1. [Switching from serde's with to `serde_as`](#switching-from-serdes-with-to-serde_as)
-    1. [Implementing `SerializeAs` / `DeserializeAs`](#implementing-serializeas--deserializeas)
+    1. [Deserializing Optional Fields](#deserializing-optional-fields)
+    2. [Implementing `SerializeAs` / `DeserializeAs`](#implementing-serializeas--deserializeas)
 2. [De/Serialize Implementations Available](#deserialize-implementations-available)
     1. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
     2. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
@@ -69,6 +70,29 @@ struct A {
     mime: Option<BTreeMap<String, Vec<mime::Mime>>>,
 }
 ```
+
+### Deserializing Optional Fields
+
+During deserialization serde treats fields of `Option<T>` as optional and does not require them to be present.
+This breaks when adding either the `serde_as` annotation or serde's `with` annotation.
+The default behavior can be restored by adding serde's `default` attribute.
+
+```rust
+# use serde::{Deserialize, Serialize};
+# use serde_with::{serde_as, DisplayFromStr};
+#
+#[serde_as]
+#[derive(Serialize, Deserialize)]
+struct A {
+    #[serde_as(as = "Option<DisplayFromStr>")]
+    // Allows deserialization without providing a value for `val`
+    #[serde(default)]
+    val: Option<u32>,
+}
+```
+
+In the future this behavior might change and `default` would be applied on `Option<T>` fields.
+You can add your feedback at [serde_with#185].
 
 ### Implementing `SerializeAs` / `DeserializeAs`
 
@@ -275,8 +299,8 @@ value: Vec<String, u32>,
 
 The [inverse operation](#maps-to-vec-of-tuples) is also available.
 
-[`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 [`chrono::DateTime<Local>`]: chrono_crate::DateTime
+[`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 [`chrono::Duration`]: https://docs.rs/chrono/latest/chrono/struct.Duration.html
 [`DefaultOnError`]: crate::DefaultOnError
 [`DeserializeAs`]: crate::DeserializeAs
@@ -285,8 +309,9 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`DurationSecondsWithFrac`]: crate::DurationSecondsWithFrac
 [`Hex`]: crate::hex::Hex
 [`JsonString`]: crate::json::JsonString
+[`NoneAsEmptyString`]: crate::NoneAsEmptyString
 [`SerializeAs`]: crate::SerializeAs
 [bytes to string converter]: crate::BytesOrString
 [duration to UNIX epoch]: crate::DurationSeconds
 [hex strings]: crate::hex::Hex
-[`NoneAsEmptyString`]: crate::NoneAsEmptyString
+[serde_with#185]: https://github.com/jonasbb/serde_with/issues/185
