@@ -1005,6 +1005,8 @@ pub struct DurationSecondsWithFrac<
 /// # }
 /// ```
 ///
+/// [`chrono::DateTime<Local>`]: chrono_crate::DateTime
+/// [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 /// [`SystemTime`]: std::time::SystemTime
 /// [feature flag]: https://docs.rs/serde_with/1.5.1/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
@@ -1133,6 +1135,8 @@ pub struct TimestampSeconds<
 /// # }
 /// ```
 ///
+/// [`chrono::DateTime<Local>`]: chrono_crate::DateTime
+/// [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 /// [`SystemTime`]: std::time::SystemTime
 /// [feature flag]: https://docs.rs/serde_with/1.5.1/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
