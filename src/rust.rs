@@ -1735,6 +1735,30 @@ pub mod default_on_error {
 /// One use case are JSON APIs in which the `null` value represents some default state.
 /// This adapter allows to turn the `null` directly into the [`Default`] value of the type.
 ///
+/// ## Converting to `serde_as`
+///
+/// The same functionality can be more clearly expressed via [`DefaultOnNull`] and using the [`serde_as`] macro.
+/// It can be combined with other convertes as shown.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, DefaultOnNull, DisplayFromStr};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize)]
+/// struct A {
+///     #[serde_as(as = "DefaultOnNull")]
+///     value: u32,
+///     #[serde_as(as = "DefaultOnNull<DisplayFromStr>")]
+///     value2: u32,
+/// }
+/// # }
+/// ```
+///
+/// [`DefaultOnNull`]: crate::DefaultOnNull
+/// [`serde_as`]: crate::guide::serde_as
+///
 /// # Examples
 ///
 /// ```

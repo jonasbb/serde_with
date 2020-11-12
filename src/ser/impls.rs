@@ -386,3 +386,15 @@ use_signed_duration!(
     {f64, STRICTNESS => STRICTNESS: Strictness}
     {String, STRICTNESS => STRICTNESS: Strictness}
 );
+
+impl<T, U> SerializeAs<T> for DefaultOnNull<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_some(&SerializeAsWrap::<T, U>::new(source))
+    }
+}

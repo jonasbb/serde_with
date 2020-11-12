@@ -6,8 +6,9 @@ use crate::utils::{
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    formats::Flexible, serde_as, BytesOrString, DefaultOnError, DisplayFromStr, DurationSeconds,
-    DurationSecondsWithFrac, NoneAsEmptyString, Same, TimestampSeconds, TimestampSecondsWithFrac,
+    formats::Flexible, serde_as, BytesOrString, DefaultOnError, DefaultOnNull, DisplayFromStr,
+    DurationSeconds, DurationSecondsWithFrac, NoneAsEmptyString, Same, TimestampSeconds,
+    TimestampSecondsWithFrac,
 };
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
@@ -1075,5 +1076,71 @@ fn test_timestamp_seconds_with_frac_systemtime() {
         expect![[
             r#"invalid value: string "a", expected an integer, a float, or a string containing a number at line 1 column 3"#
         ]],
+    );
+}
+
+#[test]
+fn test_default_on_null() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "DefaultOnNull<DisplayFromStr>")] u32);
+
+    // Normal
+    is_equal(S(123), expect![[r#""123""#]]);
+    is_equal(S(0), expect![[r#""0""#]]);
+    // Null case
+    check_deserialization(S(0), r#"null"#);
+    // Error cases
+    check_error_deserialization::<S>(
+        r#""12+3""#,
+        expect![[r#"invalid digit found in string at line 1 column 6"#]],
+    );
+    check_error_deserialization::<S>(
+        r#""abc""#,
+        expect![[r#"invalid digit found in string at line 1 column 5"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S2(#[serde_as(as = "Vec<DefaultOnNull>")] Vec<u32>);
+
+    // Normal
+    is_equal(
+        S2(vec![1, 2, 0, 3]),
+        expect![[r#"
+            [
+              1,
+              2,
+              0,
+              3
+            ]"#]],
+    );
+    is_equal(S2(vec![]), expect![[r#"[]"#]]);
+    // Null cases
+    check_deserialization(S2(vec![1, 0, 2]), r#"[1, null, 2]"#);
+    check_error_deserialization::<S2>(
+        r#"["not_a_number"]"#,
+        expect![[r#"invalid type: string "not_a_number", expected u32 at line 1 column 15"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S3(#[serde_as(as = "Vec<DefaultOnNull<DisplayFromStr>>")] Vec<u32>);
+
+    // Normal
+    is_equal(
+        S3(vec![1, 2, 3]),
+        expect![[r#"
+            [
+              "1",
+              "2",
+              "3"
+            ]"#]],
+    );
+    // Null case
+    check_deserialization(S3(vec![0, 3, 0]), r#"[null,"3",null]"#);
+    check_error_deserialization::<S3>(
+        r#"[null,3,null]"#,
+        expect![[r#"invalid type: integer `3`, expected a string at line 1 column 7"#]],
     );
 }

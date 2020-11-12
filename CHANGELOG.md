@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add `DefaultOnNull` as the equivalent for `rust::default_on_null` but for the `serde_as` system.
+
 ## [1.5.1]
 
 ### Fixed
