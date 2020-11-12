@@ -753,3 +753,16 @@ use_signed_duration!(
     {String, Strict =>}
     {FORMAT, Flexible => FORMAT: Format}
 );
+
+impl<'de, T, U> DeserializeAs<'de, T> for DefaultOnNull<U>
+where
+    U: DeserializeAs<'de, T>,
+    T: Default,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(Option::<U>::deserialize_as(deserializer)?.unwrap_or_default())
+    }
+}

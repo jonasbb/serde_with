@@ -557,6 +557,64 @@ pub struct NoneAsEmptyString;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DefaultOnError<T = Same>(PhantomData<T>);
 
+/// Deserialize [`Default`] from `null` values
+///
+/// Instead of erroring on `null` values, it simply deserializes the [`Default`] variant of the type.
+/// During serialization this wrapper does nothing.
+/// The serialization behavior of the underlying type is preserved.
+/// The type must implement [`Default`] for this conversion to work.
+///
+/// The same functionality is also available as [`serde_with::rust::default_on_null`][crate::rust::default_on_null] compatible with serde's with-annotation.
+///
+/// # Examples
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::Deserialize;
+/// # use serde_with::{serde_as, DefaultOnNull};
+/// #
+/// #[serde_as]
+/// #[derive(Deserialize,  Debug)]
+/// struct A {
+///     #[serde_as(deserialize_as = "DefaultOnNull")]
+///     value: u32,
+/// }
+///
+/// let a: A = serde_json::from_str(r#"{"value": 123}"#).unwrap();
+/// assert_eq!(123, a.value);
+///
+/// // null values are deserialized into the default, here 0
+/// let a: A = serde_json::from_str(r#"{"value": null}"#).unwrap();
+/// assert_eq!(0, a.value);
+/// # }
+/// ```
+///
+/// `DefaultOnNull` can be combined with other conversion methods.
+/// In this example we deserialize a `Vec`, each element is deserialized from a string.
+/// If we encounter null, then we get the default value of 0.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DefaultOnNull, DisplayFromStr};
+/// #
+/// #[serde_as]
+/// #[derive(Serialize, Deserialize)]
+/// struct C {
+///     #[serde_as(as = "Vec<DefaultOnNull<DisplayFromStr>>")]
+///     value: Vec<u32>,
+/// };
+///
+/// let c: C = serde_json::from_value(json!({
+///     "value": ["1", "2", null, null, "5"]
+/// })).unwrap();
+/// assert_eq!(vec![1, 2, 0, 0, 5], c.value);
+/// # }
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
+pub struct DefaultOnNull<T = Same>(PhantomData<T>);
+
 /// Deserialize from bytes or string
 ///
 /// Any Rust [`String`] can be converted into bytes, i.e., `Vec<u8>`.

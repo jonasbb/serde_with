@@ -14,15 +14,16 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
     2. [Implementing `SerializeAs` / `DeserializeAs`](#implementing-serializeas--deserializeas)
 2. [De/Serialize Implementations Available](#deserialize-implementations-available)
     1. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
-    2. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-    3. [`Duration` as seconds](#duration-as-seconds)
-    4. [Ignore deserialization errors](#ignore-deserialization-errors)
-    5. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-    6. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-    7. [`None` as empty `String`](#none-as-empty-string)
-    8. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-    9. [Value into JSON String](#value-into-json-string)
-    10. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+    2. [`Default` from `null`](#default-from-null)
+    3. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+    4. [`Duration` as seconds](#duration-as-seconds)
+    5. [Ignore deserialization errors](#ignore-deserialization-errors)
+    6. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+    7. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+    8. [`None` as empty `String`](#none-as-empty-string)
+    9. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+    10. [Value into JSON String](#value-into-json-string)
+    11. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Switching from serde's with to `serde_as`
 
@@ -118,6 +119,25 @@ value: Vec<u8>,
 
 // JSON
 "value": "deadbeef",
+```
+
+### `Default` from `null`
+
+[`DefaultOnNull`]
+
+```ignore
+// Rust
+#[serde_as(as = "DefaultOnNull")]
+value: u32,
+#[serde_as(as = "DefaultOnNull<DisplayFromStr>")]
+value2: u32,
+
+// JSON
+"value": 123,
+"value2": "999",
+
+// Deserializes null into the Default value, i.e.,
+null => 0
 ```
 
 ### De/Serialize with `FromStr` and `Display`
@@ -303,6 +323,7 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 [`chrono::Duration`]: https://docs.rs/chrono/latest/chrono/struct.Duration.html
 [`DefaultOnError`]: crate::DefaultOnError
+[`DefaultOnNull`]: crate::DefaultOnNull
 [`DeserializeAs`]: crate::DeserializeAs
 [`DisplayFromStr`]: crate::DisplayFromStr
 [`DurationSeconds`]: crate::DurationSeconds
