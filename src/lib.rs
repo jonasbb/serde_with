@@ -473,6 +473,9 @@ pub struct NoneAsEmptyString;
 /// The main use case is ignoring error while deserializing.
 /// Instead of erroring, it simply deserializes the [`Default`] variant of the type.
 /// It is not possible to find the error location, i.e., which field had a deserialization error, with this method.
+/// During serialization this wrapper does nothing.
+/// The serialization behavior of the underlying type is preserved.
+/// The type must implement [`Default`] for this conversion to work.
 ///
 /// The same functionality is also available as [`serde_with::rust::default_on_error`][crate::rust::default_on_error] compatible with serde's with-annotation.
 ///
