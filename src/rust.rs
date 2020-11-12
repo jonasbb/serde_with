@@ -1631,18 +1631,20 @@ pub mod bytes_or_string {
 /// ## Converting to `serde_as`
 ///
 /// The same functionality can be more clearly expressed via [`DefaultOnError`] and using the [`serde_as`] macro.
-/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`], such as the tuple and `u32` type.
+/// It can be combined with other convertes as shown.
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
 /// # use serde_derive::Deserialize;
-/// # use serde_with::{serde_as, DefaultOnError};
+/// # use serde_with::{serde_as, DefaultOnError, DisplayFromStr};
 /// #
 /// #[serde_as]
 /// #[derive(Deserialize)]
 /// struct A {
 ///     #[serde_as(as = "DefaultOnError")]
 ///     value: u32,
+///     #[serde_as(as = "DefaultOnError<DisplayFromStr>")]
+///     value2: u32,
 /// }
 /// # }
 /// ```
