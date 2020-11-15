@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Bump minimum supported rust version to 1.40.0
+
 ## [1.2.2]
 
 ### Fixed
