@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Add `DefaultOnNull` as the equivalent for `rust::default_on_null` but for the `serde_as` system.
 
+### Changed
+
+* Bump minimum supported rust version to 1.40.0
+
 ## [1.5.1]
 
 ### Fixed
