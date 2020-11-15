@@ -51,7 +51,7 @@ ron = "0.6"
 rustversion = "1.0.0"
 serde_derive = "1.0.75"
 serde_json = {version = "1.0.25", features = ["preserve_order"]}
-version-sync = "0.8.1"
+version-sync = "0.9.1"
 
 [[test]]
 name = "chrono"
