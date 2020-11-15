@@ -3,9 +3,16 @@
 use s_with as serde_with;
 
 // Ensure that types from the environment do not infect the macro
+#[allow(unused_imports)]
+use crate::Option::*;
 mod std {}
-type Option = ::std::option::Option<()>;
-type Result<T> = ::std::result::Result<T, ()>;
+type Result = ();
+enum Option {
+    Some,
+    None(()),
+    Ok,
+    Err,
+}
 
 // The macro creates custom deserialization code.
 // You need to specify a function name and the field name of the flattened field.
