@@ -37,15 +37,15 @@ extern crate proc_macro;
 mod utils;
 
 use crate::utils::IteratorExt as _;
-use darling::{Error as DarlingError, FromField};
+use darling::{Error as DarlingError, FromField, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::{quote, ToTokens};
 use std::str::FromStr;
 use syn::{
-    parse::Parser, punctuated::Pair, spanned::Spanned, Attribute, DeriveInput, Error, Field,
-    Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path, PathArguments,
-    ReturnType, Type,
+    parse::Parser, parse_macro_input, punctuated::Pair, spanned::Spanned, Attribute, AttributeArgs,
+    DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta,
+    Path, PathArguments, ReturnType, Type,
 };
 
 /// Apply function on every field of structs or enums
@@ -417,26 +417,97 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// }
 /// ```
 ///
-/// # Limitations
+/// # Usage in other procedural macros
 ///
-/// This macro cannot be used outside of the [`serde_with`] crate, since it relies on types defined therein.
-/// The [`serde_with`] crate has to be available in the root namespace under `::serde_with`.
+/// If `serde_as` is being used in a context where the `serde_with` crate is not available from the
+/// root path, but is re-exported at some other path, the `crate = "..."` attribute argument should
+/// be used to specify its path. This may be the case if `serde_as` is being used in a procedural
+/// macro - otherwise, users of that macro would need to add `serde_with` to their Cargo own
+/// manifest.
+///
+/// The `crate` argument will generally be used in conjunction with [`serde`'s own `crate`
+/// argument](https://serde.rs/container-attrs.html#crate).
+///
+/// For example, a type definition may be defined in a procedural macro:
+///
+/// ```rust,ignore
+/// // some_other_lib_derive/src/lib.rs
+///
+/// use proc_macro::TokenStream;
+/// use quote::quote;
+///
+/// #[proc_macro]
+/// pub fn define_some_type(_item: TokenStream) -> TokenStream {
+///     let def = quote! {
+///         #[serde(crate = "::some_other_lib::serde")]
+///         #[::some_other_lib::serde_with::serde_as(crate = "::some_other_lib::serde_with")]
+///         #[derive(::some_other_lib::serde::Deserialize)]
+///         struct Data {
+///             #[serde_as(as = "_")]
+///             a: u32,
+///         }
+///     };
+///
+///     TokenStream::from(def)
+/// }
+/// ```
+///
+/// This can be re-exported through a library which also re-exports `serde` and `serde_with`:
+///
+/// ```rust,ignore
+/// // some_other_lib/src/lib.rs
+///
+/// pub use serde;
+/// pub use serde_with;
+/// pub use some_other_lib_derive::define_some_type;
+/// ```
+///
+/// And the procedural macro can be used by other crates without any additional imports:
+///
+/// ```rust,ignore
+/// // consuming_crate/src/main.rs
+///
+/// some_other_lib::define_some_type!();
+/// ```
 ///
 /// [`serde_as`]: https://docs.rs/serde_with/1.5.1/serde_with/guide/index.html
 /// [`serde_with`]: https://crates.io/crates/serde_with/
 #[proc_macro_attribute]
-pub fn serde_as(_args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
+    #[derive(FromMeta, Debug)]
+    struct SerdeContainerOptions {
+        #[darling(rename = "crate", default)]
+        alt_crate_path: Option<String>,
+    }
+
+    let args: AttributeArgs = parse_macro_input!(args);
+    let container_options = match SerdeContainerOptions::from_list(&args) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(e.write_errors());
+        }
+    };
+
+    let serde_with_crate_path = container_options
+        .alt_crate_path
+        .as_deref()
+        .unwrap_or("::serde_with");
+
     // Convert any error message into a nice compiler error
-    let res =
-        match apply_function_to_struct_and_enum_fields_darling(input, serde_as_add_attr_to_field) {
-            Ok(res) => res,
-            Err(err) => err.write_errors(),
-        };
+    let res = match apply_function_to_struct_and_enum_fields_darling(input, |field| {
+        serde_as_add_attr_to_field(field, serde_with_crate_path)
+    }) {
+        Ok(res) => res,
+        Err(err) => err.write_errors(),
+    };
     TokenStream::from(res)
 }
 
 /// Add the skip_serializing_if annotation to each field of the struct
-fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), DarlingError> {
+fn serde_as_add_attr_to_field(
+    field: &mut Field,
+    serde_with_crate_path: &str,
+) -> Result<(), DarlingError> {
     #[derive(FromField, Debug)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
@@ -503,9 +574,13 @@ fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), DarlingError> {
 
     if let Some(Ok(type_)) = serde_as_options.r#as {
         let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
-            r##"#[serde(with = "::serde_with::As::<{}>")]"##,
-            replace_infer_type_with_type(type_, &syn::parse_str("::serde_with::Same").unwrap())
-                .to_token_stream()
+            r##"#[serde(with = "{}::As::<{}>")]"##,
+            serde_with_crate_path,
+            replace_infer_type_with_type(
+                type_,
+                &syn::parse_str(&format!("{}::Same", serde_with_crate_path)).unwrap()
+            )
+            .to_token_stream()
         ))
         .unwrap();
         let attrs = Attribute::parse_outer
@@ -515,9 +590,13 @@ fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), DarlingError> {
     }
     if let Some(Ok(type_)) = serde_as_options.deserialize_as {
         let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
-            r##"#[serde(deserialize_with = "::serde_with::As::<{}>::deserialize")]"##,
-            replace_infer_type_with_type(type_, &syn::parse_str("::serde_with::Same").unwrap())
-                .to_token_stream()
+            r##"#[serde(deserialize_with = "{}::As::<{}>::deserialize")]"##,
+            serde_with_crate_path,
+            replace_infer_type_with_type(
+                type_,
+                &syn::parse_str(&format!("{}::Same", serde_with_crate_path)).unwrap()
+            )
+            .to_token_stream()
         ))
         .unwrap();
         let attrs = Attribute::parse_outer
@@ -527,9 +606,13 @@ fn serde_as_add_attr_to_field(field: &mut Field) -> Result<(), DarlingError> {
     }
     if let Some(Ok(type_)) = serde_as_options.serialize_as {
         let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
-            r##"#[serde(serialize_with = "::serde_with::As::<{}>::serialize")]"##,
-            replace_infer_type_with_type(type_, &syn::parse_str("::serde_with::Same").unwrap())
-                .to_token_stream()
+            r##"#[serde(serialize_with = "{}::As::<{}>::serialize")]"##,
+            serde_with_crate_path,
+            replace_infer_type_with_type(
+                type_,
+                &syn::parse_str(&format!("{}::Same", serde_with_crate_path)).unwrap()
+            )
+            .to_token_stream()
         ))
         .unwrap();
         let attrs = Attribute::parse_outer
@@ -548,7 +631,7 @@ fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
 
 /// Recursively replace all occurrences of `_` with `replacement` in a [Type][]
 ///
-/// The [serde_as][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for `::serde_with::As`.
+/// The [serde_as][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for `serde_with::As`.
 /// This function replaces all occurrences of the infer type with another type.
 fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
     match to_replace {
