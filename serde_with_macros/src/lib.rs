@@ -360,7 +360,6 @@ fn is_std_option(path: &Path) -> bool {
 /// * it contains a Meta::List
 /// * which contains in another Meta a Meta::NameValue
 /// * with the name being `skip_serializing_if`
-#[allow(clippy::cmp_owned)]
 fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
     // On the example of
     // #[serde(skip_serializing_if = "Option::is_none")]
@@ -378,7 +377,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
                     for expr in expr.nested {
                         if let NestedMeta::Meta(Meta::NameValue(expr)) = expr {
                             if let Some(ident) = expr.path.get_ident() {
-                                if ident.to_string() == name {
+                                if *ident == name {
                                     return true;
                                 }
                             }
