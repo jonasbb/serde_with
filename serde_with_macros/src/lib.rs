@@ -490,8 +490,7 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let serde_with_crate_path = container_options
         .alt_crate_path
-        .as_ref()
-        .map(|path| path.as_str())
+        .as_deref()
         .unwrap_or("::serde_with");
 
     // Convert any error message into a nice compiler error
