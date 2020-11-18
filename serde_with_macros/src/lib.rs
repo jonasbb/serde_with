@@ -47,6 +47,7 @@ use syn::{
     DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta,
     Path, PathArguments, ReturnType, Type,
 };
+use utils::DeriveOptions;
 
 /// Apply function on every field of structs or enums
 fn apply_function_to_struct_and_enum_fields<F>(
@@ -361,25 +362,15 @@ fn is_std_option(path: &Path) -> bool {
 /// * which contains in another Meta a Meta::NameValue
 /// * with the name being `skip_serializing_if`
 fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
-    // On the example of
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    //
-    // `serde` is the outermost path, here namespace
-    // it contains a Meta::List
-    // which contains in another Meta a Meta::NameValue
-    // with the name being `skip_serializing_if`
-
     for attr in &field.attrs {
         if attr.path.is_ident(namespace) {
             // Ignore non parsable attributes, as these are not important for us
-            if let Ok(expr) = attr.parse_meta() {
-                if let Meta::List(expr) = expr {
-                    for expr in expr.nested {
-                        if let NestedMeta::Meta(Meta::NameValue(expr)) = expr {
-                            if let Some(ident) = expr.path.get_ident() {
-                                if *ident == name {
-                                    return true;
-                                }
+            if let Ok(Meta::List(expr)) = attr.parse_meta() {
+                for expr in expr.nested {
+                    if let NestedMeta::Meta(Meta::NameValue(expr)) = expr {
+                        if let Some(ident) = expr.path.get_ident() {
+                            if *ident == name {
+                                return true;
                             }
                         }
                     }
@@ -624,7 +615,7 @@ fn serde_as_add_attr_to_field(
     Ok(())
 }
 
-/// Parse a [String][] and return a [Type][]
+/// Parse a [`String`] and return a [`syn::Type`]
 fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
     Some(syn::parse_str(&*s))
 }
@@ -776,63 +767,70 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
 ///
 /// [`Display`]: std::fmt::Display
 /// [`FromStr`]: std::str::FromStr
-#[proc_macro_derive(DeserializeFromStr)]
+#[proc_macro_derive(DeserializeFromStr, attributes(serde_with))]
 pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
-    // Convert any error message into a nice compiler error
-    let res = match deserialize_fromstr(item) {
-        Ok(res) => res,
-        Err(err) => err.to_compile_error(),
+    let input: DeriveInput = parse_macro_input!(item);
+    let derive_options = match DeriveOptions::from_derive_input(&input) {
+        Ok(opt) => opt,
+        Err(err) => {
+            return err;
+        }
     };
-    TokenStream::from(res)
+    TokenStream::from(deserialize_fromstr(
+        input,
+        derive_options.get_serde_with_path(),
+    ))
 }
 
-fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Error> {
-    let input = syn::parse::<DeriveInput>(item)?;
+fn deserialize_fromstr(
+    input: DeriveInput,
+    serde_with_crate_path: Path,
+) -> proc_macro2::TokenStream {
     let ident = input.ident;
-    Ok(quote! {
+    quote! {
         #[automatically_derived]
-        impl<'de> serde::Deserialize<'de> for #ident
+        impl<'de> #serde_with_crate_path::serde::Deserialize<'de> for #ident
         where
-            Self: std::str::FromStr,
-            <Self as std::str::FromStr>::Err: std::fmt::Display,
+            Self: ::std::str::FromStr,
+            <Self as ::std::str::FromStr>::Err: ::std::fmt::Display,
         {
-            fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+            fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
             where
-                D: serde::Deserializer<'de>,
+                D: #serde_with_crate_path::serde::Deserializer<'de>,
             {
-                struct Helper<S>(std::marker::PhantomData<S>);
+                struct Helper<S>(::std::marker::PhantomData<S>);
 
-                impl<'de, S> serde::de::Visitor<'de> for Helper<S>
+                impl<'de, S> #serde_with_crate_path::serde::de::Visitor<'de> for Helper<S>
                 where
-                    S: std::str::FromStr,
-                    <S as std::str::FromStr>::Err: std::fmt::Display,
+                    S: ::std::str::FromStr,
+                    <S as ::std::str::FromStr>::Err: ::std::fmt::Display,
                 {
                     type Value = S;
 
-                    fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                         write!(formatter, "string")
                     }
 
-                    fn visit_str<E>(self, value: &str) -> std::result::Result<Self::Value, E>
+                    fn visit_str<E>(self, value: &str) -> ::std::result::Result<Self::Value, E>
                     where
-                        E: serde::de::Error,
+                        E: #serde_with_crate_path::serde::de::Error,
                     {
-                        value.parse::<Self::Value>().map_err(serde::de::Error::custom)
+                        value.parse::<Self::Value>().map_err(#serde_with_crate_path::serde::de::Error::custom)
                     }
 
-                    fn visit_bytes<E>(self, value: &[u8]) -> std::result::Result<Self::Value, E>
+                    fn visit_bytes<E>(self, value: &[u8]) -> ::std::result::Result<Self::Value, E>
                     where
-                        E: serde::de::Error,
+                        E: #serde_with_crate_path::serde::de::Error,
                     {
-                        let utf8 = std::str::from_utf8(value).map_err(serde::de::Error::custom)?;
+                        let utf8 = ::std::str::from_utf8(value).map_err(#serde_with_crate_path::serde::de::Error::custom)?;
                         self.visit_str(utf8)
                     }
                 }
 
-                deserializer.deserialize_str(Helper(std::marker::PhantomData))
+                deserializer.deserialize_str(Helper(::std::marker::PhantomData))
             }
         }
-    })
+    }
 }
 
 /// Serialize value by using it's [`Display`] implementation
@@ -869,31 +867,35 @@ fn deserialize_fromstr(item: TokenStream) -> Result<proc_macro2::TokenStream, Er
 ///
 /// [`Display`]: std::fmt::Display
 /// [`FromStr`]: std::str::FromStr
-#[proc_macro_derive(SerializeDisplay)]
+#[proc_macro_derive(SerializeDisplay, attributes(serde_with))]
 pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
-    // Convert any error message into a nice compiler error
-    let res = match serialize_display(item) {
-        Ok(res) => res,
-        Err(err) => err.to_compile_error(),
+    let input: DeriveInput = parse_macro_input!(item);
+    let derive_options = match DeriveOptions::from_derive_input(&input) {
+        Ok(opt) => opt,
+        Err(err) => {
+            return err;
+        }
     };
-    TokenStream::from(res)
+    TokenStream::from(serialize_display(
+        input,
+        derive_options.get_serde_with_path(),
+    ))
 }
 
-fn serialize_display(item: TokenStream) -> Result<proc_macro2::TokenStream, Error> {
-    let input = syn::parse::<DeriveInput>(item)?;
+fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> proc_macro2::TokenStream {
     let ident = input.ident;
-    Ok(quote! {
+    quote! {
         #[automatically_derived]
-        impl<'de> serde::Serialize for #ident
+        impl<'de> #serde_with_crate_path::serde::Serialize for #ident
         where
-            Self: std::fmt::Display,
+            Self: ::std::fmt::Display,
         {
-            fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
             where
-                S: serde::Serializer,
+                S: #serde_with_crate_path::serde::Serializer,
             {
                 serializer.serialize_str(&self.to_string())
             }
         }
-    })
+    }
 }
