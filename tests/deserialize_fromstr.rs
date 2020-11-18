@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use serde_with_macros::DeserializeFromStr;
+use serde_with::DeserializeFromStr;
 use std::{
     num::ParseIntError,
     str::{FromStr, ParseBoolError},

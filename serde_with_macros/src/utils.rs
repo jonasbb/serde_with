@@ -1,5 +1,7 @@
+use darling::FromDeriveInput;
+use proc_macro::TokenStream;
 use std::iter::Iterator;
-use syn::Error;
+use syn::{Error, Path};
 
 /// Merge multiple [`syn::Error`] into one.
 pub(crate) trait IteratorExt {
@@ -19,3 +21,27 @@ pub(crate) trait IteratorExt {
     }
 }
 impl<I> IteratorExt for I where I: Iterator<Item = Result<(), Error>> + Sized {}
+
+/// Attributes usable for derive macros
+#[derive(FromDeriveInput, Debug)]
+#[darling(attributes(serde_with))]
+pub(crate) struct DeriveOptions {
+    /// Path to the crate
+    #[darling(rename = "crate", default)]
+    pub(crate) alt_crate_path: Option<Path>,
+}
+
+impl DeriveOptions {
+    pub(crate) fn from_derive_input(input: &syn::DeriveInput) -> Result<Self, TokenStream> {
+        match <Self as FromDeriveInput>::from_derive_input(&input) {
+            Ok(v) => Ok(v),
+            Err(e) => Err(TokenStream::from(e.write_errors())),
+        }
+    }
+
+    pub(crate) fn get_serde_with_path(&self) -> Path {
+        self.alt_crate_path
+            .clone()
+            .unwrap_or_else(|| syn::parse_str("::serde_with").unwrap())
+    }
+}

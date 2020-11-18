@@ -1,5 +1,5 @@
 use pretty_assertions::assert_eq;
-use serde_with_macros::SerializeDisplay;
+use serde_with::SerializeDisplay;
 use std::fmt;
 
 #[derive(SerializeDisplay)]
