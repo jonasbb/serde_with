@@ -361,25 +361,15 @@ fn is_std_option(path: &Path) -> bool {
 /// * which contains in another Meta a Meta::NameValue
 /// * with the name being `skip_serializing_if`
 fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
-    // On the example of
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    //
-    // `serde` is the outermost path, here namespace
-    // it contains a Meta::List
-    // which contains in another Meta a Meta::NameValue
-    // with the name being `skip_serializing_if`
-
     for attr in &field.attrs {
         if attr.path.is_ident(namespace) {
             // Ignore non parsable attributes, as these are not important for us
-            if let Ok(expr) = attr.parse_meta() {
-                if let Meta::List(expr) = expr {
-                    for expr in expr.nested {
-                        if let NestedMeta::Meta(Meta::NameValue(expr)) = expr {
-                            if let Some(ident) = expr.path.get_ident() {
-                                if *ident == name {
-                                    return true;
-                                }
+            if let Ok(Meta::List(expr)) = attr.parse_meta() {
+                for expr in expr.nested {
+                    if let NestedMeta::Meta(Meta::NameValue(expr)) = expr {
+                        if let Some(ident) = expr.path.get_ident() {
+                            if *ident == name {
+                                return true;
                             }
                         }
                     }
@@ -624,7 +614,7 @@ fn serde_as_add_attr_to_field(
     Ok(())
 }
 
-/// Parse a [String][] and return a [Type][]
+/// Parse a [`String`] and return a [`syn::Type`]
 fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
     Some(syn::parse_str(&*s))
 }

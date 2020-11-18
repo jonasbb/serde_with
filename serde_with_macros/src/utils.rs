@@ -1,6 +1,7 @@
 use std::iter::Iterator;
 use syn::Error;
 
+/// Merge multiple [`syn::Error`] into one.
 pub(crate) trait IteratorExt {
     fn collect_error(self) -> Result<(), Error>
     where
