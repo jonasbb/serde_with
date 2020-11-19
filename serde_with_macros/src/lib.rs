@@ -408,61 +408,22 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// }
 /// ```
 ///
-/// # Usage in other procedural macros
+/// # Alternative path to `serde_with` crate
 ///
-/// If `serde_as` is being used in a context where the `serde_with` crate is not available from the
-/// root path, but is re-exported at some other path, the `crate = "..."` attribute argument should
-/// be used to specify its path. This may be the case if `serde_as` is being used in a procedural
-/// macro - otherwise, users of that macro would need to add `serde_with` to their Cargo own
-/// manifest.
-///
-/// The `crate` argument will generally be used in conjunction with [`serde`'s own `crate`
-/// argument](https://serde.rs/container-attrs.html#crate).
-///
-/// For example, a type definition may be defined in a procedural macro:
+/// If `serde_with` is not available at the default path, its path should be specified with the
+/// `crate` argument. See [re-exporting `serde_as`] for more use case information.
 ///
 /// ```rust,ignore
-/// // some_other_lib_derive/src/lib.rs
-///
-/// use proc_macro::TokenStream;
-/// use quote::quote;
-///
-/// #[proc_macro]
-/// pub fn define_some_type(_item: TokenStream) -> TokenStream {
-///     let def = quote! {
-///         #[serde(crate = "::some_other_lib::serde")]
-///         #[::some_other_lib::serde_with::serde_as(crate = "::some_other_lib::serde_with")]
-///         #[derive(::some_other_lib::serde::Deserialize)]
-///         struct Data {
-///             #[serde_as(as = "_")]
-///             a: u32,
-///         }
-///     };
-///
-///     TokenStream::from(def)
+/// #[serde_as(crate = "::some_other_lib::serde_with")]
+/// #[derive(Deserialize)]
+/// struct Data {
+///     #[serde_as(as = "_")]
+///     a: u32,
 /// }
 /// ```
 ///
-/// This can be re-exported through a library which also re-exports `serde` and `serde_with`:
-///
-/// ```rust,ignore
-/// // some_other_lib/src/lib.rs
-///
-/// pub use serde;
-/// pub use serde_with;
-/// pub use some_other_lib_derive::define_some_type;
-/// ```
-///
-/// And the procedural macro can be used by other crates without any additional imports:
-///
-/// ```rust,ignore
-/// // consuming_crate/src/main.rs
-///
-/// some_other_lib::define_some_type!();
-/// ```
-///
 /// [`serde_as`]: https://docs.rs/serde_with/1.5.1/serde_with/guide/index.html
-/// [`serde_with`]: https://crates.io/crates/serde_with/
+/// [re-exporting `serde_as`]: https://docs.rs/serde_with/1.5.1/serde_with/guide/serde_as/index.html#re-exporting-serde_as
 #[proc_macro_attribute]
 pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
     #[derive(FromMeta, Debug)]

@@ -1,7 +1,7 @@
 # `serde_as` Annotation
 
 This is an alternative to serde's with-annotation.
-It is more flexable and composable but work with fewer types.
+It is more flexible and composable but work with fewer types.
 
 The scheme is based on two new traits, [`SerializeAs`] and [`DeserializeAs`], which need to be implemented by all types which want to be compatible with `serde_as`.
 The proc macro attribute [`#[serde_as]`][crate::serde_as] exists as a usability boost for users.
@@ -12,6 +12,7 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
 1. [Switching from serde's with to `serde_as`](#switching-from-serdes-with-to-serde_as)
     1. [Deserializing Optional Fields](#deserializing-optional-fields)
     2. [Implementing `SerializeAs` / `DeserializeAs`](#implementing-serializeas--deserializeas)
+    3. [Using `serde_as` in a procedural macro](#re-exporting-serde_as)
 2. [De/Serialize Implementations Available](#deserialize-implementations-available)
     1. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
     2. [`Default` from `null`](#default-from-null)
@@ -103,6 +104,57 @@ Most "leaf" types do not need to implement these traits since they are supported
 [`SerializeAs`] / [`DeserializeAs`] is very important for collection types, like `Vec` or `BTreeMap`, since they need special handling for they key/value de/serialization such that the conversions can be done on the key/values.
 You also find them implemented on the conversion types, such as the [`DisplayFromStr`] type.
 These make up the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
+
+### Re-exporting `serde_as`
+
+If `serde_as` is being used in a context where the `serde_with` crate is not available from the root
+path, but is re-exported at some other path, the `crate = "..."` attribute argument should be used
+to specify its path. This may be the case if `serde_as` is being used in a procedural macro -
+otherwise, users of that macro would need to add `serde_with` to their own Cargo manifest.
+
+The `crate` argument will generally be used in conjunction with [`serde`'s own `crate` argument].
+
+For example, a type definition may be defined in a procedural macro:
+
+```rust,ignore
+// some_other_lib_derive/src/lib.rs
+
+use proc_macro::TokenStream;
+use quote::quote;
+
+#[proc_macro]
+pub fn define_some_type(_item: TokenStream) -> TokenStream {
+    let def = quote! {
+        #[serde(crate = "::some_other_lib::serde")]
+        #[::some_other_lib::serde_with::serde_as(crate = "::some_other_lib::serde_with")]
+        #[derive(::some_other_lib::serde::Deserialize)]
+        struct Data {
+            #[serde_as(as = "_")]
+            a: u32,
+        }
+    };
+
+    TokenStream::from(def)
+}
+```
+
+This can be re-exported through a library which also re-exports `serde` and `serde_with`:
+
+```rust,ignore
+// some_other_lib/src/lib.rs
+
+pub use serde;
+pub use serde_with;
+pub use some_other_lib_derive::define_some_type;
+```
+
+And the procedural macro can be used by other crates without any additional imports:
+
+```rust,ignore
+// consuming_crate/src/main.rs
+
+some_other_lib::define_some_type!();
+```
 
 ## De/Serialize Implementations Available
 
@@ -336,3 +388,4 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [duration to UNIX epoch]: crate::DurationSeconds
 [hex strings]: crate::hex::Hex
 [serde_with#185]: https://github.com/jonasbb/serde_with/issues/185
+[`serde`'s own `crate` argument]: https://serde.rs/container-attrs.html#crate
