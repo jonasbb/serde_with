@@ -691,6 +691,16 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
 ///
 /// Serialization with [`Display`] is available with the matching [`SerializeDisplay`] derive.
 ///
+/// # Attributes
+///
+/// Attributes for the derive can be specified via the `#[serde_with(...)]` attribute on the struct or enum.
+/// Currently, these arguments to the attribute are possible:
+///
+/// * **`#[serde_with(crate = "...")]`**: This allows using `DeserializeFromStr` when `serde_with` is not available from the crate root.
+///     This happens while [renaming dependencies in Cargo.toml][cargo-toml-rename] or when re-exporting the macro from a different crate.
+///
+///     This argument is analogue to [serde's crate argument][serde-crate] and the [crate argument to `serde_as`][serde-as-crate].
+///
 /// # Example
 ///
 /// ```rust,ignore
@@ -728,6 +738,9 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
 ///
 /// [`Display`]: std::fmt::Display
 /// [`FromStr`]: std::str::FromStr
+/// [cargo-toml-rename]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#renaming-dependencies-in-cargotoml
+/// [serde-as-crate]: https://docs.rs/serde_with/1.5.1/serde_with/guide/serde_as/index.html#re-exporting-serde_as
+/// [serde-crate]: https://serde.rs/container-attrs.html#crate
 #[proc_macro_derive(DeserializeFromStr, attributes(serde_with))]
 pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(item);
@@ -805,6 +818,16 @@ fn deserialize_fromstr(
 ///
 /// Deserialization with [`FromStr`] is available with the matching [`DeserializeFromStr`] derive.
 ///
+/// # Attributes
+///
+/// Attributes for the derive can be specified via the `#[serde_with(...)]` attribute on the struct or enum.
+/// Currently, these arguments to the attribute are possible:
+///
+/// * **`#[serde_with(crate = "...")]`**: This allows using `SerializeDisplay` when `serde_with` is not available from the crate root.
+///     This happens while [renaming dependencies in Cargo.toml][cargo-toml-rename] or when re-exporting the macro from a different crate.
+///
+///     This argument is analogue to [serde's crate argument][serde-crate] and the [crate argument to `serde_as`][serde-as-crate].
+///
 /// # Example
 ///
 /// ```rust,ignore
@@ -828,6 +851,9 @@ fn deserialize_fromstr(
 ///
 /// [`Display`]: std::fmt::Display
 /// [`FromStr`]: std::str::FromStr
+/// [cargo-toml-rename]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#renaming-dependencies-in-cargotoml
+/// [serde-as-crate]: https://docs.rs/serde_with/1.5.1/serde_with/guide/serde_as/index.html#re-exporting-serde_as
+/// [serde-crate]: https://serde.rs/container-attrs.html#crate
 #[proc_macro_derive(SerializeDisplay, attributes(serde_with))]
 pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(item);
