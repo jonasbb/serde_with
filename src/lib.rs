@@ -677,7 +677,7 @@ pub struct BytesOrString;
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct duration and allows deserialization from any type.
 /// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports `chrono::Duration` with the `chrono`-[feature flag].
+/// This type also supports [`chrono::Duration`] with the `chrono`-[feature flag].
 ///
 /// | Duration Type         | Converter                 | Available `FORMAT`s    |
 /// | --------------------- | ------------------------- | ---------------------- |
@@ -817,7 +817,7 @@ pub struct DurationSeconds<
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct duration and allows deserialization from any type.
 /// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports `chrono::Duration` with the `chrono`-[feature flag].
+/// This type also supports [`chrono::Duration`] with the `chrono`-[feature flag].
 ///
 /// | Duration Type         | Converter                 | Available `FORMAT`s    |
 /// | --------------------- | ------------------------- | ---------------------- |
@@ -943,7 +943,7 @@ pub struct DurationSecondsWithFrac<
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct timestamp and allows deserialization from any type.
 /// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports `chrono::DateTime` with the `chrono`-[feature flag].
+/// This type also supports [`chrono::DateTime`][DateTime] with the `chrono`-[feature flag].
 ///
 /// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
 /// | ------------------------- | -------------------------- | ---------------------- |
@@ -1008,7 +1008,7 @@ pub struct DurationSecondsWithFrac<
 /// # }
 /// ```
 ///
-/// [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] are also supported when using the `chrono` feature.
+/// [`chrono::DateTime<Utc>`][DateTime] and [`chrono::DateTime<Local>`][DateTime] are also supported when using the `chrono` feature.
 /// Like [`SystemTime`], it is a signed timestamp, thus can be de/serialized as an `i64`.
 ///
 /// ```rust
@@ -1066,9 +1066,8 @@ pub struct DurationSecondsWithFrac<
 /// # }
 /// ```
 ///
-/// [`chrono::DateTime<Local>`]: chrono_crate::DateTime
-/// [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 /// [`SystemTime`]: std::time::SystemTime
+/// [DateTime]: chrono_crate::DateTime
 /// [feature flag]: https://docs.rs/serde_with/1.5.1/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSeconds<
@@ -1087,7 +1086,7 @@ pub struct TimestampSeconds<
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct timestamp and allows deserialization from any type.
 /// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports `chrono::DateTime` with the `chrono`-[feature flag].
+/// This type also supports [`chrono::DateTime`][DateTime] with the `chrono`-[feature flag].
 ///
 /// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
 /// | ------------------------- | -------------------------- | ---------------------- |
@@ -1146,7 +1145,7 @@ pub struct TimestampSeconds<
 /// # }
 /// ```
 ///
-/// [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] are also supported when using the `chrono` feature.
+/// [`chrono::DateTime<Utc>`][DateTime] and [`chrono::DateTime<Local>`][DateTime] are also supported when using the `chrono` feature.
 /// Like [`SystemTime`], it is a signed timestamp, thus can be de/serialized as an `i64`.
 ///
 /// ```rust
@@ -1196,9 +1195,8 @@ pub struct TimestampSeconds<
 /// # }
 /// ```
 ///
-/// [`chrono::DateTime<Local>`]: chrono_crate::DateTime
-/// [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 /// [`SystemTime`]: std::time::SystemTime
+/// [DateTime]: chrono_crate::DateTime
 /// [feature flag]: https://docs.rs/serde_with/1.5.1/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<
