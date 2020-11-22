@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Support specifying a path to the `serde_with` crate for the `serde_as` and derive macros.
+    This is useful when using crate renaming in Cargo.toml or while re-exporting the macros.
+
+    Many thanks to @tobz1000 for raising the issue and contributing fixes.
+
 ### Changed
 
 * Bump minimum supported rust version to 1.40.0
