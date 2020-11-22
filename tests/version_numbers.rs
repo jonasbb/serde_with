@@ -13,6 +13,11 @@ fn test_readme_deps_in_lib() {
 }
 
 #[test]
+fn test_changelog() {
+    assert_contains_regex!("CHANGELOG.md", r#"## \[{version}\]"#);
+}
+
+#[test]
 fn test_html_root_url() {
     assert_html_root_url_updated!("src/lib.rs");
 }
