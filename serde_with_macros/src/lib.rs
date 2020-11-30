@@ -24,6 +24,8 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/1.3.0")]
+// Necessary for nightly clippy lints
+#![allow(clippy::unknown_clippy_lints)]
 
 //! proc-macro extensions for [`serde_with`]
 //!
@@ -577,6 +579,10 @@ fn serde_as_add_attr_to_field(
 }
 
 /// Parse a [`String`] and return a [`syn::Type`]
+
+// Return type is required by the darling struct fields
+// It needs to be an Option, such that is represents an optional field
+#[allow(clippy::unnecessary_wraps)]
 fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
     Some(syn::parse_str(&*s))
 }
