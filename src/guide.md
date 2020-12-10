@@ -6,61 +6,7 @@ For example, you can serialize [a map as a sequence of tuples][crate::guide::ser
 
 The crate offers four types of functionality.
 
-## 1. Integration with serde's with-annotation
-
-[serde's with-annotation][with-annotation] allows to specify a different serialization or deserialization function for a field.
-It is usefull to adapt the serialization of existing types to the requirements of a protocol.
-Most modules in this crate can be used together with the with-annotation.
-
-The annotation approach has one big drawback, in that it is very inflexible.
-It allows to specify arbitrary serialization code, but the code has to perform the correct transformations.
-It is not possible to combine multiple of those functions.
-One common use case for this is the serialization of collections like `Vec`.
-If you have a field of type `T`, you can apply the with-annotation, but if you have a field of type `Vec<T>`, there is no way to re-use the same functions for the with-annotation.
-This inflexibility is fixed with the `serde_as` scheme below.
-
-### Example
-
-```rust
-# use serde_derive::{Deserialize, Serialize};
-# use std::net::Ipv4Addr;
-#
-# #[derive(Debug, PartialEq, Eq)]
-#[derive(Deserialize, Serialize)]
-struct Data {
-    // Type does not implement Serialize or Deserialize
-    #[serde(with = "serde_with::rust::display_fromstr")]
-    address: Ipv4Addr,
-    // Treat the Vec like a map with duplicates
-    #[serde(with = "serde_with::rust::tuple_list_as_map")]
-    vec_as_map: Vec<(String, u32)>,
-}
-
-let data = Data {
-    address: Ipv4Addr::new(192, 168, 0, 1),
-    vec_as_map: vec![
-        ("Hello".into(), 123),
-        ("World".into(), 456),
-        ("Hello".into(), 123),
-    ],
-};
-
-let json = r#"{
-  "address": "192.168.0.1",
-  "vec_as_map": {
-    "Hello": 123,
-    "World": 456,
-    "Hello": 123
-  }
-}"#;
-
-// Test Serialization
-assert_eq!(json, serde_json::to_string_pretty(&data).unwrap());
-// Test Deserialization
-assert_eq!(data, serde_json::from_str(json).unwrap());
-```
-
-## 2. A more flexible and composable replacement for the with annotation, called `serde_as` *(v1.5.0+)*
+## 1. A more flexible and composable replacement for the with annotation, called `serde_as` *(v1.5.0+)*
 
 This is an alternative to the with-annotation, which adds flexibility and composability to the scheme.
 The main downside is that it work with fewer types than aboves with-annotations.
@@ -105,6 +51,60 @@ let json = r#"{
     "123": "Hello",
     "456": "World",
     "123": "Hello"
+  }
+}"#;
+
+// Test Serialization
+assert_eq!(json, serde_json::to_string_pretty(&data).unwrap());
+// Test Deserialization
+assert_eq!(data, serde_json::from_str(json).unwrap());
+```
+
+## 2. Integration with serde's with-annotation
+
+[serde's with-annotation][with-annotation] allows to specify a different serialization or deserialization function for a field.
+It is usefull to adapt the serialization of existing types to the requirements of a protocol.
+Most modules in this crate can be used together with the with-annotation.
+
+The annotation approach has one big drawback, in that it is very inflexible.
+It allows to specify arbitrary serialization code, but the code has to perform the correct transformations.
+It is not possible to combine multiple of those functions.
+One common use case for this is the serialization of collections like `Vec`.
+If you have a field of type `T`, you can apply the with-annotation, but if you have a field of type `Vec<T>`, there is no way to re-use the same functions for the with-annotation.
+This inflexibility is fixed with the `serde_as` scheme below.
+
+### Example
+
+```rust
+# use serde_derive::{Deserialize, Serialize};
+# use std::net::Ipv4Addr;
+#
+# #[derive(Debug, PartialEq, Eq)]
+#[derive(Deserialize, Serialize)]
+struct Data {
+    // Type does not implement Serialize or Deserialize
+    #[serde(with = "serde_with::rust::display_fromstr")]
+    address: Ipv4Addr,
+    // Treat the Vec like a map with duplicates
+    #[serde(with = "serde_with::rust::tuple_list_as_map")]
+    vec_as_map: Vec<(String, u32)>,
+}
+
+let data = Data {
+    address: Ipv4Addr::new(192, 168, 0, 1),
+    vec_as_map: vec![
+        ("Hello".into(), 123),
+        ("World".into(), 456),
+        ("Hello".into(), 123),
+    ],
+};
+
+let json = r#"{
+  "address": "192.168.0.1",
+  "vec_as_map": {
+    "Hello": 123,
+    "World": 456,
+    "Hello": 123
   }
 }"#;
 
