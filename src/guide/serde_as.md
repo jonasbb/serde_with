@@ -12,7 +12,9 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
 1. [Switching from serde's with to `serde_as`](#switching-from-serdes-with-to-serde_as)
     1. [Deserializing Optional Fields](#deserializing-optional-fields)
     2. [Implementing `SerializeAs` / `DeserializeAs`](#implementing-serializeas--deserializeas)
-    3. [Using `serde_as` in a procedural macro](#re-exporting-serde_as)
+    3. [Using `#[serde_as]` on types without `SerializeAs` and `Serialize` implementations](#using-serde_as-on-types-without-serializeas-and-serialize-implementations)
+    4. [Using `#[serde_as]` with serde's remote derives](#using-serde_as-with-serdes-remote-derives)
+    5. [Re-exporting `serde_as`](#re-exporting-serde_as)
 2. [De/Serialize Implementations Available](#deserialize-implementations-available)
     1. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
     2. [`Default` from `null`](#default-from-null)
@@ -104,6 +106,130 @@ Most "leaf" types do not need to implement these traits since they are supported
 [`SerializeAs`] / [`DeserializeAs`] is very important for collection types, like `Vec` or `BTreeMap`, since they need special handling for they key/value de/serialization such that the conversions can be done on the key/values.
 You also find them implemented on the conversion types, such as the [`DisplayFromStr`] type.
 These make up the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
+
+### Using `#[serde_as]` on types without `SerializeAs` and `Serialize` implementations
+
+The `SerializeAs` and `DeserializeAs` traits can easily be used together with types from other crates without running into orphan rule problems.
+This is a distinct advantage of the `serde_as` system.
+For this example we assume we have a type `RemoteType` from a dependency which does not implement `Serialize` nor `SerializeAs`.
+We assume we have a module containing a `serialize` and a `deserialize` function, which can be used in the `#[serde(with = "MODULE")]` annotation.
+You find an example in the [offical serde documentation](https://serde.rs/custom-date-format.html).
+
+Our goal is to serialize this `Data` struct.
+Right now we do not have anything we can use to replace `???` with, since `_` only works if `RemoteType` would implement `Serialize`, which it does not.
+
+```rust
+# #[cfg(FALSE)] {
+#[serde_as]
+#[derive(serde::Serialize)]
+struct Data {
+    #[serde_as(as = "Vec<???>")]
+    vec: Vec<RemoteType>,
+}
+# }
+```
+
+We need to create a new type for which we can implement `SerializeAs`, to replace the `???`.
+The `SerializeAs` implementation is **always** written for a local type.
+This allows it to seamlessly work with types from dependencies without running into orphan rule problems.
+
+```rust
+# #[cfg(FALSE)] {
+struct Localtype;
+
+impl SerializeAs<RemoteType> for LocalType {
+    fn serialize_as<S>(value: &RemoteType, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {  
+        MODULE::serialize(value, serializer)
+    }
+}
+# }
+```
+
+This is how the final implementation looks like.
+We assumed we have a module `MODULE` with a `serialize` function already, which we use here to provide the implementation.
+As can be seen this is mostly boilerplate, since the most part is encapsulated in `$module::serialize`.
+The final `Data` struct will now look like:
+
+```rust
+# #[cfg(FALSE)] {
+#[serde_as]
+#[derive(serde::Serialize)]
+struct Data {
+    #[serde_as(as = "Vec<LocalType>")]
+    vec: Vec<RemoteType>,
+}
+# }
+```
+
+### Using `#[serde_as]` with serde's remote derives
+
+A special case of the above section is using it on remote derives.
+This is a special functionality of serde where it derives the de-/serialization code for a type from another crate if all fields are `pub`.
+You can find all the details in the [official serde documentation](https://serde.rs/remote-derive.html).
+
+```rust
+# #[cfg(FALSE)] {
+// Pretend that this is somebody else's crate, not a module.
+mod other_crate {
+    // Neither Serde nor the other crate provides Serialize and Deserialize
+    // impls for this struct.
+    pub struct Duration {
+        pub secs: i64,
+        pub nanos: i32,
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+use other_crate::Duration;
+
+// Serde calls this the definition of the remote type. It is just a copy of the
+// remote data structure. The `remote` attribute gives the path to the actual
+// type we intend to derive code for.
+#[derive(serde::Serialize, serde::Deserialize)]
+#[serde(remote = "Duration")]
+struct DurationDef {
+    secs: i64,
+    nanos: i32,
+}
+# }
+```
+
+Our goal is it now to use `Duration` within `serde_as`.
+We make use of the existing `DurationDef` type and its `serialize` and `deserialize` functions.
+We can write this implementation.
+The implementation for `DeserializeAs` works analogue.
+
+```rust
+# #[cfg(FALSE)] {
+impl SerializeAs<Duration> for DurationDef {
+    fn serialize_as<S>(value: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {  
+        DurationDef::serialize(value, serializer)
+    }
+}
+# }
+```
+
+This now allows us to use `Duration` for serialization.
+
+```rust
+# #[cfg(FALSE)] {
+use other_crate::Duration;
+
+#[serde_as]
+#[derive(serde::Serialize)]
+struct Data {
+    #[serde_as(as = "Vec<DurationDef>")]
+    vec: Vec<Duration>,
+}
+# }
+```
 
 ### Re-exporting `serde_as`
 

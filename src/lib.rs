@@ -44,7 +44,7 @@
 //! * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
 //!      Check the documentation for [`serde_with::rust::StringWithSeparator::<CommaSeparator>`][StringWithSeparator].
 //!
-//! Check out the [**user guide**][user guide] to find out more tips and tricks about this crate.
+//! **Check out the [user guide][user guide] to find out more tips and tricks about this crate.**
 //!
 //! # Use `serde_with` in your Project
 //!
