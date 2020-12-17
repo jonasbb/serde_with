@@ -74,6 +74,11 @@ path = "tests/serde_as.rs"
 required-features = ["macros"]
 
 [[test]]
+name = "serde_as_duration"
+path = "tests/serde_as_duration.rs"
+required-features = ["macros"]
+
+[[test]]
 name = "serde_as_macro"
 path = "tests/serde_as_macro.rs"
 required-features = ["macros"]
