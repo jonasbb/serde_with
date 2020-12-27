@@ -120,24 +120,12 @@ impl std::ops::Mul<u32> for DurationSigned {
     }
 }
 
-impl std::ops::MulAssign<u32> for DurationSigned {
-    fn mul_assign(&mut self, rhs: u32) {
-        self.duration *= rhs;
-    }
-}
-
 impl std::ops::Div<u32> for DurationSigned {
     type Output = DurationSigned;
 
     fn div(mut self, rhs: u32) -> Self::Output {
         self.duration /= rhs;
         self
-    }
-}
-
-impl std::ops::DivAssign<u32> for DurationSigned {
-    fn div_assign(&mut self, rhs: u32) {
-        self.duration /= rhs;
     }
 }
 
