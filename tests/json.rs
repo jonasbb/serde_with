@@ -12,7 +12,7 @@ fn test_nested_json() {
     struct Struct {
         #[serde_as(as = "JsonString")]
         value: Nested,
-    };
+    }
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]

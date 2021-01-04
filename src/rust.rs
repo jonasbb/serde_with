@@ -566,7 +566,7 @@ pub mod sets_duplicate_value_is_error {
         struct SeqVisitor<T, V> {
             marker: PhantomData<T>,
             set_item_type: PhantomData<V>,
-        };
+        }
 
         impl<'de, T, V> Visitor<'de> for SeqVisitor<T, V>
         where
@@ -670,7 +670,7 @@ pub mod maps_duplicate_key_is_error {
             marker: PhantomData<T>,
             map_key_type: PhantomData<K>,
             map_value_type: PhantomData<V>,
-        };
+        }
 
         impl<'de, T, K, V> Visitor<'de> for MapVisitor<T, K, V>
         where
@@ -739,7 +739,7 @@ pub mod sets_first_value_wins {
         struct SeqVisitor<T, V> {
             marker: PhantomData<T>,
             set_item_type: PhantomData<V>,
-        };
+        }
 
         impl<'de, T, V> Visitor<'de> for SeqVisitor<T, V>
         where
@@ -808,7 +808,7 @@ pub mod sets_last_value_wins {
         struct SeqVisitor<T, V> {
             marker: PhantomData<T>,
             set_item_type: PhantomData<V>,
-        };
+        }
 
         impl<'de, T, V> Visitor<'de> for SeqVisitor<T, V>
         where
@@ -911,7 +911,7 @@ pub mod maps_first_key_wins {
             marker: PhantomData<T>,
             map_key_type: PhantomData<K>,
             map_value_type: PhantomData<V>,
-        };
+        }
 
         impl<'de, T, K, V> Visitor<'de> for MapVisitor<T, K, V>
         where
@@ -1714,7 +1714,7 @@ pub mod default_on_error {
             // This is necessary to make this work, when instead of having a direct value
             // like integer or string, the deserializer sees a list or map.
             Error(serde::de::IgnoredAny),
-        };
+        }
 
         Ok(match Deserialize::deserialize(deserializer) {
             Ok(GoodOrError::Good(res)) => res,
