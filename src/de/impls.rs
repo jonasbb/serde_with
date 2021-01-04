@@ -290,7 +290,7 @@ macro_rules! tuple_impl {
 
                         Ok(($($t.into_inner(),)+))
                     }
-                };
+                }
 
                 deserializer.deserialize_tuple(
                     $len,
@@ -355,7 +355,7 @@ macro_rules! array_impl {
                             },
                         )*])
                     }
-                };
+                }
 
                 deserializer.deserialize_tuple(
                     $len,
@@ -650,7 +650,7 @@ where
             // like integer or string, the deserializer sees a list or map.
             Error(IgnoredAny),
             _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
-        };
+        }
 
         Ok(match Deserialize::deserialize(deserializer) {
             Ok(GoodOrError::<T, TAs>::Good(res)) => res.into_inner(),

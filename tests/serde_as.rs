@@ -48,7 +48,7 @@ fn test_option() {
     struct Struct {
         #[serde_as(as = "_")]
         value: Option<u32>,
-    };
+    }
     check_error_deserialization::<Struct>(
         r#"{}"#,
         expect![[r#"missing field `value` at line 1 column 2"#]],
@@ -535,7 +535,7 @@ fn test_default_on_error() {
     struct Struct2 {
         #[serde_as(as = "DefaultOnError<Vec<DisplayFromStr>>")]
         value: Vec<u32>,
-    };
+    }
     check_deserialization(Struct2 { value: vec![] }, r#"{"value":}"#);
 
     #[serde_as]
