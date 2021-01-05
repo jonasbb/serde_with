@@ -170,3 +170,23 @@ fn test_serde_as_macro_serialize_deserialize() {
     assert_eq!(expected, serde_json::to_string_pretty(&data).unwrap());
     assert_eq!(data, serde_json::from_str(expected).unwrap());
 }
+
+/// Test that the [`serde_as`] macro works correctly if applied multiple times to a field
+#[test]
+fn test_serde_as_macro_multiple_field_attributes() {
+    #[serde_as]
+    #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+    struct Data {
+        #[serde_as(serialize_as = "DisplayFromStr")]
+        #[serde_as(deserialize_as = "DisplayFromStr")]
+        a: u32,
+    }
+
+    let data = Data { a: 10 };
+    let expected = r##"{
+  "a": "10"
+}"##;
+
+    assert_eq!(expected, serde_json::to_string_pretty(&data).unwrap());
+    assert_eq!(data, serde_json::from_str(expected).unwrap());
+}
