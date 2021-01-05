@@ -499,6 +499,7 @@ fn serde_as_add_attr_to_field(
     let serde_as_options = SerdeAsOptions::from_field(field)?;
     let serde_with_options = SerdeWithOptions::from_field(field)?;
 
+    // TODO allow multiple attributes
     // Find index of serde_as attribute
     let serde_as_idx = field.attrs.iter().enumerate().find_map(|(idx, attr)| {
         if attr.path.is_ident("serde_as") {
@@ -514,6 +515,10 @@ fn serde_as_add_attr_to_field(
 
     // serde_as Attribute
     field.attrs.remove(serde_as_idx);
+
+    if !serde_as_options.has_any_set() {
+        return Err(DarlingError::custom("An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter."));
+    }
 
     // Check if there are any conflicting attributes
     if serde_as_options.has_any_set() && serde_with_options.has_any_set() {

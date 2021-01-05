@@ -93,3 +93,15 @@ error: Unable to parse attribute: expected literal
    |
 67 |     #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
    |                                                       ^^^^^^^^^^^^^^
+
+error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
+  --> $DIR/serde_as.rs:70:5
+   |
+70 |     no_entries: u32,
+   |     ^^^^^^^^^^
+
+error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
+  --> $DIR/serde_as.rs:72:5
+   |
+72 |     no_entries_brackets: u32,
+   |     ^^^^^^^^^^^^^^^^^^^
