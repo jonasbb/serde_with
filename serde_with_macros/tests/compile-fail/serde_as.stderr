@@ -87,3 +87,9 @@ error: Unknown field: `unknw2`
    |
 59 |     #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
    |                                   ^^^^^^
+
+error: Unable to parse attribute: expected literal
+  --> $DIR/serde_as.rs:67:55
+   |
+67 |     #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
+   |                                                       ^^^^^^^^^^^^^^
