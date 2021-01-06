@@ -59,6 +59,46 @@ use super::*;
 /// The `T` type is the on the Rust side after deserialization, whereas the `U` type determines how the value will be deserialized.
 /// These two changes are usually enough to make a container type implement [`DeserializeAs`][].
 ///
+///
+/// [`DeserializeAsWrap`] is a piece of glue code which turns [`DeserializeAs`] into a serde compatible datatype, by converting all calls to `deserialize` into `deserialize_as`.
+/// This allows us to implement [`DeserializeAs`] such that it can be applied recursively throughout the whole data structure.
+/// This is mostly important for container types, such as `Vec` or `BTreeMap`.
+/// In a `BTreeMap` this allows us to specify two different serialization behaviors, one for key and one for value, using the [`DeserializeAs`] trait.
+///
+/// ## Implementing a converter Type
+///
+/// This shows a simplified implementation for [`DisplayFromStr`].
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros"))] {
+/// # use serde::Deserialize;
+/// # use serde::de::Error;
+/// # use serde_with::DeserializeAs;
+/// # use std::str::FromStr;
+/// # use std::fmt::Display;
+/// struct DisplayFromStr;
+///
+/// impl<'de, T> DeserializeAs<'de, T> for DisplayFromStr
+/// where
+///     T: FromStr,
+///     T::Err: Display,
+/// {
+///     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+///     where
+///         D: serde::Deserializer<'de>,
+///     {
+///         let s = String::deserialize(deserializer).map_err(Error::custom)?;
+///         s.parse().map_err(Error::custom)
+///     }
+/// }
+/// #
+/// # #[serde_with::serde_as]
+/// # #[derive(serde::Deserialize)]
+/// # struct S (#[serde_as(as = "DisplayFromStr")] bool);
+/// #
+/// # assert_eq!(false, serde_json::from_str::<S>(r#""false""#).unwrap().0);
+/// # }
+/// ```
 /// [`BTreeMap`]: std::collections::BTreeMap
 /// [`Duration`]: std::time::Duration
 /// [`FromStr`]: std::str::FromStr
