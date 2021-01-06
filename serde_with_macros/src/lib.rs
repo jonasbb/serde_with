@@ -499,7 +499,8 @@ fn serde_as_add_attr_to_field(
     let serde_as_options = SerdeAsOptions::from_field(field)?;
     let serde_with_options = SerdeWithOptions::from_field(field)?;
 
-    // TODO allow multiple attributes
+    let mut errors = Vec::new();
+
     // Find index of serde_as attribute
     let serde_as_idxs: Vec<_> = field
         .attrs
@@ -522,18 +523,22 @@ fn serde_as_add_attr_to_field(
     }
 
     if !serde_as_options.has_any_set() {
-        return Err(DarlingError::custom("An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter."));
+        errors.push(DarlingError::custom("An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter."));
     }
 
     // Check if there are any conflicting attributes
     if serde_as_options.has_any_set() && serde_with_options.has_any_set() {
-        return Err(DarlingError::custom("Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`."));
+        errors.push(DarlingError::custom("Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`."));
     }
 
     if serde_as_options.r#as.is_some() && serde_as_options.deserialize_as.is_some() {
-        return Err(DarlingError::custom("Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code."));
+        errors.push(DarlingError::custom("Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code."));
     } else if serde_as_options.r#as.is_some() && serde_as_options.serialize_as.is_some() {
-        return Err(DarlingError::custom("Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code."));
+        errors.push(DarlingError::custom("Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code."));
+    }
+
+    if !errors.is_empty() {
+        return Err(DarlingError::multiple(errors));
     }
 
     if let Some(Ok(type_)) = serde_as_options.r#as {
