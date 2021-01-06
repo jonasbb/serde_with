@@ -60,4 +60,16 @@ struct ConflictingAsAnnotations {
     two_unkowns: u32,
 }
 
+/// Test error message for malformed attributes
+#[serde_as]
+#[derive(Serialize)]
+struct MalformedAttributes {
+    #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
+    missing_quotes: u32,
+    #[serde_as]
+    no_entries: u32,
+    #[serde_as()]
+    no_entries_brackets: u32,
+}
+
 fn main() {}

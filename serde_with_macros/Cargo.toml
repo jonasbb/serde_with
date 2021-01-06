@@ -21,7 +21,7 @@ proc-macro = true
 maintenance = {status = "actively-developed"}
 
 [dependencies]
-darling = "0.11.0"
+darling = "0.12.0"
 proc-macro2 = "1.0.1"
 quote = "1.0.0"
 

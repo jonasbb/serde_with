@@ -87,3 +87,21 @@ error: Unknown field: `unknw2`
    |
 59 |     #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
    |                                   ^^^^^^
+
+error: Unable to parse attribute: expected literal
+  --> $DIR/serde_as.rs:67:55
+   |
+67 |     #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
+   |                                                       ^^^^^^^^^^^^^^
+
+error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
+  --> $DIR/serde_as.rs:70:5
+   |
+70 |     no_entries: u32,
+   |     ^^^^^^^^^^
+
+error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
+  --> $DIR/serde_as.rs:72:5
+   |
+72 |     no_entries_brackets: u32,
+   |     ^^^^^^^^^^^^^^^^^^^
