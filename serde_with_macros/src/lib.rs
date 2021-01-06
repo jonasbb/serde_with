@@ -501,20 +501,25 @@ fn serde_as_add_attr_to_field(
 
     // TODO allow multiple attributes
     // Find index of serde_as attribute
-    let serde_as_idx = field.attrs.iter().enumerate().find_map(|(idx, attr)| {
-        if attr.path.is_ident("serde_as") {
-            Some(idx)
-        } else {
-            None
-        }
-    });
-    if serde_as_idx.is_none() {
+    let serde_as_idxs: Vec<_> = field
+        .attrs
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, attr)| {
+            if attr.path.is_ident("serde_as") {
+                Some(idx)
+            } else {
+                None
+            }
+        })
+        .collect();
+    if serde_as_idxs.is_empty() {
         return Ok(());
     }
-    let serde_as_idx = serde_as_idx.expect("Just checked that the value is Some");
-
-    // serde_as Attribute
-    field.attrs.remove(serde_as_idx);
+    // remove serde_as Attribute as otherwise they cause compile errors
+    for idx in serde_as_idxs.into_iter().rev() {
+        field.attrs.remove(idx);
+    }
 
     if !serde_as_options.has_any_set() {
         return Err(DarlingError::custom("An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter."));
