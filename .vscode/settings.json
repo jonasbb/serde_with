@@ -24,6 +24,7 @@
         "newtype",
         "nsecs",
         "rustversion",
+        "serde",
         "serde's",
         "structs",
         "subsec",
@@ -34,5 +35,10 @@
         "systemtime",
         "trybuild",
         "vecdeque"
+    ],
+    "cSpell.enableFiletypes": [
+        "markdown",
+        "rust",
+        "toml"
     ]
 }

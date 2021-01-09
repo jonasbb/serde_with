@@ -61,6 +61,41 @@ use super::*;
 /// The `T` type is the on the Rust side before serialization, whereas the `U` type determines how the value will be serialized.
 /// These two changes are usually enough to make a container type implement [`SerializeAs`][].
 ///
+/// [`SerializeAsWrap`] is a piece of glue code which turns [`SerializeAs`] into a serde compatible datatype, by converting all calls to `serialize` into `serialize_as`.
+/// This allows us to implement [`SerializeAs`] such that it can be applied recursively throughout the whole data structure.
+/// This is mostly important for container types, such as `Vec` or `BTreeMap`.
+/// In a `BTreeMap` this allows us to specify two different serialization behaviors, one for key and one for value, using the [`SerializeAs`] trait.
+///
+/// ## Implementing a converter Type
+///
+/// This shows a simplified implementation for [`DisplayFromStr`].
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros"))] {
+/// # use serde_with::SerializeAs;
+/// # use std::fmt::Display;
+/// struct DisplayFromStr;
+///
+/// impl<T> SerializeAs<T> for DisplayFromStr
+/// where
+///     T: Display,
+/// {
+///     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+///     where
+///         S: serde::Serializer,
+///     {
+///         serializer.serialize_str(&source.to_string())
+///     }
+/// }
+/// #
+/// # #[serde_with::serde_as]
+/// # #[derive(serde::Serialize)]
+/// # struct S (#[serde_as(as = "DisplayFromStr")] bool);
+/// #
+/// # assert_eq!(r#""false""#, serde_json::to_string(&S(false)).unwrap());
+/// # }
+/// ```
+///
 /// [`BTreeMap`]: std::collections::BTreeMap
 /// [`Display`]: std::fmt::Display
 /// [`Duration`]: std::time::Duration

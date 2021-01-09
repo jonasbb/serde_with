@@ -107,13 +107,15 @@ Most "leaf" types do not need to implement these traits since they are supported
 You also find them implemented on the conversion types, such as the [`DisplayFromStr`] type.
 These make up the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
 
+The trait documentations for [`SerializeAs`] and [`DeserializeAs`] describe in details how to implement them for container types like `Box` or `Vec` and other types.
+
 ### Using `#[serde_as]` on types without `SerializeAs` and `Serialize` implementations
 
 The `SerializeAs` and `DeserializeAs` traits can easily be used together with types from other crates without running into orphan rule problems.
 This is a distinct advantage of the `serde_as` system.
 For this example we assume we have a type `RemoteType` from a dependency which does not implement `Serialize` nor `SerializeAs`.
 We assume we have a module containing a `serialize` and a `deserialize` function, which can be used in the `#[serde(with = "MODULE")]` annotation.
-You find an example in the [offical serde documentation](https://serde.rs/custom-date-format.html).
+You find an example in the [official serde documentation](https://serde.rs/custom-date-format.html).
 
 Our goal is to serialize this `Data` struct.
 Right now we do not have anything we can use to replace `???` with, since `_` only works if `RemoteType` would implement `Serialize`, which it does not.
