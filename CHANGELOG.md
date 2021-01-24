@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Add new types similar to `DurationSeconds` and `TimestampSeconds` but for base units of milliseconds, microseconds, and nanoseconds.
     The `*WithFrac` variants also exist.
+* Add `SerializeAs` implementation for references.
+
+### Changed
+
+* Release `Sized` trait bound from `As`, `Same`, `SerializeAs`, and `SerializeAsWrap`.
+    Only the serialize part is relaxed.
 
 ## [1.6.0]
 
