@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.6.1]
+
 ### Added
 
 * Add new types similar to `DurationSeconds` and `TimestampSeconds` but for base units of milliseconds, microseconds, and nanoseconds.

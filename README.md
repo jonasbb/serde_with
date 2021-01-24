@@ -17,7 +17,12 @@ Some common use cases are:
 * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
      Check the documentation for [`serde_with::rust::StringWithSeparator::<CommaSeparator>`][StringWithSeparator].
 
+### Getting Help
+
 **Check out the [user guide][user guide] to find out more tips and tricks about this crate.**
+
+For further help using this crate you can [open a new discussion](https://github.com/jonasbb/serde_with/discussions/new) or ask on [users.rust-lang.org](https://users.rust-lang.org/).
+For bugs please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on Github.
 
 ## Use `serde_with` in your Project
 
@@ -25,7 +30,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies.serde_with]
-version = "1.6.0"
+version = "1.6.1"
 features = [ "..." ]
 ```
 
@@ -119,13 +124,13 @@ Foo {
 }
 ```
 
-[`DisplayFromStr`]: https://docs.rs/serde_with/1.6.0/serde_with/struct.DisplayFromStr.html
-[`with_prefix!`]: https://docs.rs/serde_with/1.6.0/serde_with/macro.with_prefix.html
-[display_fromstr]: https://docs.rs/serde_with/1.6.0/serde_with/rust/display_fromstr/index.html
-[feature flags]: https://docs.rs/serde_with/1.6.0/serde_with/guide/feature_flags/index.html
-[skip_serializing_none]: https://docs.rs/serde_with/1.6.0/serde_with/attr.skip_serializing_none.html
-[StringWithSeparator]: https://docs.rs/serde_with/1.6.0/serde_with/rust/struct.StringWithSeparator.html
-[user guide]: https://docs.rs/serde_with/1.6.0/serde_with/guide/index.html
+[`DisplayFromStr`]: https://docs.rs/serde_with/1.6.1/serde_with/struct.DisplayFromStr.html
+[`with_prefix!`]: https://docs.rs/serde_with/1.6.1/serde_with/macro.with_prefix.html
+[display_fromstr]: https://docs.rs/serde_with/1.6.1/serde_with/rust/display_fromstr/index.html
+[feature flags]: https://docs.rs/serde_with/1.6.1/serde_with/guide/feature_flags/index.html
+[skip_serializing_none]: https://docs.rs/serde_with/1.6.1/serde_with/attr.skip_serializing_none.html
+[StringWithSeparator]: https://docs.rs/serde_with/1.6.1/serde_with/rust/struct.StringWithSeparator.html
+[user guide]: https://docs.rs/serde_with/1.6.1/serde_with/guide/index.html
 [with-annotation]: https://serde.rs/field-attrs.html#with
 
 ## License
