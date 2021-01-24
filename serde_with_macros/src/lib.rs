@@ -24,6 +24,8 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/1.3.0")]
+// Necessary to silence the warning about clippy::unknown_clippy_lints on nightly
+#![allow(renamed_and_removed_lints)]
 // Necessary for nightly clippy lints
 #![allow(clippy::unknown_clippy_lints)]
 
