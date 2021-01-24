@@ -1144,3 +1144,104 @@ fn test_default_on_null() {
         expect![[r#"invalid type: integer `3`, expected a string at line 1 column 7"#]],
     );
 }
+
+#[test]
+fn test_serialize_reference() {
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S1<'a>(#[serde_as(as = "Vec<DisplayFromStr>")] &'a Vec<u32>);
+    check_serialization(
+        S1(&vec![1, 2]),
+        expect![[r#"
+        [
+          "1",
+          "2"
+        ]"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S2<'a>(#[serde_as(as = "&[DisplayFromStr]")] &'a [u32]);
+    check_serialization(
+        S2(&[1, 2]),
+        expect![[r#"
+            [
+              "1",
+              "2"
+            ]"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S3<'a>(
+        #[serde_as(as = "&BTreeMap<DisplayFromStr, DisplayFromStr>")] &'a BTreeMap<bool, u32>,
+    );
+    let bmap = vec![(false, 123), (true, 456)].into_iter().collect();
+    check_serialization(
+        S3(&bmap),
+        expect![[r#"
+            {
+              "false": "123",
+              "true": "456"
+            }"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S4<'a>(#[serde_as(as = "&Vec<(_, DisplayFromStr)>")] &'a BTreeMap<bool, u32>);
+    let bmap = vec![(false, 123), (true, 456)].into_iter().collect();
+    check_serialization(
+        S4(&bmap),
+        expect![[r#"
+            [
+              [
+                false,
+                "123"
+              ],
+              [
+                true,
+                "456"
+              ]
+            ]"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S5<'a>(
+        #[serde_as(as = "&BTreeMap<DisplayFromStr, &Vec<(_, _)>>")]
+        &'a Vec<(u32, &'a BTreeMap<bool, String>)>,
+    );
+    let bmap0 = vec![(false, "123".to_string()), (true, "456".to_string())]
+        .into_iter()
+        .collect();
+    let bmap1 = vec![(true, "Hello".to_string()), (false, "World".to_string())]
+        .into_iter()
+        .collect();
+    let vec = vec![(111, &bmap0), (999, &bmap1)];
+    check_serialization(
+        S5(&vec),
+        expect![[r#"
+            {
+              "111": [
+                [
+                  false,
+                  "123"
+                ],
+                [
+                  true,
+                  "456"
+                ]
+              ],
+              "999": [
+                [
+                  false,
+                  "World"
+                ],
+                [
+                  true,
+                  "Hello"
+                ]
+              ]
+            }"#]],
+    );
+}

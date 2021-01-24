@@ -100,7 +100,7 @@ use super::*;
 /// [`Display`]: std::fmt::Display
 /// [`Duration`]: std::time::Duration
 /// [impl-serialize]: https://serde.rs/impl-serialize.html
-pub trait SerializeAs<T> {
+pub trait SerializeAs<T: ?Sized> {
     /// Serialize this value into the given Serde serializer.
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -109,12 +109,16 @@ pub trait SerializeAs<T> {
 
 /// Helper type to implement [`SerializeAs`] for container-like types.
 #[derive(Debug)]
-pub struct SerializeAsWrap<'a, T, U> {
+pub struct SerializeAsWrap<'a, T: ?Sized, U: ?Sized> {
     value: &'a T,
     marker: PhantomData<U>,
 }
 
-impl<'a, T, U> SerializeAsWrap<'a, T, U> {
+impl<'a, T, U> SerializeAsWrap<'a, T, U>
+where
+    T: ?Sized,
+    U: ?Sized,
+{
     /// Create new instance with provided value.
     pub fn new(value: &'a T) -> Self {
         Self {
@@ -126,6 +130,8 @@ impl<'a, T, U> SerializeAsWrap<'a, T, U> {
 
 impl<'a, T, U> Serialize for SerializeAsWrap<'a, T, U>
 where
+    T: ?Sized,
+    U: ?Sized,
     U: SerializeAs<T>,
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -138,6 +144,8 @@ where
 
 impl<'a, T, U> From<&'a T> for SerializeAsWrap<'a, T, U>
 where
+    T: ?Sized,
+    U: ?Sized,
     U: SerializeAs<T>,
 {
     fn from(value: &'a T) -> Self {
