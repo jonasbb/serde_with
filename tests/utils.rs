@@ -34,7 +34,7 @@ where
 #[rustversion::attr(since(1.46), track_caller)]
 pub fn check_serialization<T>(value: T, serialize_to: Expect)
 where
-    T: Debug + PartialEq + Serialize,
+    T: Debug + Serialize,
 {
     serialize_to.assert_eq(&serde_json::to_string_pretty(&value).unwrap());
 }
@@ -42,7 +42,7 @@ where
 #[rustversion::attr(since(1.46), track_caller)]
 pub fn check_error_deserialization<T>(deserialize_from: &str, error_msg: Expect)
 where
-    T: Debug + DeserializeOwned + PartialEq,
+    T: Debug + DeserializeOwned,
 {
     error_msg.assert_eq(
         &serde_json::from_str::<T>(deserialize_from)
