@@ -9,6 +9,20 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+impl<'a, T, U> SerializeAs<&'a T> for &'a U
+where
+    U: SerializeAs<T>,
+    T: ?Sized,
+    U: ?Sized,
+{
+    fn serialize_as<S>(source: &&'a T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, U>::new(source).serialize(serializer)
+    }
+}
+
 impl<T, U> SerializeAs<Box<T>> for Box<U>
 where
     U: SerializeAs<T>,
@@ -55,11 +69,13 @@ macro_rules! seq_impl {
 }
 
 type BoxedSlice<T> = Box<[T]>;
+type Slice<T> = [T];
 seq_impl!(BinaryHeap<T: Ord + Sized>);
 seq_impl!(BoxedSlice<T>);
 seq_impl!(BTreeSet<T: Ord + Sized>);
 seq_impl!(HashSet<T: Eq + Hash + Sized, H: BuildHasher + Sized>);
 seq_impl!(LinkedList<T>);
+seq_impl!(Slice<T>);
 seq_impl!(Vec<T>);
 seq_impl!(VecDeque<T>);
 
