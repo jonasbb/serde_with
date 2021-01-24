@@ -37,12 +37,12 @@ where
 }
 
 macro_rules! seq_impl {
-    ($ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound:ident)* >) => {
+    ($ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound:ident $(+ $bound2:ident)*)* >) => {
         impl<T, U $(, $typaram)*> SerializeAs<$ty<T $(, $typaram)*>> for $ty<U $(, $typaram)*>
         where
             U: SerializeAs<T>,
-            $(T: $tbound1 $(+ $tbound2)*,)*
-            $($typaram: $bound,)*
+            $(T: ?Sized + $tbound1 $(+ $tbound2)*,)*
+            $($typaram: ?Sized + $bound $(+ $bound2)*,)*
         {
             fn serialize_as<S>(source: &$ty<T $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
             where
@@ -55,10 +55,10 @@ macro_rules! seq_impl {
 }
 
 type BoxedSlice<T> = Box<[T]>;
-seq_impl!(BinaryHeap<T: Ord>);
+seq_impl!(BinaryHeap<T: Ord + Sized>);
 seq_impl!(BoxedSlice<T>);
-seq_impl!(BTreeSet<T: Ord>);
-seq_impl!(HashSet<T: Eq + Hash, H: BuildHasher>);
+seq_impl!(BTreeSet<T: Ord + Sized>);
+seq_impl!(HashSet<T: Eq + Hash + Sized, H: BuildHasher + Sized>);
 seq_impl!(LinkedList<T>);
 seq_impl!(Vec<T>);
 seq_impl!(VecDeque<T>);
@@ -190,7 +190,10 @@ array_impl!(30);
 array_impl!(31);
 array_impl!(32);
 
-impl<T: Serialize> SerializeAs<T> for Same {
+impl<T> SerializeAs<T> for Same
+where
+    T: Serialize + ?Sized,
+{
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

@@ -337,9 +337,9 @@ impl Separator for CommaSeparator {
 ///
 /// [serde_as]: https://docs.rs/serde_with/1.6.0/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
-pub struct As<T>(PhantomData<T>);
+pub struct As<T: ?Sized>(PhantomData<T>);
 
-impl<T> As<T> {
+impl<T: ?Sized> As<T> {
     /// Serialize type `T` using [`SerializeAs`][]
     ///
     /// The function signature is compatible with [serde's with-annotation][with-annotation].
@@ -349,6 +349,7 @@ impl<T> As<T> {
     where
         S: Serializer,
         T: SerializeAs<I>,
+        I: ?Sized,
     {
         T::serialize_as(value, serializer)
     }
