@@ -1802,3 +1802,22 @@ pub mod default_on_null {
         value.serialize(serializer)
     }
 }
+
+
+/// Deserialize any value, ignore it, and return the default value for the type being deserialized
+/// 
+/// ```rust
+/// # use serde_derive::Deserialize;
+/// use serde_with::deserialize_ignore_any;
+///
+/// #[derive(Deserialize)]
+/// enum Item {
+///    Foo, Bar, Baz,
+///    #[serde(other, deserialize_with = "deserialize_ignore_any")]
+///    Other,
+/// }
+/// ```
+
+pub fn deserialize_ignore_any<'de, D: Deserializer<'de>, T:Default>(deserializer: D) -> Result<T, D::Error> {
+    serde::de::IgnoredAny::deserialize(deserializer).map(|_| T::default())
+}
