@@ -225,6 +225,7 @@ pub mod ser;
 mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
+pub use rust::deserialize_ignore_any;
 
 // Taken from shepmaster/snafu
 // Originally licensed as MIT+Apache 2
