@@ -1806,16 +1806,16 @@ pub mod default_on_null {
 /// Deserialize any value, ignore it, and return the default value for the type being deserialized.
 /// It is useful for instance to create an enum with a catch-all variant
 /// that will accept any incoming data.
-/// 
+///
 ///
 /// ## Example: deserializing a heterogeneous collection of xml nodes
-/// 
+///
 /// When serde-xml-rs deserializes an XML tag to an enum, it always maps the tag
 /// name to the enum variant name, and the tag attributes and children to the enum contents.
-/// This means that in order for an enum variant to accept any XML tag, it both has to use 
+/// This means that in order for an enum variant to accept any XML tag, it both has to use
 /// `#[serde(other)]` to accept any tag name, and `#[serde(deserialize_with = "deserialize_ignore_any")]`
 /// to accept any attributes and children.
-/// 
+///
 /// ```rust
 /// # use serde_derive::Deserialize;
 /// use serde_with::deserialize_ignore_any;
