@@ -1804,30 +1804,95 @@ pub mod default_on_null {
 }
 
 /// Deserialize any value, ignore it, and return the default value for the type being deserialized.
-/// It is useful for instance to create an enum with a catch-all variant
-/// that will accept any incoming data.
 ///
+/// This function can be used in two different ways:
 ///
-/// ## Example: deserializing a heterogeneous collection of xml nodes
+/// 1. It is useful for instance to create an enum with a catch-all variant that will accept any incoming data.
+/// 2. [`untagged`] enum representations do not allow the `other` annotation as the fallback enum variant.
+///     With this function you can emulate an `other` variant, which can deserialize any data carrying enum.
 ///
-/// When serde-xml-rs deserializes an XML tag to an enum, it always maps the tag
+/// **Note:** Using this function will prevent deserializing data-less enum variants.
+/// If this is a problem depends on the data format.
+/// For example, deserializing `"Bar"` as an enum in JSON would fail, since it carries no data.
+///
+/// # Examples
+///
+/// ## Deserializing a heterogeneous collection of XML nodes
+///
+/// When [`serde-xml-rs`] deserializes an XML tag to an enum, it always maps the tag
 /// name to the enum variant name, and the tag attributes and children to the enum contents.
 /// This means that in order for an enum variant to accept any XML tag, it both has to use
 /// `#[serde(other)]` to accept any tag name, and `#[serde(deserialize_with = "deserialize_ignore_any")]`
 /// to accept any attributes and children.
 ///
 /// ```rust
-/// # use serde_derive::Deserialize;
-/// use serde_with::deserialize_ignore_any;
+/// # use serde::Deserialize;
+/// use serde_with::rust::deserialize_ignore_any;
 ///
-/// #[derive(Deserialize)]
+/// #[derive(Deserialize, Debug)]
+/// #[serde(rename_all = "lowercase")]
 /// enum Item {
-///    Foo, Bar, Baz,
-///    #[serde(other, deserialize_with = "deserialize_ignore_any")]
-///    Other,
+///     Foo(String),
+///     Bar(String),
+///     #[serde(other, deserialize_with = "deserialize_ignore_any")]
+///     Other,
 /// }
+///
+/// // Deserialize this XML
+/// # let items: Vec<Item> = serde_xml_rs::from_str(
+/// r"
+/// <foo>a</foo>
+/// <bar>b</bar>
+/// <foo>c</foo>
+/// <unknown>d</unknown>
+/// "
+/// # ).unwrap();
+///
+/// // into these Items
+/// # let expected =
+/// vec![
+///     Item::Foo(String::from("a")),
+///     Item::Bar(String::from("b")),
+///     Item::Foo(String::from("c")),
+///     Item::Other,
+/// ]
+/// # ;
+/// # assert_eq!(expected, items);
 /// ```
-
+///
+/// ## Simulating an `other` enum variant in an `untagged` enum
+///
+/// ```rust
+/// # use serde::Deserialize;
+/// # use serde_json::json;
+/// use serde_with::rust::deserialize_ignore_any;
+///
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize)]
+/// #[serde(untagged)]
+/// enum Item {
+///     Foo{x: u8},
+///     #[serde(deserialize_with = "deserialize_ignore_any")]
+///     Other,
+/// }
+///
+/// // Deserialize this JSON
+/// # let items: Vec<Item> = serde_json::from_value(
+/// json!([
+///     {"y": 1},
+///     {"x": 1},
+/// ])
+/// # ).unwrap();
+///
+/// // into these Items
+/// # let expected =
+/// vec![Item::Other, Item::Foo{x: 1}]
+/// # ;
+/// # assert_eq!(expected, items);
+/// ```
+///
+/// [`serde-xml-rs`]: https://docs.rs/serde-xml-rs
+/// [`untagged`]: https://serde.rs/enum-representations.html#untagged
 pub fn deserialize_ignore_any<'de, D: Deserializer<'de>, T: Default>(
     deserializer: D,
 ) -> Result<T, D::Error> {

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* New function `serde_with::rust::deserialize_ignore_any`.
+    This function allows deserializing any data and returns the default value of the type.
+    This can be used in conjunction with `#[serde(other)]` to allow deserialization of unknown data carrying enum variants.
+
+    Thanks to @lovasoa for suggesting and implementing it.
+
 ## [1.6.1]
 
 ### Added
