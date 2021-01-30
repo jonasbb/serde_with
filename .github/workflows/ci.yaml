@@ -103,17 +103,20 @@ jobs:
         name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           command: test
-          args: --workspace --no-default-features --all-targets
+          # cargo test --all-targets does NOT run doctests
+          # since doctests are important this should not be added
+          # https://github.com/rust-lang/cargo/issues/6669
+          args: --workspace --no-default-features
       - uses: actions-rs/cargo@v1
         name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           command: test
-          args: --workspace --all-targets
+          args: --workspace
       - uses: actions-rs/cargo@v1
         name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
           command: test
-          args: --workspace --all-features --all-targets
+          args: --workspace --all-features
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1

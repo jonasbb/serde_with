@@ -1829,7 +1829,8 @@ pub mod default_on_null {
 /// # use serde::Deserialize;
 /// use serde_with::rust::deserialize_ignore_any;
 ///
-/// #[derive(Deserialize, Debug)]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize)]
 /// #[serde(rename_all = "lowercase")]
 /// enum Item {
 ///     Foo(String),
