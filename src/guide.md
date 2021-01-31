@@ -8,8 +8,8 @@ The crate offers four types of functionality.
 
 ## 1. A more flexible and composable replacement for the with annotation, called `serde_as` *(v1.5.0+)*
 
-This is an alternative to the with-annotation, which adds flexibility and composability to the scheme.
-The main downside is that it work with fewer types than aboves with-annotations.
+This is an alternative to [serde's with-annotation][with-annotation], which adds flexibility and composability to the scheme.
+The main downside is that it work with fewer types than [with-annotations][with-annotation].
 However, all types from the Rust Standard Library should be supported in all combinations and any missing entry is a bug.
 
 The `serde_as` scheme is based on two new traits: [`SerializeAs`] and [`DeserializeAs`].  
@@ -71,7 +71,9 @@ It allows to specify arbitrary serialization code, but the code has to perform t
 It is not possible to combine multiple of those functions.
 One common use case for this is the serialization of collections like `Vec`.
 If you have a field of type `T`, you can apply the with-annotation, but if you have a field of type `Vec<T>`, there is no way to re-use the same functions for the with-annotation.
-This inflexibility is fixed with the `serde_as` scheme below.
+This inflexibility is fixed in the `serde_as` scheme presented above.
+
+The example shows a similar setup as in the `serde_as` example above, but using the with-annotation.
 
 ### Example
 
