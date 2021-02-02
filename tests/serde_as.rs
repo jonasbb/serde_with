@@ -1,3 +1,8 @@
+// Nightly clippy contains upper_case_acronyms, unknown in older versions
+// but clippy::unknown_clippy_lints is not accepted on nightly anymore (thus the other allows).
+#![allow(unknown_lints, renamed_and_removed_lints, clippy::unknown_clippy_lints)]
+#![allow(clippy::upper_case_acronyms)]
+
 mod utils;
 
 use crate::utils::{
