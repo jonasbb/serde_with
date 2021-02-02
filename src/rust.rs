@@ -1352,7 +1352,7 @@ pub mod btreemap_as_tuple_list {
 /// #[derive(Deserialize, Serialize)]
 /// struct S {
 ///     #[serde_as(as = "BTreeMap<_, _>")] // HashMap will also work
-///     s: BTreeMap<(String, u32), u32>,
+///     s: Vec<(i32, String)>,
 /// }
 /// # }
 /// ```
