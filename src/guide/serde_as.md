@@ -488,7 +488,7 @@ value: OtherStruct,
 ```ignore
 // Rust
 #[serde_as(as = "HashMap<_, _>")] // also works with BTreeMap
-value: Vec<String, u32>,
+value: Vec<(String, u32)>,
 
 // JSON
 "value": {
