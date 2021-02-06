@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Improve error messages when `#[serde_as(..)]` is misused as a field attribute.
     Thanks to @Lehona for reporting the bug in #233.
+* Internal cleanup for assembling and parsing attributes during `serde_as` processing.
 
 ## [1.3.0]
 

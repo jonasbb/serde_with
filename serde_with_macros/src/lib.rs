@@ -29,9 +29,10 @@
 // Necessary for nightly clippy lints
 #![allow(clippy::unknown_clippy_lints)]
 
-//! proc-macro extensions for [`serde_with`]
+//! proc-macro extensions for [`serde_with`].
 //!
-//! This crate should not be used alone, but through the [`serde_with`] crate.
+//! This crate should **NEVER** be used alone.
+//! All macros **MUST** be used via the re-exports in the [`serde_with`] crate.
 //!
 //! [`serde_with`]: https://crates.io/crates/serde_with/
 
@@ -43,9 +44,8 @@ mod utils;
 use crate::utils::IteratorExt as _;
 use darling::{Error as DarlingError, FromField, FromMeta};
 use proc_macro::TokenStream;
-use proc_macro2::Span;
-use quote::{quote, ToTokens};
-use std::str::FromStr;
+use proc_macro2::{Span, TokenStream as TokenStream2};
+use quote::quote;
 use syn::{
     parse::Parser, parse_macro_input, punctuated::Pair, spanned::Spanned, Attribute, AttributeArgs,
     DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta,
@@ -57,7 +57,7 @@ use utils::DeriveOptions;
 fn apply_function_to_struct_and_enum_fields<F>(
     input: TokenStream,
     function: F,
-) -> Result<proc_macro2::TokenStream, Error>
+) -> Result<TokenStream2, Error>
 where
     F: Copy,
     F: Fn(&mut Field) -> Result<(), String>,
@@ -107,7 +107,7 @@ where
 fn apply_function_to_struct_and_enum_fields_darling<F>(
     input: TokenStream,
     function: F,
-) -> Result<proc_macro2::TokenStream, DarlingError>
+) -> Result<TokenStream2, DarlingError>
 where
     F: Copy,
     F: Fn(&mut Field) -> Result<(), DarlingError>,
@@ -320,8 +320,7 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
             let attr_tokens = quote!(
                 #[serde(skip_serializing_if = "Option::is_none")]
             );
-            let parser = Attribute::parse_outer;
-            let attrs = parser
+            let attrs = Attribute::parse_outer
                 .parse2(attr_tokens)
                 .expect("Static attr tokens should not panic");
             field.attrs.extend(attrs);
@@ -448,10 +447,14 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
         .alt_crate_path
         .as_deref()
         .unwrap_or("::serde_with");
+    let serde_with_crate_path = match syn::parse_str(serde_with_crate_path) {
+        Ok(path) => path,
+        Err(err) => return TokenStream::from(DarlingError::from(err).write_errors()),
+    };
 
     // Convert any error message into a nice compiler error
     let res = match apply_function_to_struct_and_enum_fields_darling(input, |field| {
-        serde_as_add_attr_to_field(field, serde_with_crate_path)
+        serde_as_add_attr_to_field(field, &serde_with_crate_path)
     }) {
         Ok(res) => res,
         Err(err) => err.write_errors(),
@@ -459,10 +462,10 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
     TokenStream::from(res)
 }
 
-/// Add the skip_serializing_if annotation to each field of the struct
+/// Inspect the field and convert the `serde_as` attribute into the classical `serde`
 fn serde_as_add_attr_to_field(
     field: &mut Field,
-    serde_with_crate_path: &str,
+    serde_with_crate_path: &Path,
 ) -> Result<(), DarlingError> {
     #[derive(FromField, Debug)]
     #[darling(attributes(serde_as))]
@@ -543,52 +546,28 @@ fn serde_as_add_attr_to_field(
         return Err(DarlingError::multiple(errors));
     }
 
+    let type_same = &syn::parse_quote!(#serde_with_crate_path::Same);
     if let Some(Ok(type_)) = serde_as_options.r#as {
-        let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
-            r##"#[serde(with = "{}::As::<{}>")]"##,
-            serde_with_crate_path,
-            replace_infer_type_with_type(
-                type_,
-                &syn::parse_str(&format!("{}::Same", serde_with_crate_path)).unwrap()
-            )
-            .to_token_stream()
-        ))
-        .unwrap();
-        let attrs = Attribute::parse_outer
-            .parse2(attr_tokens)
-            .expect("Static attr tokens should not panic");
+        let replacement_type = replace_infer_type_with_type(type_, type_same);
+        let attr_inner_tokens = quote!(#serde_with_crate_path::As::<#replacement_type>).to_string();
+        let attr_tokens = quote!(#[serde(with = #attr_inner_tokens)]);
+        let attrs = Attribute::parse_outer.parse2(attr_tokens)?;
         field.attrs.extend(attrs);
     }
     if let Some(Ok(type_)) = serde_as_options.deserialize_as {
-        let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
-            r##"#[serde(deserialize_with = "{}::As::<{}>::deserialize")]"##,
-            serde_with_crate_path,
-            replace_infer_type_with_type(
-                type_,
-                &syn::parse_str(&format!("{}::Same", serde_with_crate_path)).unwrap()
-            )
-            .to_token_stream()
-        ))
-        .unwrap();
-        let attrs = Attribute::parse_outer
-            .parse2(attr_tokens)
-            .expect("Static attr tokens should not panic");
+        let replacement_type = replace_infer_type_with_type(type_, type_same);
+        let attr_inner_tokens =
+            quote!(#serde_with_crate_path::As::<#replacement_type>::deserialize).to_string();
+        let attr_tokens = quote!(#[serde(deserialize_with = #attr_inner_tokens)]);
+        let attrs = Attribute::parse_outer.parse2(attr_tokens)?;
         field.attrs.extend(attrs);
     }
     if let Some(Ok(type_)) = serde_as_options.serialize_as {
-        let attr_tokens = proc_macro2::TokenStream::from_str(&*format!(
-            r##"#[serde(serialize_with = "{}::As::<{}>::serialize")]"##,
-            serde_with_crate_path,
-            replace_infer_type_with_type(
-                type_,
-                &syn::parse_str(&format!("{}::Same", serde_with_crate_path)).unwrap()
-            )
-            .to_token_stream()
-        ))
-        .unwrap();
-        let attrs = Attribute::parse_outer
-            .parse2(attr_tokens)
-            .expect("Static attr tokens should not panic");
+        let replacement_type = replace_infer_type_with_type(type_, type_same);
+        let attr_inner_tokens =
+            quote!(#serde_with_crate_path::As::<#replacement_type>::serialize).to_string();
+        let attr_tokens = quote!(#[serde(serialize_with = #attr_inner_tokens)]);
+        let attrs = Attribute::parse_outer.parse2(attr_tokens)?;
         field.attrs.extend(attrs);
     }
 
@@ -779,10 +758,7 @@ pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
     ))
 }
 
-fn deserialize_fromstr(
-    input: DeriveInput,
-    serde_with_crate_path: Path,
-) -> proc_macro2::TokenStream {
+fn deserialize_fromstr(input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
     let ident = input.ident;
     quote! {
         #[automatically_derived]
@@ -892,7 +868,7 @@ pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
     ))
 }
 
-fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> proc_macro2::TokenStream {
+fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
     let ident = input.ident;
     quote! {
         #[automatically_derived]
