@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Improve error messages when `#[serde_as(..)]` is misused as a field attribute.
     Thanks to @Lehona for reporting the bug in #233.
 * Internal cleanup for assembling and parsing attributes during `serde_as` processing.
+* Change processing on `#[serde_as(...)]` attributes on fields.
+
+    The attributes will no longer be stripped during proc-macro processing.
+    Instead, a private derive macro is applied to the struct/enum which captures them and makes them inert, thus allowing compilation.
+
+    This should have no effect on the generated code and on the runtime behavior.
+    It eases integration of third-party crates with `serde_with`, since they can now process the `#[serde_as(...)]` field attributes reliably.
+    Before this was impossible for derive macros and lead to akward ordering constraints on the attribute macros.
+
+    Thanks to @Lehona for reporting this problem and to @dtolnay for suggesting the dummy derive macro.
 
 ## [1.3.0]
 

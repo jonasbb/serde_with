@@ -106,6 +106,7 @@ where
 /// Like [apply_function_to_struct_and_enum_fields] but for darling errors
 fn apply_function_to_struct_and_enum_fields_darling<F>(
     input: TokenStream,
+    serde_with_crate_path: &Path,
     function: F,
 ) -> Result<TokenStream2, DarlingError>
 where
@@ -157,10 +158,17 @@ where
         }
     }
 
+    // Add a dummy derive macro which consumes (makes inert) all field attributes
+    let attr_tokens = quote!(
+        #[derive(#serde_with_crate_path::__private_consume_serde_as_attributes)]
+    );
+    let consume_serde_as_attribute = Attribute::parse_outer.parse2(attr_tokens)?;
+
     // For each field in the struct given by `input`, add the `skip_serializing_if` attribute,
     // if and only if, it is of type `Option`
     if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
         apply_on_fields(&mut input.fields, function)?;
+        input.attrs.extend(consume_serde_as_attribute);
         Ok(quote!(#input))
     } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
         let errors: Vec<DarlingError> = input
@@ -174,6 +182,7 @@ where
             })
             .collect();
         if errors.is_empty() {
+            input.attrs.extend(consume_serde_as_attribute);
             Ok(quote!(#input))
         } else {
             Err(DarlingError::multiple(errors))
@@ -453,9 +462,11 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     // Convert any error message into a nice compiler error
-    let res = match apply_function_to_struct_and_enum_fields_darling(input, |field| {
-        serde_as_add_attr_to_field(field, &serde_with_crate_path)
-    }) {
+    let res = match apply_function_to_struct_and_enum_fields_darling(
+        input,
+        &serde_with_crate_path,
+        |field| serde_as_add_attr_to_field(field, &serde_with_crate_path),
+    ) {
         Ok(res) => res,
         Err(err) => err.write_errors(),
     };
@@ -505,28 +516,6 @@ fn serde_as_add_attr_to_field(
     let serde_with_options = SerdeWithOptions::from_field(field)?;
 
     let mut errors = Vec::new();
-
-    // Find index of serde_as attribute
-    let serde_as_idxs: Vec<_> = field
-        .attrs
-        .iter()
-        .enumerate()
-        .filter_map(|(idx, attr)| {
-            if attr.path.is_ident("serde_as") {
-                Some(idx)
-            } else {
-                None
-            }
-        })
-        .collect();
-    if serde_as_idxs.is_empty() {
-        return Ok(());
-    }
-    // remove serde_as Attribute as otherwise they cause compile errors
-    for idx in serde_as_idxs.into_iter().rev() {
-        field.attrs.remove(idx);
-    }
-
     if !serde_as_options.has_any_set() {
         errors.push(DarlingError::custom("An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter."));
     }
@@ -884,4 +873,18 @@ fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> TokenSt
             }
         }
     }
+}
+
+#[doc(hidden)]
+/// Private function. Not part of the public API
+///
+/// The only task of this derive macro is to consume any `serde_as` attributes and turn them into inert attributes.
+/// This allows the serde_as macro to keep the field attributes without causing compiler errors.
+/// The intend is that keeping the field attributes allows downstream crates to consume and akt on them without causing an ordering dependency to the serde_as macro.
+/// Otherwise, downstream proc-macros would need to be places *in front of* the main `#[serde_as]` attribute, since otherwise the field attributes would already be stripped off.
+///
+/// More details about the use-cases in the Github discussion: <https://github.com/jonasbb/serde_with/discussions/260>.
+#[proc_macro_derive(__private_consume_serde_as_attributes, attributes(serde_as))]
+pub fn __private_consume_serde_as_attributes(_: TokenStream) -> TokenStream {
+    TokenStream::new()
 }
