@@ -18,9 +18,9 @@ enum Option {
     Err,
 }
 
-#[serde(crate = "s")]
 #[serde_as(crate = "s_with")]
 #[derive(Deserialize, Serialize)]
+#[serde(crate = "s")]
 struct Data {
     #[serde_as(as = "_")]
     a: u32,
