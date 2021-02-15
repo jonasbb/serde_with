@@ -1,73 +1,73 @@
 error: Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.
- --> $DIR/serde_as.rs:9:5
+ --> $DIR/serde_as.rs:8:5
   |
-9 |     a: u32,
+8 |     #[serde_as(as = "_", deserialize_as = "_")]
   |     ^
 
 error: Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code.
-  --> $DIR/serde_as.rs:11:5
+  --> $DIR/serde_as.rs:10:5
    |
-11 |     b: u32,
+10 |     #[serde_as(as = "_", serialize_as = "_")]
    |     ^
 
 error: Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.
-  --> $DIR/serde_as.rs:13:5
+  --> $DIR/serde_as.rs:12:5
    |
-13 |     c: u32,
+12 |     #[serde_as(as = "_", deserialize_as = "_", serialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:21:5
+  --> $DIR/serde_as.rs:20:5
    |
-21 |     #[serde(with = "u32")]
+20 |     #[serde_as(as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:24:5
+  --> $DIR/serde_as.rs:23:5
    |
-24 |     #[serde(deserialize_with = "u32")]
+23 |     #[serde_as(as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:27:5
+  --> $DIR/serde_as.rs:26:5
    |
-27 |     #[serde(serialize_with = "u32")]
+26 |     #[serde_as(as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:31:5
+  --> $DIR/serde_as.rs:30:5
    |
-31 |     #[serde(with = "u32")]
+30 |     #[serde_as(deserialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:34:5
+  --> $DIR/serde_as.rs:33:5
    |
-34 |     #[serde(deserialize_with = "u32")]
+33 |     #[serde_as(deserialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:37:5
+  --> $DIR/serde_as.rs:36:5
    |
-37 |     #[serde(serialize_with = "u32")]
+36 |     #[serde_as(deserialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:41:5
+  --> $DIR/serde_as.rs:40:5
    |
-41 |     #[serde(with = "u32")]
+40 |     #[serde_as(serialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:44:5
+  --> $DIR/serde_as.rs:43:5
    |
-44 |     #[serde(deserialize_with = "u32")]
+43 |     #[serde_as(serialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:47:5
+  --> $DIR/serde_as.rs:46:5
    |
-47 |     #[serde(serialize_with = "u32")]
+46 |     #[serde_as(serialize_as = "_")]
    |     ^
 
 error: Unknown field: `does_not_exist`
@@ -95,13 +95,13 @@ error: Unable to parse attribute: expected literal
    |                                                       ^^^^^^^^^^^^^^
 
 error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
-  --> $DIR/serde_as.rs:70:5
+  --> $DIR/serde_as.rs:69:5
    |
-70 |     no_entries: u32,
-   |     ^^^^^^^^^^
+69 |     #[serde_as]
+   |     ^
 
 error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
-  --> $DIR/serde_as.rs:72:5
+  --> $DIR/serde_as.rs:71:5
    |
-72 |     no_entries_brackets: u32,
-   |     ^^^^^^^^^^^^^^^^^^^
+71 |     #[serde_as()]
+   |     ^
