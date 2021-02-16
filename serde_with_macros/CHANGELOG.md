@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.1]
+
+### Fixed
+
+* Fix compiling when having a struct field without the `serde_as` annotation.
+    This broke in 1.4.0 [#267](https://github.com/jonasbb/serde_with/issues/267)
+
 ## [1.4.0]
 
 ### Changed
