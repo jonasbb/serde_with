@@ -512,6 +512,14 @@ fn serde_as_add_attr_to_field(
         }
     }
 
+    // Check if there even is any `serde_as` attribute and exit early if not.
+    if !field
+        .attrs
+        .iter()
+        .any(|attr| attr.path.is_ident("serde_as"))
+    {
+        return Ok(());
+    }
     let serde_as_options = SerdeAsOptions::from_field(field)?;
     let serde_with_options = SerdeWithOptions::from_field(field)?;
 
