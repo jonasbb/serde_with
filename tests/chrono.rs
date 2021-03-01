@@ -6,11 +6,13 @@ use crate::utils::{
 use chrono_crate::{DateTime, Duration, NaiveDateTime, Utc};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
+use serde_with::formats::Flexible;
 use serde_with::{
-    formats::Flexible, serde_as, DurationSeconds, DurationSecondsWithFrac, TimestampSeconds,
-    TimestampSecondsWithFrac,
+    serde_as, DurationSeconds, DurationSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use std::{collections::BTreeMap, iter::FromIterator, str::FromStr};
+use std::collections::BTreeMap;
+use std::iter::FromIterator;
+use std::str::FromStr;
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
     DateTime::from_utc(NaiveDateTime::from_timestamp(secs, nsecs), Utc)

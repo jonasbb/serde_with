@@ -1,19 +1,17 @@
 //! De/Serialization for Rust's builtin and std types
 
 use crate::Separator;
-use serde::{
-    de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
-    ser::{Serialize, SerializeMap, SerializeSeq, Serializer},
+use serde::de::{
+    Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
-use std::{
-    cmp::Eq,
-    collections::{BTreeMap, HashMap},
-    fmt::{self, Display},
-    hash::{BuildHasher, Hash},
-    iter::FromIterator,
-    marker::PhantomData,
-    str::FromStr,
-};
+use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
+use std::cmp::Eq;
+use std::collections::{BTreeMap, HashMap};
+use std::fmt::{self, Display};
+use std::hash::{BuildHasher, Hash};
+use std::iter::FromIterator;
+use std::marker::PhantomData;
+use std::str::FromStr;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
@@ -185,16 +183,12 @@ pub mod display_fromstr {
 /// [`DisplayFromStr`]: crate::DisplayFromStr
 /// [`serde_as`]: crate::guide::serde_as
 pub mod seq_display_fromstr {
-    use serde::{
-        de::{Deserializer, Error, SeqAccess, Visitor},
-        ser::{SerializeSeq, Serializer},
-    };
-    use std::{
-        fmt::{self, Display},
-        iter::{FromIterator, IntoIterator},
-        marker::PhantomData,
-        str::FromStr,
-    };
+    use serde::de::{Deserializer, Error, SeqAccess, Visitor};
+    use serde::ser::{SerializeSeq, Serializer};
+    use std::fmt::{self, Display};
+    use std::iter::{FromIterator, IntoIterator};
+    use std::marker::PhantomData;
+    use std::str::FromStr;
 
     /// Deserialize collection T using [FromIterator] and [FromStr] for each element
     pub fn deserialize<'de, D, T, I>(deserializer: D) -> Result<T, D::Error>

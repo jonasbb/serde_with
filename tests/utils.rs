@@ -2,7 +2,8 @@
 
 use expect_test::Expect;
 use pretty_assertions::assert_eq;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
 use std::fmt::Debug;
 
 #[rustversion::attr(since(1.46), track_caller)]

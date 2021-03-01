@@ -3,11 +3,9 @@ mod utils;
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
-use serde_with::{
-    formats::{Lowercase, Uppercase},
-    hex::Hex,
-    serde_as,
-};
+use serde_with::formats::{Lowercase, Uppercase};
+use serde_with::hex::Hex;
+use serde_with::serde_as;
 
 #[test]
 fn hex_vec() {

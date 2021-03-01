@@ -41,17 +41,18 @@ extern crate proc_macro;
 
 mod utils;
 
-use crate::utils::IteratorExt as _;
+use crate::utils::{DeriveOptions, IteratorExt as _};
 use darling::{Error as DarlingError, FromField, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
+use syn::parse::Parser;
+use syn::punctuated::Pair;
+use syn::spanned::Spanned;
 use syn::{
-    parse::Parser, parse_macro_input, punctuated::Pair, spanned::Spanned, Attribute, AttributeArgs,
-    DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta,
-    Path, PathArguments, ReturnType, Type,
+    parse_macro_input, Attribute, AttributeArgs, DeriveInput, Error, Field, Fields,
+    GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path, PathArguments, ReturnType, Type,
 };
-use utils::DeriveOptions;
 
 /// Apply function on every field of structs or enums
 fn apply_function_to_struct_and_enum_fields<F>(

@@ -4,15 +4,13 @@
 //!
 //! [chrono]: https://docs.rs/chrono/
 
-use crate::{
-    de::DeserializeAs,
-    formats::{Flexible, Format, Strict, Strictness},
-    ser::SerializeAs,
-    utils, DurationSeconds, DurationSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
-};
+use crate::de::DeserializeAs;
+use crate::formats::{Flexible, Format, Strict, Strictness};
+use crate::ser::SerializeAs;
+use crate::utils::duration::{DurationSigned, Sign};
+use crate::{DurationSeconds, DurationSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac};
 use chrono_crate::{DateTime, Duration, Local, NaiveDateTime, Utc};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-use utils::duration::{DurationSigned, Sign};
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
 fn unix_epoch_utc() -> DateTime<Utc> {

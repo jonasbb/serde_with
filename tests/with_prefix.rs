@@ -4,10 +4,8 @@ use crate::utils::is_equal;
 use expect_test::expect;
 use serde_derive::{Deserialize, Serialize};
 use serde_with::with_prefix;
-use std::{
-    collections::{BTreeMap, HashMap},
-    iter::FromIterator,
-};
+use std::collections::{BTreeMap, HashMap};
+use std::iter::FromIterator;
 
 #[test]
 fn test_flatten_with_prefix() {

@@ -3,7 +3,8 @@ mod utils;
 use crate::utils::is_equal;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
-use serde_with::{json::JsonString, serde_as, DisplayFromStr};
+use serde_with::json::JsonString;
+use serde_with::{serde_as, DisplayFromStr};
 
 #[test]
 fn test_nested_json() {

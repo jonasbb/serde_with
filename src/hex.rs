@@ -2,13 +2,13 @@
 //!
 //! This modules is only available when using the `hex` feature of the crate.
 
-use crate::{
-    de::DeserializeAs,
-    formats::{Format, Lowercase, Uppercase},
-    ser::SerializeAs,
-};
-use serde::{de::Error, Deserialize, Deserializer, Serializer};
-use std::{borrow::Cow, marker::PhantomData};
+use crate::de::DeserializeAs;
+use crate::formats::{Format, Lowercase, Uppercase};
+use crate::ser::SerializeAs;
+use serde::de::Error;
+use serde::{Deserialize, Deserializer, Serializer};
+use std::borrow::Cow;
+use std::marker::PhantomData;
 
 /// Serialize bytes as a hex string
 ///

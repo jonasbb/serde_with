@@ -10,17 +10,15 @@ use crate::utils::{
 };
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
+use serde_with::formats::Flexible;
 use serde_with::{
-    formats::Flexible, serde_as, BytesOrString, DefaultOnError, DefaultOnNull, DisplayFromStr,
-    DurationSeconds, DurationSecondsWithFrac, NoneAsEmptyString, Same, TimestampSeconds,
-    TimestampSecondsWithFrac,
+    serde_as, BytesOrString, DefaultOnError, DefaultOnNull, DisplayFromStr, DurationSeconds,
+    DurationSecondsWithFrac, NoneAsEmptyString, Same, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use std::{
-    collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
-    rc::Rc,
-    sync::Arc,
-    time::{Duration, SystemTime},
-};
+use std::collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque};
+use std::rc::Rc;
+use std::sync::Arc;
+use std::time::{Duration, SystemTime};
 
 #[test]
 fn test_box() {
@@ -394,7 +392,8 @@ fn test_map_as_tuple_list() {
 
 #[test]
 fn test_tuple_list_as_map() {
-    use std::{collections::HashMap, net::IpAddr};
+    use std::collections::HashMap;
+    use std::net::IpAddr;
     let ip = "1.2.3.4".parse().unwrap();
     let ip2 = "255.255.255.255".parse().unwrap();
 
@@ -810,7 +809,8 @@ fn test_duration_seconds_with_frac() {
 
 #[test]
 fn string_with_separator() {
-    use serde_with::{rust::StringWithSeparator, CommaSeparator, SpaceSeparator};
+    use serde_with::rust::StringWithSeparator;
+    use serde_with::{CommaSeparator, SpaceSeparator};
 
     #[serde_as]
     #[derive(Deserialize, Serialize)]

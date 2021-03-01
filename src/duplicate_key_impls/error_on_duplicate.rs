@@ -1,7 +1,5 @@
-use std::{
-    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
-    hash::{BuildHasher, Hash},
-};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::hash::{BuildHasher, Hash};
 
 pub trait PreventDuplicateInsertsSet<T> {
     fn new(size_hint: Option<usize>) -> Self;
