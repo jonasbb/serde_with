@@ -1,5 +1,7 @@
+#![forbid(unsafe_code)]
 #![deny(
     missing_copy_implementations,
+    // missing_crate_level_docs, not available in MSRV
     missing_debug_implementations,
     missing_docs,
     trivial_casts,
@@ -10,6 +12,7 @@
     variant_size_differences
 )]
 #![warn(rust_2018_idioms)]
+#![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_copy_implementations,
     missing_debug_implementations,
