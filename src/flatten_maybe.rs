@@ -34,7 +34,6 @@
 /// // You need to specify a function name and the field name of the flattened field.
 /// serde_with::flattened_maybe!(deserialize_t, "t");
 ///
-///
 /// # fn main() {
 /// // Supports both flattened
 /// let j = r#" {"i":1} "#;

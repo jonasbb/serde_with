@@ -284,7 +284,6 @@ where
 ///     a: Option<String>,
 /// }
 /// ```
-///
 #[proc_macro_attribute]
 pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStream {
     let res = match apply_function_to_struct_and_enum_fields(

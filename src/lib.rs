@@ -498,7 +498,7 @@ pub struct NoneAsEmptyString;
 /// # use serde_with::{serde_as, DefaultOnError};
 /// #
 /// #[serde_as]
-/// #[derive(Deserialize,  Debug)]
+/// #[derive(Deserialize, Debug)]
 /// struct A {
 ///     #[serde_as(deserialize_as = "DefaultOnError")]
 ///     value: u32,
@@ -538,7 +538,6 @@ pub struct NoneAsEmptyString;
 ///     #[serde(default)]
 ///     value: u32,
 /// }
-///
 ///
 /// let b: B = serde_json::from_str(r#"{  }"#).unwrap();
 /// assert_eq!(0, b.value);
@@ -588,7 +587,7 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 /// # use serde_with::{serde_as, DefaultOnNull};
 /// #
 /// #[serde_as]
-/// #[derive(Deserialize,  Debug)]
+/// #[derive(Deserialize, Debug)]
 /// struct A {
 ///     #[serde_as(deserialize_as = "DefaultOnNull")]
 ///     value: u32,

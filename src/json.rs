@@ -32,7 +32,10 @@ use serde::{Deserializer, Serialize, Serializer};
 /// let x = A {
 ///     other_struct: B { value: 10 },
 /// };
-/// assert_eq!(r#"{"other_struct":"{\"value\":10}"}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(
+///     r#"{"other_struct":"{\"value\":10}"}"#,
+///     serde_json::to_string(&x).unwrap()
+/// );
 /// ```
 pub mod nested {
     use serde::de::{DeserializeOwned, Deserializer, Error, Visitor};
@@ -114,7 +117,10 @@ pub mod nested {
 /// let x = A {
 ///     other_struct: B { value: 10 },
 /// };
-/// assert_eq!(r#"{"other_struct":"{\"value\":10}"}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(
+///     r#"{"other_struct":"{\"value\":10}"}"#,
+///     serde_json::to_string(&x).unwrap()
+/// );
 /// # }
 /// ```
 #[derive(Copy, Clone, Debug, Default)]

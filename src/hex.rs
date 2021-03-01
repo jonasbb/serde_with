@@ -22,7 +22,6 @@ use std::marker::PhantomData;
 /// # Example
 ///
 /// ```rust
-///
 /// # #[cfg(feature = "macros")] {
 /// # use serde_derive::{Deserialize, Serialize};
 /// # use serde_json::json;
@@ -48,13 +47,25 @@ use std::marker::PhantomData;
 /// let b = b"Hello World!";
 ///
 /// // Hex with lowercase letters
-/// assert_eq!(json!("48656c6c6f20576f726c6421"), serde_json::to_value(BytesLowercase(b.to_vec())).unwrap());
+/// assert_eq!(
+///     json!("48656c6c6f20576f726c6421"),
+///     serde_json::to_value(BytesLowercase(b.to_vec())).unwrap()
+/// );
 /// // Hex with uppercase letters
-/// assert_eq!(json!("48656C6C6F20576F726C6421"), serde_json::to_value(BytesUppercase(b.to_vec())).unwrap());
+/// assert_eq!(
+///     json!("48656C6C6F20576F726C6421"),
+///     serde_json::to_value(BytesUppercase(b.to_vec())).unwrap()
+/// );
 ///
 /// // Serialization always work from lower- and uppercase characters, even mixed case.
-/// assert_eq!(BytesLowercase(vec![0x00, 0xaa, 0xbc, 0x99, 0xff]), serde_json::from_value(json!("00aAbc99FF")).unwrap());
-/// assert_eq!(BytesUppercase(vec![0x00, 0xaa, 0xbc, 0x99, 0xff]), serde_json::from_value(json!("00aAbc99FF")).unwrap());
+/// assert_eq!(
+///     BytesLowercase(vec![0x00, 0xaa, 0xbc, 0x99, 0xff]),
+///     serde_json::from_value(json!("00aAbc99FF")).unwrap()
+/// );
+/// assert_eq!(
+///     BytesUppercase(vec![0x00, 0xaa, 0xbc, 0x99, 0xff]),
+///     serde_json::from_value(json!("00aAbc99FF")).unwrap()
+/// );
 /// # }
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
