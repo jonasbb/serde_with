@@ -121,7 +121,7 @@ pub mod datetime_utc_ts_seconds_from_any {
 
                 match *parts.as_slice() {
                     [seconds] => {
-                        if let Ok(seconds) = i64::from_str_radix(seconds, 10) {
+                        if let Ok(seconds) = seconds.parse() {
                             let ndt = NaiveDateTime::from_timestamp_opt(seconds, 0);
                             if let Some(ndt) = ndt {
                                 Ok(DateTime::<Utc>::from_utc(ndt, Utc))
@@ -136,7 +136,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                         }
                     }
                     [seconds, subseconds] => {
-                        if let Ok(seconds) = i64::from_str_radix(seconds, 10) {
+                        if let Ok(seconds) = seconds.parse() {
                             let subseclen = subseconds.chars().count() as u32;
                             if subseclen > 9 {
                                 return Err(Error::custom(format!(
@@ -145,7 +145,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                                 )));
                             }
 
-                            if let Ok(mut subseconds) = u32::from_str_radix(subseconds, 10) {
+                            if let Ok(mut subseconds) = subseconds.parse() {
                                 // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds
                                 subseconds *= 10u32.pow(9 - subseclen);
                                 let ndt = NaiveDateTime::from_timestamp_opt(seconds, subseconds);

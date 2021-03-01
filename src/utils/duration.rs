@@ -493,14 +493,14 @@ fn parse_float_into_time_parts(mut value: &str) -> Result<(Sign, u64, u32), Pars
     let parts: Vec<_> = value.split('.').collect();
     match *parts.as_slice() {
         [seconds] => {
-            if let Ok(seconds) = u64::from_str_radix(seconds, 10) {
+            if let Ok(seconds) = seconds.parse() {
                 Ok((sign, seconds, 0))
             } else {
                 Err(ParseFloatError::InvalidValue)
             }
         }
         [seconds, subseconds] => {
-            if let Ok(seconds) = u64::from_str_radix(seconds, 10) {
+            if let Ok(seconds) = seconds.parse() {
                 let subseclen = subseconds.chars().count() as u32;
                 if subseclen > 9 {
                     return Err(ParseFloatError::Custom(format!(
@@ -509,7 +509,7 @@ fn parse_float_into_time_parts(mut value: &str) -> Result<(Sign, u64, u32), Pars
                     )));
                 }
 
-                if let Ok(mut subseconds) = u32::from_str_radix(subseconds, 10) {
+                if let Ok(mut subseconds) = subseconds.parse() {
                     // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds
                     subseconds *= 10u32.pow(9 - subseclen);
                     Ok((sign, seconds, subseconds))
