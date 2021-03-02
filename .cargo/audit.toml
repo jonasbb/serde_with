@@ -1,0 +1,26 @@
+[advisories]
+ignore = [
+    # difference is unmaintained, is a dependency of pretty_assertions
+    "RUSTSEC-2020-0095",
+]
+# warn for categories of informational advisories
+informational_warnings = [
+    "unmaintained",
+    "unsound",
+]
+
+# Output Configuration
+[output]
+ # exit on error if unmaintained dependencies are found
+deny = [
+    "unmaintained",
+    "unsound",
+]
+# Only print information on error
+quiet = false
+# Show inverse dependency trees along with advisories (default: true)
+show_tree = true
+
+[yanked]
+enabled = true # Warn for yanked crates in Cargo.lock (default: true)
+update_index = true # Auto-update the crates.io index (default: true)
