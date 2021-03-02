@@ -4,15 +4,13 @@
 //!
 //! [chrono]: https://docs.rs/chrono/
 
-use crate::{
-    de::DeserializeAs,
-    formats::{Flexible, Format, Strict, Strictness},
-    ser::SerializeAs,
-    utils, DurationSeconds, DurationSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
-};
+use crate::de::DeserializeAs;
+use crate::formats::{Flexible, Format, Strict, Strictness};
+use crate::ser::SerializeAs;
+use crate::utils::duration::{DurationSigned, Sign};
+use crate::{DurationSeconds, DurationSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac};
 use chrono_crate::{DateTime, Duration, Local, NaiveDateTime, Utc};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-use utils::duration::{DurationSigned, Sign};
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
 fn unix_epoch_utc() -> DateTime<Utc> {
@@ -47,7 +45,6 @@ fn unix_epoch_local() -> DateTime<Local> {
 /// // and strings with numbers, for high-precision values
 /// assert!(serde_json::from_str::<S>(r#"{ "date": "1478563200.123" }"#).is_ok());
 /// ```
-///
 pub mod datetime_utc_ts_seconds_from_any {
     use chrono_crate::{DateTime, NaiveDateTime, Utc};
     use serde::de::{Deserializer, Error, Unexpected, Visitor};

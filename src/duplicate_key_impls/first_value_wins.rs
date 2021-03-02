@@ -1,7 +1,5 @@
-use std::{
-    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
-    hash::{BuildHasher, Hash},
-};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::hash::{BuildHasher, Hash};
 
 #[deprecated = "This is serde's default behavior."]
 pub trait DuplicateInsertsFirstWinsSet<T> {

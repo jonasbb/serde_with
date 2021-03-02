@@ -1,7 +1,5 @@
-use std::{
-    collections::{BTreeSet, HashSet},
-    hash::{BuildHasher, Hash},
-};
+use std::collections::{BTreeSet, HashSet};
+use std::hash::{BuildHasher, Hash};
 
 pub trait DuplicateInsertsLastWinsSet<T> {
     fn new(size_hint: Option<usize>) -> Self;

@@ -1,13 +1,12 @@
-use utils::duration::DurationSigned;
-
 use super::*;
-use crate::{formats::Strictness, rust::StringWithSeparator, Separator};
-use std::{
-    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
-    fmt::Display,
-    hash::{BuildHasher, Hash},
-    time::{Duration, SystemTime},
-};
+use crate::formats::Strictness;
+use crate::rust::StringWithSeparator;
+use crate::utils::duration::DurationSigned;
+use crate::Separator;
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
+use std::fmt::Display;
+use std::hash::{BuildHasher, Hash};
+use std::time::{Duration, SystemTime};
 
 impl<'a, T, U> SerializeAs<&'a T> for &'a U
 where

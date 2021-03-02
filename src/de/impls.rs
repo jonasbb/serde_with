@@ -1,20 +1,16 @@
 use super::*;
-use crate::{
-    formats::{Flexible, Format, Strict},
-    rust::StringWithSeparator,
-    utils,
-    utils::duration::DurationSigned,
-};
+use crate::formats::{Flexible, Format, Strict};
+use crate::rust::StringWithSeparator;
+use crate::utils;
+use crate::utils::duration::DurationSigned;
 use serde::de::*;
-use std::{
-    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
-    convert::From,
-    fmt::{self, Display},
-    hash::{BuildHasher, Hash},
-    iter::FromIterator,
-    str::FromStr,
-    time::{Duration, SystemTime},
-};
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
+use std::convert::From;
+use std::fmt::{self, Display};
+use std::hash::{BuildHasher, Hash};
+use std::iter::FromIterator;
+use std::str::FromStr;
+use std::time::{Duration, SystemTime};
 
 impl<'de, T, U> DeserializeAs<'de, Box<T>> for Box<U>
 where

@@ -1,19 +1,17 @@
 //! De/Serialization for Rust's builtin and std types
 
 use crate::Separator;
-use serde::{
-    de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
-    ser::{Serialize, SerializeMap, SerializeSeq, Serializer},
+use serde::de::{
+    Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
-use std::{
-    cmp::Eq,
-    collections::{BTreeMap, HashMap},
-    fmt::{self, Display},
-    hash::{BuildHasher, Hash},
-    iter::FromIterator,
-    marker::PhantomData,
-    str::FromStr,
-};
+use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
+use std::cmp::Eq;
+use std::collections::{BTreeMap, HashMap};
+use std::fmt::{self, Display};
+use std::hash::{BuildHasher, Hash};
+use std::iter::FromIterator;
+use std::marker::PhantomData;
+use std::str::FromStr;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
@@ -66,7 +64,10 @@ use std::{
 ///     mime: mime::STAR_STAR,
 ///     number: 777,
 /// };
-/// assert_eq!(r#"{"mime":"*/*","number":"777"}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(
+///     r#"{"mime":"*/*","number":"777"}"#,
+///     serde_json::to_string(&x).unwrap()
+/// );
 /// ```
 ///
 /// [`DeserializeFromStr`]: serde_with_macros::DeserializeFromStr
@@ -179,22 +180,21 @@ pub mod display_fromstr {
 ///     ].into_iter().collect(),
 ///     bs: vec![false, true],
 /// };
-/// assert_eq!(r#"{"addresses":["127.53.0.1","127.53.0.2","127.53.1.1"],"bs":["false","true"]}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(
+///     r#"{"addresses":["127.53.0.1","127.53.0.2","127.53.1.1"],"bs":["false","true"]}"#,
+///     serde_json::to_string(&x).unwrap()
+/// );
 /// ```
 ///
 /// [`DisplayFromStr`]: crate::DisplayFromStr
 /// [`serde_as`]: crate::guide::serde_as
 pub mod seq_display_fromstr {
-    use serde::{
-        de::{Deserializer, Error, SeqAccess, Visitor},
-        ser::{SerializeSeq, Serializer},
-    };
-    use std::{
-        fmt::{self, Display},
-        iter::{FromIterator, IntoIterator},
-        marker::PhantomData,
-        str::FromStr,
-    };
+    use serde::de::{Deserializer, Error, SeqAccess, Visitor};
+    use serde::ser::{SerializeSeq, Serializer};
+    use std::fmt::{self, Display};
+    use std::iter::{FromIterator, IntoIterator};
+    use std::marker::PhantomData;
+    use std::str::FromStr;
 
     /// Deserialize collection T using [FromIterator] and [FromStr] for each element
     pub fn deserialize<'de, D, T, I>(deserializer: D) -> Result<T, D::Error>
@@ -310,7 +310,10 @@ pub mod seq_display_fromstr {
 ///     tags: vec!["1".to_string(), "2".to_string(), "3".to_string()],
 ///     more_tags: BTreeSet::new(),
 /// };
-/// assert_eq!(r#"{"tags":"1 2 3","more_tags":""}"#, serde_json::to_string(&x).unwrap());
+/// assert_eq!(
+///     r#"{"tags":"1 2 3","more_tags":""}"#,
+///     serde_json::to_string(&x).unwrap()
+/// );
 /// ```
 ///
 /// [`serde_as`]: crate::guide::serde_as
@@ -389,18 +392,18 @@ where
 /// }
 /// // Missing Value
 /// let s = r#"{}"#;
-/// assert_eq!(Doc {a: None}, serde_json::from_str(s).unwrap());
-/// assert_eq!(s, serde_json::to_string(&Doc {a: None}).unwrap());
+/// assert_eq!(Doc { a: None }, serde_json::from_str(s).unwrap());
+/// assert_eq!(s, serde_json::to_string(&Doc { a: None }).unwrap());
 ///
 /// // Unset Value
 /// let s = r#"{"a":null}"#;
-/// assert_eq!(Doc {a: Some(None)}, serde_json::from_str(s).unwrap());
-/// assert_eq!(s, serde_json::to_string(&Doc {a: Some(None)}).unwrap());
+/// assert_eq!(Doc { a: Some(None) }, serde_json::from_str(s).unwrap());
+/// assert_eq!(s, serde_json::to_string(&Doc { a: Some(None) }).unwrap());
 ///
 /// // Existing Value
 /// let s = r#"{"a":5}"#;
-/// assert_eq!(Doc {a: Some(Some(5))}, serde_json::from_str(s).unwrap());
-/// assert_eq!(s, serde_json::to_string(&Doc {a: Some(Some(5))}).unwrap());
+/// assert_eq!(Doc { a: Some(Some(5)) }, serde_json::from_str(s).unwrap());
+/// assert_eq!(s, serde_json::to_string(&Doc { a: Some(Some(5)) }).unwrap());
 /// ```
 #[allow(clippy::option_option)]
 pub mod double_option {
@@ -1692,7 +1695,6 @@ pub mod bytes_or_string {
 ///     #[serde(default, deserialize_with = "serde_with::rust::default_on_error::deserialize")]
 ///     value: u32,
 /// }
-///
 ///
 /// let b: B = serde_json::from_str(r#"{  }"#).unwrap();
 /// assert_eq!(0, b.value);
