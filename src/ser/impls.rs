@@ -150,61 +150,6 @@ tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
-macro_rules! array_impl {
-    ($len:literal) => {
-        impl<T, As> SerializeAs<[T; $len]> for [As; $len]
-        where
-            As: SerializeAs<T>,
-        {
-            fn serialize_as<S>(array: &[T; $len], serializer: S) -> Result<S::Ok, S::Error>
-            where
-                S: Serializer,
-            {
-                use serde::ser::SerializeTuple;
-                let mut arr = serializer.serialize_tuple($len)?;
-                for elem in array {
-                    arr.serialize_element(&SerializeAsWrap::<T, As>::new(elem))?;
-                }
-                arr.end()
-            }
-        }
-    };
-}
-
-array_impl!(0);
-array_impl!(1);
-array_impl!(2);
-array_impl!(3);
-array_impl!(4);
-array_impl!(5);
-array_impl!(6);
-array_impl!(7);
-array_impl!(8);
-array_impl!(9);
-array_impl!(10);
-array_impl!(11);
-array_impl!(12);
-array_impl!(13);
-array_impl!(14);
-array_impl!(15);
-array_impl!(16);
-array_impl!(17);
-array_impl!(18);
-array_impl!(19);
-array_impl!(20);
-array_impl!(21);
-array_impl!(22);
-array_impl!(23);
-array_impl!(24);
-array_impl!(25);
-array_impl!(26);
-array_impl!(27);
-array_impl!(28);
-array_impl!(29);
-array_impl!(30);
-array_impl!(31);
-array_impl!(32);
-
 impl<T> SerializeAs<T> for Same
 where
     T: Serialize + ?Sized,
@@ -290,13 +235,6 @@ tuple_seq_as_map_impl! {
     Option<(K, V)>,
     Vec<(K, V)>,
     VecDeque<(K, V)>,
-}
-tuple_seq_as_map_impl! {
-    [(K, V); 0], [(K, V); 1], [(K, V); 2], [(K, V); 3], [(K, V); 4], [(K, V); 5], [(K, V); 6],
-    [(K, V); 7], [(K, V); 8], [(K, V); 9], [(K, V); 10], [(K, V); 11], [(K, V); 12], [(K, V); 13],
-    [(K, V); 14], [(K, V); 15], [(K, V); 16], [(K, V); 17], [(K, V); 18], [(K, V); 19], [(K, V); 20],
-    [(K, V); 21], [(K, V); 22], [(K, V); 23], [(K, V); 24], [(K, V); 25], [(K, V); 26], [(K, V); 27],
-    [(K, V); 28], [(K, V); 29], [(K, V); 30], [(K, V); 31], [(K, V); 32],
 }
 
 impl<T, TAs> SerializeAs<T> for DefaultOnError<TAs>

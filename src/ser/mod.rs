@@ -7,7 +7,26 @@
 //!
 //! [user guide]: crate::guide
 
+#[macro_use]
 mod impls;
+
+// The redirection via macro_rules is necessary to circumvent https://github.com/rust-lang/rust/issues/54727
+// which prevents proc macros on non-inline modules
+#[rustversion::before(1.51)]
+macro_rules! mod_arrays {
+    () => {
+        #[path = "legacy_arrays.rs"]
+        mod arrays;
+    };
+}
+#[rustversion::since(1.51)]
+macro_rules! mod_arrays {
+    () => {
+        #[path = "const_arrays.rs"]
+        mod arrays;
+    };
+}
+mod_arrays!();
 
 use super::*;
 
