@@ -1,4 +1,3 @@
-#![forbid(unsafe_code)]
 #![deny(
     missing_copy_implementations,
     // missing_crate_level_docs, not available in MSRV
