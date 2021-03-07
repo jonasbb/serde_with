@@ -5,7 +5,11 @@ members = [
 ]
 
 [package]
-authors = ["Jonas Bushart"]
+authors = [
+    "Jonas Bushart",
+    # For creation of the SerializeAs and DeserializeAs traits.
+    "Marcin Kaźmierczak",
+]
 name = "serde_with"
 version = "1.6.4"
 
