@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+* Add support for arrays of arbitrary size.
+    This feature requires Rust 1.51+.
+
+    ```rust
+    // Rust
+    #[serde_as(as = "[[_; 64]; 33]")]
+    value: [[u8; 64]; 33],
+
+    // JSON
+    "value": [[0,0,0,0,0,...], [0,0,0,...], ...],
+    ```
+
+    Mapping of arrays was available before, but limited to arrays of length 32.
+    All conversion methods are available for the array elements.
+
+    This is similar to the existing [`serde-big-array`] crate with three important improvements:
+
+    1. Support for the `serde_as` annotation.
+    2. Supports non-copy elements (see [serde-big-array#6][serde-big-array-copy]).
+    2. Supports arbitrary nestings of arrays (see [serde-big-array#7][serde-big-array-nested]).
+
+[`serde-big-array`]: https://crates.io/crates/serde-big-array
+[serde-big-array-copy]: https://github.com/est31/serde-big-array/issues/6
+[serde-big-array-nested]: https://github.com/est31/serde-big-array/issues/7
+
+* Arrays with tuple elements can now be deserialized from  a map.
+    This feature requires Rust 1.51+.
+
+    ```rust
+    // Rust
+    #[serde_as(as = "BTreeMap<_, _>")]
+    value: [(String, u16); 3],
+
+    // JSON
+    "value": {
+        "a": 1,
+        "b": 2,
+        "c": 3
+    },
+    ```
+
 ## [1.6.4]
 
 ### Fixed
