@@ -16,17 +16,18 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
     4. [Using `#[serde_as]` with serde's remote derives](#using-serde_as-with-serdes-remote-derives)
     5. [Re-exporting `serde_as`](#re-exporting-serde_as)
 2. [De/Serialize Implementations Available](#deserialize-implementations-available)
-    1. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
-    2. [`Default` from `null`](#default-from-null)
-    3. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-    4. [`Duration` as seconds](#duration-as-seconds)
-    5. [Ignore deserialization errors](#ignore-deserialization-errors)
-    6. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-    7. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-    8. [`None` as empty `String`](#none-as-empty-string)
-    9. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-    10. [Value into JSON String](#value-into-json-string)
-    11. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+    1. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
+    2. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
+    3. [`Default` from `null`](#default-from-null)
+    4. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+    5. [`Duration` as seconds](#duration-as-seconds)
+    6. [Ignore deserialization errors](#ignore-deserialization-errors)
+    7. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+    8. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+    9. [`None` as empty `String`](#none-as-empty-string)
+    10. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+    11. [Value into JSON String](#value-into-json-string)
+    12. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Switching from serde's with to `serde_as`
 
@@ -286,6 +287,19 @@ some_other_lib::define_some_type!();
 
 ## De/Serialize Implementations Available
 
+### Big Array support (Rust 1.51+)
+
+Support for arrays of arbitrary size.
+
+```ignore
+// Rust
+#[serde_as(as = "[[_; 64]; 33]")]
+value: [[u8; 64]; 33],
+
+// JSON
+"value": [[0,0,0,0,0,...], [0,0,0,...], ...],
+```
+
 ### Bytes / `Vec<u8>` to hex string
 
 [`Hex`]
@@ -496,6 +510,9 @@ value: Vec<(String, u32)>,
     "world": 2
 },
 ```
+
+This operation is also available for other sequence types.
+This includes `BinaryHeap<(K, V)>`, `BTreeSet<(K, V)>`, `HashSet<(K, V)>`, `LinkedList<(K, V)>`, `VecDeque<(K, V)>`, `Option<(K, V)>` and `[(K, V); N]` for all sizes of N.
 
 The [inverse operation](#maps-to-vec-of-tuples) is also available.
 
