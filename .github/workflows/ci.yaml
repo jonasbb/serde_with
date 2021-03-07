@@ -77,7 +77,9 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "windows-latest"]
-        rust: ["1.40.0", "1.45.2", "stable", "beta", "nightly"]
+        # It is good to test more than the MSRV and stable since sometimes
+        # breakage occurs in intermediate versions.
+        rust: ["1.40.0", "1.45.2", "1.50.0", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2.3.4
@@ -124,6 +126,7 @@ jobs:
         with:
           # tarpaulin already runs with --all-targets
           args: "--workspace --all-features -- --test-threads 1"
+          version: "latest"
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v1.2.1
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
