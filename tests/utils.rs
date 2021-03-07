@@ -20,6 +20,21 @@ where
     );
 }
 
+/// Like [`is_equal`] but not pretty-print
+#[rustversion::attr(since(1.46), track_caller)]
+pub fn is_equal_compact<T>(value: T, expected: Expect)
+where
+    T: Debug + DeserializeOwned + PartialEq + Serialize,
+{
+    let serialized = serde_json::to_string(&value).unwrap();
+    expected.assert_eq(&serialized);
+    assert_eq!(
+        value,
+        serde_json::from_str::<T>(&serialized).unwrap(),
+        "Deserialization differs from expected value."
+    );
+}
+
 #[rustversion::attr(since(1.46), track_caller)]
 pub fn check_deserialization<T>(value: T, deserialize_from: &str)
 where
