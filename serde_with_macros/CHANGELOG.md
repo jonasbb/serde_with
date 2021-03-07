@@ -5,14 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.4.1]
+## [1.4.1] - 2021-02-16
 
 ### Fixed
 
 * Fix compiling when having a struct field without the `serde_as` annotation.
     This broke in 1.4.0 [#267](https://github.com/jonasbb/serde_with/issues/267)
 
-## [1.4.0]
+## [1.4.0] - 2021-02-15
 
 ### Changed
 
@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     Thanks to @Lehona for reporting this problem and to @dtolnay for suggesting the dummy derive macro.
 
-## [1.3.0]
+## [1.3.0] - 2020-11-22
 
 ### Added
 
@@ -43,14 +43,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Bump minimum supported rust version to 1.40.0
 
-## [1.2.2]
+## [1.2.2] - 2020-10-06
 
 ### Fixed
 
 * @adwhit contributed an improvement to `DeserializeFromStr` which allows it to deserialize from bytes (#186).
     This makes the derived implementation applicable in more situations.
 
-## [1.2.1]
+## [1.2.1] - 2020-10-04
 
 ### Fixed
 
@@ -60,7 +60,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     Thanks goes to @adwhit for reporting and fixing the problem in #186.
 
-## [1.2.0]
+## [1.2.0] - 2020-10-01
 
 ### Added
 
@@ -76,20 +76,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * The `serde_as` macro now supports serde attributes and no longer panic on unrecognized values in the attribute.
 
-## [1.2.0-alpha.3]
+## [1.2.0-alpha.3] - 2020-08-16
 
 ### Added
 
 * Add two derive macros, `SerializeDisplay` and `DeserializeFromStr`, which implement the `Serialize`/`Deserialize` traits based on `Display` and `FromStr`.
     This is in addition to the already existing methods like `DisplayFromStr`, which act locally, whereas the derive macros provide the traits expected by the rest of the ecosystem.
 
-## [1.2.0-alpha.2]
+## [1.2.0-alpha.2] - 2020-08-08
 
 ### Fixed
 
 * The `serde_as` macro now supports serde attributes and no longer panic on unrecognized values in the attribute.
 
-## [1.2.0-alpha.1]
+## [1.2.0-alpha.1] - 2020-06-27
 
 ### Added
 
@@ -99,21 +99,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Convert the code to use 2018 edition.
 
-## [1.1.0]
+## [1.1.0] - 2020-01-16
 
 ### Changed
 
 * Bump minimal Rust version to 1.36.0 to support Rust Edition 2018
 * Improved CI pipeline by running `cargo audit` and `tarpaulin` in all configurations now.
 
-## [1.0.1]
+## [1.0.1] - 2019-04-09
 
 ### Fixed
 
 * Features for the `syn` dependency were missing.
     This was hidden due to the dev-dependencies whose features leaked into the normal build.
 
-## [1.0.0]
+## [1.0.0] - 2019-04-02
 
 Initial Release
 

@@ -50,20 +50,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     },
     ```
 
-## [1.6.4]
+## [1.6.4] - 2021-02-16
 
 ### Fixed
 
 * Fix compiling when having a struct field without the `serde_as` annotation by updating `serde_with_macros`.
     This broke in 1.4.0 of `serde_with_macros`. [#267](https://github.com/jonasbb/serde_with/issues/267)
 
-## [1.6.3]
+## [1.6.3] - 2021-02-15
 
 ### Changed
 
 * Bump macro crate dependency (`serde_with_macros`) to 1.4.0 to pull in those improvements.
 
-## [1.6.2]
+## [1.6.2] - 2021-01-30
 
 ### Added
 
@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     Thanks to @lovasoa for suggesting and implementing it.
 
-## [1.6.1]
+## [1.6.1] - 2021-01-24
 
 ### Added
 
@@ -86,7 +86,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Release `Sized` trait bound from `As`, `Same`, `SerializeAs`, and `SerializeAsWrap`.
     Only the serialize part is relaxed.
 
-## [1.6.0]
+## [1.6.0] - 2020-11-22
 
 ### Added
 
@@ -100,7 +100,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Bump minimum supported rust version to 1.40.0
 
-## [1.5.1]
+## [1.5.1] - 2020-10-07
 
 ### Fixed
 
@@ -108,7 +108,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     The `derive` feature is required to deserliaze untagged enums which are used in the `DefaultOnError` helpers.
     This fixes compilation of `serde_with` in scenarios where no other crate enables the `derive` feature.
 
-## [1.5.0]
+## [1.5.0] - 2020-10-01
 
 ### Added
 
@@ -158,7 +158,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Deprecate `sets_first_value_wins`.
     The default behavior of serde is to take the first value, so this module is not necessary.
 
-## [1.5.0-alpha.2]
+## [1.5.0-alpha.2] - 2020-08-16
 
 ### Added
 
@@ -174,7 +174,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * The `serde_as` macro now supports serde attributes and no longer panic on unrecognized values in the attribute.
     This is part of `serde_with_macros` v1.2.0-alpha.2.
 
-## [1.5.0-alpha.1]
+## [1.5.0-alpha.1] - 2020-06-27
 
 ### Added
 
@@ -199,7 +199,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * The `with_prefix!` macro, to add a string prefixes during serialization, now also works with unit variant enum types. #115 #116
 
-## [1.4.0]
+## [1.4.0] - 2020-01-16
 
 ### Added
 
@@ -214,13 +214,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * version-sync depends on smallvec which requires 1.36
 * Improved CI pipeline by running `cargo audit` and `tarpaulin` in all configurations now.
 
-## [1.3.1]
+## [1.3.1] - 2019-04-09
 
 ### Fixed
 
 * Use `serde_with_macros` with proper dependencies specified.
 
-## [1.3.0]
+## [1.3.0] - 2019-04-02
 
 ### Added
 
@@ -229,7 +229,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     The effect of can be negated by adding `serialize_always` on those fields, which should always be serialized.
     Existing `skip_serializing_if` will never be modified and those fields keep their behavior.
 
-## [1.2.0]
+## [1.2.0] - 2019-03-04
 
 ### Added
 
@@ -240,32 +240,32 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Bumped minimal Rust version to 1.30.0
 
-## [1.1.0]
+## [1.1.0] - 2019-02-18
 
 ### Added
 
 * Serialize HashMap/BTreeMap as list of tuples
 
-## [1.0.0]
+## [1.0.0] - 2019-01-17
 
 ### Added
 
 * No changes in this release.
 * Bumped version number to indicate the stability of the library.
 
-## [0.2.5]
+## [0.2.5] - 2018-11-29
 
 ### Added
 
 * Helper which deserializes an empty string as `None` and otherwise uses `FromStr` and `AsRef<str>`.
 
-## [0.2.4]
+## [0.2.4] - 2018-11-24
 
 ### Added
 
 * De/Serialize sequences by using `Display` and `FromStr` implementations on each element. Contributed by @katyo
 
-## [0.2.3]
+## [0.2.3] - 2018-11-08
 
 ### Added
 
@@ -277,7 +277,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Improve Travis configuration
 * Various clippy improvements
 
-## [0.2.2]
+## [0.2.2] - 2018-08-05
 
 ### Added
 
@@ -288,14 +288,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * Implement a first-value wins strategy for sets/maps. This is different to serde's default
         which implements a last value wins strategy.
 
-## [0.2.1]
+## [0.2.1] - 2018-06-05
 
 ### Added
 
 * Double Option pattern to differentiate between missing, unset, or existing value
 * `with_prefix!` macro, which puts a prefix on every struct field
 
-## [0.2.0]
+## [0.2.0] - 2018-05-31
 
 ### Added
 
@@ -304,7 +304,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * De/Serialization using `Display` and `FromStr` implementations
 * String-based collections using `Display` and `FromStr`, allows to deserialize "#foo,#bar"
 
-## [0.1.0]
+## [0.1.0] - 2017-08-17
 
 ### Added
 
