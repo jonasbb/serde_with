@@ -4,6 +4,7 @@ use crate::rust::StringWithSeparator;
 use crate::utils;
 use crate::utils::duration::DurationSigned;
 use serde::de::*;
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::convert::From;
 use std::fmt::{self, Display};
@@ -700,5 +701,168 @@ where
         D: Deserializer<'de>,
     {
         Ok(Option::<U>::deserialize_as(deserializer)?.unwrap_or_default())
+    }
+}
+
+impl<'de> DeserializeAs<'de, &'de [u8]> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<&'de [u8], D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        <&'de [u8]>::deserialize(deserializer)
+    }
+}
+
+// serde_bytes implementation for ByteBuf
+// https://github.com/serde-rs/bytes/blob/cbae606b9dc225fc094b031cc84eac9493da2058/src/bytebuf.rs#L196
+//
+// Implements:
+// * visit_seq
+// * visit_bytes
+// * visit_byte_buf
+// * visit_str
+// * visit_string
+impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct VecVisitor;
+
+        impl<'de> Visitor<'de> for VecVisitor {
+            type Value = Vec<u8>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a byte array")
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                utils::SeqIter::new(seq).collect::<Result<_, _>>()
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v.to_vec())
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v)
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v.as_bytes().to_vec())
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v.into_bytes())
+            }
+        }
+
+        deserializer.deserialize_byte_buf(VecVisitor)
+    }
+}
+
+impl<'de> DeserializeAs<'de, Box<[u8]>> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<Box<[u8]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        <Bytes as DeserializeAs<'de, Vec<u8>>>::deserialize_as(deserializer)
+            .map(|vec| vec.into_boxed_slice())
+    }
+}
+
+// serde_bytes implementation for Cow<'a, [u8]>
+// https://github.com/serde-rs/bytes/blob/cbae606b9dc225fc094b031cc84eac9493da2058/src/de.rs#L77
+//
+// Implements:
+// * visit_borrowed_bytes
+// * visit_borrowed_str
+// * visit_bytes
+// * visit_str
+// * visit_byte_buf
+// * visit_string
+// * visit_seq
+impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct CowVisitor;
+
+        impl<'de> Visitor<'de> for CowVisitor {
+            type Value = Cow<'de, [u8]>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a byte array")
+            }
+
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Borrowed(v))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Borrowed(v.as_bytes()))
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(v.to_vec()))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(v.as_bytes().to_vec()))
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(v))
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(v.into_bytes()))
+            }
+
+            fn visit_seq<V>(self, seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                Ok(Cow::Owned(
+                    utils::SeqIter::new(seq).collect::<Result<_, _>>()?,
+                ))
+            }
+        }
+
+        deserializer.deserialize_bytes(CowVisitor)
     }
 }
