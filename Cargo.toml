@@ -56,6 +56,7 @@ ron = "0.6"
 serde-xml-rs = "0.4.1"
 serde_derive = "1.0.75"
 serde_json = {version = "1.0.25", features = ["preserve_order"]}
+serde_test = "1.0.124"
 version-sync = "0.9.1"
 
 [[test]]
