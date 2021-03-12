@@ -42,3 +42,21 @@ macro_rules! tuple_seq_as_map_impl_intern {
 }
 tuple_seq_as_map_impl_intern!([(K, V); N], BTreeMap<K, V>);
 tuple_seq_as_map_impl_intern!([(K, V); N], HashMap<K, V>);
+
+impl<'a, const N: usize> SerializeAs<[u8; N]> for Bytes {
+    fn serialize_as<S>(bytes: &[u8; N], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes)
+    }
+}
+
+impl<'a, const N: usize> SerializeAs<Box<[u8; N]>> for Bytes {
+    fn serialize_as<S>(bytes: &Box<[u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(&**bytes)
+    }
+}

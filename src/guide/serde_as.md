@@ -17,17 +17,18 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
     5. [Re-exporting `serde_as`](#re-exporting-serde_as)
 2. [De/Serialize Implementations Available](#deserialize-implementations-available)
     1. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
-    2. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
-    3. [`Default` from `null`](#default-from-null)
-    4. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-    5. [`Duration` as seconds](#duration-as-seconds)
-    6. [Ignore deserialization errors](#ignore-deserialization-errors)
-    7. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-    8. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-    9. [`None` as empty `String`](#none-as-empty-string)
-    10. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-    11. [Value into JSON String](#value-into-json-string)
-    12. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+    2. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
+    3. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
+    4. [`Default` from `null`](#default-from-null)
+    5. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+    6. [`Duration` as seconds](#duration-as-seconds)
+    7. [Ignore deserialization errors](#ignore-deserialization-errors)
+    8. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+    9. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+    10. [`None` as empty `String`](#none-as-empty-string)
+    11. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+    12. [Value into JSON String](#value-into-json-string)
+    13. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Switching from serde's with to `serde_as`
 
@@ -300,6 +301,21 @@ value: [[u8; 64]; 33],
 "value": [[0,0,0,0,0,...], [0,0,0,...], ...],
 ```
 
+### `Bytes` with more efficiency
+
+[`Bytes`]
+
+More efficient serialization for byte slices and similar.
+
+```ignore
+// Rust
+#[serde_as(as = "Bytes")]
+value: Vec<u8>,
+
+// JSON
+"value": [0, 1, 2, 3, ...],
+```
+
 ### Bytes / `Vec<u8>` to hex string
 
 [`Hex`]
@@ -516,6 +532,7 @@ This includes `BinaryHeap<(K, V)>`, `BTreeSet<(K, V)>`, `HashSet<(K, V)>`, `Link
 
 The [inverse operation](#maps-to-vec-of-tuples) is also available.
 
+[`Bytes`]: crate::Bytes
 [`chrono::DateTime<Local>`]: chrono_crate::DateTime
 [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 [`chrono::Duration`]: https://docs.rs/chrono/latest/chrono/struct.Duration.html

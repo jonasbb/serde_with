@@ -1387,3 +1387,132 @@ fn test_big_arrays() {
         ]],
     );
 }
+
+// The test requires const-generics to work
+#[rustversion::since(1.51)]
+#[test]
+fn test_bytes() {
+    // The test case is copied from
+    // https://github.com/serde-rs/bytes/blob/cbae606b9dc225fc094b031cc84eac9493da2058/tests/test_derive.rs
+    // Original code by @dtolnay
+
+    use serde_test::{assert_de_tokens, assert_tokens, Token};
+    use serde_with::Bytes;
+    use std::borrow::Cow;
+
+    #[serde_as]
+    #[derive(Serialize, Deserialize, PartialEq, Debug)]
+    struct Test<'a> {
+        #[serde_as(as = "Bytes")]
+        array: [u8; 52],
+
+        #[serde_as(as = "Bytes")]
+        slice: &'a [u8],
+
+        #[serde_as(as = "Bytes")]
+        vec: Vec<u8>,
+
+        #[serde_as(as = "Bytes")]
+        cow_slice: Cow<'a, [u8]>,
+
+        #[serde_as(as = "Box<Bytes>")]
+        boxed_array: Box<[u8; 52]>,
+
+        #[serde_as(as = "Bytes")]
+        boxed_array2: Box<[u8; 52]>,
+
+        #[serde_as(as = "Bytes")]
+        boxed_slice: Box<[u8]>,
+
+        #[serde_as(as = "Option<Bytes>")]
+        opt_slice: Option<&'a [u8]>,
+
+        #[serde_as(as = "Option<Bytes>")]
+        opt_vec: Option<Vec<u8>>,
+
+        #[serde_as(as = "Option<Bytes>")]
+        opt_cow_slice: Option<Cow<'a, [u8]>>,
+    }
+
+    let test = Test {
+        array: *b"ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz",
+        slice: b"...",
+        vec: b"...".to_vec(),
+        cow_slice: Cow::Borrowed(b"..."),
+        boxed_array: Box::new(*b"ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+        boxed_array2: Box::new(*b"ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+        boxed_slice: b"...".to_vec().into_boxed_slice(),
+        opt_slice: Some(b"..."),
+        opt_vec: Some(b"...".to_vec()),
+        opt_cow_slice: Some(Cow::Borrowed(b"...")),
+    };
+
+    assert_tokens(
+        &test,
+        &[
+            Token::Struct {
+                name: "Test",
+                len: 10,
+            },
+            Token::Str("array"),
+            Token::BorrowedBytes(b"ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+            Token::Str("slice"),
+            Token::BorrowedBytes(b"..."),
+            Token::Str("vec"),
+            Token::Bytes(b"..."),
+            Token::Str("cow_slice"),
+            Token::BorrowedBytes(b"..."),
+            Token::Str("boxed_array"),
+            Token::BorrowedBytes(b"ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+            Token::Str("boxed_array2"),
+            Token::BorrowedBytes(b"ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+            Token::Str("boxed_slice"),
+            Token::Bytes(b"..."),
+            Token::Str("opt_slice"),
+            Token::Some,
+            Token::BorrowedBytes(b"..."),
+            Token::Str("opt_vec"),
+            Token::Some,
+            Token::Bytes(b"..."),
+            Token::Str("opt_cow_slice"),
+            Token::Some,
+            Token::BorrowedBytes(b"..."),
+            Token::StructEnd,
+        ],
+    );
+
+    // Test string deserialization
+    assert_de_tokens(
+        &test,
+        &[
+            Token::Struct {
+                name: "Test",
+                len: 10,
+            },
+            Token::Str("array"),
+            Token::BorrowedStr("ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+            Token::Str("slice"),
+            Token::BorrowedStr("..."),
+            Token::Str("vec"),
+            Token::Bytes(b"..."),
+            Token::Str("cow_slice"),
+            Token::BorrowedStr("..."),
+            Token::Str("boxed_array"),
+            Token::BorrowedStr("ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+            Token::Str("boxed_array2"),
+            Token::BorrowedStr("ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnopqrstuvwxyz"),
+            Token::Str("boxed_slice"),
+            Token::Bytes(b"..."),
+            Token::Str("opt_slice"),
+            Token::Some,
+            Token::BorrowedStr("..."),
+            Token::Str("opt_vec"),
+            Token::Some,
+            Token::Bytes(b"..."),
+            Token::Str("opt_cow_slice"),
+            Token::Some,
+            Token::BorrowedStr("..."),
+            Token::StructEnd,
+        ],
+    );
+}

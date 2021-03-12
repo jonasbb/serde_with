@@ -3,6 +3,7 @@ use crate::formats::Strictness;
 use crate::rust::StringWithSeparator;
 use crate::utils::duration::DurationSigned;
 use crate::Separator;
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::fmt::Display;
 use std::hash::{BuildHasher, Hash};
@@ -374,5 +375,41 @@ where
         S: Serializer,
     {
         serializer.serialize_some(&SerializeAsWrap::<T, U>::new(source))
+    }
+}
+
+impl SerializeAs<&[u8]> for Bytes {
+    fn serialize_as<S>(bytes: &&[u8], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes)
+    }
+}
+
+impl SerializeAs<Vec<u8>> for Bytes {
+    fn serialize_as<S>(bytes: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes)
+    }
+}
+
+impl SerializeAs<Box<[u8]>> for Bytes {
+    fn serialize_as<S>(bytes: &Box<[u8]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes)
+    }
+}
+
+impl<'a> SerializeAs<Cow<'a, [u8]>> for Bytes {
+    fn serialize_as<S>(bytes: &Cow<'a, [u8]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes)
     }
 }

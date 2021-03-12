@@ -50,6 +50,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     },
     ```
 
+* The `Bytes` type is heavily inspired by `serde_bytes` and ports it to the `serde_as` system.
+
+    ```rust
+    #[serde_as(as = "Bytes")]
+    value: Vec<u8>,
+    ```
+
+    Compared to `serde_bytes` these improvements are available
+
+    1. Integration with the `serde_as` annotation (see [serde-bytes#14][serde-bytes-complex]).
+    2. Implementation for arrays of arbitrary size (Rust 1.51+) (see [serde-bytes#26][serde-bytes-arrays]).
+
+[serde-bytes-complex]: https://github.com/serde-rs/bytes/issues/14
+[serde-bytes-arrays]: https://github.com/serde-rs/bytes/issues/26
+
 ## [1.6.4] - 2021-02-16
 
 ### Fixed

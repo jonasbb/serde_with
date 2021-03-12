@@ -2,6 +2,7 @@ use super::*;
 use crate::utils::{MapIter, SeqIter};
 use serde::de::*;
 use std::collections::{BTreeMap, HashMap};
+use std::convert::TryInto;
 use std::fmt;
 use std::mem::MaybeUninit;
 
@@ -146,3 +147,55 @@ macro_rules! tuple_seq_as_map_impl_intern {
 }
 tuple_seq_as_map_impl_intern!([(K, V); N], BTreeMap<KAs, VAs>);
 tuple_seq_as_map_impl_intern!([(K, V); N], HashMap<KAs, VAs>);
+
+impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<[u8; N], D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ArrayVisitor<const M: usize>;
+
+        impl<'de, const M: usize> Visitor<'de> for ArrayVisitor<M> {
+            type Value = [u8; M];
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_fmt(format_args!("an byte array of size {}", M))
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                array_from_iterator(SeqIter::new(seq), &self)
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.as_bytes()
+                    .try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+        }
+
+        deserializer.deserialize_bytes(ArrayVisitor::<N>)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, Box<[u8; N]>> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<Box<[u8; N]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        <Bytes as DeserializeAs<'de, [u8; N]>>::deserialize_as(deserializer).map(Box::new)
+    }
+}

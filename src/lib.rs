@@ -1320,3 +1320,118 @@ pub struct TimestampNanoSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
 >(PhantomData<(FORMAT, STRICTNESS)>);
+
+/// Optimized handling of owned and borrowed byte representations.
+///
+/// Serialization of byte sequences like `&[u8]` or `Vec<u8>` is quite inefficient since each value will be serialized individually.
+/// This converter type optimizes the serialization and deserialization.
+///
+/// This is a port of the `serde_bytes` crate making it compatible with the `serde_as`-annotation, which allows it to be used in more cases than provided by `serde_bytes`.
+///
+/// The type provides de-/serialization for these types:
+///
+/// * `[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
+/// * `&[u8]`
+/// * `Box<[u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
+/// * `Box<[u8]>`
+/// * `Vec<u8>`
+/// * `Cow<'_, [u8]>`
+///
+/// # Examples
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_with::{serde_as, Bytes};
+/// # use std::borrow::Cow;
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Test<'a> {
+/// #   #[cfg(FALSE)]
+///     #[serde_as(as = "Bytes")]
+///     array: [u8; 15],
+///     #[serde_as(as = "Bytes")]
+///     boxed: Box<[u8]>,
+///     #[serde_as(as = "Bytes")]
+///     #[serde(borrow)]
+///     cow: Cow<'a, [u8]>,
+///     #[serde_as(as = "Bytes")]
+///     vec: Vec<u8>,
+/// }
+///
+/// let value = Test {
+/// #   #[cfg(FALSE)]
+///     array: b"0123456789ABCDE".clone(),
+///     boxed: b"...".to_vec().into_boxed_slice(),
+///     cow: Cow::Borrowed(b"FooBar"),
+///     vec: vec![0x41, 0x61, 0x21],
+/// };
+/// let expected = r#"(
+///     array: "MDEyMzQ1Njc4OUFCQ0RF",
+///     boxed: "Li4u",
+///     cow: "Rm9vQmFy",
+///     vec: "QWEh",
+/// )"#;
+/// # drop(expected);
+/// # // Create a fake expected value without the array to make the test compile without const generics
+/// # let expected = r#"(
+/// #     boxed: "Li4u",
+/// #     cow: "Rm9vQmFy",
+/// #     vec: "QWEh",
+/// # )"#;
+///
+/// # let pretty_config = ron::ser::PrettyConfig::new()
+/// #     .with_new_line("\n".into());
+/// assert_eq!(expected, ron::ser::to_string_pretty(&value, pretty_config).unwrap());
+/// assert_eq!(value, ron::from_str(&expected).unwrap());
+/// # }
+/// ```
+///
+/// ## Alternative to [`BytesOrString`]
+///
+/// The [`Bytes`] can replace [`BytesOrString`].
+/// [`Bytes`] is implemented for more types, which makes it better.
+/// The serialization behavior of [`Bytes`] differes from [`BytesOrString`], therefore only `deserialize_as` should be used.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::Deserialize;
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, Bytes};
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, serde::Serialize)]
+/// struct Test {
+///     #[serde_as(deserialize_as = "Bytes")]
+///     from_bytes: Vec<u8>,
+///     #[serde_as(deserialize_as = "Bytes")]
+///     from_str: Vec<u8>,
+/// }
+///
+/// // Different serialized values ...
+/// let j = json!({
+///     "from_bytes": [70,111,111,45,66,97,114],
+///     "from_str": "Foo-Bar",
+/// });
+///
+/// // can be deserialized ...
+/// let test = Test {
+///     from_bytes: b"Foo-Bar".to_vec(),
+///     from_str: b"Foo-Bar".to_vec(),
+/// };
+/// assert_eq!(test, serde_json::from_value(j).unwrap());
+///
+/// // and serialization will always be a byte sequence
+/// # assert_eq!(json!(
+/// {
+///     "from_bytes": [70,111,111,45,66,97,114],
+///     "from_str": [70,111,111,45,66,97,114],
+/// }
+/// # ), serde_json::to_value(&test).unwrap());
+/// # }
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Bytes;
