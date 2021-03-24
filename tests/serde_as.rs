@@ -1565,7 +1565,7 @@ fn test_one_or_many_prefer_one() {
 
 #[test]
 fn test_one_or_many_prefer_many() {
-    use serde_with::formats::{PreferMany, PreferOne};
+    use serde_with::formats::PreferMany;
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
