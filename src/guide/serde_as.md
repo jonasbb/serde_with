@@ -26,9 +26,10 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
     8. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
     9. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
     10. [`None` as empty `String`](#none-as-empty-string)
-    11. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-    12. [Value into JSON String](#value-into-json-string)
-    13. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+    11. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
+    12. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+    13. [Value into JSON String](#value-into-json-string)
+    14. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Switching from serde's with to `serde_as`
 
@@ -454,6 +455,21 @@ value: Option<String>,
 "value": "Hello World!", // converts to Some
 ```
 
+### One or many elements into `Vec`
+
+[`OneOrMany`]
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::OneOrMany<_>")]
+value: Vec<String>,
+
+// JSON
+"value": "", // Deserializes single elements
+
+"value": ["Hello", "World!"], // or lists of many
+```
+
 ### Timestamps as seconds since UNIX epoch
 
 [`TimestampSeconds`]
@@ -545,6 +561,7 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`Hex`]: crate::hex::Hex
 [`JsonString`]: crate::json::JsonString
 [`NoneAsEmptyString`]: crate::NoneAsEmptyString
+[`OneOrMany`]: crate::OneOrMany
 [`SerializeAs`]: crate::SerializeAs
 [bytes to string converter]: crate::BytesOrString
 [duration to UNIX epoch]: crate::DurationSeconds

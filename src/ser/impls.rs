@@ -413,3 +413,31 @@ impl<'a> SerializeAs<Cow<'a, [u8]>> for Bytes {
         serializer.serialize_bytes(bytes)
     }
 }
+
+impl<T, U> SerializeAs<Vec<T>> for OneOrMany<U, formats::PreferOne>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source.len() {
+            1 => SerializeAsWrap::<T, U>::new(source.iter().next().expect("Cannot be empty"))
+                .serialize(serializer),
+            _ => SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer),
+        }
+    }
+}
+
+impl<T, U> SerializeAs<Vec<T>> for OneOrMany<U, formats::PreferMany>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer)
+    }
+}

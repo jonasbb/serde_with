@@ -62,6 +62,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     1. Integration with the `serde_as` annotation (see [serde-bytes#14][serde-bytes-complex]).
     2. Implementation for arrays of arbitrary size (Rust 1.51+) (see [serde-bytes#26][serde-bytes-arrays]).
 
+* The `OneOrMany` allows to deserialize a `Vec` from either a single element or a sequence.
+
+    ```rust
+    #[serde_as(as = "OneOrMany<_>")]
+    cities: Vec<String>,
+    ```
+
+    This allows to deserialize from either `cities: "Berlin"` or `cities: ["Berlin", "Paris"]`.
+    The serialization can be configured to always emit a list with `PreferMany` or emit a single element with `PreferOne`.
+
 [serde-bytes-complex]: https://github.com/serde-rs/bytes/issues/14
 [serde-bytes-arrays]: https://github.com/serde-rs/bytes/issues/26
 
