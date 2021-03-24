@@ -4,6 +4,8 @@
         "Deque",
         "Deserialization",
         "Deserializes",
+        "MSRV",
+        "Milli",
         "NANOS",
         "accu",
         "btreemap",
@@ -40,5 +42,5 @@
         "markdown",
         "rust",
         "toml"
-    ]
+    ],
 }
