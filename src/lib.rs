@@ -1393,7 +1393,7 @@ pub struct TimestampNanoSecondsWithFrac<
 ///
 /// The [`Bytes`] can replace [`BytesOrString`].
 /// [`Bytes`] is implemented for more types, which makes it better.
-/// The serialization behavior of [`Bytes`] differes from [`BytesOrString`], therefore only `deserialize_as` should be used.
+/// The serialization behavior of [`Bytes`] differs from [`BytesOrString`], therefore only `deserialize_as` should be used.
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
@@ -1435,3 +1435,63 @@ pub struct TimestampNanoSecondsWithFrac<
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Bytes;
+
+/// Deserialize one or many elements
+///
+/// Sometime it is desireable to have a shortcut in writing 1-element lists in a config file.
+/// Usually, this is done by either writing a list or the list element itself.
+/// This distinction is not semantically important on the Rust side, thus both forms should serialize into the same `Vec`.
+///
+/// The `OneOrMany` adapter achieves exactly this use case.
+/// The serialization behavior can be tweaked to either always serialize as a list using `PreferMany` or to serialize as the inner element if possible using `PreferOne`.
+/// By default `PreferOne` is assumed, which can also be omitted like `OneOrMany<_>`.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::Deserialize;
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, OneOrMany};
+/// # use serde_with::formats::{PreferOne, PreferMany};
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, serde::Serialize)]
+/// struct Data {
+///     #[serde_as(deserialize_as = "OneOrMany<_, PreferOne>")]
+///     countries: Vec<String>,
+///     #[serde_as(deserialize_as = "OneOrMany<_, PreferMany>")]
+///     cities: Vec<String>,
+/// }
+///
+/// // The adapter allows deserializing a `Vec` from either
+/// // a single element
+/// let j = json!({
+///     "countries": "Spain",
+///     "cities": "Berlin",
+/// });
+/// assert!(serde_json::from_value::<Data>(j).is_ok());
+///
+/// // or from a list.
+/// let j = json!({
+///     "countries": ["Germany", "France"],
+///     "cities": ["Amsterdam"],
+/// });
+/// assert!(serde_json::from_value::<Data>(j).is_ok());
+///
+/// // For serialization you can choose how a single element should be encoded.
+/// // Either directly, with `PreferOne` (default), or as a list with `PreferMany`.
+/// let data = Data {
+///     countries: vec!["Spain".to_string()],
+///     cities: vec!["Berlin".to_string()],
+/// };
+/// let j = json!({
+///     "countries": "Spain",
+///     "cities": ["Berlin"],
+/// });
+/// assert_eq!(data, serde_json::from_value(j).unwrap());
+/// # }
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
+pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomData<(T, FORMAT)>);

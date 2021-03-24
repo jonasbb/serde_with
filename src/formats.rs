@@ -66,6 +66,11 @@ create_format!(
     Uppercase
     /// Use lowercase characters
     Lowercase
+
+    /// Use in combination with [`OneOrMany`]. Emit single element for lists of size 1.
+    PreferOne
+    /// Use in combination with [`OneOrMany`]. Always emit the list form.
+    PreferMany
 );
 
 /// Specify how lenient the deserialization process should be
