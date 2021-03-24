@@ -11,7 +11,8 @@ use serde::{Deserialize, Serialize};
 use serde_with::formats::Flexible;
 use serde_with::{
     serde_as, BytesOrString, DefaultOnError, DefaultOnNull, DisplayFromStr, DurationSeconds,
-    DurationSecondsWithFrac, NoneAsEmptyString, Same, TimestampSeconds, TimestampSecondsWithFrac,
+    DurationSecondsWithFrac, NoneAsEmptyString, OneOrMany, Same, TimestampSeconds,
+    TimestampSecondsWithFrac,
 };
 use std::collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque};
 use std::rc::Rc;
@@ -1515,4 +1516,108 @@ fn test_bytes() {
             Token::StructEnd,
         ],
     );
+}
+
+#[test]
+fn test_one_or_many_prefer_one() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1Vec(#[serde_as(as = "OneOrMany<_>")] Vec<u32>);
+
+    // Normal
+    is_equal(S1Vec(vec![]), expect![[r#"[]"#]]);
+    is_equal(S1Vec(vec![1]), expect![[r#"1"#]]);
+    is_equal(
+        S1Vec(vec![1, 2, 3]),
+        expect![[r#"
+            [
+              1,
+              2,
+              3
+            ]"#]],
+    );
+    check_deserialization(S1Vec(vec![1]), r#"1"#);
+    check_deserialization(S1Vec(vec![1]), r#"[1]"#);
+    check_error_deserialization::<S1Vec>(r#"{}"#, expect![[r#"a list or single element"#]]);
+    check_error_deserialization::<S1Vec>(r#""xx""#, expect![[r#"a list or single element"#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S2Vec(#[serde_as(as = "OneOrMany<DisplayFromStr>")] Vec<u32>);
+
+    // Normal
+    is_equal(S2Vec(vec![]), expect![[r#"[]"#]]);
+    is_equal(S2Vec(vec![1]), expect![[r#""1""#]]);
+    is_equal(
+        S2Vec(vec![1, 2, 3]),
+        expect![[r#"
+            [
+              "1",
+              "2",
+              "3"
+            ]"#]],
+    );
+    check_deserialization(S2Vec(vec![1]), r#""1""#);
+    check_deserialization(S2Vec(vec![1]), r#"["1"]"#);
+    check_error_deserialization::<S2Vec>(r#"{}"#, expect![[r#"a list or single element"#]]);
+    check_error_deserialization::<S2Vec>(r#""xx""#, expect![[r#"a list or single element"#]]);
+}
+
+#[test]
+fn test_one_or_many_prefer_many() {
+    use serde_with::formats::{PreferMany, PreferOne};
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1Vec(#[serde_as(as = "OneOrMany<_, PreferMany>")] Vec<u32>);
+
+    // Normal
+    is_equal(S1Vec(vec![]), expect![[r#"[]"#]]);
+    is_equal(
+        S1Vec(vec![1]),
+        expect![[r#"
+            [
+              1
+            ]"#]],
+    );
+    is_equal(
+        S1Vec(vec![1, 2, 3]),
+        expect![[r#"
+            [
+              1,
+              2,
+              3
+            ]"#]],
+    );
+    check_deserialization(S1Vec(vec![1]), r#"1"#);
+    check_deserialization(S1Vec(vec![1]), r#"[1]"#);
+    check_error_deserialization::<S1Vec>(r#"{}"#, expect![[r#"a list or single element"#]]);
+    check_error_deserialization::<S1Vec>(r#""xx""#, expect![[r#"a list or single element"#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S2Vec(#[serde_as(as = "OneOrMany<DisplayFromStr, PreferMany>")] Vec<u32>);
+
+    // Normal
+    is_equal(S2Vec(vec![]), expect![[r#"[]"#]]);
+    is_equal(
+        S2Vec(vec![1]),
+        expect![[r#"
+            [
+              "1"
+            ]"#]],
+    );
+    is_equal(
+        S2Vec(vec![1, 2, 3]),
+        expect![[r#"
+            [
+              "1",
+              "2",
+              "3"
+            ]"#]],
+    );
+    check_deserialization(S2Vec(vec![1]), r#""1""#);
+    check_deserialization(S2Vec(vec![1]), r#"["1"]"#);
+    check_error_deserialization::<S2Vec>(r#"{}"#, expect![[r#"a list or single element"#]]);
+    check_error_deserialization::<S2Vec>(r#""xx""#, expect![[r#"a list or single element"#]]);
 }
