@@ -1,6 +1,6 @@
 //! De/Serialization for Rust's builtin and std types
 
-use crate::Separator;
+use crate::{utils, Separator};
 use serde::de::{
     Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
@@ -76,7 +76,6 @@ use std::str::FromStr;
 /// [`SerializeDisplay`]: serde_with_macros::SerializeDisplay
 pub mod display_fromstr {
     use super::*;
-    use std::str::FromStr;
 
     /// Deserialize T using [`FromStr`]
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>
@@ -189,12 +188,7 @@ pub mod display_fromstr {
 /// [`DisplayFromStr`]: crate::DisplayFromStr
 /// [`serde_as`]: crate::guide::serde_as
 pub mod seq_display_fromstr {
-    use serde::de::{Deserializer, Error, SeqAccess, Visitor};
-    use serde::ser::{SerializeSeq, Serializer};
-    use std::fmt::{self, Display};
-    use std::iter::{FromIterator, IntoIterator};
-    use std::marker::PhantomData;
-    use std::str::FromStr;
+    use super::*;
 
     /// Deserialize collection T using [FromIterator] and [FromStr] for each element
     pub fn deserialize<'de, D, T, I>(deserializer: D) -> Result<T, D::Error>
@@ -217,20 +211,15 @@ pub mod seq_display_fromstr {
                 write!(formatter, "a sequence")
             }
 
-            fn visit_seq<A>(self, mut access: A) -> Result<Self::Value, A::Error>
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
             where
                 A: SeqAccess<'de>,
             {
-                let mut values = access
-                    .size_hint()
-                    .map(Self::Value::with_capacity)
-                    .unwrap_or_else(Self::Value::new);
-
-                while let Some(value) = access.next_element::<&str>()? {
-                    values.push(value.parse::<S>().map_err(Error::custom)?);
-                }
-
-                Ok(values)
+                utils::SeqIter::new(seq)
+                    .map(|res| {
+                        res.and_then(|value: &str| value.parse::<S>().map_err(Error::custom))
+                    })
+                    .collect()
             }
         }
 
@@ -1176,9 +1165,10 @@ pub mod hashmap_as_tuple_list {
         BH: BuildHasher,
     {
         let mut seq = serializer.serialize_seq(Some(map.len()))?;
-        for item in map.iter() {
+        map.iter().try_for_each(|item| {
             seq.serialize_element(&item)?;
-        }
+            Ok(())
+        })?;
         seq.end()
     }
 
@@ -1208,16 +1198,11 @@ pub mod hashmap_as_tuple_list {
             formatter.write_str("a list of key-value pairs")
         }
 
-        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
         where
             A: SeqAccess<'de>,
         {
-            let mut map =
-                HashMap::with_capacity_and_hasher(seq.size_hint().unwrap_or(0), BH::default());
-            while let Some((key, value)) = seq.next_element()? {
-                map.insert(key, value);
-            }
-            Ok(map)
+            utils::SeqIter::new(seq).collect()
         }
     }
 }
@@ -1288,9 +1273,10 @@ pub mod btreemap_as_tuple_list {
         V: Serialize,
     {
         let mut seq = serializer.serialize_seq(Some(map.len()))?;
-        for item in map.iter() {
+        map.iter().try_for_each(|item| {
             seq.serialize_element(&item)?;
-        }
+            Ok(())
+        })?;
         seq.end()
     }
 
@@ -1318,15 +1304,11 @@ pub mod btreemap_as_tuple_list {
             formatter.write_str("a list of key-value pairs")
         }
 
-        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
         where
             A: SeqAccess<'de>,
         {
-            let mut map = BTreeMap::default();
-            while let Some((key, value)) = seq.next_element()? {
-                map.insert(key, value);
-            }
-            Ok(map)
+            utils::SeqIter::new(seq).collect()
         }
     }
 }
@@ -1439,11 +1421,12 @@ pub mod tuple_list_as_map {
         V: Serialize + 'a,
         S: Serializer,
     {
-        let iter = iter.into_iter();
+        let mut iter = iter.into_iter();
         let mut map = serializer.serialize_map(Some(iter.len()))?;
-        for (key, value) in iter {
+        iter.try_for_each(|(key, value)| {
             map.serialize_entry(&key, &value)?;
-        }
+            Ok(())
+        })?;
         map.end()
     }
 
@@ -1612,15 +1595,11 @@ pub mod bytes_or_string {
             Ok(v.into_bytes())
         }
 
-        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
         where
             A: SeqAccess<'de>,
         {
-            let mut res = Vec::with_capacity(seq.size_hint().unwrap_or(0));
-            while let Some(value) = seq.next_element()? {
-                res.push(value);
-            }
-            Ok(res)
+            utils::SeqIter::new(seq).collect()
         }
     }
 }
