@@ -1460,34 +1460,7 @@ pub mod tuple_list_as_map {
         where
             A: MapAccess<'de>,
         {
-            let iter = MapIter(map, PhantomData);
-            iter.collect()
-        }
-    }
-
-    struct MapIter<'de, A, K, V>(A, PhantomData<(&'de (), A, K, V)>);
-
-    impl<'de, A, K, V> Iterator for MapIter<'de, A, K, V>
-    where
-        A: MapAccess<'de>,
-        K: Deserialize<'de>,
-        V: Deserialize<'de>,
-    {
-        type Item = Result<(K, V), A::Error>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            match self.0.next_entry() {
-                Ok(Some(x)) => Some(Ok(x)),
-                Ok(None) => None,
-                Err(err) => Some(Err(err)),
-            }
-        }
-
-        fn size_hint(&self) -> (usize, Option<usize>) {
-            match self.0.size_hint() {
-                Some(size) => (size, Some(size)),
-                None => (0, None),
-            }
+            utils::MapIter::new(map).collect()
         }
     }
 }
