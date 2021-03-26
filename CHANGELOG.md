@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Deprecated the module names `serde_with::rust::btreemap_as_tuple_list` and `serde_with::rust::hashmap_as_tuple_list`.
     You can use `serde_with::rust::map_as_tuple_list` as a replacement.
 
+### Fixed
+
+* Implement `Timestamp*Seconds` and `Duration*Seconds` also for chrono types.
+    This closes [#194]. This was incompletely implemented in #199.
+
+[#194]: https://github.com/jonasbb/serde_with/issues/194
+
 ## [1.7.0] - 2021-03-24
 
 ### Added
