@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+
+* Add a new `serde_with::rust::map_as_tuple_list` module as a replacement for `serde_with::rust::btreemap_as_tuple_list` and `serde_with::rust::hashmap_as_tuple_list`.
+    The new module uses `IntoIterator` and `FromIterator` as trait bound making it usable in more sitations.
+    The old names continue to exist but are marked as deprecated.
+
+### Deprecated
+
+* Deprecated the module names `serde_with::rust::btreemap_as_tuple_list` and `serde_with::rust::hashmap_as_tuple_list`.
+    You can use `serde_with::rust::map_as_tuple_list` as a replacement.
+
 ## [1.7.0] - 2021-03-24
 
 ### Added
