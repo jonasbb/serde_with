@@ -406,12 +406,12 @@ fn duplicate_value_last_wins_btreeset() {
 }
 
 #[test]
-fn test_hashmap_as_tuple_list() {
+fn test_map_as_tuple_list() {
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    struct S(#[serde(with = "serde_with::rust::hashmap_as_tuple_list")] HashMap<String, u8>);
+    struct Hash(#[serde(with = "serde_with::rust::map_as_tuple_list")] HashMap<String, u8>);
 
     is_equal(
-        S(HashMap::from_iter(vec![
+        Hash(HashMap::from_iter(vec![
             ("ABC".to_string(), 1),
             ("Hello".to_string(), 0),
             ("World".to_string(), 20),
@@ -433,7 +433,7 @@ fn test_hashmap_as_tuple_list() {
             ]"#]],
     );
     is_equal(
-        S(HashMap::from_iter(vec![("Hello".to_string(), 0)])),
+        Hash(HashMap::from_iter(vec![("Hello".to_string(), 0)])),
         expect![[r#"
             [
               [
@@ -442,22 +442,19 @@ fn test_hashmap_as_tuple_list() {
               ]
             ]"#]],
     );
-    is_equal(S(HashMap::default()), expect![[r#"[]"#]]);
+    is_equal(Hash(HashMap::default()), expect![[r#"[]"#]]);
 
     // Test parse error, only single element instead of tuple
-    check_error_deserialization::<S>(
+    check_error_deserialization::<Hash>(
         r#"[ [1] ]"#,
         expect![[r#"invalid type: integer `1`, expected a string at line 1 column 4"#]],
     );
-}
 
-#[test]
-fn test_btreemap_as_tuple_list() {
     #[derive(Debug, Deserialize, Serialize, PartialEq)]
-    struct S(#[serde(with = "serde_with::rust::btreemap_as_tuple_list")] BTreeMap<String, u8>);
+    struct BTree(#[serde(with = "serde_with::rust::map_as_tuple_list")] BTreeMap<String, u8>);
 
     is_equal(
-        S(BTreeMap::from_iter(vec![
+        BTree(BTreeMap::from_iter(vec![
             ("ABC".to_string(), 1),
             ("Hello".to_string(), 0),
             ("World".to_string(), 20),
@@ -479,7 +476,7 @@ fn test_btreemap_as_tuple_list() {
             ]"#]],
     );
     is_equal(
-        S(BTreeMap::from_iter(vec![("Hello".to_string(), 0)])),
+        BTree(BTreeMap::from_iter(vec![("Hello".to_string(), 0)])),
         expect![[r#"
             [
               [
@@ -488,10 +485,10 @@ fn test_btreemap_as_tuple_list() {
               ]
             ]"#]],
     );
-    is_equal(S(BTreeMap::default()), expect![[r#"[]"#]]);
+    is_equal(BTree(BTreeMap::default()), expect![[r#"[]"#]]);
 
     // Test parse error, only single element instead of tuple
-    check_error_deserialization::<S>(
+    check_error_deserialization::<BTree>(
         r#"[ [1] ]"#,
         expect![[r#"invalid type: integer `1`, expected a string at line 1 column 4"#]],
     );
