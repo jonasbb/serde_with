@@ -614,7 +614,7 @@ macro_rules! use_signed_duration {
             $ty:ty; $converter:ident =>
             $({
                 $format:ty, $strictness:ty =>
-                $($tbound:ident: $bound:ident)*
+                $($tbound:ident: $bound:ident $(,)?)*
             })*
         }
     ) => {
