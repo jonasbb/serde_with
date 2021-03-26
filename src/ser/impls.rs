@@ -6,7 +6,6 @@ use crate::Separator;
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::fmt::Display;
-use std::hash::{BuildHasher, Hash};
 use std::time::{Duration, SystemTime};
 
 impl<'a, T, U> SerializeAs<&'a T> for &'a U
@@ -51,12 +50,12 @@ where
 }
 
 macro_rules! seq_impl {
-    ($ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound:ident $(+ $bound2:ident)*)* >) => {
+    ($ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound:ident )* >) => {
         impl<T, U $(, $typaram)*> SerializeAs<$ty<T $(, $typaram)*>> for $ty<U $(, $typaram)*>
         where
             U: SerializeAs<T>,
             $(T: ?Sized + $tbound1 $(+ $tbound2)*,)*
-            $($typaram: ?Sized + $bound $(+ $bound2)*,)*
+            $($typaram: ?Sized + $bound,)*
         {
             fn serialize_as<S>(source: &$ty<T $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
             where
@@ -70,10 +69,10 @@ macro_rules! seq_impl {
 
 type BoxedSlice<T> = Box<[T]>;
 type Slice<T> = [T];
-seq_impl!(BinaryHeap<T: Ord + Sized>);
+seq_impl!(BinaryHeap<T>);
 seq_impl!(BoxedSlice<T>);
-seq_impl!(BTreeSet<T: Ord + Sized>);
-seq_impl!(HashSet<T: Eq + Hash + Sized, H: BuildHasher + Sized>);
+seq_impl!(BTreeSet<T>);
+seq_impl!(HashSet<T, H: Sized>);
 seq_impl!(LinkedList<T>);
 seq_impl!(Slice<T>);
 seq_impl!(Vec<T>);
@@ -85,8 +84,8 @@ macro_rules! map_impl {
         where
             KU: SerializeAs<K>,
             VU: SerializeAs<V>,
-            $(K: $kbound1 $(+ $kbound2)*,)*
-            $($typaram: $bound,)*
+            $(K: ?Sized + $kbound1 $(+ $kbound2)*,)*
+            $($typaram: ?Sized + $bound,)*
         {
             fn serialize_as<S>(source: &$ty<K, V $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
             where
@@ -98,8 +97,8 @@ macro_rules! map_impl {
     }
 }
 
-map_impl!(BTreeMap<K: Ord, V>);
-map_impl!(HashMap<K: Eq + Hash, V, H: BuildHasher>);
+map_impl!(BTreeMap<K, V>);
+map_impl!(HashMap<K, V, H: Sized>);
 
 impl<T> SerializeAs<T> for DisplayFromStr
 where
@@ -164,7 +163,7 @@ where
 }
 
 macro_rules! map_as_tuple_seq {
-    ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound:ident)* >) => {
+    ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V >) => {
         impl<K, KAs, V, VAs> SerializeAs<$ty<K, V>> for Vec<(KAs, VAs)>
         where
             KAs: SerializeAs<K>,
@@ -184,8 +183,8 @@ macro_rules! map_as_tuple_seq {
         }
     };
 }
-map_as_tuple_seq!(BTreeMap<K: Ord, V>);
-map_as_tuple_seq!(HashMap<K: Eq + Hash, V, H: BuildHasher>);
+map_as_tuple_seq!(BTreeMap<K, V>);
+map_as_tuple_seq!(HashMap<K, V>);
 
 impl<AsRefStr> SerializeAs<Option<AsRefStr>> for NoneAsEmptyString
 where
