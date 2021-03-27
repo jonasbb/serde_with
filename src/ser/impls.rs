@@ -286,10 +286,10 @@ macro_rules! use_signed_duration {
     (
         $main_trait:ident $internal_trait:ident =>
         {
-            $ty:ty; $converter:ident =>
+            $ty:ty =>
             $({
                 $format:ty, $strictness:ty =>
-                $($tbound:ident: $bound:ident)*
+                $($tbound:ident: $bound:ident $(,)?)*
             })*
         }
     ) => {
@@ -323,7 +323,7 @@ use_signed_duration!(
     DurationMicroSeconds DurationMicroSeconds,
     DurationNanoSeconds DurationNanoSeconds,
     => {
-        Duration; to_std_duration =>
+        Duration =>
         {u64, STRICTNESS => STRICTNESS: Strictness}
         {f64, STRICTNESS => STRICTNESS: Strictness}
         {String, STRICTNESS => STRICTNESS: Strictness}
@@ -335,7 +335,7 @@ use_signed_duration!(
     DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
     DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
-        Duration; to_std_duration =>
+        Duration =>
         {f64, STRICTNESS => STRICTNESS: Strictness}
         {String, STRICTNESS => STRICTNESS: Strictness}
     }
@@ -347,7 +347,7 @@ use_signed_duration!(
     TimestampMicroSeconds DurationMicroSeconds,
     TimestampNanoSeconds DurationNanoSeconds,
     => {
-        SystemTime; to_system_time =>
+        SystemTime =>
         {i64, STRICTNESS => STRICTNESS: Strictness}
         {f64, STRICTNESS => STRICTNESS: Strictness}
         {String, STRICTNESS => STRICTNESS: Strictness}
@@ -359,7 +359,7 @@ use_signed_duration!(
     TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
     TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
-        SystemTime; to_system_time =>
+        SystemTime =>
         {f64, STRICTNESS => STRICTNESS: Strictness}
         {String, STRICTNESS => STRICTNESS: Strictness}
     }
