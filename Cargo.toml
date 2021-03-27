@@ -76,17 +76,7 @@ required-features = ["json", "macros"]
 
 [[test]]
 name = "serde_as"
-path = "tests/serde_as.rs"
-required-features = ["macros"]
-
-[[test]]
-name = "serde_as_duration"
-path = "tests/serde_as_duration.rs"
-required-features = ["macros"]
-
-[[test]]
-name = "serde_as_macro"
-path = "tests/serde_as_macro.rs"
+path = "tests/serde_as/lib.rs"
 required-features = ["macros"]
 
 [package.metadata.docs.rs]
