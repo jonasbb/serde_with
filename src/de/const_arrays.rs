@@ -10,7 +10,7 @@ use std::mem::MaybeUninit;
 
 /// # Safety
 /// The code follow exactly the pattern of initializing an array element-by-element from the standard library.
-/// https://doc.rust-lang.org/nightly/std/mem/union.MaybeUninit.html#initializing-an-array-element-by-element
+/// <https://doc.rust-lang.org/nightly/std/mem/union.MaybeUninit.html#initializing-an-array-element-by-element>
 fn array_from_iterator<I, T, E, const N: usize>(
     mut iter: I,
     expected: &dyn Expected,
