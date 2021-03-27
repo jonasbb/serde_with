@@ -79,5 +79,10 @@ name = "serde_as"
 path = "tests/serde_as/lib.rs"
 required-features = ["macros"]
 
+[[test]]
+name = "derives"
+path = "tests/derives/lib.rs"
+required-features = ["macros"]
+
 [package.metadata.docs.rs]
 all-features = true
