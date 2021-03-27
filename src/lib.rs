@@ -1495,3 +1495,7 @@ pub struct Bytes;
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomData<(T, FORMAT)>);
+
+/// TODO
+#[derive(Copy, Clone, Debug, Default)]
+pub struct PickFirst<T>(PhantomData<T>);
