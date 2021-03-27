@@ -59,7 +59,7 @@ impl DurationSigned {
         Self { sign, duration }
     }
 
-    pub(crate) fn to_system_time<'de, D>(&self) -> Result<SystemTime, D::Error>
+    pub(crate) fn to_system_time<'de, D>(self) -> Result<SystemTime, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -72,7 +72,7 @@ impl DurationSigned {
         })
     }
 
-    pub(crate) fn to_std_duration<'de, D>(&self) -> Result<Duration, D::Error>
+    pub(crate) fn to_std_duration<'de, D>(self) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
     {

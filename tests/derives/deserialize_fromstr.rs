@@ -1,3 +1,4 @@
+use super::*;
 use pretty_assertions::assert_eq;
 use serde_with::DeserializeFromStr;
 use std::num::ParseIntError;
@@ -31,12 +32,9 @@ impl FromStr for A {
 
 #[test]
 fn test_deserialize_fromstr() {
-    let a: A = serde_json::from_str("\"159<>true\"").unwrap();
-    assert_eq!(A { a: 159, b: true }, a);
-    let a: A = serde_json::from_str("\"999<>false\"").unwrap();
-    assert_eq!(A { a: 999, b: false }, a);
-    let a: A = serde_json::from_str("\"0<>true\"").unwrap();
-    assert_eq!(A { a: 0, b: true }, a);
+    check_deserialization(A { a: 159, b: true }, "\"159<>true\"");
+    check_deserialization(A { a: 999, b: false }, "\"999<>false\"");
+    check_deserialization(A { a: 0, b: true }, "\"0<>true\"");
 }
 
 #[test]
@@ -82,15 +80,16 @@ fn test_deserialize_from_bytes() {
 
 #[test]
 fn test_deserialize_fromstr_in_vec() {
-    let json = r#"[
-  "123<>false",
-  "0<>true",
-  "999<>true"
-]"#;
-    let expected = vec![
-        A { a: 123, b: false },
-        A { a: 0, b: true },
-        A { a: 999, b: true },
-    ];
-    assert_eq!(expected, serde_json::from_str::<Vec<A>>(&json).unwrap());
+    check_deserialization(
+        vec![
+            A { a: 123, b: false },
+            A { a: 0, b: true },
+            A { a: 999, b: true },
+        ],
+        r#"[
+        "123<>false",
+        "0<>true",
+        "999<>true"
+      ]"#,
+    );
 }
