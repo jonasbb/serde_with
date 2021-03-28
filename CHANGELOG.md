@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+### Added
+
+* Added `PickFirst` adapter for `serde_as`.
+    It allows to deserialize from multiple different forms.
+    Deserializing a number from either a number or string can be implemented like:
+
+    ```rust
+    #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
+    value: u32,
+    ```
+
 ### Changed
 
 * Add a new `serde_with::rust::map_as_tuple_list` module as a replacement for `serde_with::rust::btreemap_as_tuple_list` and `serde_with::rust::hashmap_as_tuple_list`.
