@@ -928,10 +928,10 @@ where
         #[serde(
             untagged,
             bound(deserialize = r#"
-            DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
-            DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
-        "#),
-            expecting = "// TODO"
+                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
+            "#),
+            expecting = "PickFirst could not deserialize data"
         )]
         enum Helper<'a, T, TAs1, TAs2>
         where
@@ -967,11 +967,11 @@ where
         #[serde(
             untagged,
             bound(deserialize = r#"
-            DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
-            DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
-            DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
-        "#),
-            expecting = "// TODO"
+                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
+            "#),
+            expecting = "PickFirst could not deserialize data"
         )]
         enum Helper<'a, T, TAs1, TAs2, TAs3>
         where
@@ -1011,12 +1011,12 @@ where
         #[serde(
             untagged,
             bound(deserialize = r#"
-            DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
-            DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
-            DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
-            DeserializeAsWrap<T, TAs4>: Deserialize<'de>,
-        "#),
-            expecting = "// TODO"
+                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs4>: Deserialize<'de>,
+            "#),
+            expecting = "PickFirst could not deserialize data"
         )]
         enum Helper<'a, T, TAs1, TAs2, TAs3, TAs4>
         where

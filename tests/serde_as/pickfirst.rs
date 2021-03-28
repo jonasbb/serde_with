@@ -9,7 +9,10 @@ fn test_pick_first_two() {
 
     is_equal(S(123), expect![[r#"123"#]]);
     check_deserialization(S(123), r#""123""#);
-    check_error_deserialization::<S>(r#""Abc""#, expect![[r#"// TODO"#]]);
+    check_error_deserialization::<S>(
+        r#""Abc""#,
+        expect![[r#"PickFirst could not deserialize data"#]],
+    );
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -83,7 +86,10 @@ fn test_pick_first_three() {
         ]"#,
     );
     check_deserialization(S(vec![1, 2, 3]), r#""1,2,3""#);
-    check_error_deserialization::<S>(r#""Abc""#, expect![[r#"// TODO"#]]);
+    check_error_deserialization::<S>(
+        r#""Abc""#,
+        expect![[r#"PickFirst could not deserialize data"#]],
+    );
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -121,5 +127,8 @@ fn test_pick_first_four() {
     struct S(#[serde_as(as = "PickFirst<(_, _, _, _)>")] u32);
 
     is_equal(S(123), expect![[r#"123"#]]);
-    check_error_deserialization::<S>(r#""Abc""#, expect![[r#"// TODO"#]]);
+    check_error_deserialization::<S>(
+        r#""Abc""#,
+        expect![[r#"PickFirst could not deserialize data"#]],
+    );
 }
