@@ -1496,6 +1496,63 @@ pub struct Bytes;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomData<(T, FORMAT)>);
 
-/// TODO
+/// Try multiple deserialization options until one succeeds.
+///
+/// This adapter allows you to specify a list of deserialization options.
+/// They are tried in order and the first one working is applied.
+/// Serialization always picks the first option.
+///
+/// `PickFirst` has one type parameter which must be instanciated with a tuple of two, three, or four elements.
+/// For example, `PickFirst<(_, DisplayFromStr)>` on a field of type `u32` allows to deserialize from a number or from a string via the `FromStr` trait.
+/// The value will be serialized as a number, since that is what the first type `_` indicates.
+///
+/// # Examples
+///
+/// Deserialize a number from either a number or a string.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::Deserialize;
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DisplayFromStr, PickFirst};
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, serde::Serialize)]
+/// struct Data {
+///     #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
+///     as_number: u32,
+///     #[serde_as(as = "PickFirst<(DisplayFromStr, _)>")]
+///     as_string: u32,
+/// }
+/// let data = Data {
+///     as_number: 123,
+///     as_string: 456
+/// };
+///
+/// // Both fields can be deserialized from numbers:
+/// let j = json!({
+///     "as_number": 123,
+///     "as_string": 456,
+/// });
+/// assert_eq!(data, serde_json::from_value(j).unwrap());
+///
+/// // or from a string:
+/// let j = json!({
+///     "as_number": "123",
+///     "as_string": "456",
+/// });
+/// assert_eq!(data, serde_json::from_value(j).unwrap());
+///
+/// // For serialization the first type in the tuple determines the behavior.
+/// // The `as_number` field will use the normal `Serialize` behavior and produce a number,
+/// // while `as_string` used `Display` to produce a string.
+/// let expected = json!({
+///     "as_number": 123,
+///     "as_string": "456",
+/// });
+/// assert_eq!(expected, serde_json::to_value(&data).unwrap());
+/// # }
+/// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct PickFirst<T>(PhantomData<T>);
