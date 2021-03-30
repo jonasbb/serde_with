@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Added `PickFirst` adapter for `serde_as`.
+* Added `PickFirst` adapter for `serde_as`. [#291]
     It allows to deserialize from multiple different forms.
     Deserializing a number from either a number or string can be implemented like:
 
@@ -17,6 +17,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
     value: u32,
     ```
+
+* Implement `SerializeAs`/`DeserializeAs` for more wrapper types. [#288], [#293]
+    This now supports:
+    * `Arc`, `sync::Weak`
+    * `Rc`, `rc::Weak`
+    * `Cell`, `RefCell`
+    * `Mutex`, `RwLock`
+    * `Result`
+
+[#288]: https://github.com/jonasbb/serde_with/issues/288
+[#291]: https://github.com/jonasbb/serde_with/issues/291
+[#293]: https://github.com/jonasbb/serde_with/issues/293
 
 ### Changed
 
@@ -32,9 +44,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 * Implement `Timestamp*Seconds` and `Duration*Seconds` also for chrono types.
-    This closes [#194]. This was incompletely implemented in #199.
+    This closes [#194]. This was incompletely implemented in [#199].
 
 [#194]: https://github.com/jonasbb/serde_with/issues/194
+[#199]: https://github.com/jonasbb/serde_with/issues/199
 
 ## [1.7.0] - 2021-03-24
 
