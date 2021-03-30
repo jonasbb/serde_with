@@ -5,13 +5,19 @@ use crate::utils;
 use crate::utils::duration::DurationSigned;
 use serde::de::*;
 use std::borrow::Cow;
+use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::convert::From;
 use std::fmt::{self, Display};
 use std::hash::{BuildHasher, Hash};
 use std::iter::FromIterator;
+use std::rc::{Rc, Weak as RcWeak};
 use std::str::FromStr;
+use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
 use std::time::{Duration, SystemTime};
+
+///////////////////////////////////////////////////////////////////////////////
+// region: Simple Wrapper types (e.g., Box, Option)
 
 impl<'de, T, U> DeserializeAs<'de, Box<T>> for Box<U>
 where
@@ -75,6 +81,140 @@ where
         deserializer.deserialize_option(OptionVisitor::<T, U>(PhantomData))
     }
 }
+
+impl<'de, T, U> DeserializeAs<'de, Rc<T>> for Rc<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Rc<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(Rc::new(
+            DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+        ))
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, RcWeak<T>> for RcWeak<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<RcWeak<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        DeserializeAsWrap::<Option<Rc<T>>, Option<Rc<U>>>::deserialize(deserializer)?;
+        Ok(RcWeak::new())
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, Arc<T>> for Arc<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Arc<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(Arc::new(
+            DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+        ))
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, ArcWeak<T>> for ArcWeak<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<ArcWeak<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        DeserializeAsWrap::<Option<Arc<T>>, Option<Arc<U>>>::deserialize(deserializer)?;
+        Ok(ArcWeak::new())
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, Cell<T>> for Cell<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Cell<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(Cell::new(
+            DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+        ))
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, RefCell<T>> for RefCell<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<RefCell<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(RefCell::new(
+            DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+        ))
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, Mutex<T>> for Mutex<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Mutex<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(Mutex::new(
+            DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+        ))
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, RwLock<T>> for RwLock<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<RwLock<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(RwLock::new(
+            DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+        ))
+    }
+}
+
+impl<'de, T, TAs, E, EAs> DeserializeAs<'de, Result<T, E>> for Result<TAs, EAs>
+where
+    TAs: DeserializeAs<'de, T>,
+    EAs: DeserializeAs<'de, E>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Result<T, E>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(
+            match Result::<DeserializeAsWrap<T, TAs>, DeserializeAsWrap<E, EAs>>::deserialize(
+                deserializer,
+            )? {
+                Ok(value) => Ok(value.into_inner()),
+                Err(err) => Err(err.into_inner()),
+            },
+        )
+    }
+}
+
+// endregion
+///////////////////////////////////////////////////////////////////////////////
+// region: Collection Types (e.g., Maps, Sets, Vec)
 
 macro_rules! seq_impl {
     (
@@ -379,6 +519,10 @@ macro_rules! map_as_tuple_seq {
 }
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
 map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
+
+// endregion
+///////////////////////////////////////////////////////////////////////////////
+// region: Conversion types which cause different serialization behavior
 
 impl<'de, Str> DeserializeAs<'de, Option<Str>> for NoneAsEmptyString
 where
@@ -1043,3 +1187,5 @@ where
         }
     }
 }
+
+// endregion

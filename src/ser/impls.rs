@@ -3,10 +3,17 @@ use crate::formats::Strictness;
 use crate::rust::StringWithSeparator;
 use crate::utils::duration::DurationSigned;
 use crate::Separator;
+use serde::ser::Error;
 use std::borrow::Cow;
+use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::fmt::Display;
+use std::rc::{Rc, Weak as RcWeak};
+use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
 use std::time::{Duration, SystemTime};
+
+///////////////////////////////////////////////////////////////////////////////
+// region: Simple Wrapper types (e.g., Box, Option)
 
 impl<'a, T, U> SerializeAs<&'a T> for &'a U
 where
@@ -15,6 +22,20 @@ where
     U: ?Sized,
 {
     fn serialize_as<S>(source: &&'a T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, U>::new(source).serialize(serializer)
+    }
+}
+
+impl<'a, T, U> SerializeAs<&'a mut T> for &'a mut U
+where
+    U: SerializeAs<T>,
+    T: ?Sized,
+    U: ?Sized,
+{
+    fn serialize_as<S>(source: &&'a mut T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -48,6 +69,135 @@ where
         }
     }
 }
+
+impl<T, U> SerializeAs<Rc<T>> for Rc<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Rc<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, U>::new(source).serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<RcWeak<T>> for RcWeak<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &RcWeak<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<Option<Rc<T>>, Option<Rc<U>>>::new(&source.upgrade())
+            .serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<Arc<T>> for Arc<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Arc<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, U>::new(source).serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<ArcWeak<T>> for ArcWeak<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &ArcWeak<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<Option<Arc<T>>, Option<Arc<U>>>::new(&source.upgrade())
+            .serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<Cell<T>> for Cell<U>
+where
+    U: SerializeAs<T>,
+    T: Copy,
+{
+    fn serialize_as<S>(source: &Cell<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, U>::new(&source.get()).serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<RefCell<T>> for RefCell<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &RefCell<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source.try_borrow() {
+            Ok(source) => SerializeAsWrap::<T, U>::new(&*source).serialize(serializer),
+            Err(_) => Err(S::Error::custom("already mutably borrowed")),
+        }
+    }
+}
+
+impl<T, U> SerializeAs<Mutex<T>> for Mutex<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Mutex<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source.lock() {
+            Ok(source) => SerializeAsWrap::<T, U>::new(&*source).serialize(serializer),
+            Err(_) => Err(S::Error::custom("lock poison error while serializing")),
+        }
+    }
+}
+
+impl<T, U> SerializeAs<RwLock<T>> for RwLock<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &RwLock<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source.read() {
+            Ok(source) => SerializeAsWrap::<T, U>::new(&*source).serialize(serializer),
+            Err(_) => Err(S::Error::custom("lock poison error while serializing")),
+        }
+    }
+}
+
+impl<T, TAs, E, EAs> SerializeAs<Result<T, E>> for Result<TAs, EAs>
+where
+    TAs: SerializeAs<T>,
+    EAs: SerializeAs<E>,
+{
+    fn serialize_as<S>(source: &Result<T, E>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source
+            .as_ref()
+            .map(SerializeAsWrap::<T, TAs>::new)
+            .map_err(SerializeAsWrap::<E, EAs>::new)
+            .serialize(serializer)
+    }
+}
+
+// endregion
+///////////////////////////////////////////////////////////////////////////////
+// region: Collection Types (e.g., Maps, Sets, Vec)
 
 macro_rules! seq_impl {
     ($ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound:ident )* >) => {
@@ -185,6 +335,10 @@ macro_rules! map_as_tuple_seq {
 }
 map_as_tuple_seq!(BTreeMap<K, V>);
 map_as_tuple_seq!(HashMap<K, V>);
+
+// endregion
+///////////////////////////////////////////////////////////////////////////////
+// region: Conversion types which cause different serialization behavior
 
 impl<AsRefStr> SerializeAs<Option<AsRefStr>> for NoneAsEmptyString
 where
@@ -488,3 +642,5 @@ where
         SerializeAsWrap::<T, TAs1>::new(source).serialize(serializer)
     }
 }
+
+// endregion
