@@ -11,9 +11,9 @@ use std::convert::From;
 use std::fmt::{self, Display};
 use std::hash::{BuildHasher, Hash};
 use std::iter::FromIterator;
-use std::rc::Rc;
+use std::rc::{Rc, Weak as RcWeak};
 use std::str::FromStr;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
 use std::time::{Duration, SystemTime};
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,6 +96,19 @@ where
     }
 }
 
+impl<'de, T, U> DeserializeAs<'de, RcWeak<T>> for RcWeak<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<RcWeak<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        DeserializeAsWrap::<Option<Rc<T>>, Option<Rc<U>>>::deserialize(deserializer)?;
+        Ok(RcWeak::new())
+    }
+}
+
 impl<'de, T, U> DeserializeAs<'de, Arc<T>> for Arc<U>
 where
     U: DeserializeAs<'de, T>,
@@ -107,6 +120,19 @@ where
         Ok(Arc::new(
             DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
         ))
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, ArcWeak<T>> for ArcWeak<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<ArcWeak<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        DeserializeAsWrap::<Option<Arc<T>>, Option<Arc<U>>>::deserialize(deserializer)?;
+        Ok(ArcWeak::new())
     }
 }
 

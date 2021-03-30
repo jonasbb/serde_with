@@ -8,8 +8,8 @@ use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
 use std::fmt::Display;
-use std::rc::Rc;
-use std::sync::{Arc, Mutex, RwLock};
+use std::rc::{Rc, Weak as RcWeak};
+use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
 use std::time::{Duration, SystemTime};
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,6 +82,19 @@ where
     }
 }
 
+impl<T, U> SerializeAs<RcWeak<T>> for RcWeak<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &RcWeak<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<Option<Rc<T>>, Option<Rc<U>>>::new(&source.upgrade())
+            .serialize(serializer)
+    }
+}
+
 impl<T, U> SerializeAs<Arc<T>> for Arc<U>
 where
     U: SerializeAs<T>,
@@ -91,6 +104,19 @@ where
         S: Serializer,
     {
         SerializeAsWrap::<T, U>::new(source).serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<ArcWeak<T>> for ArcWeak<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &ArcWeak<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<Option<Arc<T>>, Option<Arc<U>>>::new(&source.upgrade())
+            .serialize(serializer)
     }
 }
 
