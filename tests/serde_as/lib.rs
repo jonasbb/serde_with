@@ -15,7 +15,10 @@ use crate::utils::*;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::formats::Flexible;
-use serde_with::{serde_as, BytesOrString, DisplayFromStr, NoneAsEmptyString, OneOrMany, Same};
+use serde_with::{
+    serde_as, BytesOrString, CommaSeparator, DisplayFromStr, NoneAsEmptyString, OneOrMany, Same,
+    StringWithSeparator,
+};
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque};
 use std::rc::{Rc, Weak as RcWeak};
@@ -103,10 +106,6 @@ fn test_option() {
         r#"{}"#,
         expect![[r#"invalid type: map, expected u32 at line 1 column 0"#]],
     );
-    check_error_deserialization::<S>(
-        r#"{}"#,
-        expect![[r#"invalid type: map, expected u32 at line 1 column 0"#]],
-    );
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -118,6 +117,32 @@ fn test_option() {
         r#"{}"#,
         expect![[r#"missing field `value` at line 1 column 2"#]],
     );
+}
+
+#[test]
+fn test_result() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(
+        #[serde_as(as = "Result<StringWithSeparator<CommaSeparator, u32>, DisplayFromStr>")]
+        Result<Vec<u32>, u32>,
+    );
+
+    is_equal(
+        S(Ok(vec![1, 2, 3])),
+        expect![[r#"
+        {
+          "Ok": "1,2,3"
+        }"#]],
+    );
+    is_equal(
+        S(Err(9)),
+        expect![[r#"
+            {
+              "Err": "9"
+            }"#]],
+    );
+    check_error_deserialization::<S>(r#"{}"#, expect![[r#"expected value at line 1 column 2"#]]);
 }
 
 #[test]

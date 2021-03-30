@@ -187,10 +187,11 @@ where
     where
         S: Serializer,
     {
-        match source {
-            Ok(source) => SerializeAsWrap::<T, TAs>::new(source).serialize(serializer),
-            Err(err) => SerializeAsWrap::<E, EAs>::new(err).serialize(serializer),
-        }
+        source
+            .as_ref()
+            .map(SerializeAsWrap::<T, TAs>::new)
+            .map_err(SerializeAsWrap::<E, EAs>::new)
+            .serialize(serializer)
     }
 }
 
