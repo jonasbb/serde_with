@@ -898,7 +898,148 @@ where
         match h {
             Helper::One(one) => Ok(vec![one.into_inner()]),
             Helper::Many(many) => Ok(many.into_inner()),
-            _ => unreachable!(),
+            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
+        }
+    }
+}
+
+impl<'de, T, TAs1> DeserializeAs<'de, T> for PickFirst<(TAs1,)>
+where
+    TAs1: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(DeserializeAsWrap::<T, TAs1>::deserialize(deserializer)?.into_inner())
+    }
+}
+
+impl<'de, T, TAs1, TAs2> DeserializeAs<'de, T> for PickFirst<(TAs1, TAs2)>
+where
+    TAs1: DeserializeAs<'de, T>,
+    TAs2: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        #[serde(
+            untagged,
+            bound(deserialize = r#"
+                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
+            "#),
+            expecting = "PickFirst could not deserialize data"
+        )]
+        enum Helper<'a, T, TAs1, TAs2>
+        where
+            TAs1: DeserializeAs<'a, T>,
+            TAs2: DeserializeAs<'a, T>,
+        {
+            First(DeserializeAsWrap<T, TAs1>),
+            Second(DeserializeAsWrap<T, TAs2>),
+            #[serde(skip)]
+            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
+        }
+
+        let h: Helper<'de, T, TAs1, TAs2> = Deserialize::deserialize(deserializer)?;
+        match h {
+            Helper::First(first) => Ok(first.into_inner()),
+            Helper::Second(second) => Ok(second.into_inner()),
+            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
+        }
+    }
+}
+
+impl<'de, T, TAs1, TAs2, TAs3> DeserializeAs<'de, T> for PickFirst<(TAs1, TAs2, TAs3)>
+where
+    TAs1: DeserializeAs<'de, T>,
+    TAs2: DeserializeAs<'de, T>,
+    TAs3: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        #[serde(
+            untagged,
+            bound(deserialize = r#"
+                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
+            "#),
+            expecting = "PickFirst could not deserialize data"
+        )]
+        enum Helper<'a, T, TAs1, TAs2, TAs3>
+        where
+            TAs1: DeserializeAs<'a, T>,
+            TAs2: DeserializeAs<'a, T>,
+            TAs3: DeserializeAs<'a, T>,
+        {
+            First(DeserializeAsWrap<T, TAs1>),
+            Second(DeserializeAsWrap<T, TAs2>),
+            Third(DeserializeAsWrap<T, TAs3>),
+            #[serde(skip)]
+            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
+        }
+
+        let h: Helper<'de, T, TAs1, TAs2, TAs3> = Deserialize::deserialize(deserializer)?;
+        match h {
+            Helper::First(first) => Ok(first.into_inner()),
+            Helper::Second(second) => Ok(second.into_inner()),
+            Helper::Third(third) => Ok(third.into_inner()),
+            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
+        }
+    }
+}
+
+impl<'de, T, TAs1, TAs2, TAs3, TAs4> DeserializeAs<'de, T> for PickFirst<(TAs1, TAs2, TAs3, TAs4)>
+where
+    TAs1: DeserializeAs<'de, T>,
+    TAs2: DeserializeAs<'de, T>,
+    TAs3: DeserializeAs<'de, T>,
+    TAs4: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        #[serde(
+            untagged,
+            bound(deserialize = r#"
+                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
+                DeserializeAsWrap<T, TAs4>: Deserialize<'de>,
+            "#),
+            expecting = "PickFirst could not deserialize data"
+        )]
+        enum Helper<'a, T, TAs1, TAs2, TAs3, TAs4>
+        where
+            TAs1: DeserializeAs<'a, T>,
+            TAs2: DeserializeAs<'a, T>,
+            TAs3: DeserializeAs<'a, T>,
+            TAs4: DeserializeAs<'a, T>,
+        {
+            First(DeserializeAsWrap<T, TAs1>),
+            Second(DeserializeAsWrap<T, TAs2>),
+            Third(DeserializeAsWrap<T, TAs3>),
+            Forth(DeserializeAsWrap<T, TAs4>),
+            #[serde(skip)]
+            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
+        }
+
+        let h: Helper<'de, T, TAs1, TAs2, TAs3, TAs4> = Deserialize::deserialize(deserializer)?;
+        match h {
+            Helper::First(first) => Ok(first.into_inner()),
+            Helper::Second(second) => Ok(second.into_inner()),
+            Helper::Third(third) => Ok(third.into_inner()),
+            Helper::Forth(forth) => Ok(forth.into_inner()),
+            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
         }
     }
 }

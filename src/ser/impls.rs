@@ -440,3 +440,51 @@ where
         SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer)
     }
 }
+
+impl<T, TAs1> SerializeAs<T> for PickFirst<(TAs1,)>
+where
+    TAs1: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, TAs1>::new(source).serialize(serializer)
+    }
+}
+
+impl<T, TAs1, TAs2> SerializeAs<T> for PickFirst<(TAs1, TAs2)>
+where
+    TAs1: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, TAs1>::new(source).serialize(serializer)
+    }
+}
+
+impl<T, TAs1, TAs2, TAs3> SerializeAs<T> for PickFirst<(TAs1, TAs2, TAs3)>
+where
+    TAs1: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, TAs1>::new(source).serialize(serializer)
+    }
+}
+
+impl<T, TAs1, TAs2, TAs3, TAs4> SerializeAs<T> for PickFirst<(TAs1, TAs2, TAs3, TAs4)>
+where
+    TAs1: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<T, TAs1>::new(source).serialize(serializer)
+    }
+}
