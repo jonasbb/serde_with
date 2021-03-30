@@ -16,17 +16,79 @@ use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::formats::Flexible;
 use serde_with::{serde_as, BytesOrString, DisplayFromStr, NoneAsEmptyString, OneOrMany, Same};
+use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque};
-use std::rc::Rc;
-use std::sync::Arc;
+use std::rc::{Rc, Weak as RcWeak};
+use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
 
 #[test]
-fn test_box() {
+fn test_basic_wrappers() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct S(#[serde_as(as = "Box<DisplayFromStr>")] Box<u32>);
+    struct SBox(#[serde_as(as = "Box<DisplayFromStr>")] Box<u32>);
 
-    is_equal(S(Box::new(123)), expect![[r#""123""#]]);
+    is_equal(SBox(Box::new(123)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SRc(#[serde_as(as = "Rc<DisplayFromStr>")] Rc<u32>);
+
+    is_equal(SRc(Rc::new(123)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize)]
+    struct SRcWeak(#[serde_as(as = "RcWeak<DisplayFromStr>")] RcWeak<u32>);
+
+    check_serialization(SRcWeak(RcWeak::new()), expect![[r#"null"#]]);
+    let s: SRcWeak = serde_json::from_str("null").unwrap();
+    assert!(s.0.upgrade().is_none());
+    let s: SRcWeak = serde_json::from_str("\"123\"").unwrap();
+    assert!(s.0.upgrade().is_none());
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SArc(#[serde_as(as = "Arc<DisplayFromStr>")] Arc<u32>);
+
+    is_equal(SArc(Arc::new(123)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize)]
+    struct SArcWeak(#[serde_as(as = "ArcWeak<DisplayFromStr>")] ArcWeak<u32>);
+
+    check_serialization(SArcWeak(ArcWeak::new()), expect![[r#"null"#]]);
+    let s: SArcWeak = serde_json::from_str("null").unwrap();
+    assert!(s.0.upgrade().is_none());
+    let s: SArcWeak = serde_json::from_str("\"123\"").unwrap();
+    assert!(s.0.upgrade().is_none());
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SCell(#[serde_as(as = "Cell<DisplayFromStr>")] Cell<u32>);
+
+    is_equal(SCell(Cell::new(123)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SRefCell(#[serde_as(as = "RefCell<DisplayFromStr>")] RefCell<u32>);
+
+    is_equal(SRefCell(RefCell::new(123)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize)]
+    struct SMutex(#[serde_as(as = "Mutex<DisplayFromStr>")] Mutex<u32>);
+
+    check_serialization(SMutex(Mutex::new(123)), expect![[r#""123""#]]);
+    let s: SMutex = serde_json::from_str("\"123\"").unwrap();
+    assert_eq!(*s.0.lock().unwrap(), 123);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize)]
+    struct SRwLock(#[serde_as(as = "RwLock<DisplayFromStr>")] RwLock<u32>);
+
+    let expected = expect![[r#""123""#]];
+    check_serialization(SRwLock(RwLock::new(123)), expected);
+    let s: SRwLock = serde_json::from_str("\"123\"").unwrap();
+    assert_eq!(*s.0.read().unwrap(), 123);
 }
 
 #[test]
@@ -400,6 +462,42 @@ fn test_serialize_reference() {
     #[serde_as]
     #[derive(Debug, Serialize)]
     struct S1<'a>(#[serde_as(as = "Vec<DisplayFromStr>")] &'a Vec<u32>);
+    check_serialization(
+        S1(&vec![1, 2]),
+        expect![[r#"
+        [
+          "1",
+          "2"
+        ]"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S1a<'a>(#[serde_as(as = "&Vec<DisplayFromStr>")] &'a Vec<u32>);
+    check_serialization(
+        S1(&vec![1, 2]),
+        expect![[r#"
+        [
+          "1",
+          "2"
+        ]"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S1Mut<'a>(#[serde_as(as = "Vec<DisplayFromStr>")] &'a mut Vec<u32>);
+    check_serialization(
+        S1(&vec![1, 2]),
+        expect![[r#"
+        [
+          "1",
+          "2"
+        ]"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S1aMut<'a>(#[serde_as(as = "&mut Vec<DisplayFromStr>")] &'a mut Vec<u32>);
     check_serialization(
         S1(&vec![1, 2]),
         expect![[r#"
