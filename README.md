@@ -7,7 +7,7 @@
 
 ---
 
-This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][user guide]-annotation.
+This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][as-annotation]-annotation.
 Some common use cases are:
 
 * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
@@ -132,6 +132,7 @@ Foo {
 [StringWithSeparator]: https://docs.rs/serde_with/1.8.0/serde_with/rust/struct.StringWithSeparator.html
 [user guide]: https://docs.rs/serde_with/1.8.0/serde_with/guide/index.html
 [with-annotation]: https://serde.rs/field-attrs.html#with
+[as-annotation]: https://docs.rs/serde_with/1.8.0/serde_with/guide/serde_as/index.html
 
 ## License
 
