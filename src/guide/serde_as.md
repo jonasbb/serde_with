@@ -4,7 +4,7 @@ This is an alternative to serde's with-annotation.
 It is more flexible and composable but work with fewer types.
 
 The scheme is based on two new traits, [`SerializeAs`] and [`DeserializeAs`], which need to be implemented by all types which want to be compatible with `serde_as`.
-The proc macro attribute [`#[serde_as]`][crate::serde_as] exists as a usability boost for users.
+The proc-macro attribute [`#[serde_as]`][crate::serde_as] exists as a usability boost for users.
 
 This site contains some general advice how to use this crate and then lists the implemented conversions for `serde_as`.
 The basic design of the system was done by [@markazmierczak](https://github.com/markazmierczak).
@@ -63,7 +63,7 @@ struct A {
 }
 ```
 
-The main advantage is that you can compose `serde_as` stuff, which is not possible with the with-annotation.
+The main advantage is that you can compose `serde_as` stuff, which is impossible with the with-annotation.
 For example, the `mime` field from above could be nested in one or more data structures:
 
 ```rust
@@ -151,6 +151,15 @@ impl SerializeAs<RemoteType> for LocalType {
         MODULE::serialize(value, serializer)
     }
 }
+
+impl<'de> DeserializeAs<'de, RemoteType> for LocalType {
+    fn deserialize_as<D>(deserializer: D) -> Result<RemoteType, D::Error>
+    where
+        D: Deserializer<'de>,
+    {  
+        MODULE::deserialize(deserializer)
+    }
+}
 # }
 ```
 
@@ -173,7 +182,7 @@ struct Data {
 ### Using `#[serde_as]` with serde's remote derives
 
 A special case of the above section is using it on remote derives.
-This is a special functionality of serde where it derives the de-/serialization code for a type from another crate if all fields are `pub`.
+This is a special functionality of serde where it derives the de/serialization code for a type from another crate if all fields are `pub`.
 You can find all the details in the [official serde documentation](https://serde.rs/remote-derive.html).
 
 ```rust
@@ -205,7 +214,7 @@ struct DurationDef {
 ```
 
 Our goal is it now to use `Duration` within `serde_as`.
-We make use of the existing `DurationDef` type and its `serialize` and `deserialize` functions.
+We use the existing `DurationDef` type and its `serialize` and `deserialize` functions.
 We can write this implementation.
 The implementation for `DeserializeAs` works analogue.
 
@@ -280,7 +289,7 @@ pub use serde_with;
 pub use some_other_lib_derive::define_some_type;
 ```
 
-And the procedural macro can be used by other crates without any additional imports:
+The procedural macro can be used by other crates without any additional imports:
 
 ```rust,ignore
 // consuming_crate/src/main.rs
