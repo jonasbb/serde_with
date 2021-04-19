@@ -8,6 +8,7 @@ use crate::ser::SerializeAs;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serializer};
 use std::borrow::Cow;
+use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 
 /// Serialize bytes as a hex string
@@ -66,6 +67,45 @@ use std::marker::PhantomData;
 ///     BytesUppercase(vec![0x00, 0xaa, 0xbc, 0x99, 0xff]),
 ///     serde_json::from_value(json!("00aAbc99FF")).unwrap()
 /// );
+///
+/// /////////////////////////////////////
+/// // Arrays are supported in Rust 1.48+
+///
+/// # #[rustversion::since(1.48)]
+/// # fn test_array() {
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq, Eq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct ByteArray(
+///     // Equivalent to serde_with::hex::Hex<serde_with::formats::Lowercase>
+///     #[serde_as(as = "serde_with::hex::Hex")]
+///     [u8; 12]
+/// );
+///
+/// let b = b"Hello World!";
+///
+/// assert_eq!(
+///     json!("48656c6c6f20576f726c6421"),
+///     serde_json::to_value(ByteArray(b.clone())).unwrap()
+/// );
+///
+/// // Serialization always work from lower- and uppercase characters, even mixed case.
+/// assert_eq!(
+///     ByteArray([0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0xaa, 0xbc, 0x99, 0xff]),
+///     serde_json::from_value(json!("0011223344556677aAbc99FF")).unwrap()
+/// );
+///
+/// // Remember that the conversion may fail. (The following errors are specific to fixed-size arrays)
+/// let error_result: Result<ByteArray, _> = serde_json::from_value(json!("42")); // Too short
+/// error_result.unwrap_err();
+///
+/// let error_result: Result<ByteArray, _> =
+///     serde_json::from_value(json!("000000000000000000000000000000")); // Too long
+/// error_result.unwrap_err();
+/// # };
+/// # #[rustversion::before(1.48)]
+/// # fn test_array() {}
+/// # test_array();
 /// # }
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
@@ -97,7 +137,7 @@ where
 
 impl<'de, T, FORMAT> DeserializeAs<'de, T> for Hex<FORMAT>
 where
-    T: From<Vec<u8>>,
+    T: TryFrom<Vec<u8>>,
     FORMAT: Format,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
@@ -106,6 +146,14 @@ where
     {
         <Cow<'de, str> as Deserialize<'de>>::deserialize(deserializer)
             .and_then(|s| hex::decode(&*s).map_err(Error::custom))
-            .map(Into::into)
+            .and_then(|vec: Vec<u8>| {
+                let length = vec.len();
+                vec.try_into().map_err(|_e: T::Error| {
+                    Error::custom(format!(
+                        "Can't convert a Byte Vector of length {} to the output type.",
+                        length
+                    ))
+                })
+            })
     }
 }
