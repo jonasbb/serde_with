@@ -2,9 +2,11 @@
 
 // Ensure no prelude is available
 #![no_implicit_prelude]
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 
 use ::s_with::{DeserializeFromStr, SerializeDisplay};
+// Needed for 1.45, unused in 1.50
+use ::std::panic;
 
 #[derive(DeserializeFromStr, SerializeDisplay)]
 #[serde_with(crate = "::s_with")]
