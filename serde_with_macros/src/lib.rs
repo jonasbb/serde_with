@@ -437,6 +437,48 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// }
 /// ```
 ///
+/// # What this macro does
+///
+/// The `serde_as` macro only serves a convenience function.
+/// All the steps it takes can easily applied manually, in case the cost of an attribute macro is deemed to high.
+/// The functionality can best be described with an example.
+///
+/// ```rust,ignore
+/// #[serde_as]
+/// #[derive(serde::Serialize)]
+/// struct Foo {
+///     #[serde_as(as = "Vec<_>")]
+///     bar: Vec<u32>,
+/// }
+/// ```
+///
+/// 1. All the placeholder type `_` will be replaced with `::serde_with::Same`.
+///     The placeholder type `_` marks all the places where the types `Serialize` implementation should be used.
+///     In the example it means that the u32 values will be serialize by the `Serialize` implementation of u32.
+///     The `Same` type implements `SerializeAs` whenever the underlying type implements `Serialize` and is used to make the two traits compatible.
+///
+///     If you specify a custom path for `serde_with` via the `crate` attribute the path to the `Same` type will be altered accordingly.
+/// 2. Wrap the type from the annotation inside a `::serde_with::As`.
+///     In the above example we know have something like `::serde_with::As::<Vec<::serde_with::Same>>`.
+///     The `As` type acts as the opposite of the `Same` type.
+///     It allows using a `SerializeAs` type whenever a `Serialize` is required.
+/// 3. Translate the `*as` attributes into the serde equivalent ones.
+///     `#[serde_as(as = ...)]` will become `#[serde(with = ...)]`.
+///     Similarly, `serialize_as` is translated to `serialize_with`.
+///
+///     The field attributes will be kept on the struct/enum such that other macros can use them too.
+///
+/// After all these steps, the code snippet will have transformed into roughly this.
+///
+/// ```rust,ignore
+/// #[derive(serde::Serialize)]
+/// struct Foo {
+///     #[serde_as(as = "Vec<_>")]
+///     #[serde(with = "::serde_with::As::<Vec<::serde_with::Same>>")]
+///     bar: Vec<u32>,
+/// }
+/// ```
+///
 /// [`serde_as`]: https://docs.rs/serde_with/1.8.1/serde_with/guide/index.html
 /// [re-exporting `serde_as`]: https://docs.rs/serde_with/1.8.1/serde_with/guide/serde_as/index.html#re-exporting-serde_as
 #[proc_macro_attribute]
