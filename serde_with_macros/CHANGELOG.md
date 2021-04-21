@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 * Describe how the `serde_as` macro works on a high level.
+* The derive macros `SerializeDisplay` and `DeserializeFromStr` were relying on the prelude where they were used.
+    Properly name all types and traits required for the expanded code to work.
+    The tests were improved to be better able to catch such problems.
 
 ## [1.4.1] - 2021-02-16
 
