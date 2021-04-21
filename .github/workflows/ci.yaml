@@ -32,6 +32,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
           components: clippy
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/clippy-check@v1
         name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         with:
@@ -88,6 +89,7 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.rust }}
           override: true
+      - uses: Swatinem/rust-cache@v1
       - uses: actions-rs/cargo@v1
         name: Build (${{ matrix.os }} / ${{ matrix.rust }})
         if: matrix.rust != 'nightly'
