@@ -823,7 +823,7 @@ fn deserialize_fromstr(input: DeriveInput, serde_with_crate_path: Path) -> Token
                     type Value = S;
 
                     fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                        write!(formatter, "string")
+                        ::std::write!(formatter, "string")
                     }
 
                     fn visit_str<E>(self, value: &str) -> ::std::result::Result<Self::Value, E>
@@ -922,7 +922,7 @@ fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> TokenSt
             where
                 S: #serde_with_crate_path::serde::Serializer,
             {
-                serializer.serialize_str(&self.to_string())
+                serializer.serialize_str(&::std::string::ToString::to_string(self))
             }
         }
     }
