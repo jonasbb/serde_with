@@ -1,35 +1,24 @@
+//! Test that the derive macros properly name all the types and traits used
+
+// Ensure no prelude is available
+#![no_implicit_prelude]
 #![allow(dead_code)]
 
-use s_with::{DeserializeFromStr, SerializeDisplay};
-
-// We check that the macros result in valid code even in
-// absence of a FromStr import and with a clobbered Result type
-// Ensure that types from the environment do not infect the macro
-
-#[allow(unused_imports)]
-use crate::Option::*;
-mod std {}
-type Result = ();
-enum Option {
-    Some,
-    None(()),
-    Ok,
-    Err,
-}
+use ::s_with::{DeserializeFromStr, SerializeDisplay};
 
 #[derive(DeserializeFromStr, SerializeDisplay)]
-#[serde_with(crate = "s_with")]
+#[serde_with(crate = "::s_with")]
 struct A;
 
 impl ::std::str::FromStr for A {
-    type Err = String;
+    type Err = ::std::string::String;
     fn from_str(_: &str) -> ::std::result::Result<Self, Self::Err> {
-        unimplemented!()
+        ::std::unimplemented!()
     }
 }
 
 impl ::std::fmt::Display for A {
     fn fmt(&self, _: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        unimplemented!()
+        ::std::unimplemented!()
     }
 }
