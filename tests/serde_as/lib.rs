@@ -8,6 +8,7 @@ mod frominto;
 mod map_tuple_list;
 mod pickfirst;
 mod serde_as_macro;
+mod serde_conv;
 mod time;
 #[path = "../utils.rs"]
 mod utils;

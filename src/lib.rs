@@ -224,6 +224,7 @@ pub mod hex;
 pub mod json;
 pub mod rust;
 pub mod ser;
+mod serde_conv;
 mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
