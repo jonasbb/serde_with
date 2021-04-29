@@ -56,6 +56,18 @@ where
 }
 
 #[rustversion::attr(since(1.46), track_caller)]
+pub fn check_error_serialization<T>(value: T, error_msg: Expect)
+where
+    T: Debug + Serialize,
+{
+    error_msg.assert_eq(
+        &serde_json::to_string_pretty(&value)
+            .unwrap_err()
+            .to_string(),
+    );
+}
+
+#[rustversion::attr(since(1.46), track_caller)]
 pub fn check_error_deserialization<T>(deserialize_from: &str, error_msg: Expect)
 where
     T: Debug + DeserializeOwned,

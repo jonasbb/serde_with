@@ -1,5 +1,6 @@
 use super::*;
 use serde_with::{FromInto, TryFromInto};
+use std::convert::TryFrom;
 
 #[derive(Clone, Debug, PartialEq)]
 enum IntoSerializable {
@@ -127,4 +128,60 @@ fn test_tryfrominto_de_and_ser() {
 
     is_equal(S(LikeBool::Trueish), expect![[r#"true"#]]);
     is_equal(S(LikeBool::Falseisch), expect![[r#"false"#]]);
+}
+
+#[derive(Clone, Debug, PartialEq)]
+enum TryIntoSerializable {
+    Works,
+    Fails,
+}
+
+impl TryFrom<TryIntoSerializable> for String {
+    type Error = &'static str;
+
+    fn try_from(value: TryIntoSerializable) -> Result<Self, Self::Error> {
+        match value {
+            TryIntoSerializable::Works => Ok("Works".to_string()),
+            TryIntoSerializable::Fails => Err("Fails cannot be turned into String"),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum TryFromDeserializable {
+    Zero,
+}
+
+impl TryFrom<u32> for TryFromDeserializable {
+    type Error = &'static str;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(TryFromDeserializable::Zero),
+            _ => Err("Number is not zero"),
+        }
+    }
+}
+
+#[test]
+fn test_tryfrominto_ser_with_error() {
+    #[serde_as]
+    #[derive(Debug, PartialEq, Serialize)]
+    struct S(#[serde_as(serialize_as = "TryFromInto<String>")] TryIntoSerializable);
+
+    check_serialization(S(TryIntoSerializable::Works), expect![[r#""Works""#]]);
+    check_error_serialization(
+        S(TryIntoSerializable::Fails),
+        expect![[r#"Fails cannot be turned into String"#]],
+    );
+}
+
+#[test]
+fn test_tryfrominto_de_with_error() {
+    #[serde_as]
+    #[derive(Debug, PartialEq, Deserialize)]
+    struct S(#[serde_as(deserialize_as = "TryFromInto<u32>")] TryFromDeserializable);
+
+    check_deserialization(S(TryFromDeserializable::Zero), "0");
+    check_error_deserialization::<S>("1", expect![[r#"Number is not zero"#]]);
 }
