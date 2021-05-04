@@ -117,7 +117,7 @@ macro_rules! serde_conv {
                 D: $crate::serde::Deserializer<'de>,
             {
                 let y = $crate::serde::Deserialize::deserialize(deserializer)?;
-                ::std::result::Result::Ok($de(y).map_err($crate::serde::de::Error::custom)?)
+                $de(y).map_err($crate::serde::de::Error::custom)
             }
         }
 
