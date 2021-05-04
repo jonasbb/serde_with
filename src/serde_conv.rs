@@ -1,11 +1,13 @@
 /// TODO
 #[macro_export]
 macro_rules! serde_conv {
-    ($m:ident, $t:ty, $ser:expr, $de:expr) => {
+    ($m:ident, $t:ty, $ser:expr, $de:expr) => {$crate::serde_conv!(pub(self) $m, $t, $ser, $de)};
+    ($vis:vis $m:ident, $t:ty, $ser:expr, $de:expr) => {
         #[allow(non_camel_case_types)]
-        pub struct $m;
+        $vis struct $m;
+
         impl $m {
-            pub fn serialize<S>(x: &$t, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+            $vis fn serialize<S>(x: &$t, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
             where
                 S: $crate::serde::Serializer,
             {
@@ -13,7 +15,7 @@ macro_rules! serde_conv {
                 $crate::serde::Serialize::serialize(&y, serializer)
             }
 
-            pub fn deserialize<'de, D>(deserializer: D) -> ::std::result::Result<$t, D::Error>
+            $vis fn deserialize<'de, D>(deserializer: D) -> ::std::result::Result<$t, D::Error>
             where
                 D: $crate::serde::Deserializer<'de>,
             {
