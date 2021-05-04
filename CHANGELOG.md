@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+* Added `FromInto` and `TryFromInto` adapters, which enable serialization by converting into a proxy type.
+
+    ```ignore
+    // Rust
+    #[serde_as(as = "FromInto<(u8, u8, u8)>")]
+    value: Rgb,
+
+    impl From<(u8, u8, u8)> for Rgb { ... }
+    impl From<Rgb> for (u8, u8, u8) { ... }
+
+    // JSON
+    "value": [128, 64, 32],
+    ```
+
 ## [1.8.1] - 2021-04-19
 
 ### Added

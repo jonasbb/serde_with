@@ -1512,13 +1512,13 @@ pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomDat
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde::Deserialize;
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DisplayFromStr, PickFirst};
 /// #
 /// #[serde_as]
 /// # #[derive(Debug, PartialEq)]
-/// #[derive(Deserialize, serde::Serialize)]
+/// #[derive(Deserialize, Serialize)]
 /// struct Data {
 ///     #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
 ///     as_number: u32,
@@ -1556,3 +1556,177 @@ pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomDat
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct PickFirst<T>(PhantomData<T>);
+
+/// Serialize value by converting to/from a proxy type with serde support.
+///
+/// This adapter serializes a type `O` by converting it into a second type `T` and serializing `T`.
+/// Deserializing works analogue, by deserializing a `T` and then converting into `O`.
+///
+/// ```rust
+/// # #[cfg(FALSE)] {
+/// struct S {
+///     #[serde_as(as = "FromInto<T>")]
+///     value: O,
+/// }
+/// # }
+/// ```
+///
+/// For serialization `O` needs to be `O: Into<T> + Clone`.
+/// For deserialization the opposite `T: Into<O>` is required.
+/// The `Clone` bound is required since `serialize` operates on a reference but `Into` implementations on references are uncommon.
+///
+/// **Note**: [`TryFromInto`] is the more generalized version of this adapter which uses the [`TryInto`](std::convert::TryInto) trait instead.
+///
+/// # Example
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, FromInto};
+/// #
+/// #[derive(Clone, Debug, PartialEq)]
+/// struct Rgb {
+///     red: u8,
+///     green: u8,
+///     blue: u8,
+/// }
+///
+/// # /*
+/// impl From<(u8, u8, u8)> for Rgb { ... }
+/// impl From<Rgb> for (u8, u8, u8) { ... }
+/// # */
+/// #
+/// # impl From<(u8, u8, u8)> for Rgb {
+/// #     fn from(v: (u8, u8, u8)) -> Self {
+/// #         Rgb {
+/// #             red: v.0,
+/// #             green: v.1,
+/// #             blue: v.2,
+/// #         }
+/// #     }
+/// # }
+/// #
+/// # impl From<Rgb> for (u8, u8, u8) {
+/// #     fn from(v: Rgb) -> Self {
+/// #         (v.red, v.green, v.blue)
+/// #     }
+/// # }
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Color {
+///     #[serde_as(as = "FromInto<(u8, u8, u8)>")]
+///     rgb: Rgb,
+/// }
+/// let color = Color {
+///     rgb: Rgb {
+///         red: 128,
+///         green: 64,
+///         blue: 32,
+///     },
+/// };
+///
+/// // Define our expected JSON form
+/// let j = json!({
+///     "rgb": [128, 64, 32],
+/// });
+/// // Ensure serialization and deserialization produce the expected results
+/// assert_eq!(j, serde_json::to_value(&color).unwrap());
+/// assert_eq!(color, serde_json::from_value(j).unwrap());
+/// # }
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
+pub struct FromInto<T>(PhantomData<T>);
+
+/// Serialize value by converting to/from a proxy type with serde support.
+///
+/// This adapter serializes a type `O` by converting it into a second type `T` and serializing `T`.
+/// Deserializing works analogue, by deserializing a `T` and then converting into `O`.
+///
+/// ```rust
+/// # #[cfg(FALSE)] {
+/// struct S {
+///     #[serde_as(as = "TryFromInto<T>")]
+///     value: O,
+/// }
+/// # }
+/// ```
+///
+/// For serialization `O` needs to be `O: TryInto<T> + Clone`.
+/// For deserialization the opposite `T: TryInto<O>` is required.
+/// The `Clone` bound is required since `serialize` operates on a reference but `TryInto` implementations on references are uncommon.
+/// In both cases the `TryInto::Error` type must implement [`Display`](std::fmt::Display).
+///
+/// **Note**: [`FromInto`] is the more specialized version of this adapter which uses the infallible [`Into`] trait instead.
+/// [`TryFromInto`] is strictly more general and can also be used where [`FromInto`] is applicable.
+/// The example shows a use case, when only the deserialization behavior is fallible, but not serializing.
+///
+/// # Example
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, TryFromInto};
+/// # use std::convert::TryFrom;
+/// #
+/// #[derive(Clone, Debug, PartialEq)]
+/// enum Boollike {
+///     True,
+///     False,
+/// }
+///
+/// # /*
+/// impl From<Boollike> for u8 { ... }
+/// # */
+/// #
+/// impl TryFrom<u8> for Boollike {
+///     type Error = String;
+///     fn try_from(v: u8) -> Result<Self, Self::Error> {
+///         match v {
+///             0 => Ok(Boollike::False),
+///             1 => Ok(Boollike::True),
+///             _ => Err(format!("Boolikes can only be constructed from 0 or 1 but found {}", v))
+///         }
+///     }
+/// }
+/// #
+/// # impl From<Boollike> for u8 {
+/// #     fn from(v: Boollike) -> Self {
+/// #        match v {
+/// #            Boollike::True => 1,
+/// #            Boollike::False => 0,
+/// #        }
+/// #     }
+/// # }
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Data {
+///     #[serde_as(as = "TryFromInto<u8>")]
+///     b: Boollike,
+/// }
+/// let data = Data {
+///     b: Boollike::True,
+/// };
+///
+/// // Define our expected JSON form
+/// let j = json!({
+///     "b": 1,
+/// });
+/// // Ensure serialization and deserialization produce the expected results
+/// assert_eq!(j, serde_json::to_value(&data).unwrap());
+/// assert_eq!(data, serde_json::from_value(j).unwrap());
+///
+/// // Numbers besides 0 or 1 should be an error
+/// let j = json!({
+///     "b": 2,
+/// });
+/// assert_eq!("Boolikes can only be constructed from 0 or 1 but found 2", serde_json::from_value::<Data>(j).unwrap_err().to_string());
+/// # }
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
+pub struct TryFromInto<T>(PhantomData<T>);

@@ -19,18 +19,20 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
     1. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
     2. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
     3. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
-    4. [`Default` from `null`](#default-from-null)
-    5. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-    6. [`Duration` as seconds](#duration-as-seconds)
-    7. [Ignore deserialization errors](#ignore-deserialization-errors)
-    8. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-    9. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-    10. [`None` as empty `String`](#none-as-empty-string)
-    11. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
-    12. [Pick first successful deserialization](#pick-first-successful-deserialization)
-    13. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-    14. [Value into JSON String](#value-into-json-string)
-    15. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+    4. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
+    5. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
+    6. [`Default` from `null`](#default-from-null)
+    7. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+    8. [`Duration` as seconds](#duration-as-seconds)
+    9. [Ignore deserialization errors](#ignore-deserialization-errors)
+    10. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+    11. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+    12. [`None` as empty `String`](#none-as-empty-string)
+    13. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
+    14. [Pick first successful deserialization](#pick-first-successful-deserialization)
+    15. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+    16. [Value into JSON String](#value-into-json-string)
+    17. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Switching from serde's with to `serde_as`
 
@@ -342,6 +344,35 @@ value: Vec<u8>,
 "value": "deadbeef",
 ```
 
+### Convert to an intermediate type using `Into`
+
+[`FromInto`]
+
+```ignore
+// Rust
+#[serde_as(as = "FromInto<(u8, u8, u8)>")]
+value: Rgb,
+
+impl From<(u8, u8, u8)> for Rgb { ... }
+impl From<Rgb> for (u8, u8, u8) { ... }
+
+// JSON
+"value": [128, 64, 32],
+```
+
+### Convert to an intermediate type using `TryInto`
+
+[`TryFromInto`]
+
+```ignore
+// Rust
+#[serde_as(as = "TryFromInto<i8>")]
+value: u8,
+
+// JSON
+"value": 127,
+```
+
 ### `Default` from `null`
 
 [`DefaultOnNull`]
@@ -585,12 +616,14 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`DisplayFromStr`]: crate::DisplayFromStr
 [`DurationSeconds`]: crate::DurationSeconds
 [`DurationSecondsWithFrac`]: crate::DurationSecondsWithFrac
+[`FromInto`]: crate::FromInto
 [`Hex`]: crate::hex::Hex
 [`JsonString`]: crate::json::JsonString
 [`NoneAsEmptyString`]: crate::NoneAsEmptyString
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
 [`SerializeAs`]: crate::SerializeAs
+[`TryFromInto`]: crate::TryFromInto
 [bytes to string converter]: crate::BytesOrString
 [duration to UNIX epoch]: crate::DurationSeconds
 [hex strings]: crate::hex::Hex

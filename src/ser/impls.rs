@@ -7,6 +7,7 @@ use serde::ser::Error;
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
+use std::convert::TryInto;
 use std::fmt::Display;
 use std::rc::{Rc, Weak as RcWeak};
 use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
@@ -640,6 +641,37 @@ where
         S: Serializer,
     {
         SerializeAsWrap::<T, TAs1>::new(source).serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<T> for FromInto<U>
+where
+    T: Into<U> + Clone,
+    U: Serialize,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source.clone().into().serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<T> for TryFromInto<U>
+where
+    T: TryInto<U> + Clone,
+    <T as TryInto<U>>::Error: Display,
+    U: Serialize,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source
+            .clone()
+            .try_into()
+            .map_err(S::Error::custom)?
+            .serialize(serializer)
     }
 }
 
