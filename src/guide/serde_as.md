@@ -113,6 +113,10 @@ Most "leaf" types do not need to implement these traits since they are supported
 You also find them implemented on the conversion types, such as the [`DisplayFromStr`] type.
 These make up the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
 
+In many cases conversion is only required from one serializable type to another one, without requiring the full power of the `Serialize` or `Deserialize` traits.
+In these cases the [`serde_conv!`] macro conveniently allows to define conversion types without the boilerplate.
+The documentation of [`serde_conv!`] contains more details how to use it.
+
 The trait documentations for [`SerializeAs`] and [`DeserializeAs`] describe in details how to implement them for container types like `Box` or `Vec` and other types.
 
 ### Using `#[serde_as]` on types without `SerializeAs` and `Serialize` implementations
@@ -622,6 +626,7 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`NoneAsEmptyString`]: crate::NoneAsEmptyString
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
+[`serde_conv!`]: crate::serde_conv!
 [`SerializeAs`]: crate::SerializeAs
 [`TryFromInto`]: crate::TryFromInto
 [bytes to string converter]: crate::BytesOrString
