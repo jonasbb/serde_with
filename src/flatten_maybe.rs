@@ -54,8 +54,7 @@
 /// ```
 #[macro_export]
 macro_rules! flattened_maybe {
-    // TODO Change $field to literal, once the compiler version is bumped enough.
-    ($fn:ident, $field:expr) => {
+    ($fn:ident, $field:literal) => {
         fn $fn<'de, T, D>(deserializer: D) -> ::std::result::Result<T, D::Error>
         where
             T: serde_with::serde::Deserialize<'de>,
