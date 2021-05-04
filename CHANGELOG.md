@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Added `FromInto` and `TryFromInto` adapters, which enable serialization by converting into a proxy type.
 
-    ```ignore
+    ```rust
     // Rust
     #[serde_as(as = "FromInto<(u8, u8, u8)>")]
     value: Rgb,
@@ -21,6 +21,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     // JSON
     "value": [128, 64, 32],
+    ```
+
+* New `serde_conv!` macro to create conversion types with reduced boilerplate.
+    The generated types can be used with `#[serde_as]` or serde's with-attribute.
+
+    ```rust
+    serde_with::serde_conv!(
+        RgbAsArray,
+        Rgb,
+        |rgb: &Rgb| [rgb.red, rgb.green, rgb.blue],
+        |value: [u8; 3]| -> Result<_, std::convert::Infallible> {
+            Ok(Rgb {
+                red: value[0],
+                green: value[1],
+                blue: value[2],
+            })
+        }
+    );
     ```
 
 ## [1.8.1] - 2021-04-19
