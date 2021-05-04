@@ -29,8 +29,7 @@ macro_rules! serde_conv {
             where
                 S: $crate::serde::Serializer,
             {
-                let y = $ser(x);
-                $crate::serde::Serialize::serialize(&y, serializer)
+                Self::serialize(x, serializer)
             }
         }
 
@@ -39,8 +38,7 @@ macro_rules! serde_conv {
             where
                 D: $crate::serde::Deserializer<'de>,
             {
-                let y = $crate::serde::Deserialize::deserialize(deserializer)?;
-                ::std::result::Result::Ok($de(y).map_err($crate::serde::de::Error::custom)?)
+                Self::deserialize(deserializer)
             }
         }
     };
