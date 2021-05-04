@@ -3,7 +3,7 @@ use serde_with::serde_conv;
 
 #[test]
 fn test_bool_as_string() {
-    serde_conv!(BoolAsString, bool, |x: bool| x.to_string(), |x: String| x
+    serde_conv!(BoolAsString, bool, |x: &bool| x.to_string(), |x: String| x
         .parse());
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]

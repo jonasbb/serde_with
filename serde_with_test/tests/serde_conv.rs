@@ -9,7 +9,7 @@ use ::s_with::serde_conv;
 serde_conv!(
     BoolAsString,
     bool,
-    |x: bool| ::std::string::ToString::to_string(&x),
+    |x: &bool| ::std::string::ToString::to_string(x),
     |x: ::std::string::String| x.parse()
 );
 
@@ -21,8 +21,8 @@ struct S(#[serde(with = "BoolAsString")] bool);
 // This makes it look more like a module.
 serde_conv!(number, u32, u32_to_string, string_to_u32);
 
-fn u32_to_string(x: u32) -> ::std::string::String {
-    ::std::string::ToString::to_string(&x)
+fn u32_to_string(x: &u32) -> ::std::string::String {
+    ::std::string::ToString::to_string(x)
 }
 
 fn string_to_u32(

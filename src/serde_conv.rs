@@ -98,7 +98,7 @@
 /// ```
 #[macro_export]
 macro_rules! serde_conv {
-    ($m:ident, $t:ty, $ser:expr, $de:expr) => {$crate::serde_conv!(pub(self) $m, $t, $ser, $de)};
+    ($m:ident, $t:ty, $ser:expr, $de:expr) => {$crate::serde_conv!(pub(self) $m, $t, $ser, $de);};
     ($vis:vis $m:ident, $t:ty, $ser:expr, $de:expr) => {
         #[allow(non_camel_case_types)]
         $vis struct $m;
