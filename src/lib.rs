@@ -25,7 +25,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with/1.8.1")]
+#![doc(html_root_url = "https://docs.rs/serde_with/1.9.0")]
 // Necessary to silence the warning about clippy::unknown_clippy_lints on nightly
 #![allow(renamed_and_removed_lints)]
 // Rust 1.45: introduction of `strip_prefix` used by clippy::manual_strip
@@ -38,7 +38,7 @@
 //!
 //! ---
 //!
-//! This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][user guide]-annotation.
+//! This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][as-annotation]-annotation.
 //! Some common use cases are:
 //!
 //! * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
@@ -61,7 +61,7 @@
 //!
 //! ```toml
 //! [dependencies.serde_with]
-//! version = "1.8.1"
+//! version = "1.9.0"
 //! features = [ "..." ]
 //! ```
 //!
@@ -200,14 +200,15 @@
 //! # }
 //! ```
 //!
-//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.8.1/serde_with/struct.DisplayFromStr.html
-//! [`with_prefix!`]: https://docs.rs/serde_with/1.8.1/serde_with/macro.with_prefix.html
-//! [display_fromstr]: https://docs.rs/serde_with/1.8.1/serde_with/rust/display_fromstr/index.html
-//! [feature flags]: https://docs.rs/serde_with/1.8.1/serde_with/guide/feature_flags/index.html
-//! [skip_serializing_none]: https://docs.rs/serde_with/1.8.1/serde_with/attr.skip_serializing_none.html
-//! [StringWithSeparator]: https://docs.rs/serde_with/1.8.1/serde_with/rust/struct.StringWithSeparator.html
-//! [user guide]: https://docs.rs/serde_with/1.8.1/serde_with/guide/index.html
+//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.9.0/serde_with/struct.DisplayFromStr.html
+//! [`with_prefix!`]: https://docs.rs/serde_with/1.9.0/serde_with/macro.with_prefix.html
+//! [display_fromstr]: https://docs.rs/serde_with/1.9.0/serde_with/rust/display_fromstr/index.html
+//! [feature flags]: https://docs.rs/serde_with/1.9.0/serde_with/guide/feature_flags/index.html
+//! [skip_serializing_none]: https://docs.rs/serde_with/1.9.0/serde_with/attr.skip_serializing_none.html
+//! [StringWithSeparator]: https://docs.rs/serde_with/1.9.0/serde_with/rust/struct.StringWithSeparator.html
+//! [user guide]: https://docs.rs/serde_with/1.9.0/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
+//! [as-annotation]: https://docs.rs/serde_with/1.9.0/serde_with/guide/serde_as/index.html
 
 #[doc(hidden)]
 pub extern crate serde;
@@ -343,7 +344,7 @@ impl Separator for CommaSeparator {
 /// # }
 /// ```
 ///
-/// [serde_as]: https://docs.rs/serde_with/1.8.1/serde_with/attr.serde_as.html
+/// [serde_as]: https://docs.rs/serde_with/1.9.0/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct As<T: ?Sized>(PhantomData<T>);
 
@@ -809,7 +810,7 @@ pub struct BytesOrString;
 /// ```
 ///
 /// [`chrono::Duration`]: chrono_crate::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.8.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.9.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
@@ -935,7 +936,7 @@ pub struct DurationSeconds<
 /// ```
 ///
 /// [`chrono::Duration`]: chrono_crate::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.8.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.9.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1132,7 +1133,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: chrono_crate::DateTime
-/// [feature flag]: https://docs.rs/serde_with/1.8.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.9.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
@@ -1261,7 +1262,7 @@ pub struct TimestampSeconds<
 ///
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: chrono_crate::DateTime
-/// [feature flag]: https://docs.rs/serde_with/1.8.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.9.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,
