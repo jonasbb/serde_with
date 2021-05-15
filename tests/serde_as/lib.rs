@@ -384,27 +384,6 @@ fn test_none_as_empty_string() {
 
     is_equal(S(None), expect![[r#""""#]]);
     is_equal(S(Some("Hello".to_string())), expect![[r#""Hello""#]]);
-
-    #[serde_as]
-    #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct SRc(#[serde_as(as = "NoneAsEmptyString")] Option<Rc<str>>);
-
-    is_equal(SRc(None), expect![[r#""""#]]);
-    is_equal(SRc(Some("Hello".into())), expect![[r#""Hello""#]]);
-
-    #[serde_as]
-    #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct SArc(#[serde_as(as = "NoneAsEmptyString")] Option<Arc<str>>);
-
-    is_equal(SArc(None), expect![[r#""""#]]);
-    is_equal(SArc(Some("Hello".into())), expect![[r#""Hello""#]]);
-
-    #[serde_as]
-    #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct SBox(#[serde_as(as = "NoneAsEmptyString")] Option<Box<str>>);
-
-    is_equal(SBox(None), expect![[r#""""#]]);
-    is_equal(SBox(Some("Hello".into())), expect![[r#""Hello""#]]);
 }
 
 #[test]

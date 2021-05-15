@@ -7,7 +7,7 @@ use serde::de::*;
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
-use std::convert::{From, TryInto};
+use std::convert::TryInto;
 use std::fmt::{self, Display};
 use std::hash::{BuildHasher, Hash};
 use std::iter::FromIterator;
@@ -526,35 +526,14 @@ map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 
 impl<'de, Str> DeserializeAs<'de, Option<Str>> for NoneAsEmptyString
 where
-    Str: for<'a> From<&'a str>,
+    Str: FromStr,
+    Str::Err: Display,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<Option<Str>, D::Error>
     where
         D: Deserializer<'de>,
     {
-        struct OptionStringEmptyNone<Str>(PhantomData<Str>);
-        impl<'de, Str> Visitor<'de> for OptionStringEmptyNone<Str>
-        where
-            Str: for<'a> From<&'a str>,
-        {
-            type Value = Option<Str>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("any string")
-            }
-
-            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-            where
-                E: Error,
-            {
-                Ok(match value {
-                    "" => None,
-                    v => Some(Str::from(v)),
-                })
-            }
-        }
-
-        deserializer.deserialize_str(OptionStringEmptyNone(PhantomData))
+        crate::rust::string_empty_as_none::deserialize(deserializer)
     }
 }
 
