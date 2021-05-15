@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.9.1] - 2021-05-15
+
 ### Changed
 
 * `NoneAsEmptyString`: Deserialize using `FromStr` instead of using `for<'a> From<&'a str>` (#316)
+    This will *not* change any behavior when applied to a field of type `Option<String>` as used in the documentation.
+    Thanks to @mkroening for finding and fixing the issue.
 
 ## [1.9.0] - 2021-05-09
 
