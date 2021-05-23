@@ -103,6 +103,7 @@ macro_rules! serde_conv {
         #[allow(non_camel_case_types)]
         $vis struct $m;
 
+        #[allow(clippy::ptr_arg)]
         impl $m {
             $vis fn serialize<S>(x: &$t, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
             where
