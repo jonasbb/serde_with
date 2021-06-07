@@ -33,7 +33,7 @@ pub(crate) struct DeriveOptions {
 
 impl DeriveOptions {
     pub(crate) fn from_derive_input(input: &syn::DeriveInput) -> Result<Self, TokenStream> {
-        match <Self as FromDeriveInput>::from_derive_input(&input) {
+        match <Self as FromDeriveInput>::from_derive_input(input) {
             Ok(v) => Ok(v),
             Err(e) => Err(TokenStream::from(e.write_errors())),
         }

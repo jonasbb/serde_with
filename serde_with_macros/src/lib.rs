@@ -301,7 +301,7 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
     if let Type::Path(path) = &field.ty {
         if is_std_option(&path.path) {
             let has_skip_serializing_if =
-                field_has_attribute(&field, "serde", "skip_serializing_if");
+                field_has_attribute(field, "serde", "skip_serializing_if");
 
             // Remove the `serialize_always` attribute
             let mut has_always_attr = false;

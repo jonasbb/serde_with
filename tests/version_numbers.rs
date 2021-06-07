@@ -49,7 +49,7 @@ fn test_docs_rs_url_point_to_current_version() -> Result<(), Box<dyn std::error:
         let entry = entry?;
         let content = std::fs::read_to_string(&entry)?;
         for (line_number, line) in content.split('\n').enumerate() {
-            for capture in re.captures_iter(&line) {
+            for capture in re.captures_iter(line) {
                 match capture
                     .get(1)
                     .expect("Will exist if regex matches")
