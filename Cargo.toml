@@ -11,7 +11,7 @@ authors = [
     "Marcin Kaźmierczak",
 ]
 name = "serde_with"
-version = "1.9.1"
+version = "1.9.2"
 
 categories = ["encoding"]
 description = "Custom de/serialization functions for Rust's serde"
@@ -43,7 +43,7 @@ hex = {version = "0.4.2", optional = true}
 rustversion = "1.0.0"
 serde = {version = "1.0.122", features = ["derive"]}
 serde_json = {version = "1.0.1", optional = true}
-serde_with_macros = {path = "./serde_with_macros", version = "1.4.1", optional = true}
+serde_with_macros = {path = "./serde_with_macros", version = "1.4.2", optional = true}
 
 [dev-dependencies]
 expect-test = "1.0.0"
