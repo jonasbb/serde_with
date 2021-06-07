@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.9.2] - 2021-06-07
+
+### Fixed
+
+* Suppress clippy warnings, which can occur while using `serde_conv` (#320)
+    Thanks to @mkroening for reporting and fixing the issue.
+
 ## [1.9.1] - 2021-05-15
 
 ### Changed

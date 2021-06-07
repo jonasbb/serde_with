@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [1.4.2] - 2021-06-07
+
 ### Fixed
 
 * Describe how the `serde_as` macro works on a high level.
@@ -14,7 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     Properly name all types and traits required for the expanded code to work.
     The tests were improved to be better able to catch such problems.
 
-## [1.4.1] - 2021-02-16
+## [1.4.2] - 2021-02-16
 
 ### Fixed
 
