@@ -1,6 +1,7 @@
 use super::*;
 use crate::utils::{MapIter, SeqIter};
 use serde::de::*;
+use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap};
 use std::convert::TryInto;
 use std::fmt;
@@ -188,6 +189,135 @@ impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
         }
 
         deserializer.deserialize_bytes(ArrayVisitor::<N>)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<&'de [u8; N], D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ArrayVisitor<const M: usize>;
+
+        impl<'de, const M: usize> Visitor<'de> for ArrayVisitor<M> {
+            type Value = &'de [u8; M];
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_fmt(format_args!("a borrowed byte array of size {}", M))
+            }
+
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.as_bytes()
+                    .try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+        }
+
+        deserializer.deserialize_bytes(ArrayVisitor::<N>)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8; N]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct CowVisitor<const M: usize>;
+
+        impl<'de, const M: usize> Visitor<'de> for CowVisitor<M> {
+            type Value = Cow<'de, [u8; M]>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a byte array")
+            }
+
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Borrowed(
+                    v.try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Borrowed(
+                    v.as_bytes()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(
+                    v.to_vec()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(
+                    v.as_bytes()
+                        .to_vec()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                let len = v.len();
+                Ok(Cow::Owned(
+                    v.try_into()
+                        .map_err(|_| Error::invalid_length(len, &self))?,
+                ))
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                let len = v.len();
+                Ok(Cow::Owned(
+                    v.into_bytes()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(len, &self))?,
+                ))
+            }
+
+            fn visit_seq<V>(self, seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                Ok(Cow::Owned(array_from_iterator(SeqIter::new(seq), &self)?))
+            }
+        }
+
+        deserializer.deserialize_bytes(CowVisitor)
     }
 }
 

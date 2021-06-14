@@ -1333,11 +1333,13 @@ pub struct TimestampNanoSecondsWithFrac<
 /// The type provides de-/serialization for these types:
 ///
 /// * `[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
+/// * `&[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
 /// * `&[u8]`
 /// * `Box<[u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
 /// * `Box<[u8]>`
 /// * `Vec<u8>`
 /// * `Cow<'_, [u8]>`
+/// * `Cow<'_, [u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
 ///
 /// # Examples
 ///
@@ -1359,6 +1361,10 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     #[serde_as(as = "Bytes")]
 ///     #[serde(borrow)]
 ///     cow: Cow<'a, [u8]>,
+/// #   #[cfg(FALSE)]
+///     #[serde_as(as = "Bytes")]
+///     #[serde(borrow)]
+///     cow_array: Cow<'a, [u8; 15]>,
 ///     #[serde_as(as = "Bytes")]
 ///     vec: Vec<u8>,
 /// }
@@ -1368,16 +1374,19 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     array: b"0123456789ABCDE".clone(),
 ///     boxed: b"...".to_vec().into_boxed_slice(),
 ///     cow: Cow::Borrowed(b"FooBar"),
+/// #   #[cfg(FALSE)]
+///     cow_array: Cow::Borrowed(&[42u8; 15]),
 ///     vec: vec![0x41, 0x61, 0x21],
 /// };
 /// let expected = r#"(
 ///     array: "MDEyMzQ1Njc4OUFCQ0RF",
 ///     boxed: "Li4u",
 ///     cow: "Rm9vQmFy",
+///     cow_array: "KioqKioqKioqKioqKioq",
 ///     vec: "QWEh",
 /// )"#;
 /// # drop(expected);
-/// # // Create a fake expected value without the array to make the test compile without const generics
+/// # // Create a fake expected value that doesn't use const generics
 /// # let expected = r#"(
 /// #     boxed: "Li4u",
 /// #     cow: "Rm9vQmFy",
@@ -1388,6 +1397,50 @@ pub struct TimestampNanoSecondsWithFrac<
 /// #     .with_new_line("\n".into());
 /// assert_eq!(expected, ron::ser::to_string_pretty(&value, pretty_config).unwrap());
 /// assert_eq!(value, ron::from_str(&expected).unwrap());
+/// # }
+/// ```
+///
+/// Fully borrowed types can also be used but you'll need a Deserializer that
+/// supports Serde's 0-copy deserialization:
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_with::{serde_as, Bytes};
+/// # use std::borrow::Cow;
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct TestBorrows<'a> {
+/// #   #[cfg(FALSE)]
+///     #[serde_as(as = "Bytes")]
+///     #[serde(borrow)]
+///     array_buf: &'a [u8; 15],
+///     #[serde_as(as = "Bytes")]
+///     #[serde(borrow)]
+///     buf: &'a [u8],
+/// }
+///
+/// let value = TestBorrows {
+/// #   #[cfg(FALSE)]
+///     array_buf: &[10u8; 15],
+///     buf: &[20u8, 21u8, 22u8],
+/// };
+/// let expected = r#"(
+///     array_buf: "CgoKCgoKCgoKCgoKCgoK",
+///     buf: "FBUW",
+/// )"#;
+/// # drop(expected);
+/// # // Create a fake expected value that doesn't use const generics
+/// # let expected = r#"(
+/// #     buf: "FBUW",
+/// # )"#;
+///
+/// # let pretty_config = ron::ser::PrettyConfig::new()
+/// #     .with_new_line("\n".into());
+/// assert_eq!(expected, ron::ser::to_string_pretty(&value, pretty_config).unwrap());
+/// // RON doesn't support borrowed deserialization of byte arrays
 /// # }
 /// ```
 ///
