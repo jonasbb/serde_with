@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* The `Bytes` type now supports borrowed and Cow arrays of fixed size (requires Rust 1.51+)
+
+    ```rust
+    #[serde_as(as = "Bytes")]
+    #[serde(borrow)]
+    borrowed_array: &'a [u8; 15],
+    #[serde_as(as = "Bytes")]
+    #[serde(borrow)]
+    cow_array: Cow<'a, [u8; 15]>,
+    ```
+
+    Note: For borrowed arrays the used Deserializer needs to support Serde's 0-copy deserialization.
+
 ## [1.9.2] - 2021-06-07
 
 ### Fixed

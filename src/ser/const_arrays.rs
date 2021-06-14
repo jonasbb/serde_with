@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use super::*;
 use std::collections::{BTreeMap, HashMap};
 
@@ -52,11 +53,29 @@ impl<'a, const N: usize> SerializeAs<[u8; N]> for Bytes {
     }
 }
 
+impl<'a, const N: usize> SerializeAs<&[u8; N]> for Bytes {
+    fn serialize_as<S>(bytes: &&[u8; N], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(*bytes)
+    }
+}
+
 impl<'a, const N: usize> SerializeAs<Box<[u8; N]>> for Bytes {
     fn serialize_as<S>(bytes: &Box<[u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         serializer.serialize_bytes(&**bytes)
+    }
+}
+
+impl<'a, const N: usize> SerializeAs<Cow<'a, [u8; N]>> for Bytes {
+    fn serialize_as<S>(bytes: &Cow<'a, [u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes.as_ref())
     }
 }

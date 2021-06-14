@@ -1333,11 +1333,13 @@ pub struct TimestampNanoSecondsWithFrac<
 /// The type provides de-/serialization for these types:
 ///
 /// * `[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
+/// * `&[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
 /// * `&[u8]`
 /// * `Box<[u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
 /// * `Box<[u8]>`
 /// * `Vec<u8>`
 /// * `Cow<'_, [u8]>`
+/// * `Cow<'_, [u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
 ///
 /// # Examples
 ///
@@ -1359,6 +1361,10 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     #[serde_as(as = "Bytes")]
 ///     #[serde(borrow)]
 ///     cow: Cow<'a, [u8]>,
+/// #   #[cfg(FALSE)]
+///     #[serde_as(as = "Bytes")]
+///     #[serde(borrow)]
+///     cow_array: Cow<'a, [u8; 15]>,
 ///     #[serde_as(as = "Bytes")]
 ///     vec: Vec<u8>,
 /// }
@@ -1368,16 +1374,19 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     array: b"0123456789ABCDE".clone(),
 ///     boxed: b"...".to_vec().into_boxed_slice(),
 ///     cow: Cow::Borrowed(b"FooBar"),
+/// #   #[cfg(FALSE)]
+///     cow_array: Cow::Borrowed(&[42u8; 15]),
 ///     vec: vec![0x41, 0x61, 0x21],
 /// };
 /// let expected = r#"(
 ///     array: "MDEyMzQ1Njc4OUFCQ0RF",
 ///     boxed: "Li4u",
 ///     cow: "Rm9vQmFy",
+///     cow_array: "KioqKioqKioqKioqKioq",
 ///     vec: "QWEh",
 /// )"#;
 /// # drop(expected);
-/// # // Create a fake expected value without the array to make the test compile without const generics
+/// # // Create a fake expected value that doesn't use const generics
 /// # let expected = r#"(
 /// #     boxed: "Li4u",
 /// #     cow: "Rm9vQmFy",
