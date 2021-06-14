@@ -1400,6 +1400,50 @@ pub struct TimestampNanoSecondsWithFrac<
 /// # }
 /// ```
 ///
+/// Fully borrowed types can also be used but you'll need a Deserializer that
+/// supports Serde's 0-copy deserialization:
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_with::{serde_as, Bytes};
+/// # use std::borrow::Cow;
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct TestBorrows<'a> {
+/// #   #[cfg(FALSE)]
+///     #[serde_as(as = "Bytes")]
+///     #[serde(borrow)]
+///     array_buf: &'a [u8; 15],
+///     #[serde_as(as = "Bytes")]
+///     #[serde(borrow)]
+///     buf: &'a [u8],
+/// }
+///
+/// let value = TestBorrows {
+/// #   #[cfg(FALSE)]
+///     array_buf: &[10u8; 15],
+///     buf: &[20u8, 21u8, 22u8],
+/// };
+/// let expected = r#"(
+///     array_buf: "CgoKCgoKCgoKCgoKCgoK",
+///     buf: "FBUW",
+/// )"#;
+/// # drop(expected);
+/// # // Create a fake expected value that doesn't use const generics
+/// # let expected = r#"(
+/// #     buf: "FBUW",
+/// # )"#;
+///
+/// # let pretty_config = ron::ser::PrettyConfig::new()
+/// #     .with_new_line("\n".into());
+/// assert_eq!(expected, ron::ser::to_string_pretty(&value, pretty_config).unwrap());
+/// // RON doesn't support borrowed deserialization of byte arrays
+/// # }
+/// ```
+///
 /// ## Alternative to [`BytesOrString`]
 ///
 /// The [`Bytes`] can replace [`BytesOrString`].
