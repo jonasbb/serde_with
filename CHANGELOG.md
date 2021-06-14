@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.9.3] - 2021-06-14
+
 ### Added
 
 * The `Bytes` type now supports borrowed and Cow arrays of fixed size (requires Rust 1.51+)
