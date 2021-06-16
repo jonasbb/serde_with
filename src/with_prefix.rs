@@ -8,6 +8,8 @@ use std::fmt;
 /// Serialize with an added prefix on every field name and deserialize by
 /// trimming away the prefix.
 ///
+/// You can set the visibility of the generated module by prefix the module name with a module visibility.
+///
 /// **Note:** Use of this macro is incompatible with applying the [`deny_unknown_fields`] attribute
 /// on the container.
 /// While deserializing, it will always warn about unknown fields, even though they are processed
@@ -70,7 +72,8 @@ use std::fmt;
 /// }
 ///
 /// with_prefix!(prefix_player1 "player1_");
-/// with_prefix!(prefix_player2 "player2_");
+/// // You can also set the visibility of the generated prefix module, the default is private.
+/// with_prefix!(pub prefix_player2 "player2_");
 /// #
 /// # const EXPECTED: &str = r#"{
 /// #   "player1_name": "name1",
@@ -102,8 +105,9 @@ use std::fmt;
 /// [issue-with_prefix-deny_unknown_fields]: https://github.com/jonasbb/serde_with/issues/57
 #[macro_export]
 macro_rules! with_prefix {
-    ($module:ident $prefix:expr) => {
-        mod $module {
+    ($module:ident $prefix:expr) => {$crate::with_prefix!(pub(self) $module $prefix);};
+    ($vis:vis $module:ident $prefix:expr) => {
+        $vis mod $module {
             use $crate::serde::{Deserialize, Deserializer, Serialize, Serializer};
             use $crate::with_prefix::WithPrefix;
 
