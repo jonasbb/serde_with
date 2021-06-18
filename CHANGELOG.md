@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.9.4] - 2021-06-18
+
+### Fixed
+
+* `with_prefix!` now supports an optional visibility modifier. (#327, #328)  
+    If not specified `pub(self)` is assumed.
+
+    ```rust
+    with_prefix!(prefix_active "active_");                   // => mod {...}
+    with_prefix!(pub prefix_active "active_");               // => pub mod {...}
+    with_prefix!(pub(crate) prefix_active "active_");        // => pub(crate) mod {...}
+    with_prefix!(pub(in other_mod) prefix_active "active_"); // => pub(in other_mod) mod {...}
+    ```
+
+    Thanks to @elpiel for raising and fixing the issue.
+
 ## [1.9.3] - 2021-06-14
 
 ### Added
