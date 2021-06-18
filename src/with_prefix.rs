@@ -8,7 +8,9 @@ use std::fmt;
 /// Serialize with an added prefix on every field name and deserialize by
 /// trimming away the prefix.
 ///
-/// You can set the visibility of the generated module by prefix the module name with a module visibility.
+/// You can set the visibility of the generated module by prefixing the module name with a module visibility.
+/// `with_prefix!(pub(crate) prefix_foo "foo_");` creates a module with `pub(crate)` visibility.
+/// The visibility is optional and by default `pub(self)`, i.e., private visibility is assumed.
 ///
 /// **Note:** Use of this macro is incompatible with applying the [`deny_unknown_fields`] attribute
 /// on the container.
