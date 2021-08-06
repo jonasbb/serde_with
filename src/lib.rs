@@ -30,6 +30,7 @@
 #![allow(renamed_and_removed_lints)]
 // Rust 1.45: introduction of `strip_prefix` used by clippy::manual_strip
 #![allow(clippy::unknown_clippy_lints)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
@@ -214,14 +215,17 @@
 pub extern crate serde;
 
 #[cfg(feature = "chrono")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 pub mod chrono;
 pub mod de;
 mod duplicate_key_impls;
 mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
+#[cfg_attr(docsrs, doc(cfg(feature = "hex")))]
 pub mod hex;
 #[cfg(feature = "json")]
+#[cfg_attr(docsrs, doc(cfg(feature = "json")))]
 pub mod json;
 pub mod rust;
 pub mod ser;
@@ -273,6 +277,7 @@ pub use crate::{de::DeserializeAs, rust::StringWithSeparator, ser::SerializeAs};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
+#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[doc(inline)]
 pub use serde_with_macros::*;
 use std::marker::PhantomData;
