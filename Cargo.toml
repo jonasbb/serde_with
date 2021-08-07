@@ -86,3 +86,11 @@ required-features = ["macros"]
 
 [package.metadata.docs.rs]
 all-features = true
+rustdoc-args = [
+    # Enable doc_cfg showing the required features.
+    "--cfg=docsrs",
+    # Generate links to definition in rustdoc source code pages
+    # https://github.com/rust-lang/rust/pull/84176
+    "-Zunstable-options", "--generate-link-to-definition"
+]
+
