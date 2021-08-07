@@ -114,6 +114,7 @@
 //! The `serde_as` attribute allows to circumvent this restriction, even for nested types and nested arrays.
 //!
 //! ```rust
+//! # #[cfg(FALSE)] {
 //! # #[cfg(feature = "macros")]
 //! # use serde::{Deserialize, Serialize};
 //! # #[cfg(feature = "macros")]
@@ -139,6 +140,7 @@
 //!     optional: Some([222; 128])
 //! };
 //! assert!(serde_json::to_string(&arrays).is_ok());
+//! # }
 //! # }
 //! ```
 //!
