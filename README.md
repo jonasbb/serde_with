@@ -12,6 +12,9 @@ Some common use cases are:
 
 * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
      Check [`DisplayFromStr`][] or [`serde_with::rust::display_fromstr`][display_fromstr] for details.
+* Support for arrays larger than 32 elements or using const generics.
+    With `serde_as` large arrays are supported, even if they are nested in other types.
+    `[bool; 64]`, `Option<[u8; M]>`, and `Box<[[u8; 64]; N]>` are all supported, as [this examples shows](#large-and-const-generic-arrays).
 * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
 * Apply a prefix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
 * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
@@ -57,6 +60,32 @@ Foo {bar: 12}
 
 // into this JSON
 {"bar": "12"}
+```
+
+### Large and const-generic arrays
+
+serde does not support arrays with more than 32 elements or using const-generics.
+The `serde_as` attribute allows to circumvent this restriction, even for nested types and nested arrays.
+
+```rust
+#[serde_as]
+#[derive(Deserialize, Serialize)]
+struct Arrays<const N: usize, const M: usize> {
+    #[serde_as(as = "[_; N]")]
+    constgeneric: [bool; N],
+    #[serde_as(as = "Box<[[_; 64]; N]>")]
+    nested: Box<[[u8; 64]; N]>,
+    #[serde_as(as = "Option<[_; M]>")]
+    optional: Option<[u8; M]>,
+}
+
+// This allows us to serialize a struct like this
+let arrays = Arrays {
+    constgeneric: [true; 100],
+    nested: Box::new([[111; 64]; 100]),
+    optional: Some([222; 128])
+};
+assert!(serde_json::to_string(&arrays).is_ok());
 ```
 
 ### `skip_serializing_none`
