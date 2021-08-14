@@ -492,16 +492,15 @@ where
 {
     type Error = A::Error;
 
-    // Use `strip_prefix` with Rust 1.45
-    #[allow(clippy::manual_strip)]
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
     where
         K: DeserializeSeed<'de>,
     {
         while let Some(s) = self.delegate.next_key::<String>()? {
-            if s.starts_with(self.prefix) {
-                let without_prefix = s[self.prefix.len()..].into_deserializer();
-                return seed.deserialize(without_prefix).map(Some);
+            if let Some(without_prefix) = s.strip_prefix(self.prefix) {
+                return seed
+                    .deserialize(without_prefix.into_deserializer())
+                    .map(Some);
             }
             self.delegate.next_value::<IgnoredAny>()?;
         }
@@ -584,8 +583,6 @@ where
 {
     type Error = A::Error;
 
-    // Use `strip_prefix` with Rust 1.45
-    #[allow(clippy::manual_strip)]
     fn next_key_seed<K>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error>
     where
         K: DeserializeSeed<'de>,
@@ -595,9 +592,10 @@ where
             return seed.deserialize(without_prefix).map(Some);
         }
         while let Some(s) = self.delegate.next_key::<String>()? {
-            if s.starts_with(self.prefix) {
-                let without_prefix = s[self.prefix.len()..].into_deserializer();
-                return seed.deserialize(without_prefix).map(Some);
+            if let Some(without_prefix) = s.strip_prefix(self.prefix) {
+                return seed
+                    .deserialize(without_prefix.into_deserializer())
+                    .map(Some);
             }
             self.delegate.next_value::<IgnoredAny>()?;
         }

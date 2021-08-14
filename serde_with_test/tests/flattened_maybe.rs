@@ -5,7 +5,7 @@
 #![allow(dead_code, unused_imports)]
 
 use ::s_with as serde_with;
-// Needed for 1.45, unused in 1.50
+// Needed for 1.46, unused in 1.50
 use ::std::panic;
 
 // The macro creates custom deserialization code.

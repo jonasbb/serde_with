@@ -6,7 +6,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::fmt::Debug;
 
-#[rustversion::attr(since(1.46), track_caller)]
+#[track_caller]
 pub fn is_equal<T>(value: T, expected: Expect)
 where
     T: Debug + DeserializeOwned + PartialEq + Serialize,
@@ -21,7 +21,7 @@ where
 }
 
 /// Like [`is_equal`] but not pretty-print
-#[rustversion::attr(since(1.46), track_caller)]
+#[track_caller]
 pub fn is_equal_compact<T>(value: T, expected: Expect)
 where
     T: Debug + DeserializeOwned + PartialEq + Serialize,
@@ -35,7 +35,7 @@ where
     );
 }
 
-#[rustversion::attr(since(1.46), track_caller)]
+#[track_caller]
 pub fn check_deserialization<T>(value: T, deserialize_from: &str)
 where
     T: Debug + DeserializeOwned + PartialEq,
@@ -47,7 +47,7 @@ where
     );
 }
 
-#[rustversion::attr(since(1.46), track_caller)]
+#[track_caller]
 pub fn check_serialization<T>(value: T, serialize_to: Expect)
 where
     T: Debug + Serialize,
@@ -55,7 +55,7 @@ where
     serialize_to.assert_eq(&serde_json::to_string_pretty(&value).unwrap());
 }
 
-#[rustversion::attr(since(1.46), track_caller)]
+#[track_caller]
 pub fn check_error_serialization<T>(value: T, error_msg: Expect)
 where
     T: Debug + Serialize,
@@ -67,7 +67,7 @@ where
     );
 }
 
-#[rustversion::attr(since(1.46), track_caller)]
+#[track_caller]
 pub fn check_error_deserialization<T>(deserialize_from: &str, error_msg: Expect)
 where
     T: Debug + DeserializeOwned,
