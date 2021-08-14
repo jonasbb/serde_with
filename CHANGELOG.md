@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## Changed
+
+* Bump MSRV to 1.46, since the dev-dependency bitflags requires that version now.
+
 ## [1.9.4] - 2021-06-18
 
 ### Fixed

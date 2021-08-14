@@ -30,9 +30,7 @@
 // Necessary to silence the warning about clippy::unknown_clippy_lints on nightly
 #![allow(renamed_and_removed_lints)]
 // Necessary for nightly clippy lints
-// False positive in current clippy nightlies clippy::nonstandard_macro_braces
-// https://github.com/rust-lang/rust-clippy/issues/7422
-#![allow(clippy::unknown_clippy_lints, clippy::nonstandard_macro_braces)]
+#![allow(clippy::unknown_clippy_lints)]
 
 //! proc-macro extensions for [`serde_with`].
 //!
