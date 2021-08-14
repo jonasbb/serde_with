@@ -152,12 +152,12 @@ fn test_tuple_list_as_map() {
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct SLL(
+    struct Sll(
         #[serde_as(as = "HashMap<DisplayFromStr, DisplayFromStr>")] LinkedList<(u32, IpAddr)>,
     );
 
     is_equal(
-        SLL(vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect()),
+        Sll(vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect()),
         expect![[r#"
             {
               "1": "1.2.3.4",
