@@ -4,7 +4,7 @@ use crate::{utils, Separator};
 use serde::de::{
     Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
-use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
+use serde::ser::{Serialize, SerializeSeq, Serializer};
 use std::cmp::Eq;
 #[cfg(doc)]
 use std::collections::{BTreeMap, HashMap};
@@ -1498,14 +1498,9 @@ pub mod tuple_list_as_map {
         V: Serialize + 'a,
         S: Serializer,
     {
-        // This cannot use collect_map, since it uses references to tuples, not tuples.
-        let mut iter = iter.into_iter();
-        let mut map = serializer.serialize_map(Some(iter.len()))?;
-        iter.try_for_each(|(key, value)| {
-            map.serialize_entry(&key, &value)?;
-            Ok(())
-        })?;
-        map.end()
+        // Convert &(K, V) to (&K, &V) for collect_map.
+        let iter = iter.into_iter().map(|(k, v)| (k, v));
+        serializer.collect_map(iter)
     }
 
     /// Deserialize a map into an iterator of tuples.
