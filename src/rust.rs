@@ -4,7 +4,7 @@ use crate::{utils, Separator};
 use serde::de::{
     Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
-use serde::ser::{Serialize, SerializeSeq, Serializer};
+use serde::ser::{Serialize, Serializer};
 use std::cmp::Eq;
 #[cfg(doc)]
 use std::collections::{BTreeMap, HashMap};
@@ -236,14 +236,21 @@ pub mod seq_display_fromstr {
         for<'a> &'a T: IntoIterator<Item = &'a I>,
         I: Display,
     {
-        // collect_seq doesn't work, since the I elements are not serializable
-        let iter = value.into_iter();
-        let (_, to) = iter.size_hint();
-        let mut seq = serializer.serialize_seq(to)?;
-        for item in iter {
-            seq.serialize_element(&item.to_string())?;
+        struct SerializeString<'a, I>(&'a I);
+
+        impl<'a, I> Serialize for SerializeString<'a, I>
+        where
+            I: Display,
+        {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                serializer.collect_str(self.0)
+            }
         }
-        seq.end()
+
+        serializer.collect_seq(value.into_iter().map(SerializeString))
     }
 }
 
