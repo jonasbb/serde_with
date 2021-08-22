@@ -922,7 +922,7 @@ fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> TokenSt
             where
                 S: #serde_with_crate_path::serde::Serializer,
             {
-                serializer.serialize_str(&::std::string::ToString::to_string(self))
+                serializer.collect_str(&self)
             }
         }
     }

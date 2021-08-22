@@ -103,7 +103,7 @@ use super::*;
 ///     where
 ///         S: serde::Serializer,
 ///     {
-///         serializer.serialize_str(&source.to_string())
+///         serializer.collect_str(&source)
 ///     }
 /// }
 /// #

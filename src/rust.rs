@@ -115,7 +115,7 @@ pub mod display_fromstr {
         T: Display,
         S: Serializer,
     {
-        serializer.serialize_str(&*value.to_string())
+        serializer.collect_str(&value)
     }
 }
 
@@ -236,6 +236,7 @@ pub mod seq_display_fromstr {
         for<'a> &'a T: IntoIterator<Item = &'a I>,
         I: Display,
     {
+        // collect_seq doesn't work, since the I elements are not serializable
         let iter = value.into_iter();
         let (_, to) = iter.size_hint();
         let mut seq = serializer.serialize_seq(to)?;
@@ -1169,13 +1170,7 @@ pub mod map_as_tuple_list {
         K: Serialize + 'a,
         V: Serialize + 'a,
     {
-        let mut iter = map.into_iter();
-        let mut seq = serializer.serialize_seq(Some(iter.len()))?;
-        iter.try_for_each(|item| {
-            seq.serialize_element(&item)?;
-            Ok(())
-        })?;
-        seq.end()
+        serializer.collect_seq(map)
     }
 
     /// Deserialize a map from a list of tuples
@@ -1503,6 +1498,7 @@ pub mod tuple_list_as_map {
         V: Serialize + 'a,
         S: Serializer,
     {
+        // This cannot use collect_map, since it uses references to tuples, not tuples.
         let mut iter = iter.into_iter();
         let mut map = serializer.serialize_map(Some(iter.len()))?;
         iter.try_for_each(|(key, value)| {
