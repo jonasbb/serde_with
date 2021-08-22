@@ -436,7 +436,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// # What this macro does
 ///
 /// The `serde_as` macro only serves a convenience function.
-/// All the steps it takes can easily applied manually, in case the cost of an attribute macro is deemed to high.
+/// All the steps it takes can easily be applied manually, in case the cost of an attribute macro is deemed to high.
 /// The functionality can best be described with an example.
 ///
 /// ```rust,ignore
@@ -450,7 +450,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///
 /// 1. All the placeholder type `_` will be replaced with `::serde_with::Same`.
 ///     The placeholder type `_` marks all the places where the types `Serialize` implementation should be used.
-///     In the example it means that the u32 values will be serialize by the `Serialize` implementation of u32.
+///     In the example, it means that the `u32` values will serialize with the `Serialize` implementation of `u32`.
 ///     The `Same` type implements `SerializeAs` whenever the underlying type implements `Serialize` and is used to make the two traits compatible.
 ///
 ///     If you specify a custom path for `serde_with` via the `crate` attribute the path to the `Same` type will be altered accordingly.
@@ -1010,8 +1010,8 @@ fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> TokenSt
 ///
 /// The only task of this derive macro is to consume any `serde_as` attributes and turn them into inert attributes.
 /// This allows the serde_as macro to keep the field attributes without causing compiler errors.
-/// The intend is that keeping the field attributes allows downstream crates to consume and akt on them without causing an ordering dependency to the serde_as macro.
-/// Otherwise, downstream proc-macros would need to be places *in front of* the main `#[serde_as]` attribute, since otherwise the field attributes would already be stripped off.
+/// The intend is that keeping the field attributes allows downstream crates to consume and act on them without causing an ordering dependency to the serde_as macro.
+/// Otherwise, downstream proc-macros would need to be placed *in front of* the main `#[serde_as]` attribute, since otherwise the field attributes would already be stripped off.
 ///
 /// More details about the use-cases in the Github discussion: <https://github.com/jonasbb/serde_with/discussions/260>.
 #[proc_macro_derive(__private_consume_serde_as_attributes, attributes(serde_as))]
