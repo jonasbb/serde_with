@@ -4,7 +4,7 @@ use crate::{utils, Separator};
 use serde::de::{
     Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor,
 };
-use serde::ser::{Serialize, SerializeMap, SerializeSeq, Serializer};
+use serde::ser::{Serialize, Serializer};
 use std::cmp::Eq;
 #[cfg(doc)]
 use std::collections::{BTreeMap, HashMap};
@@ -236,14 +236,21 @@ pub mod seq_display_fromstr {
         for<'a> &'a T: IntoIterator<Item = &'a I>,
         I: Display,
     {
-        // collect_seq doesn't work, since the I elements are not serializable
-        let iter = value.into_iter();
-        let (_, to) = iter.size_hint();
-        let mut seq = serializer.serialize_seq(to)?;
-        for item in iter {
-            seq.serialize_element(&item.to_string())?;
+        struct SerializeString<'a, I>(&'a I);
+
+        impl<'a, I> Serialize for SerializeString<'a, I>
+        where
+            I: Display,
+        {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                serializer.collect_str(self.0)
+            }
         }
-        seq.end()
+
+        serializer.collect_seq(value.into_iter().map(SerializeString))
     }
 }
 
@@ -1498,14 +1505,9 @@ pub mod tuple_list_as_map {
         V: Serialize + 'a,
         S: Serializer,
     {
-        // This cannot use collect_map, since it uses references to tuples, not tuples.
-        let mut iter = iter.into_iter();
-        let mut map = serializer.serialize_map(Some(iter.len()))?;
-        iter.try_for_each(|(key, value)| {
-            map.serialize_entry(&key, &value)?;
-            Ok(())
-        })?;
-        map.end()
+        // Convert &(K, V) to (&K, &V) for collect_map.
+        let iter = iter.into_iter().map(|(k, v)| (k, v));
+        serializer.collect_map(iter)
     }
 
     /// Deserialize a map into an iterator of tuples.
