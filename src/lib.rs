@@ -1828,3 +1828,7 @@ pub struct FromInto<T>(PhantomData<T>);
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TryFromInto<T>(PhantomData<T>);
+
+/// TODO
+#[derive(Copy, Clone, Debug, Default)]
+pub struct BorrowCow;

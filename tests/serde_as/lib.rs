@@ -874,3 +874,78 @@ fn test_one_or_many_prefer_many() {
     check_error_deserialization::<S2Vec>(r#"{}"#, expect![[r#"a list or single element"#]]);
     check_error_deserialization::<S2Vec>(r#""xx""#, expect![[r#"a list or single element"#]]);
 }
+
+/// Test that Cow borrows from the input
+#[test]
+fn test_borrow_cow_str() {
+    use serde_test::{assert_tokens, Token};
+    use serde_with::BorrowCow;
+    use std::borrow::Cow;
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1<'a> {
+        #[serde(borrow)]
+        #[serde_as(as = "BorrowCow")]
+        cow: Cow<'a, str>,
+        #[serde(borrow)]
+        #[serde_as(as = "Option<BorrowCow>")]
+        opt: Option<Cow<'a, str>>,
+        #[serde(borrow)]
+        #[serde_as(as = "Box<BorrowCow>")]
+        b: Box<Cow<'a, str>>,
+        #[serde(borrow)]
+        #[serde_as(as = "[BorrowCow; 1]")]
+        arr: [Cow<'a, str>; 1],
+    }
+
+    assert_tokens(
+        &S1 {
+            cow: "abc".into(),
+            opt: Some("foo".into()),
+            b: Box::new("bar".into()),
+            arr: ["def".into()],
+        },
+        &[
+            Token::Struct { name: "S1", len: 4 },
+            Token::Str("cow"),
+            Token::BorrowedStr("abc"),
+            Token::Str("opt"),
+            Token::Some,
+            Token::BorrowedStr("foo"),
+            Token::Str("b"),
+            Token::BorrowedStr("bar"),
+            Token::Str("arr"),
+            Token::Tuple { len: 1 },
+            Token::BorrowedStr("def"),
+            Token::TupleEnd,
+            Token::StructEnd,
+        ],
+    );
+    let s1: S1<'_> = serde_json::from_str(
+        r#"{
+        "cow": "abc",
+        "opt": "foo",
+        "b": "bar",
+        "arr": ["def"]
+    }"#,
+    )
+    .unwrap();
+    assert!(matches!(s1.cow, Cow::Borrowed(_)));
+    assert!(matches!(s1.opt, Some(Cow::Borrowed(_))));
+    assert!(matches!(*s1.b, Cow::Borrowed(_)));
+    assert!(matches!(s1.arr, [Cow::Borrowed(_)]));
+    let s1: S1<'_> = serde_json::from_str(
+        r#"{
+        "cow": "a\"c",
+        "opt": "f\"o",
+        "b": "b\"r",
+        "arr": ["d\"f"]
+    }"#,
+    )
+    .unwrap();
+    assert!(matches!(s1.cow, Cow::Owned(_)));
+    assert!(matches!(s1.opt, Some(Cow::Owned(_))));
+    assert!(matches!(*s1.b, Cow::Owned(_)));
+    assert!(matches!(s1.arr, [Cow::Owned(_)]));
+}

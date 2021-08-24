@@ -675,4 +675,13 @@ where
     }
 }
 
+impl<'a> SerializeAs<Cow<'a, str>> for BorrowCow {
+    fn serialize_as<S>(source: &Cow<'a, str>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(source)
+    }
+}
+
 // endregion
