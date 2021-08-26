@@ -885,16 +885,12 @@ fn test_borrow_cow_str() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct S1<'a> {
-        #[serde(borrow)]
         #[serde_as(as = "BorrowCow")]
         cow: Cow<'a, str>,
-        #[serde(borrow)]
         #[serde_as(as = "Option<BorrowCow>")]
         opt: Option<Cow<'a, str>>,
-        #[serde(borrow)]
         #[serde_as(as = "Box<BorrowCow>")]
         b: Box<Cow<'a, str>>,
-        #[serde(borrow)]
         #[serde_as(as = "[BorrowCow; 1]")]
         arr: [Cow<'a, str>; 1],
     }
