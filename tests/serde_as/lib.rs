@@ -878,7 +878,7 @@ fn test_one_or_many_prefer_many() {
 /// Test that Cow borrows from the input
 #[test]
 fn test_borrow_cow_str() {
-    use serde_test::{assert_tokens, Token};
+    use serde_test::{assert_ser_tokens, Token};
     use serde_with::BorrowCow;
     use std::borrow::Cow;
 
@@ -895,7 +895,7 @@ fn test_borrow_cow_str() {
         arr: [Cow<'a, str>; 1],
     }
 
-    assert_tokens(
+    assert_ser_tokens(
         &S1 {
             cow: "abc".into(),
             opt: Some("foo".into()),
@@ -944,4 +944,70 @@ fn test_borrow_cow_str() {
     assert!(matches!(s1.opt, Some(Cow::Owned(_))));
     assert!(matches!(*s1.b, Cow::Owned(_)));
     assert!(matches!(s1.arr, [Cow::Owned(_)]));
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S2<'a> {
+        #[serde_as(as = "BorrowCow")]
+        cow: Cow<'a, [u8]>,
+        #[serde_as(as = "Option<BorrowCow>")]
+        opt: Option<Cow<'a, [u8]>>,
+    }
+
+    assert_ser_tokens(
+        &S2 {
+            cow: b"abc"[..].into(),
+            opt: Some(b"foo"[..].into()),
+        },
+        &[
+            Token::Struct { name: "S2", len: 2 },
+            Token::Str("cow"),
+            Token::Seq { len: Some(3) },
+            Token::U8(b'a'),
+            Token::U8(b'b'),
+            Token::U8(b'c'),
+            Token::SeqEnd,
+            Token::Str("opt"),
+            Token::Some,
+            Token::Seq { len: Some(3) },
+            Token::U8(b'f'),
+            Token::U8(b'o'),
+            Token::U8(b'o'),
+            Token::SeqEnd,
+            Token::StructEnd,
+        ],
+    );
+    let tokens = &[
+        Token::Struct { name: "S2", len: 2 },
+        Token::Str("cow"),
+        Token::BorrowedBytes(b"abc"),
+        Token::Str("opt"),
+        Token::Some,
+        Token::BorrowedBytes(b"foo"),
+        Token::StructEnd,
+    ];
+    let mut deser = serde_test::Deserializer::new(tokens);
+    let s2 = S2::deserialize(&mut deser).unwrap();
+    assert!(matches!(s2.cow, Cow::Borrowed(_)));
+    assert!(matches!(s2.opt, Some(Cow::Borrowed(_))));
+
+    // Check that a manual borrow works too
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S3<'a>(
+        #[serde(borrow = "'a")]
+        #[serde_as(as = "BorrowCow")]
+        Cow<'a, [u8]>,
+        // TODO add a test for Cow<'b, [u8; N]>
+        // #[serde_as(as = "BorrowCow")]
+        // Cow<'b, [u8; N]>,
+    );
+    let tokens = &[
+        Token::NewtypeStruct { name: "S3" },
+        Token::BorrowedBytes(b"abc"),
+    ];
+
+    let mut deser = serde_test::Deserializer::new(tokens);
+    let s3 = S3::deserialize(&mut deser).unwrap();
+    assert!(matches!(s3.0, Cow::Borrowed(_)));
 }

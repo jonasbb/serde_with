@@ -1236,4 +1236,13 @@ impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
     }
 }
 
+impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for BorrowCow {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Bytes::deserialize_as(deserializer)
+    }
+}
+
 // endregion
