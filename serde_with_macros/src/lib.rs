@@ -49,11 +49,10 @@ use darling::{Error as DarlingError, FromField, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
-use syn::parse::Parser;
 use syn::punctuated::Pair;
 use syn::spanned::Spanned;
 use syn::{
-    parse_macro_input, Attribute, AttributeArgs, DeriveInput, Error, Field, Fields,
+    parse_macro_input, parse_quote, AttributeArgs, DeriveInput, Error, Field, Fields,
     GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path, PathArguments, ReturnType, Type,
 };
 
@@ -163,16 +162,15 @@ where
     }
 
     // Add a dummy derive macro which consumes (makes inert) all field attributes
-    let attr_tokens = quote!(
+    let consume_serde_as_attribute = parse_quote!(
         #[derive(#serde_with_crate_path::__private_consume_serde_as_attributes)]
     );
-    let consume_serde_as_attribute = Attribute::parse_outer.parse2(attr_tokens)?;
 
     // For each field in the struct given by `input`, add the `skip_serializing_if` attribute,
     // if and only if, it is of type `Option`
     if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
         apply_on_fields(&mut input.fields, function)?;
-        input.attrs.extend(consume_serde_as_attribute);
+        input.attrs.push(consume_serde_as_attribute);
         Ok(quote!(#input))
     } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
         let errors: Vec<DarlingError> = input
@@ -186,7 +184,7 @@ where
             })
             .collect();
         if errors.is_empty() {
-            input.attrs.extend(consume_serde_as_attribute);
+            input.attrs.push(consume_serde_as_attribute);
             Ok(quote!(#input))
         } else {
             Err(DarlingError::multiple(errors))
@@ -329,13 +327,10 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
             }
 
             // Add the `skip_serializing_if` attribute
-            let attr_tokens = quote!(
+            let attr = parse_quote!(
                 #[serde(skip_serializing_if = "Option::is_none")]
             );
-            let attrs = Attribute::parse_outer
-                .parse2(attr_tokens)
-                .expect("Static attr tokens should not panic");
-            field.attrs.extend(attrs);
+            field.attrs.push(attr);
         } else {
             // Warn on use of `serialize_always` on non-Option fields
             let has_attr = field
@@ -592,25 +587,22 @@ fn serde_as_add_attr_to_field(
     if let Some(Ok(type_)) = serde_as_options.r#as {
         let replacement_type = replace_infer_type_with_type(type_, type_same);
         let attr_inner_tokens = quote!(#serde_with_crate_path::As::<#replacement_type>).to_string();
-        let attr_tokens = quote!(#[serde(with = #attr_inner_tokens)]);
-        let attrs = Attribute::parse_outer.parse2(attr_tokens)?;
-        field.attrs.extend(attrs);
+        let attr = parse_quote!(#[serde(with = #attr_inner_tokens)]);
+        field.attrs.push(attr);
     }
     if let Some(Ok(type_)) = serde_as_options.deserialize_as {
         let replacement_type = replace_infer_type_with_type(type_, type_same);
         let attr_inner_tokens =
             quote!(#serde_with_crate_path::As::<#replacement_type>::deserialize).to_string();
-        let attr_tokens = quote!(#[serde(deserialize_with = #attr_inner_tokens)]);
-        let attrs = Attribute::parse_outer.parse2(attr_tokens)?;
-        field.attrs.extend(attrs);
+        let attr = parse_quote!(#[serde(deserialize_with = #attr_inner_tokens)]);
+        field.attrs.push(attr);
     }
     if let Some(Ok(type_)) = serde_as_options.serialize_as {
         let replacement_type = replace_infer_type_with_type(type_, type_same);
         let attr_inner_tokens =
             quote!(#serde_with_crate_path::As::<#replacement_type>::serialize).to_string();
-        let attr_tokens = quote!(#[serde(serialize_with = #attr_inner_tokens)]);
-        let attrs = Attribute::parse_outer.parse2(attr_tokens)?;
-        field.attrs.extend(attrs);
+        let attr = parse_quote!(#[serde(serialize_with = #attr_inner_tokens)]);
+        field.attrs.push(attr);
     }
 
     Ok(())
