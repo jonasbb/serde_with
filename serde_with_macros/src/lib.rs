@@ -45,6 +45,7 @@ extern crate proc_macro;
 mod utils;
 
 use crate::utils::{DeriveOptions, IteratorExt as _};
+use darling::util::Override;
 use darling::{Error as DarlingError, FromField, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
@@ -537,16 +538,19 @@ fn serde_as_add_attr_to_field(
 
     #[derive(FromField, Debug)]
     #[darling(attributes(serde), allow_unknown_fields)]
-    struct SerdeWithOptions {
+    struct SerdeOptions {
         #[darling(default)]
         with: Option<String>,
         #[darling(default)]
         deserialize_with: Option<String>,
         #[darling(default)]
         serialize_with: Option<String>,
+
+        #[darling(default)]
+        borrow: Option<Override<String>>,
     }
 
-    impl SerdeWithOptions {
+    impl SerdeOptions {
         fn has_any_set(&self) -> bool {
             self.with.is_some() || self.deserialize_with.is_some() || self.serialize_with.is_some()
         }
@@ -561,7 +565,7 @@ fn serde_as_add_attr_to_field(
         return Ok(());
     }
     let serde_as_options = SerdeAsOptions::from_field(field)?;
-    let serde_with_options = SerdeWithOptions::from_field(field)?;
+    let serde_options = SerdeOptions::from_field(field)?;
 
     let mut errors = Vec::new();
     if !serde_as_options.has_any_set() {
@@ -569,7 +573,7 @@ fn serde_as_add_attr_to_field(
     }
 
     // Check if there are any conflicting attributes
-    if serde_as_options.has_any_set() && serde_with_options.has_any_set() {
+    if serde_as_options.has_any_set() && serde_options.has_any_set() {
         errors.push(DarlingError::custom("Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`."));
     }
 
@@ -584,13 +588,26 @@ fn serde_as_add_attr_to_field(
     }
 
     let type_same = &syn::parse_quote!(#serde_with_crate_path::Same);
+    let type_borrowcow = &syn::parse_quote!(BorrowCow);
     if let Some(Ok(type_)) = serde_as_options.r#as {
+        // If the field is not borrowed yet, check if we need to borrow it.
+        if serde_options.borrow.is_none() && has_type_embedded(&type_, type_borrowcow) {
+            let attr_borrow = parse_quote!(#[serde(borrow)]);
+            field.attrs.push(attr_borrow);
+        }
+
         let replacement_type = replace_infer_type_with_type(type_, type_same);
         let attr_inner_tokens = quote!(#serde_with_crate_path::As::<#replacement_type>).to_string();
         let attr = parse_quote!(#[serde(with = #attr_inner_tokens)]);
         field.attrs.push(attr);
     }
     if let Some(Ok(type_)) = serde_as_options.deserialize_as {
+        // If the field is not borrowed yet, check if we need to borrow it.
+        if serde_options.borrow.is_none() && has_type_embedded(&type_, type_borrowcow) {
+            let attr_borrow = parse_quote!(#[serde(borrow)]);
+            field.attrs.push(attr_borrow);
+        }
+
         let replacement_type = replace_infer_type_with_type(type_, type_same);
         let attr_inner_tokens =
             quote!(#serde_with_crate_path::As::<#replacement_type>::deserialize).to_string();
@@ -712,6 +729,71 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
 
         // Pass unknown types or non-handleable types (e.g., bare Fn) without performing any replacements
         type_ => type_,
+    }
+}
+
+/// Check if a type ending in the `syn::Ident` `embedded_type` is contained in `type_`.
+fn has_type_embedded(type_: &Type, embedded_type: &syn::Ident) -> bool {
+    match type_ {
+        // Base cases
+        Type::Infer(_) => false,
+        Type::Never(_inner) => false,
+
+        // Recursive cases
+        // Iterate through all positions where a type could occur and recursively call this function
+        Type::Array(inner) => has_type_embedded(&inner.elem, embedded_type),
+        Type::Group(inner) => has_type_embedded(&inner.elem, embedded_type),
+        Type::Paren(inner) => has_type_embedded(&inner.elem, embedded_type),
+        Type::Path(inner) => {
+            match inner.path.segments.last() {
+                Some(t) => {
+                    if t.ident == *embedded_type {
+                        return true;
+                    }
+
+                    match &t.arguments {
+                        PathArguments::None => false,
+                        PathArguments::AngleBracketed(inner) => {
+                            // Iterate over the args between the angle brackets
+                            inner
+                                .args
+                                .iter()
+                                .any(|generic_argument| match generic_argument {
+                                    // replace types within the generics list, but leave other stuff like lifetimes untouched
+                                    GenericArgument::Type(type_) => {
+                                        has_type_embedded(type_, embedded_type)
+                                    }
+                                    _ga => false,
+                                })
+                        }
+                        PathArguments::Parenthesized(inner) => {
+                            inner
+                                .inputs
+                                .iter()
+                                .any(|type_| has_type_embedded(type_, embedded_type))
+                                || match &inner.output {
+                                    ReturnType::Type(_arrow, type_) => {
+                                        has_type_embedded(type_, embedded_type)
+                                    }
+                                    _default => false,
+                                }
+                        }
+                    }
+                }
+                None => false,
+            }
+        }
+        Type::Ptr(inner) => has_type_embedded(&inner.elem, embedded_type),
+        Type::Reference(inner) => has_type_embedded(&inner.elem, embedded_type),
+        Type::Slice(inner) => has_type_embedded(&inner.elem, embedded_type),
+        Type::Tuple(inner) => inner.elems.pairs().any(|pair| match pair {
+            Pair::Punctuated(type_, _) | Pair::End(type_) => {
+                has_type_embedded(type_, embedded_type)
+            }
+        }),
+
+        // Pass unknown types or non-handleable types (e.g., bare Fn) without performing any replacements
+        _type_ => false,
     }
 }
 
