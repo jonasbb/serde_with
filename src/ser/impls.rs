@@ -675,4 +675,22 @@ where
     }
 }
 
+impl<'a> SerializeAs<Cow<'a, str>> for BorrowCow {
+    fn serialize_as<S>(source: &Cow<'a, str>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(source)
+    }
+}
+
+impl<'a> SerializeAs<Cow<'a, [u8]>> for BorrowCow {
+    fn serialize_as<S>(value: &Cow<'a, [u8]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_seq(value.iter())
+    }
+}
+
 // endregion

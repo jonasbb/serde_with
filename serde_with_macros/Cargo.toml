@@ -1,7 +1,7 @@
 [package]
 authors = ["Jonas Bushart"]
 name = "serde_with_macros"
-version = "1.4.2"
+version = "1.5.0"
 
 categories = ["encoding"]
 description = "proc-macro library for serde_with"

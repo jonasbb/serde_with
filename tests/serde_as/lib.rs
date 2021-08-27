@@ -874,3 +874,140 @@ fn test_one_or_many_prefer_many() {
     check_error_deserialization::<S2Vec>(r#"{}"#, expect![[r#"a list or single element"#]]);
     check_error_deserialization::<S2Vec>(r#""xx""#, expect![[r#"a list or single element"#]]);
 }
+
+/// Test that Cow borrows from the input
+#[test]
+fn test_borrow_cow_str() {
+    use serde_test::{assert_ser_tokens, Token};
+    use serde_with::BorrowCow;
+    use std::borrow::Cow;
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1<'a> {
+        #[serde_as(as = "BorrowCow")]
+        cow: Cow<'a, str>,
+        #[serde_as(as = "Option<BorrowCow>")]
+        opt: Option<Cow<'a, str>>,
+        #[serde_as(as = "Box<BorrowCow>")]
+        b: Box<Cow<'a, str>>,
+        #[serde_as(as = "[BorrowCow; 1]")]
+        arr: [Cow<'a, str>; 1],
+    }
+
+    assert_ser_tokens(
+        &S1 {
+            cow: "abc".into(),
+            opt: Some("foo".into()),
+            b: Box::new("bar".into()),
+            arr: ["def".into()],
+        },
+        &[
+            Token::Struct { name: "S1", len: 4 },
+            Token::Str("cow"),
+            Token::BorrowedStr("abc"),
+            Token::Str("opt"),
+            Token::Some,
+            Token::BorrowedStr("foo"),
+            Token::Str("b"),
+            Token::BorrowedStr("bar"),
+            Token::Str("arr"),
+            Token::Tuple { len: 1 },
+            Token::BorrowedStr("def"),
+            Token::TupleEnd,
+            Token::StructEnd,
+        ],
+    );
+    let s1: S1<'_> = serde_json::from_str(
+        r#"{
+        "cow": "abc",
+        "opt": "foo",
+        "b": "bar",
+        "arr": ["def"]
+    }"#,
+    )
+    .unwrap();
+    assert!(matches!(s1.cow, Cow::Borrowed(_)));
+    assert!(matches!(s1.opt, Some(Cow::Borrowed(_))));
+    assert!(matches!(*s1.b, Cow::Borrowed(_)));
+    assert!(matches!(s1.arr, [Cow::Borrowed(_)]));
+    let s1: S1<'_> = serde_json::from_str(
+        r#"{
+        "cow": "a\"c",
+        "opt": "f\"o",
+        "b": "b\"r",
+        "arr": ["d\"f"]
+    }"#,
+    )
+    .unwrap();
+    assert!(matches!(s1.cow, Cow::Owned(_)));
+    assert!(matches!(s1.opt, Some(Cow::Owned(_))));
+    assert!(matches!(*s1.b, Cow::Owned(_)));
+    assert!(matches!(s1.arr, [Cow::Owned(_)]));
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S2<'a> {
+        #[serde_as(as = "BorrowCow")]
+        cow: Cow<'a, [u8]>,
+        #[serde_as(as = "Option<BorrowCow>")]
+        opt: Option<Cow<'a, [u8]>>,
+    }
+
+    assert_ser_tokens(
+        &S2 {
+            cow: b"abc"[..].into(),
+            opt: Some(b"foo"[..].into()),
+        },
+        &[
+            Token::Struct { name: "S2", len: 2 },
+            Token::Str("cow"),
+            Token::Seq { len: Some(3) },
+            Token::U8(b'a'),
+            Token::U8(b'b'),
+            Token::U8(b'c'),
+            Token::SeqEnd,
+            Token::Str("opt"),
+            Token::Some,
+            Token::Seq { len: Some(3) },
+            Token::U8(b'f'),
+            Token::U8(b'o'),
+            Token::U8(b'o'),
+            Token::SeqEnd,
+            Token::StructEnd,
+        ],
+    );
+    let tokens = &[
+        Token::Struct { name: "S2", len: 2 },
+        Token::Str("cow"),
+        Token::BorrowedBytes(b"abc"),
+        Token::Str("opt"),
+        Token::Some,
+        Token::BorrowedBytes(b"foo"),
+        Token::StructEnd,
+    ];
+    let mut deser = serde_test::Deserializer::new(tokens);
+    let s2 = S2::deserialize(&mut deser).unwrap();
+    assert!(matches!(s2.cow, Cow::Borrowed(_)));
+    assert!(matches!(s2.opt, Some(Cow::Borrowed(_))));
+
+    // Check that a manual borrow works too
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S3<'a>(
+        #[serde(borrow = "'a")]
+        #[serde_as(as = "BorrowCow")]
+        Cow<'a, [u8]>,
+        // TODO add a test for Cow<'b, [u8; N]>
+        // #[serde_as(as = "BorrowCow")]
+        // Cow<'b, [u8; N]>,
+    );
+    let tokens = &[
+        Token::NewtypeStruct { name: "S3" },
+        Token::BorrowedBytes(b"abc"),
+    ];
+
+    let mut deser = serde_test::Deserializer::new(tokens);
+    let s3 = S3::deserialize(&mut deser).unwrap();
+    assert!(matches!(s3.0, Cow::Borrowed(_)));
+}

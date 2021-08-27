@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [1.5.0]
+
+### Added
+
+* Add the attribute `#[serde(borrow)]` on a field if `serde_as` is used in combination with the `BorrowCow` type.
+
 ## [1.4.2] - 2021-06-07
 
 ### Fixed

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.10.0]
+
+### Added
+
+* Add `BorrowCow` which instructs serde to borrow data during deserialization of `Cow<'_, str>`, `Cow<'_, [u8]>`, or `Cow<'_, [u8; N]>`. (#347)
+    The implementation is for [serde#2072](https://github.com/serde-rs/serde/pull/2072#pullrequestreview-735511713) and [serde#2016](https://github.com/serde-rs/serde/issues/2016), about `#[serde(borrow)]` not working for `Option<Cow<'a, str>>`.
+
+    ```rust
+    #[serde_as]
+    #[derive(Deserialize, Serialize)]
+    struct Data<'a> {
+        #[serde_as(as = "Option<[BorrowCow; 1]>")]
+        nested: Option<[Cow<'a, str>; 1]>,
+    }
+    ```
+
+    The `#[serde(borrow)]` annotation is automatically added by the `#[serde_as]` attribute.
+
 ## Changed
 
 * Bump MSRV to 1.46, since the dev-dependency bitflags requires that version now.

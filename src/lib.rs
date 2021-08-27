@@ -25,7 +25,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with/1.9.4")]
+#![doc(html_root_url = "https://docs.rs/serde_with/1.10.0")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! [![docs.rs badge](https://docs.rs/serde_with/badge.svg)](https://docs.rs/serde_with/)
@@ -62,7 +62,7 @@
 //!
 //! ```toml
 //! [dependencies.serde_with]
-//! version = "1.9.4"
+//! version = "1.10.0"
 //! features = [ "..." ]
 //! ```
 //!
@@ -239,15 +239,15 @@
 //! # }
 //! ```
 //!
-//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.9.4/serde_with/struct.DisplayFromStr.html
-//! [`with_prefix!`]: https://docs.rs/serde_with/1.9.4/serde_with/macro.with_prefix.html
-//! [display_fromstr]: https://docs.rs/serde_with/1.9.4/serde_with/rust/display_fromstr/index.html
-//! [feature flags]: https://docs.rs/serde_with/1.9.4/serde_with/guide/feature_flags/index.html
-//! [skip_serializing_none]: https://docs.rs/serde_with/1.9.4/serde_with/attr.skip_serializing_none.html
-//! [StringWithSeparator]: https://docs.rs/serde_with/1.9.4/serde_with/rust/struct.StringWithSeparator.html
-//! [user guide]: https://docs.rs/serde_with/1.9.4/serde_with/guide/index.html
+//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.10.0/serde_with/struct.DisplayFromStr.html
+//! [`with_prefix!`]: https://docs.rs/serde_with/1.10.0/serde_with/macro.with_prefix.html
+//! [display_fromstr]: https://docs.rs/serde_with/1.10.0/serde_with/rust/display_fromstr/index.html
+//! [feature flags]: https://docs.rs/serde_with/1.10.0/serde_with/guide/feature_flags/index.html
+//! [skip_serializing_none]: https://docs.rs/serde_with/1.10.0/serde_with/attr.skip_serializing_none.html
+//! [StringWithSeparator]: https://docs.rs/serde_with/1.10.0/serde_with/rust/struct.StringWithSeparator.html
+//! [user guide]: https://docs.rs/serde_with/1.10.0/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
-//! [as-annotation]: https://docs.rs/serde_with/1.9.4/serde_with/guide/serde_as/index.html
+//! [as-annotation]: https://docs.rs/serde_with/1.10.0/serde_with/guide/serde_as/index.html
 
 #[doc(hidden)]
 pub extern crate serde;
@@ -387,7 +387,7 @@ impl Separator for CommaSeparator {
 /// # }
 /// ```
 ///
-/// [serde_as]: https://docs.rs/serde_with/1.9.4/serde_with/attr.serde_as.html
+/// [serde_as]: https://docs.rs/serde_with/1.10.0/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct As<T: ?Sized>(PhantomData<T>);
 
@@ -853,7 +853,7 @@ pub struct BytesOrString;
 /// ```
 ///
 /// [`chrono::Duration`]: chrono_crate::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.9.4/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.10.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
@@ -979,7 +979,7 @@ pub struct DurationSeconds<
 /// ```
 ///
 /// [`chrono::Duration`]: chrono_crate::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.9.4/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.10.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1176,7 +1176,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: chrono_crate::DateTime
-/// [feature flag]: https://docs.rs/serde_with/1.9.4/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.10.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
@@ -1305,7 +1305,7 @@ pub struct TimestampSeconds<
 ///
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: chrono_crate::DateTime
-/// [feature flag]: https://docs.rs/serde_with/1.9.4/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.10.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1828,3 +1828,72 @@ pub struct FromInto<T>(PhantomData<T>);
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TryFromInto<T>(PhantomData<T>);
+
+/// Borrow `Cow` data during deserialization when possible.
+///
+/// The types `Cow<'a, [u8]>`, `Cow<'a, [u8; N]>`, and `Cow<'a, str>` can borrow from the input data during deserialization.
+/// serde supports this, by annotating the fields with `#[serde(borrow)]`. but does not support borrowing on nested types.
+/// This gap is filled by this `BorrowCow` adapter.
+///
+/// Using this adapter with `Cow<'a, [u8]>`/Cow<'a, [u8; N]>` will serialize the value as a sequence of `u8` values.
+/// This *might* not allow to borrow the data during deserialization.
+/// For a different format, which is also more efficient, use the [`Bytes`] adapter, which is also implemented for `Cow`.
+///
+/// When combined with the [`serde_as`] attribute, the `#[serde(borrow)]` annotation will be added automatically.
+/// If the annotation is wrong or too broad, for example because of multiple lifetime parameters, a manual annotation is required.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_with::{serde_as, BorrowCow};
+/// # use std::borrow::Cow;
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Data<'a, 'b, 'c> {
+///     #[serde_as(as = "BorrowCow")]
+///     str: Cow<'a, str>,
+///     #[serde_as(as = "BorrowCow")]
+///     slice: Cow<'b, [u8]>,
+///
+///     #[serde_as(as = "Option<[BorrowCow; 1]>")]
+///     nested: Option<[Cow<'c, str>; 1]>,
+/// }
+/// let data = Data {
+///     str: "foobar".into(),
+///     slice: b"foobar"[..].into(),
+///     nested: Some(["HelloWorld".into()]),
+/// };
+///
+/// // Define our expected JSON form
+/// let j = r#"{
+///   "str": "foobar",
+///   "slice": [
+///     102,
+///     111,
+///     111,
+///     98,
+///     97,
+///     114
+///   ],
+///   "nested": [
+///     "HelloWorld"
+///   ]
+/// }"#;
+/// // Ensure serialization and deserialization produce the expected results
+/// assert_eq!(j, serde_json::to_string_pretty(&data).unwrap());
+/// assert_eq!(data, serde_json::from_str(j).unwrap());
+///
+/// // Cow borrows from the input data
+/// let deserialized: Data<'_, '_, '_> = serde_json::from_str(j).unwrap();
+/// assert!(matches!(deserialized.str, Cow::Borrowed(_)));
+/// assert!(matches!(deserialized.nested, Some([Cow::Borrowed(_)])));
+/// // JSON does not allow borrowing bytes, so `slice` does not borrow
+/// assert!(matches!(deserialized.slice, Cow::Owned(_)));
+/// # }
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
+pub struct BorrowCow;

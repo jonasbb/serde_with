@@ -1196,4 +1196,53 @@ where
     }
 }
 
+impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, str>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct CowVisitor;
+
+        impl<'de> Visitor<'de> for CowVisitor {
+            type Value = Cow<'de, str>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("an optionally borrowed string")
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Borrowed(v))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(v.to_owned()))
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(v))
+            }
+        }
+
+        deserializer.deserialize_str(CowVisitor)
+    }
+}
+
+impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for BorrowCow {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Bytes::deserialize_as(deserializer)
+    }
+}
+
 // endregion
