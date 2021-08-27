@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.10.0]
+
 ### Added
 
 * Add `BorrowCow` which instructs serde to borrow data during deserialization of `Cow<'_, str>`, `Cow<'_, [u8]>`, or `Cow<'_, [u8; N]>`. (#347)
