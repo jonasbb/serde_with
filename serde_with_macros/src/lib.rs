@@ -463,6 +463,9 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     Similarly, `serialize_as` is translated to `serialize_with`.
 ///
 ///     The field attributes will be kept on the struct/enum such that other macros can use them too.
+/// 4. It searches `#[serde_as(as = ...)]` if there is a type named `BorrowCow` under any path.
+///     If `BorrowCow` is found, the attribute `#[serde(borrow)]` is added to the field.
+///     If `#[serde(borrow)]` or `#[serde(borrow = "...")]` is already present, this step will be skipped.
 ///
 /// After all these steps, the code snippet will have transformed into roughly this.
 ///
