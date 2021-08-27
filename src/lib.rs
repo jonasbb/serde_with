@@ -1829,6 +1829,71 @@ pub struct FromInto<T>(PhantomData<T>);
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TryFromInto<T>(PhantomData<T>);
 
-/// TODO
+/// Borrow `Cow` data during deserialization when possible.
+///
+/// The types `Cow<'a, [u8]>`, `Cow<'a, [u8; N]>`, and `Cow<'a, str>` can borrow from the input data during deserialization.
+/// serde supports this, by annotating the fields with `#[serde(borrow)]`. but does not support borrowing on nested types.
+/// This gap is filled by this `BorrowCow` adapter.
+///
+/// Using this adapter with `Cow<'a, [u8]>`/Cow<'a, [u8; N]>` will serialize the value as a sequence of `u8` values.
+/// This *might* not allow to borrow the data during deserialization.
+/// For a different format, which is also more efficient, use the [`Bytes`] adapter, which is also implemented for `Cow`.
+///
+/// When combined with the [`serde_as`] attribute, the `#[serde(borrow)]` annotation will be added automatically.
+/// If the annotation is wrong or too broad, for example because of multiple lifetime parameters, a manual annotation is required.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_with::{serde_as, BorrowCow};
+/// # use std::borrow::Cow;
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Data<'a, 'b, 'c> {
+///     #[serde_as(as = "BorrowCow")]
+///     str: Cow<'a, str>,
+///     #[serde_as(as = "BorrowCow")]
+///     slice: Cow<'b, [u8]>,
+///
+///     #[serde_as(as = "Option<[BorrowCow; 1]>")]
+///     nested: Option<[Cow<'c, str>; 1]>,
+/// }
+/// let data = Data {
+///     str: "foobar".into(),
+///     slice: b"foobar"[..].into(),
+///     nested: Some(["HelloWorld".into()]),
+/// };
+///
+/// // Define our expected JSON form
+/// let j = r#"{
+///   "str": "foobar",
+///   "slice": [
+///     102,
+///     111,
+///     111,
+///     98,
+///     97,
+///     114
+///   ],
+///   "nested": [
+///     "HelloWorld"
+///   ]
+/// }"#;
+/// // Ensure serialization and deserialization produce the expected results
+/// assert_eq!(j, serde_json::to_string_pretty(&data).unwrap());
+/// assert_eq!(data, serde_json::from_str(j).unwrap());
+///
+/// // Cow borrows from the input data
+/// let deserialized: Data<'_, '_, '_> = serde_json::from_str(j).unwrap();
+/// assert!(matches!(deserialized.str, Cow::Borrowed(_)));
+/// assert!(matches!(deserialized.nested, Some([Cow::Borrowed(_)])));
+/// // JSON does not allow borrowing bytes, so `slice` does not borrow
+/// assert!(matches!(deserialized.slice, Cow::Owned(_)));
+/// # }
+/// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BorrowCow;
