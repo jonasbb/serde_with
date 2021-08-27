@@ -79,3 +79,12 @@ impl<'a, const N: usize> SerializeAs<Cow<'a, [u8; N]>> for Bytes {
         serializer.serialize_bytes(bytes.as_ref())
     }
 }
+
+impl<'a, const N: usize> SerializeAs<Cow<'a, [u8; N]>> for BorrowCow {
+    fn serialize_as<S>(value: &Cow<'a, [u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_seq(value.iter())
+    }
+}

@@ -326,6 +326,15 @@ impl<'de, const N: usize> DeserializeAs<'de, Box<[u8; N]>> for Bytes {
     where
         D: Deserializer<'de>,
     {
-        <Bytes as DeserializeAs<'de, [u8; N]>>::deserialize_as(deserializer).map(Box::new)
+        Bytes::deserialize_as(deserializer).map(Box::new)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for BorrowCow {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8; N]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Bytes::deserialize_as(deserializer)
     }
 }
