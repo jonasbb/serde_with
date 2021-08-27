@@ -17,22 +17,23 @@ The basic design of the system was done by [@markazmierczak](https://github.com/
     5. [Re-exporting `serde_as`](#re-exporting-serde_as)
 2. [De/Serialize Implementations Available](#deserialize-implementations-available)
     1. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
-    2. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
-    3. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
-    4. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
-    5. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
-    6. [`Default` from `null`](#default-from-null)
-    7. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-    8. [`Duration` as seconds](#duration-as-seconds)
-    9. [Ignore deserialization errors](#ignore-deserialization-errors)
-    10. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-    11. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-    12. [`None` as empty `String`](#none-as-empty-string)
-    13. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
-    14. [Pick first successful deserialization](#pick-first-successful-deserialization)
-    15. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-    16. [Value into JSON String](#value-into-json-string)
-    17. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+    2. [Borrow from the input for `Cow` type](#borrow-from-the-input-for-cow-type)
+    3. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
+    4. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
+    5. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
+    6. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
+    7. [`Default` from `null`](#default-from-null)
+    8. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+    9. [`Duration` as seconds](#duration-as-seconds)
+    10. [Ignore deserialization errors](#ignore-deserialization-errors)
+    11. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+    12. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+    13. [`None` as empty `String`](#none-as-empty-string)
+    14. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
+    15. [Pick first successful deserialization](#pick-first-successful-deserialization)
+    16. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+    17. [Value into JSON String](#value-into-json-string)
+    18. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Switching from serde's with to `serde_as`
 
@@ -316,6 +317,19 @@ value: [[u8; 64]; 33],
 
 // JSON
 "value": [[0,0,0,0,0,...], [0,0,0,...], ...],
+```
+
+### Borrow from the input for `Cow` type
+
+The types `Cow<'_, str>`, `Cow<'_, [u8]>`, or `Cow<'_, [u8; N]>` (Rust 1.51+) can borrow from the input, avoiding extra copies.
+
+```ignore
+// Rust
+#[serde_as(as = "BorrowCow")]
+value: Cow<'a, str>,
+
+// JSON
+"value": "foobar",
 ```
 
 ### `Bytes` with more efficiency
