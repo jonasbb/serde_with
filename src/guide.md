@@ -63,11 +63,11 @@ assert_eq!(data, serde_json::from_str(json).unwrap());
 ## 2. Integration with serde's with-annotation
 
 [serde's with-annotation][with-annotation] allows to specify a different serialization or deserialization function for a field.
-It is usefull to adapt the serialization of existing types to the requirements of a protocol.
+It is useful to adapt the serialization of existing types to the requirements of a protocol.
 Most modules in this crate can be used together with the with-annotation.
 
 The annotation approach has one big drawback, in that it is very inflexible.
-It allows to specify arbitrary serialization code, but the code has to perform the correct transformations.
+It allows specifying arbitrary serialization code, but the code has to perform the correct transformations.
 It is not possible to combine multiple of those functions.
 One common use case for this is the serialization of collections like `Vec`.
 If you have a field of type `T`, you can apply the with-annotation, but if you have a field of type `Vec<T>`, there is no way to re-use the same functions for the with-annotation.
@@ -118,12 +118,12 @@ assert_eq!(data, serde_json::from_str(json).unwrap());
 
 ## 3. proc-macros to make it easier to use both above parts
 
-The proc-macros are an optional addition and improve the user exerience for common tasks.
+The proc-macros are an optional addition and improve the user experience for common tasks.
 We have already seen how the `serde_as` attribute is used to define the serialization instructions.
 
 The proc-macro attributes are defined in the [`serde_with_macros`] crate and re-exported from the root of this crate.
 The proc-macros are optional, but enabled by default.
-For futher details, please refer to the documentation of each proc-macro.
+For further details, please refer to the documentation of each proc-macro.
 
 ## 4. Derive macros to implement `Deserialize` and `Serialize`
 

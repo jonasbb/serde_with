@@ -227,7 +227,7 @@ where
 /// ```
 ///
 /// The `skip_serializing_if` annotation is repetitive and harms readability.
-/// Instead the same struct can be written as:
+/// Instead, the same struct can be written as:
 ///
 /// ```rust
 /// # use serde::Serialize;
@@ -394,7 +394,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 
 /// Convenience macro to use the [`serde_as`] system.
 ///
-/// The [`serde_as`] system is designed as a more flexible alterative to serde's with-annotation.
+/// The [`serde_as`] system is designed as a more flexible alternative to serde's with-annotation.
 ///
 /// # Example
 ///
@@ -436,7 +436,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// # What this macro does
 ///
 /// The `serde_as` macro only serves a convenience function.
-/// All the steps it takes can easily be applied manually, in case the cost of an attribute macro is deemed to high.
+/// All the steps it performs, can easily be done manually, in case the cost of an attribute macro is deemed to high.
 /// The functionality can best be described with an example.
 ///
 /// ```rust,ignore
@@ -453,7 +453,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     In the example, it means that the `u32` values will serialize with the `Serialize` implementation of `u32`.
 ///     The `Same` type implements `SerializeAs` whenever the underlying type implements `Serialize` and is used to make the two traits compatible.
 ///
-///     If you specify a custom path for `serde_with` via the `crate` attribute the path to the `Same` type will be altered accordingly.
+///     If you specify a custom path for `serde_with` via the `crate` attribute, the path to the `Same` type will be altered accordingly.
 /// 2. Wrap the type from the annotation inside a `::serde_with::As`.
 ///     In the above example we know have something like `::serde_with::As::<Vec<::serde_with::Same>>`.
 ///     The `As` type acts as the opposite of the `Same` type.
@@ -800,11 +800,11 @@ fn has_type_embedded(type_: &Type, embedded_type: &syn::Ident) -> bool {
     }
 }
 
-/// Deserialize value by using it's [`FromStr`] implementation
+/// Deserialize value by using its [`FromStr`] implementation
 ///
 /// This is an alternative way to implement `Deserialize` for types which also implement [`FromStr`] by deserializing the type from string.
 /// Ensure that the struct/enum also implements [`FromStr`].
-/// If the implementation is missing you will get a error message like
+/// If the implementation is missing, you will get an error message like
 /// ```text
 /// error[E0277]: the trait bound `Struct: std::str::FromStr` is not satisfied
 /// ```
@@ -929,7 +929,7 @@ fn deserialize_fromstr(input: DeriveInput, serde_with_crate_path: Path) -> Token
 ///
 /// This is an alternative way to implement `Serialize` for types which also implement [`Display`] by serializing the type as string.
 /// Ensure that the struct/enum also implements [`Display`].
-/// If the implementation is missing you will get a error message like
+/// If the implementation is missing, you will get an error message like
 /// ```text
 /// error[E0277]: `Struct` doesn't implement `std::fmt::Display`
 /// ```

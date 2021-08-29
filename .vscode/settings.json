@@ -28,6 +28,8 @@
         "rustversion",
         "serde",
         "serde's",
+        "serializable",
+        "struct",
         "structs",
         "subsec",
         "subseclen",
@@ -42,5 +44,9 @@
         "markdown",
         "rust",
         "toml"
+    ],
+    "cSpell.enabled": true,
+    "cSpell.ignoreWords": [
+        "composability"
     ],
 }
