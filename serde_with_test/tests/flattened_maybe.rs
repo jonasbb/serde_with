@@ -4,7 +4,6 @@
 #![no_implicit_prelude]
 #![allow(dead_code, unused_imports)]
 
-use ::s_with as serde_with;
 // Needed for 1.46, unused in 1.50
 use ::std::panic;
 

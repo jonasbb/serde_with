@@ -9,10 +9,6 @@
 /// required on the field such that the helper works. The serialization format will always be
 /// flattened.
 ///
-/// **Note**:
-/// This macro requires that the crate `serde_with` is in scope with that exact name.
-/// If you import `serde_with` with a different name, you need to temporarily rename it for this macro to work.
-///
 /// # Examples
 ///
 /// ```rust
@@ -57,14 +53,15 @@ macro_rules! flattened_maybe {
     ($fn:ident, $field:literal) => {
         fn $fn<'de, T, D>(deserializer: D) -> ::std::result::Result<T, D::Error>
         where
-            T: serde_with::serde::Deserialize<'de>,
-            D: serde_with::serde::Deserializer<'de>,
+            T: $crate::serde::Deserialize<'de>,
+            D: $crate::serde::Deserializer<'de>,
         {
             use ::std::option::Option::{self, None, Some};
             use ::std::result::Result::{self, Err, Ok};
+            use $crate::serde;
 
-            #[derive(serde_with::serde::Deserialize)]
-            #[serde(crate = "serde_with::serde")]
+            #[derive($crate::serde::Deserialize)]
+            #[serde(crate = "serde")]
             pub struct Both<T> {
                 #[serde(flatten)]
                 flat: Option<T>,
@@ -72,11 +69,11 @@ macro_rules! flattened_maybe {
                 not_flat: Option<T>,
             }
 
-            let both: Both<T> = serde_with::serde::Deserialize::deserialize(deserializer)?;
+            let both: Both<T> = $crate::serde::Deserialize::deserialize(deserializer)?;
             match (both.flat, both.not_flat) {
                 (Some(t), None) | (None, Some(t)) => Ok(t),
-                (None, None) => Err(serde_with::serde::de::Error::missing_field($field)),
-                (Some(_), Some(_)) => Err(serde_with::serde::de::Error::custom(concat!(
+                (None, None) => Err($crate::serde::de::Error::missing_field($field)),
+                (Some(_), Some(_)) => Err($crate::serde::de::Error::custom(concat!(
                     "`",
                     $field,
                     "` is both flattened and not"
