@@ -16,7 +16,7 @@ use std::str::FromStr;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
-/// This allows to deserialize a string as a number.
+/// This allows deserializing a string as a number.
 /// It can be very useful for serialization formats like JSON, which do not support integer
 /// numbers and have to resort to strings to represent them.
 ///

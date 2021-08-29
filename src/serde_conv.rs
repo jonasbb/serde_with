@@ -9,7 +9,7 @@
 /// 1. The name of the converter type.
 ///     The type can be prefixed with a visibility modifies like `pub` or `pub(crate)`.
 ///     By default the type is not marked as public (`pub(self)`).
-/// 2. The type `T` we want to extent with custom behavior.
+/// 2. The type `T` we want to extend with custom behavior.
 /// 3. A function or macro taking a `&T` and returning a serializable type.
 /// 4. A function or macro taking a deserializable type and returning a `Result<T, E>`.
 ///     The error type `E` must implement `Display`.

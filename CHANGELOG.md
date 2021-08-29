@@ -125,7 +125,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * Added `PickFirst` adapter for `serde_as`. [#291]
-    It allows to deserialize from multiple different forms.
+    It allows deserializing from multiple different forms.
     Deserializing a number from either a number or string can be implemented like:
 
     ```rust
@@ -226,14 +226,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [serde-bytes-complex]: https://github.com/serde-rs/bytes/issues/14
 [serde-bytes-arrays]: https://github.com/serde-rs/bytes/issues/26
 
-* The `OneOrMany` allows to deserialize a `Vec` from either a single element or a sequence. ([#281])
+* The `OneOrMany` type allows deserializing a `Vec` from either a single element or a sequence. ([#281])
 
     ```rust
     #[serde_as(as = "OneOrMany<_>")]
     cities: Vec<String>,
     ```
 
-    This allows to deserialize from either `cities: "Berlin"` or `cities: ["Berlin", "Paris"]`.
+    This allows deserializing from either `cities: "Berlin"` or `cities: ["Berlin", "Paris"]`.
     The serialization can be configured to always emit a list with `PreferMany` or emit a single element with `PreferOne`.
 
 [#281]: https://github.com/jonasbb/serde_with/pull/281
@@ -490,7 +490,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Add chrono support: Deserialize timestamps from int, float, and string
 * Serialization of embedded JSON strings
 * De/Serialization using `Display` and `FromStr` implementations
-* String-based collections using `Display` and `FromStr`, allows to deserialize "#foo,#bar"
+* String-based collections using `Display` and `FromStr`, allows deserializing "#foo,#bar"
 
 ## [0.1.0] - 2017-08-17
 

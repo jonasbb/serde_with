@@ -430,7 +430,7 @@ pub struct Same;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
-/// This allows to deserialize a string as a number.
+/// This allows deserializing a string as a number.
 /// It can be very useful for serialization formats like JSON, which do not support integer
 /// numbers and have to resort to strings to represent them.
 ///
@@ -1538,13 +1538,13 @@ pub struct Bytes;
 
 /// Deserialize one or many elements
 ///
-/// Sometime it is desireable to have a shortcut in writing 1-element lists in a config file.
+/// Sometimes it is desirable to have a shortcut in writing 1-element lists in a config file.
 /// Usually, this is done by either writing a list or the list element itself.
 /// This distinction is not semantically important on the Rust side, thus both forms should serialize into the same `Vec`.
 ///
 /// The `OneOrMany` adapter achieves exactly this use case.
 /// The serialization behavior can be tweaked to either always serialize as a list using `PreferMany` or to serialize as the inner element if possible using `PreferOne`.
-/// By default `PreferOne` is assumed, which can also be omitted like `OneOrMany<_>`.
+/// By default, `PreferOne` is assumed, which can also be omitted like `OneOrMany<_>`.
 ///
 /// # Examples
 ///
@@ -1603,7 +1603,7 @@ pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomDat
 /// Serialization always picks the first option.
 ///
 /// `PickFirst` has one type parameter which must be instantiated with a tuple of two, three, or four elements.
-/// For example, `PickFirst<(_, DisplayFromStr)>` on a field of type `u32` allows to deserialize from a number or from a string via the `FromStr` trait.
+/// For example, `PickFirst<(_, DisplayFromStr)>` on a field of type `u32` allows deserializing from a number or from a string via the `FromStr` trait.
 /// The value will be serialized as a number, since that is what the first type `_` indicates.
 ///
 /// # Examples
