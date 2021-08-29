@@ -350,9 +350,9 @@ impl Separator for CommaSeparator {
 
 /// Adapter to convert from `serde_as` to the serde traits.
 ///
-/// The `As` type adapter allows to use types implementing [`DeserializeAs`][] or [`SerializeAs`][] in place of serde's with-annotation.
-/// The with-annotation allows to run custom code when de/serializing, however it is quite inflexible.
-/// The traits [`DeserializeAs`][]/[`SerializeAs`][] are more flexible, as they allow composition and nesting of types to create more complex de/serialization behavior.
+/// The `As` type adapter allows using types which implement [`DeserializeAs`] or [`SerializeAs`] in place of serde's with-annotation.
+/// The with-annotation allows running custom code when de/serializing, however it is quite inflexible.
+/// The traits [`DeserializeAs`]/[`SerializeAs`] are more flexible, as they allow composition and nesting of types to create more complex de/serialization behavior.
 /// However, they are not directly compatible with serde, as they are not provided by serde.
 /// The `As` type adapter makes them compatible, by forwarding the function calls to `serialize`/`deserialize` to the corresponding functions `serialize_as` and `deserialize_as`.
 ///
@@ -430,7 +430,7 @@ pub struct Same;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
-/// This allows to deserialize a string as a number.
+/// This allows deserializing a string as a number.
 /// It can be very useful for serialization formats like JSON, which do not support integer
 /// numbers and have to resort to strings to represent them.
 ///
@@ -479,9 +479,9 @@ pub struct Same;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayFromStr;
 
-/// De/Serialize a [`Option`]`<`[`String`]`>` type while transforming the empty string to [`None`]
+/// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
 ///
-/// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<`[`str`]`>` implementations.
+/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`AsRef<str>`] implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
 /// The same functionality is also available as [`serde_with::rust::string_empty_as_none`][crate::rust::string_empty_as_none] compatible with serde's with-annotation.
@@ -988,7 +988,7 @@ pub struct DurationSecondsWithFrac<
 
 /// Equivalent to [`DurationSeconds`] with milli-seconds as base unit.
 ///
-/// This type is equivalent to [`DurationSeconds`] except that the each unit represents 1 milli-second instead of 1 second for [`DurationSeconds`].
+/// This type is equivalent to [`DurationSeconds`] except that each unit represents 1 milli-second instead of 1 second for [`DurationSeconds`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMilliSeconds<
     FORMAT: formats::Format = u64,
@@ -997,7 +997,7 @@ pub struct DurationMilliSeconds<
 
 /// Equivalent to [`DurationSecondsWithFrac`] with milli-seconds as base unit.
 ///
-/// This type is equivalent to [`DurationSecondsWithFrac`] except that the each unit represents 1 milli-second instead of 1 second for [`DurationSecondsWithFrac`].
+/// This type is equivalent to [`DurationSecondsWithFrac`] except that each unit represents 1 milli-second instead of 1 second for [`DurationSecondsWithFrac`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMilliSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1006,7 +1006,7 @@ pub struct DurationMilliSecondsWithFrac<
 
 /// Equivalent to [`DurationSeconds`] with micro-seconds as base unit.
 ///
-/// This type is equivalent to [`DurationSeconds`] except that the each unit represents 1 micro-second instead of 1 second for [`DurationSeconds`].
+/// This type is equivalent to [`DurationSeconds`] except that each unit represents 1 micro-second instead of 1 second for [`DurationSeconds`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMicroSeconds<
     FORMAT: formats::Format = u64,
@@ -1015,7 +1015,7 @@ pub struct DurationMicroSeconds<
 
 /// Equivalent to [`DurationSecondsWithFrac`] with micro-seconds as base unit.
 ///
-/// This type is equivalent to [`DurationSecondsWithFrac`] except that the each unit represents 1 micro-second instead of 1 second for [`DurationSecondsWithFrac`].
+/// This type is equivalent to [`DurationSecondsWithFrac`] except that each unit represents 1 micro-second instead of 1 second for [`DurationSecondsWithFrac`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMicroSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1024,7 +1024,7 @@ pub struct DurationMicroSecondsWithFrac<
 
 /// Equivalent to [`DurationSeconds`] with nano-seconds as base unit.
 ///
-/// This type is equivalent to [`DurationSeconds`] except that the each unit represents 1 nano-second instead of 1 second for [`DurationSeconds`].
+/// This type is equivalent to [`DurationSeconds`] except that each unit represents 1 nano-second instead of 1 second for [`DurationSeconds`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationNanoSeconds<
     FORMAT: formats::Format = u64,
@@ -1033,7 +1033,7 @@ pub struct DurationNanoSeconds<
 
 /// Equivalent to [`DurationSecondsWithFrac`] with nano-seconds as base unit.
 ///
-/// This type is equivalent to [`DurationSecondsWithFrac`] except that the each unit represents 1 nano-second instead of 1 second for [`DurationSecondsWithFrac`].
+/// This type is equivalent to [`DurationSecondsWithFrac`] except that each unit represents 1 nano-second instead of 1 second for [`DurationSecondsWithFrac`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationNanoSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1314,7 +1314,7 @@ pub struct TimestampSecondsWithFrac<
 
 /// Equivalent to [`TimestampSeconds`] with milli-seconds as base unit.
 ///
-/// This type is equivalent to [`TimestampSeconds`] except that the each unit represents 1 milli-second instead of 1 second for [`TimestampSeconds`].
+/// This type is equivalent to [`TimestampSeconds`] except that each unit represents 1 milli-second instead of 1 second for [`TimestampSeconds`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMilliSeconds<
     FORMAT: formats::Format = i64,
@@ -1323,7 +1323,7 @@ pub struct TimestampMilliSeconds<
 
 /// Equivalent to [`TimestampSecondsWithFrac`] with milli-seconds as base unit.
 ///
-/// This type is equivalent to [`TimestampSecondsWithFrac`] except that the each unit represents 1 milli-second instead of 1 second for [`TimestampSecondsWithFrac`].
+/// This type is equivalent to [`TimestampSecondsWithFrac`] except that each unit represents 1 milli-second instead of 1 second for [`TimestampSecondsWithFrac`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMilliSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1332,7 +1332,7 @@ pub struct TimestampMilliSecondsWithFrac<
 
 /// Equivalent to [`TimestampSeconds`] with micro-seconds as base unit.
 ///
-/// This type is equivalent to [`TimestampSeconds`] except that the each unit represents 1 micro-second instead of 1 second for [`TimestampSeconds`].
+/// This type is equivalent to [`TimestampSeconds`] except that each unit represents 1 micro-second instead of 1 second for [`TimestampSeconds`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMicroSeconds<
     FORMAT: formats::Format = i64,
@@ -1341,7 +1341,7 @@ pub struct TimestampMicroSeconds<
 
 /// Equivalent to [`TimestampSecondsWithFrac`] with micro-seconds as base unit.
 ///
-/// This type is equivalent to [`TimestampSecondsWithFrac`] except that the each unit represents 1 micro-second instead of 1 second for [`TimestampSecondsWithFrac`].
+/// This type is equivalent to [`TimestampSecondsWithFrac`] except that each unit represents 1 micro-second instead of 1 second for [`TimestampSecondsWithFrac`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMicroSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1350,7 +1350,7 @@ pub struct TimestampMicroSecondsWithFrac<
 
 /// Equivalent to [`TimestampSeconds`] with nano-seconds as base unit.
 ///
-/// This type is equivalent to [`TimestampSeconds`] except that the each unit represents 1 nano-second instead of 1 second for [`TimestampSeconds`].
+/// This type is equivalent to [`TimestampSeconds`] except that each unit represents 1 nano-second instead of 1 second for [`TimestampSeconds`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampNanoSeconds<
     FORMAT: formats::Format = i64,
@@ -1359,7 +1359,7 @@ pub struct TimestampNanoSeconds<
 
 /// Equivalent to [`TimestampSecondsWithFrac`] with nano-seconds as base unit.
 ///
-/// This type is equivalent to [`TimestampSecondsWithFrac`] except that the each unit represents 1 nano-second instead of 1 second for [`TimestampSecondsWithFrac`].
+/// This type is equivalent to [`TimestampSecondsWithFrac`] except that each unit represents 1 nano-second instead of 1 second for [`TimestampSecondsWithFrac`].
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampNanoSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1371,9 +1371,9 @@ pub struct TimestampNanoSecondsWithFrac<
 /// Serialization of byte sequences like `&[u8]` or `Vec<u8>` is quite inefficient since each value will be serialized individually.
 /// This converter type optimizes the serialization and deserialization.
 ///
-/// This is a port of the `serde_bytes` crate making it compatible with the `serde_as`-annotation, which allows it to be used in more cases than provided by `serde_bytes`.
+/// This is a port of the [`serde_bytes`] crate making it compatible with the `serde_as`-annotation, which allows it to be used in more cases than provided by [`serde_bytes`].
 ///
-/// The type provides de-/serialization for these types:
+/// The type provides de/serialization for these types:
 ///
 /// * `[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
 /// * `&[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
@@ -1383,6 +1383,8 @@ pub struct TimestampNanoSecondsWithFrac<
 /// * `Vec<u8>`
 /// * `Cow<'_, [u8]>`
 /// * `Cow<'_, [u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
+///
+/// [`serde_bytes`]: https://crates.io/crates/serde_bytes
 ///
 /// # Examples
 ///
@@ -1536,13 +1538,13 @@ pub struct Bytes;
 
 /// Deserialize one or many elements
 ///
-/// Sometime it is desireable to have a shortcut in writing 1-element lists in a config file.
+/// Sometimes it is desirable to have a shortcut in writing 1-element lists in a config file.
 /// Usually, this is done by either writing a list or the list element itself.
 /// This distinction is not semantically important on the Rust side, thus both forms should serialize into the same `Vec`.
 ///
 /// The `OneOrMany` adapter achieves exactly this use case.
 /// The serialization behavior can be tweaked to either always serialize as a list using `PreferMany` or to serialize as the inner element if possible using `PreferOne`.
-/// By default `PreferOne` is assumed, which can also be omitted like `OneOrMany<_>`.
+/// By default, `PreferOne` is assumed, which can also be omitted like `OneOrMany<_>`.
 ///
 /// # Examples
 ///
@@ -1600,8 +1602,8 @@ pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomDat
 /// They are tried in order and the first one working is applied.
 /// Serialization always picks the first option.
 ///
-/// `PickFirst` has one type parameter which must be instanciated with a tuple of two, three, or four elements.
-/// For example, `PickFirst<(_, DisplayFromStr)>` on a field of type `u32` allows to deserialize from a number or from a string via the `FromStr` trait.
+/// `PickFirst` has one type parameter which must be instantiated with a tuple of two, three, or four elements.
+/// For example, `PickFirst<(_, DisplayFromStr)>` on a field of type `u32` allows deserializing from a number or from a string via the `FromStr` trait.
 /// The value will be serialized as a number, since that is what the first type `_` indicates.
 ///
 /// # Examples

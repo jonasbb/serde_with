@@ -16,7 +16,7 @@ use std::str::FromStr;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///
-/// This allows to deserialize a string as a number.
+/// This allows deserializing a string as a number.
 /// It can be very useful for serialization formats like JSON, which do not support integer
 /// numbers and have to resort to strings to represent them.
 ///
@@ -959,9 +959,9 @@ pub mod maps_first_key_wins {
     }
 }
 
-/// De/Serialize a [`Option`]`<`[`String`]`>` type while transforming the empty string to [`None`]
+/// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
 ///
-/// Convert an [`Option`]`<T>` from/to string using [`FromStr`] and [`AsRef`]`<`[`str`]`>` implementations.
+/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`AsRef<str>`] implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
 /// ## Converting to `serde_as`
@@ -1217,7 +1217,7 @@ pub mod map_as_tuple_list {
 /// DEPRECATED De/Serialize a [`HashMap`] into a list of tuples
 ///
 /// Use the [`map_as_tuple_list`] module which is more general than this.
-/// It should work with everything convertable to and from an `Iterator` including [`BTreeMap`] and [`HashMap`].
+/// It should work with everything convertible to and from an `Iterator` including [`BTreeMap`] and [`HashMap`].
 ///
 /// ---
 ///
@@ -1321,7 +1321,7 @@ pub mod hashmap_as_tuple_list {
 /// DEPRECATED De/Serialize a [`BTreeMap`] into a list of tuples
 ///
 /// Use the [`map_as_tuple_list`] module which is more general than this.
-/// It should work with everything convertable to and from an `Iterator` including [`BTreeMap`] and [`HashMap`].
+/// It should work with everything convertible to and from an `Iterator` including [`BTreeMap`] and [`HashMap`].
 ///
 /// ---
 ///
@@ -1615,7 +1615,7 @@ pub mod tuple_list_as_map {
 pub mod bytes_or_string {
     use super::*;
 
-    /// Deserialize a [`Vec`]`<u8>` from either bytes or string
+    /// Deserialize a [`Vec<u8>`] from either bytes or string
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
     where
         D: Deserializer<'de>,
@@ -1666,7 +1666,7 @@ pub mod bytes_or_string {
 /// ## Converting to `serde_as`
 ///
 /// The same functionality can be more clearly expressed via [`DefaultOnError`] and using the [`serde_as`] macro.
-/// It can be combined with other convertes as shown.
+/// It can be combined with other converts as shown.
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {

@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     This should have no effect on the generated code and on the runtime behavior.
     It eases integration of third-party crates with `serde_with`, since they can now process the `#[serde_as(...)]` field attributes reliably.
-    Before this was impossible for derive macros and lead to akward ordering constraints on the attribute macros.
+    Before this was impossible for derive macros and lead to awkward ordering constraints on the attribute macros.
 
     Thanks to @Lehona for reporting this problem and to @dtolnay for suggesting the dummy derive macro.
 
@@ -137,6 +137,6 @@ Initial Release
 ### Added
 
 * Add `skip_serializing_none` attribute, which adds `#[serde(skip_serializing_if = "Option::is_none")]` for each Option in a struct.
-    This is helpfull for APIs which have many optional fields.
+    This is helpful for APIs which have many optional fields.
     The effect of can be negated by adding `serialize_always` on those fields, which should always be serialized.
     Existing `skip_serializing_if` will never be modified and those fields keep their behavior.

@@ -125,7 +125,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * Added `PickFirst` adapter for `serde_as`. [#291]
-    It allows to deserialize from multiple different forms.
+    It allows deserializing from multiple different forms.
     Deserializing a number from either a number or string can be implemented like:
 
     ```rust
@@ -148,7 +148,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 * Add a new `serde_with::rust::map_as_tuple_list` module as a replacement for `serde_with::rust::btreemap_as_tuple_list` and `serde_with::rust::hashmap_as_tuple_list`.
-    The new module uses `IntoIterator` and `FromIterator` as trait bound making it usable in more sitations.
+    The new module uses `IntoIterator` and `FromIterator` as trait bound making it usable in more situations.
     The old names continue to exist but are marked as deprecated.
 
 ### Deprecated
@@ -226,14 +226,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 [serde-bytes-complex]: https://github.com/serde-rs/bytes/issues/14
 [serde-bytes-arrays]: https://github.com/serde-rs/bytes/issues/26
 
-* The `OneOrMany` allows to deserialize a `Vec` from either a single element or a sequence. ([#281])
+* The `OneOrMany` type allows deserializing a `Vec` from either a single element or a sequence. ([#281])
 
     ```rust
     #[serde_as(as = "OneOrMany<_>")]
     cities: Vec<String>,
     ```
 
-    This allows to deserialize from either `cities: "Berlin"` or `cities: ["Berlin", "Paris"]`.
+    This allows deserializing from either `cities: "Berlin"` or `cities: ["Berlin", "Paris"]`.
     The serialization can be configured to always emit a list with `PreferMany` or emit a single element with `PreferOne`.
 
 [#281]: https://github.com/jonasbb/serde_with/pull/281
@@ -293,7 +293,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 * Depend on serde with the `derive` feature enabled.
-    The `derive` feature is required to deserliaze untagged enums which are used in the `DefaultOnError` helpers.
+    The `derive` feature is required to deserialize untagged enums which are used in the `DefaultOnError` helpers.
     This fixes compilation of `serde_with` in scenarios where no other crate enables the `derive` feature.
 
 ## [1.5.0] - 2020-10-01
@@ -318,7 +318,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     This is part of `serde_with_macros` v1.2.0.
 * Added some `serialize` functions to modules which previously had none.
-    This makes it easier to use the conversion when also deriving `Serialialize`.
+    This makes it easier to use the conversion when also deriving `Serialize`.
     The functions simply pass through to the underlying `Serialize` implementation.
     This affects `sets_duplicate_value_is_error`, `maps_duplicate_key_is_error`, `maps_first_key_wins`, `default_on_error`, and `default_on_null`.
 * Added `sets_last_value_wins` as a replacement for `sets_first_value_wins` which is deprecated now.
@@ -413,7 +413,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * Add `skip_serializing_none` attribute, which adds `#[serde(skip_serializing_if = "Option::is_none")]` for each Option in a struct.
-    This is helpfull for APIs which have many optional fields.
+    This is helpful for APIs which have many optional fields.
     The effect of can be negated by adding `serialize_always` on those fields, which should always be serialized.
     Existing `skip_serializing_if` will never be modified and those fields keep their behavior.
 
@@ -470,7 +470,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * `unwrap_or_skip` allows to transparently serialize the inner part of a `Some(T)`
-* Add deserialization helpser for sets and maps, inspired by [comment](https://github.com/serde-rs/serde/issues/553#issuecomment-299711855)
+* Add deserialization helper for sets and maps, inspired by [comment](https://github.com/serde-rs/serde/issues/553#issuecomment-299711855)
     * Create an error if duplicate values for a set are detected
     * Create an error if duplicate keys for a map are detected
     * Implement a first-value wins strategy for sets/maps. This is different to serde's default
@@ -490,7 +490,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Add chrono support: Deserialize timestamps from int, float, and string
 * Serialization of embedded JSON strings
 * De/Serialization using `Display` and `FromStr` implementations
-* String-based collections using `Display` and `FromStr`, allows to deserialize "#foo,#bar"
+* String-based collections using `Display` and `FromStr`, allows deserializing "#foo,#bar"
 
 ## [0.1.0] - 2017-08-17
 
