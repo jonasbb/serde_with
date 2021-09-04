@@ -127,7 +127,7 @@ jobs:
         if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
         with:
           # tarpaulin already runs with --all-targets
-          args: "--workspace --all-features -- --test-threads 1"
+          args: "--workspace --all-features -- --test-threads=1"
           version: "latest"
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v2.0.3
