@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [1.10.0]
+## [1.10.0] - 2021-09-04
 
 ### Added
 
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Bump MSRV to 1.46, since the dev-dependency bitflags requires that version now.
 * `flattened_maybe!` no longer requires the `serde_with` crate to be available with a specific name.
-    This allows renaming the crate or using `flattened_maybe!` through a re-export without any complictions.
+    This allows renaming the crate or using `flattened_maybe!` through a re-export without any complications.
 
 ## [1.9.4] - 2021-06-18
 
