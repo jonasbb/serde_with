@@ -4,6 +4,8 @@ This crate provides helper functions to extend and change how [`serde`] serializ
 For example, you can serialize [a map as a sequence of tuples][crate::guide::serde_as#maps-to-vec-of-tuples], serialize [using the `Display` and `FromStr` traits][`DisplayFromStr`], or serialize [an empty `String` like `None`][NoneAsEmptyString].
 `serde_with` covers types from the Rust Standard Library and some common crates like [`chrono`][serde_with_chrono].
 
+[**A list of all supported transformations is available on this page.**](crate::guide::serde_as_transformations)
+
 The crate offers four types of functionality.
 
 ## 1. A more flexible and composable replacement for the with annotation, called `serde_as` *(v1.5.0+)*
