@@ -307,6 +307,7 @@ generate_guide! {
     pub mod guide {
         pub mod feature_flags;
         pub mod serde_as;
+        pub mod serde_as_transformations;
     }
 }
 
