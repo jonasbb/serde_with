@@ -14,6 +14,8 @@ on:
 
 env:
   CARGO_INCREMENTAL: 0
+  # Debug infos are not really needed for CI and this keeps the cache smaller
+  CARGO_PROFILE_DEV_DEBUG: 0
   RUSTFLAGS: -D warnings
 
 jobs:
@@ -90,6 +92,8 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
       - uses: Swatinem/rust-cache@v1
+
+      # Build the project
       - uses: actions-rs/cargo@v1
         name: Build (${{ matrix.os }} / ${{ matrix.rust }})
         if: matrix.rust != 'nightly'
@@ -103,24 +107,43 @@ jobs:
           command: build
           # https://github.com/rust-lang/cargo/issues/8088 for unstable-options
           args: --workspace --all-features --all-targets -Zunstable-options -Zfeatures=dev_dep,host_dep
+
+      # The tests are split into build and run steps, to see the time impact of each
+      # cargo test --all-targets does NOT run doctests
+      # since doctests are important this should not be added
+      # https://github.com/rust-lang/cargo/issues/6669
       - uses: actions-rs/cargo@v1
-        name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }}) Build
         with:
           command: test
-          # cargo test --all-targets does NOT run doctests
-          # since doctests are important this should not be added
-          # https://github.com/rust-lang/cargo/issues/6669
-          args: --workspace --no-default-features
+          args: --workspace --no-default-features --no-run
       - uses: actions-rs/cargo@v1
-        name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }})
+        name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }}) Run
         with:
           command: test
-          args: --workspace
+          args: --workspace --no-default-features --no-fail-fast
+
       - uses: actions-rs/cargo@v1
-        name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }}) Build
         with:
           command: test
-          args: --workspace --all-features
+          args: --workspace --no-run
+      - uses: actions-rs/cargo@v1
+        name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }}) Run
+        with:
+          command: test
+          args: --workspace --no-fail-fast
+
+      - uses: actions-rs/cargo@v1
+        name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }}) Build
+        with:
+          command: test
+          args: --workspace --all-features --no-run
+      - uses: actions-rs/cargo@v1
+        name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }}) Run
+        with:
+          command: test
+          args: --workspace --all-features --no-fail-fast
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
