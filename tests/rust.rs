@@ -6,6 +6,7 @@ use fnv::{FnvHashMap as HashMap, FnvHashSet as HashSet};
 use pretty_assertions::assert_eq;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use serde_test::{assert_tokens, Token};
 use serde_with::CommaSeparator;
 use std::cmp;
 use std::collections::{BTreeMap, BTreeSet, LinkedList, VecDeque};
@@ -602,10 +603,20 @@ fn tuple_list_as_map_vecdeque() {
 fn test_string_empty_as_none() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     struct S(#[serde(with = "serde_with::rust::string_empty_as_none", default)] Option<String>);
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct Q(
+        #[serde(
+            deserialize_with = "serde_with::rust::string_empty_as_none::deserialize",
+            default
+        )]
+        Option<String>,
+    );
 
     is_equal(S(Some("str".to_string())), expect![[r#""str""#]]);
     check_deserialization(S(None), r#""""#);
     check_deserialization(S(None), r#"null"#);
+
+    assert_tokens(&Q(None), &[Token::NewtypeStruct { name: "Q" }, Token::None]);
 }
 
 #[test]
