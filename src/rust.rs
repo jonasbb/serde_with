@@ -1056,20 +1056,6 @@ pub mod string_empty_as_none {
                 }
             }
 
-            fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
-            where
-                D: Deserializer<'de>,
-            {
-                deserializer.deserialize_any(OptionStringEmptyNone(PhantomData))
-            }
-
-            fn visit_none<E>(self) -> Result<Self::Value, E>
-            where
-                E: Error,
-            {
-                Ok(None)
-            }
-
             // handles the `null` case
             fn visit_unit<E>(self) -> Result<Self::Value, E>
             where
