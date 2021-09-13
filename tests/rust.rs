@@ -277,9 +277,9 @@ fn duplicate_value_first_wins_hashset() {
     .unwrap();
     let entries: Vec<_> = value.0.into_iter().collect();
     assert_eq!(1, entries[0].0);
-    assert_eq!(false, entries[0].1);
+    assert!(!entries[0].1);
     assert_eq!(2, entries[1].0);
-    assert_eq!(true, entries[1].1);
+    assert!(entries[1].1);
 }
 
 #[test]
@@ -338,9 +338,9 @@ fn duplicate_value_last_wins_hashset() {
     .unwrap();
     let entries: Vec<_> = value.0.into_iter().collect();
     assert_eq!(1, entries[0].0);
-    assert_eq!(true, entries[0].1);
+    assert!(entries[0].1);
     assert_eq!(2, entries[1].0);
-    assert_eq!(false, entries[1].1);
+    assert!(!entries[1].1);
 }
 
 #[test]
@@ -400,9 +400,9 @@ fn duplicate_value_last_wins_btreeset() {
     .unwrap();
     let entries: Vec<_> = value.0.into_iter().collect();
     assert_eq!(1, entries[0].0);
-    assert_eq!(true, entries[0].1);
+    assert!(entries[0].1);
     assert_eq!(2, entries[1].0);
-    assert_eq!(false, entries[1].1);
+    assert!(!entries[1].1);
 }
 
 #[test]
