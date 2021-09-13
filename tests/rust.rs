@@ -599,6 +599,16 @@ fn tuple_list_as_map_vecdeque() {
 }
 
 #[test]
+fn test_string_empty_as_none() {
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S(#[serde(with = "serde_with::rust::string_empty_as_none")] Option<String>);
+
+    is_equal(S(Some("str".to_string())), expect![[r#""str""#]]);
+    check_deserialization(S(None), r#""""#);
+    check_deserialization(S(None), r#"null"#);
+}
+
+#[test]
 fn test_default_on_error() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     struct S<T>(#[serde(with = "serde_with::rust::default_on_error")] T)
