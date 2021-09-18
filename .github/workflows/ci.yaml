@@ -153,7 +153,7 @@ jobs:
           args: "--workspace --all-features -- --test-threads=1"
           version: "latest"
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v2.0.3
+        uses: codecov/codecov-action@v2.1.0
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
 
   # Added to summarize the matrix (otherwise we would need to list every single
