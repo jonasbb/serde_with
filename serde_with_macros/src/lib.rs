@@ -297,7 +297,20 @@ pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStr
 
 /// Add the skip_serializing_if annotation to each field of the struct
 fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), String> {
-    if let Type::Path(path) = &field.ty {
+    // Extract inner path from references
+    let path = if let Type::Path(p) = &field.ty {
+        Some(p)
+    } else if let Type::Reference(r) = &field.ty {
+        if let Type::Path(p) = &*r.elem {
+            Some(p)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    if let Some(path) = path {
         if is_std_option(&path.path) {
             let has_skip_serializing_if =
                 field_has_attribute(field, "serde", "skip_serializing_if");
