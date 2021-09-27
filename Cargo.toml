@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "serde_content",
     "serde_with",
     "serde_with_macros",
     "serde_with_test",
