@@ -1,7 +1,6 @@
 #![deny(
     missing_copy_implementations,
-    // missing_crate_level_docs, not available in MSRV
-    // missing_debug_implementations,
+    // missing_crate_level_docs, // not available in MSRV
     // missing_docs,
     trivial_casts,
     trivial_numeric_casts,
@@ -14,7 +13,6 @@
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_copy_implementations,
-    missing_debug_implementations,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,

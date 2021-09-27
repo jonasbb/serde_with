@@ -12,8 +12,6 @@ use std::marker::PhantomData;
 
 /// Used from generated code to buffer the contents of the Deserializer when
 /// deserializing untagged enums and internally tagged enums.
-///
-/// Not public API. Use serde-value instead.
 #[derive(Debug)]
 pub enum Content<'de> {
     Bool(bool),
@@ -294,7 +292,6 @@ impl<'de> de::Visitor<'de> for ContentVisitor<'de> {
     }
 }
 
-/// Not public API
 pub struct ContentDeserializer<'de, E> {
     content: Content<'de>,
     err: PhantomData<E>,
@@ -1009,7 +1006,6 @@ where
     }
 }
 
-/// Not public API.
 pub struct ContentRefDeserializer<'a, 'de, E> {
     content: &'a Content<'de>,
     err: PhantomData<E>,

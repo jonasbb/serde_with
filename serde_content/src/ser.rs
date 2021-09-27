@@ -3,6 +3,7 @@
 use serde::ser::{self, Serialize, Serializer};
 use std::marker::PhantomData;
 
+#[derive(Debug)]
 pub enum Content {
     Bool(bool),
 
