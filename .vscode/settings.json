@@ -45,7 +45,6 @@
         "rust",
         "toml"
     ],
-    "cSpell.enabled": true,
     "cSpell.ignoreWords": [
         "composability"
     ],

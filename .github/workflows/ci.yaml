@@ -116,12 +116,15 @@ jobs:
         name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }}) Build
         with:
           command: test
-          args: --workspace --no-default-features --no-run
+          # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
+          # This is no longer necessary for Rust 1.51 or resolver="2"
+          # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
+          args: --workspace --no-default-features --no-run --manifest-path=serde_with/Cargo.toml
       - uses: actions-rs/cargo@v1
         name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }}) Run
         with:
           command: test
-          args: --workspace --no-default-features --no-fail-fast
+          args: --workspace --no-default-features --no-fail-fast --manifest-path=serde_with/Cargo.toml
 
       - uses: actions-rs/cargo@v1
         name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }}) Build

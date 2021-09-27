@@ -26,7 +26,7 @@ jobs:
         uses: mindsers/changelog-reader-action@v2
         with:
           version: ${{ steps.tag_name.outputs.current_version }}
-          path: ./CHANGELOG.md
+          path: ./serde_with/CHANGELOG.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -43,7 +43,7 @@ jobs:
       - run: cargo login ${CRATES_IO_TOKEN}
         env:
           CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-      - run: cargo publish
+      - run: cd serde_with && cargo publish
 
   publish_serde_with_macros:
     runs-on: ubuntu-latest
