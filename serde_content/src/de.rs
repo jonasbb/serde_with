@@ -95,6 +95,34 @@ impl<'de> Deserialize<'de> for Content<'de> {
     }
 }
 
+impl<'de, E> de::IntoDeserializer<'de, E> for Content<'de>
+where
+    E: de::Error,
+{
+    type Deserializer = ContentDeserializer<'de, E>;
+
+    fn into_deserializer(self) -> Self::Deserializer {
+        ContentDeserializer {
+            content: self,
+            err: PhantomData,
+        }
+    }
+}
+
+impl<'a, 'de, E> de::IntoDeserializer<'de, E> for &'a Content<'de>
+where
+    E: de::Error,
+{
+    type Deserializer = ContentRefDeserializer<'a, 'de, E>;
+
+    fn into_deserializer(self) -> Self::Deserializer {
+        ContentRefDeserializer {
+            content: self,
+            err: PhantomData,
+        }
+    }
+}
+
 struct ContentVisitor<'de> {
     value: PhantomData<Content<'de>>,
 }
