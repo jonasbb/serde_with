@@ -78,49 +78,49 @@ impl Serialize for Content {
             Content::Seq(ref elements) => elements.serialize(serializer),
             Content::Tuple(ref elements) => {
                 use serde::ser::SerializeTuple;
-                let mut tuple = r#try!(serializer.serialize_tuple(elements.len()));
+                let mut tuple = serializer.serialize_tuple(elements.len())?;
                 for e in elements {
-                    r#try!(tuple.serialize_element(e));
+                    tuple.serialize_element(e)?;
                 }
                 tuple.end()
             }
             Content::TupleStruct(n, ref fields) => {
                 use serde::ser::SerializeTupleStruct;
-                let mut ts = r#try!(serializer.serialize_tuple_struct(n, fields.len()));
+                let mut ts = serializer.serialize_tuple_struct(n, fields.len())?;
                 for f in fields {
-                    r#try!(ts.serialize_field(f));
+                    ts.serialize_field(f)?;
                 }
                 ts.end()
             }
             Content::TupleVariant(n, i, v, ref fields) => {
                 use serde::ser::SerializeTupleVariant;
-                let mut tv = r#try!(serializer.serialize_tuple_variant(n, i, v, fields.len()));
+                let mut tv = serializer.serialize_tuple_variant(n, i, v, fields.len())?;
                 for f in fields {
-                    r#try!(tv.serialize_field(f));
+                    tv.serialize_field(f)?;
                 }
                 tv.end()
             }
             Content::Map(ref entries) => {
                 use serde::ser::SerializeMap;
-                let mut map = r#try!(serializer.serialize_map(Some(entries.len())));
+                let mut map = serializer.serialize_map(Some(entries.len()))?;
                 for &(ref k, ref v) in entries {
-                    r#try!(map.serialize_entry(k, v));
+                    map.serialize_entry(k, v)?;
                 }
                 map.end()
             }
             Content::Struct(n, ref fields) => {
                 use serde::ser::SerializeStruct;
-                let mut s = r#try!(serializer.serialize_struct(n, fields.len()));
+                let mut s = serializer.serialize_struct(n, fields.len())?;
                 for &(k, ref v) in fields {
-                    r#try!(s.serialize_field(k, v));
+                    s.serialize_field(k, v)?;
                 }
                 s.end()
             }
             Content::StructVariant(n, i, v, ref fields) => {
                 use serde::ser::SerializeStructVariant;
-                let mut sv = r#try!(serializer.serialize_struct_variant(n, i, v, fields.len()));
+                let mut sv = serializer.serialize_struct_variant(n, i, v, fields.len())?;
                 for &(k, ref v) in fields {
-                    r#try!(sv.serialize_field(k, v));
+                    sv.serialize_field(k, v)?;
                 }
                 sv.end()
             }
@@ -223,7 +223,7 @@ where
     where
         T: Serialize,
     {
-        Ok(Content::Some(Box::new(r#try!(value.serialize(self)))))
+        Ok(Content::Some(Box::new(value.serialize(self)?)))
     }
 
     fn serialize_unit(self) -> Result<Content, E> {
@@ -253,7 +253,7 @@ where
     {
         Ok(Content::NewtypeStruct(
             name,
-            Box::new(r#try!(value.serialize(self))),
+            Box::new(value.serialize(self)?),
         ))
     }
 
@@ -271,7 +271,7 @@ where
             name,
             variant_index,
             variant,
-            Box::new(r#try!(value.serialize(self))),
+            Box::new(value.serialize(self)?),
         ))
     }
 
@@ -366,7 +366,7 @@ where
     where
         T: Serialize,
     {
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.elements.push(value);
         Ok(())
     }
@@ -392,7 +392,7 @@ where
     where
         T: Serialize,
     {
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.elements.push(value);
         Ok(())
     }
@@ -419,7 +419,7 @@ where
     where
         T: Serialize,
     {
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.fields.push(value);
         Ok(())
     }
@@ -448,7 +448,7 @@ where
     where
         T: Serialize,
     {
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.fields.push(value);
         Ok(())
     }
@@ -480,7 +480,7 @@ where
     where
         T: Serialize,
     {
-        let key = r#try!(key.serialize(ContentSerializer::<E>::new()));
+        let key = key.serialize(ContentSerializer::<E>::new())?;
         self.key = Some(key);
         Ok(())
     }
@@ -493,7 +493,7 @@ where
             .key
             .take()
             .expect("serialize_value called before serialize_key");
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.entries.push((key, value));
         Ok(())
     }
@@ -507,8 +507,8 @@ where
         K: Serialize,
         V: Serialize,
     {
-        let key = r#try!(key.serialize(ContentSerializer::<E>::new()));
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let key = key.serialize(ContentSerializer::<E>::new())?;
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.entries.push((key, value));
         Ok(())
     }
@@ -531,7 +531,7 @@ where
     where
         T: Serialize,
     {
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.fields.push((key, value));
         Ok(())
     }
@@ -560,7 +560,7 @@ where
     where
         T: Serialize,
     {
-        let value = r#try!(value.serialize(ContentSerializer::<E>::new()));
+        let value = value.serialize(ContentSerializer::<E>::new())?;
         self.fields.push((key, value));
         Ok(())
     }

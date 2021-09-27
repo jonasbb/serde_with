@@ -267,7 +267,7 @@ impl<'de> de::Visitor<'de> for ContentVisitor<'de> {
         V: SeqAccess<'de>,
     {
         let mut vec = Vec::with_capacity(size_hint::cautious(visitor.size_hint()));
-        while let Some(e) = try!(visitor.next_element()) {
+        while let Some(e) = visitor.next_element()? {
             vec.push(e);
         }
         Ok(Content::Seq(vec))
@@ -278,7 +278,7 @@ impl<'de> de::Visitor<'de> for ContentVisitor<'de> {
         V: MapAccess<'de>,
     {
         let mut vec = Vec::with_capacity(size_hint::cautious(visitor.size_hint()));
-        while let Some(kv) = try!(visitor.next_entry()) {
+        while let Some(kv) = visitor.next_entry()? {
             vec.push(kv);
         }
         Ok(Content::Map(vec))
@@ -353,8 +353,8 @@ where
 {
     let seq = content.into_iter().map(ContentDeserializer::new);
     let mut seq_visitor = de::value::SeqDeserializer::new(seq);
-    let value = try!(visitor.visit_seq(&mut seq_visitor));
-    try!(seq_visitor.end());
+    let value = visitor.visit_seq(&mut seq_visitor)?;
+    seq_visitor.end()?;
     Ok(value)
 }
 
@@ -370,8 +370,8 @@ where
         .into_iter()
         .map(|(k, v)| (ContentDeserializer::new(k), ContentDeserializer::new(v)));
     let mut map_visitor = de::value::MapDeserializer::new(map);
-    let value = try!(visitor.visit_map(&mut map_visitor));
-    try!(map_visitor.end());
+    let value = visitor.visit_map(&mut map_visitor)?;
+    map_visitor.end()?;
     Ok(value)
 }
 
@@ -894,7 +894,7 @@ where
         if len == 0 {
             visitor.visit_unit()
         } else {
-            let ret = try!(visitor.visit_seq(&mut self));
+            let ret = visitor.visit_seq(&mut self)?;
             let remaining = self.iter.len();
             if remaining == 0 {
                 Ok(ret)
@@ -1071,8 +1071,8 @@ where
 {
     let seq = content.iter().map(ContentRefDeserializer::new);
     let mut seq_visitor = de::value::SeqDeserializer::new(seq);
-    let value = try!(visitor.visit_seq(&mut seq_visitor));
-    try!(seq_visitor.end());
+    let value = visitor.visit_seq(&mut seq_visitor)?;
+    seq_visitor.end()?;
     Ok(value)
 }
 
@@ -1091,8 +1091,8 @@ where
         )
     });
     let mut map_visitor = de::value::MapDeserializer::new(map);
-    let value = try!(visitor.visit_map(&mut map_visitor));
-    try!(map_visitor.end());
+    let value = visitor.visit_map(&mut map_visitor)?;
+    map_visitor.end()?;
     Ok(value)
 }
 
@@ -1587,7 +1587,7 @@ where
         if len == 0 {
             visitor.visit_unit()
         } else {
-            let ret = try!(visitor.visit_seq(&mut self));
+            let ret = visitor.visit_seq(&mut self)?;
             let remaining = self.iter.len();
             if remaining == 0 {
                 Ok(ret)
