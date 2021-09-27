@@ -10,7 +10,7 @@ edition = "2018"
 keywords = ["serde", "utilities", "serialization", "deserialization"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/jonasbb/serde_with/tree/master/serde_with_macros"
+repository = "https://github.com/jonasbb/serde_with/"
 
 include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
 
