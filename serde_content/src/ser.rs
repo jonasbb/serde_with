@@ -3,86 +3,6 @@
 use serde::ser::{self, Serialize, Serializer};
 use std::marker::PhantomData;
 
-pub struct SerializeTupleVariantAsMapValue<M> {
-    map: M,
-    name: &'static str,
-    fields: Vec<Content>,
-}
-
-impl<M> SerializeTupleVariantAsMapValue<M> {
-    pub fn new(map: M, name: &'static str, len: usize) -> Self {
-        SerializeTupleVariantAsMapValue {
-            map,
-            name,
-            fields: Vec::with_capacity(len),
-        }
-    }
-}
-
-impl<M> ser::SerializeTupleVariant for SerializeTupleVariantAsMapValue<M>
-where
-    M: ser::SerializeMap,
-{
-    type Ok = M::Ok;
-    type Error = M::Error;
-
-    fn serialize_field<T: ?Sized>(&mut self, value: &T) -> Result<(), M::Error>
-    where
-        T: Serialize,
-    {
-        let value = r#try!(value.serialize(ContentSerializer::<M::Error>::new()));
-        self.fields.push(value);
-        Ok(())
-    }
-
-    fn end(mut self) -> Result<M::Ok, M::Error> {
-        r#try!(self
-            .map
-            .serialize_value(&Content::TupleStruct(self.name, self.fields)));
-        self.map.end()
-    }
-}
-
-pub struct SerializeStructVariantAsMapValue<M> {
-    map: M,
-    name: &'static str,
-    fields: Vec<(&'static str, Content)>,
-}
-
-impl<M> SerializeStructVariantAsMapValue<M> {
-    pub fn new(map: M, name: &'static str, len: usize) -> Self {
-        SerializeStructVariantAsMapValue {
-            map,
-            name,
-            fields: Vec::with_capacity(len),
-        }
-    }
-}
-
-impl<M> ser::SerializeStructVariant for SerializeStructVariantAsMapValue<M>
-where
-    M: ser::SerializeMap,
-{
-    type Ok = M::Ok;
-    type Error = M::Error;
-
-    fn serialize_field<T: ?Sized>(&mut self, key: &'static str, value: &T) -> Result<(), M::Error>
-    where
-        T: Serialize,
-    {
-        let value = r#try!(value.serialize(ContentSerializer::<M::Error>::new()));
-        self.fields.push((key, value));
-        Ok(())
-    }
-
-    fn end(mut self) -> Result<M::Ok, M::Error> {
-        r#try!(self
-            .map
-            .serialize_value(&Content::Struct(self.name, self.fields)));
-        self.map.end()
-    }
-}
-
 pub enum Content {
     Bool(bool),
 
@@ -215,6 +135,12 @@ pub struct ContentSerializer<E> {
 impl<E> ContentSerializer<E> {
     pub fn new() -> Self {
         ContentSerializer { error: PhantomData }
+    }
+}
+
+impl<E> Default for ContentSerializer<E> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
