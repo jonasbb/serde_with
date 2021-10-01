@@ -71,6 +71,11 @@ create_format!(
     PreferOne
     /// Use in combination with [`OneOrMany`](crate::OneOrMany). Always emit the list form.
     PreferMany
+
+    /// TODO
+    Padded
+    /// TODO
+    Unpadded
 );
 
 /// Specify how lenient the deserialization process should be
