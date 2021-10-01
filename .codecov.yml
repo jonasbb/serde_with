@@ -21,7 +21,7 @@ coverage:
       # declare a new status context "serde_with"
       serde_with:
         paths:
-          - "src/"
+          - "serde_with/src/"
         # Use the coverage from the base commit as baseline
         target: auto
         # Allow the coverage to change by up to 5%
@@ -31,7 +31,7 @@ coverage:
       serde_with_tests:
         # Only include coverage of the "tests/" folder
         paths:
-          - "tests/"
+          - "serde_with/tests/"
         # We cannot require 100%, as tarpaulin has some issues in counting lines
         # Require at least 90% to pass this check
         # FIXME: target is currently broken: https://community.codecov.io/t/github-check-not-properly-handling-subsets-of-files/1853

@@ -83,6 +83,7 @@ jobs:
         # It is good to test more than the MSRV and stable since sometimes
         # breakage occurs in intermediate versions.
         rust: ["1.46", "1.50", "stable", "beta", "nightly"]
+        crate: ["serde_with", "serde_with_macros", "serde_with_test"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2.3.4
@@ -95,55 +96,62 @@ jobs:
 
       # Build the project
       - uses: actions-rs/cargo@v1
-        name: Build (${{ matrix.os }} / ${{ matrix.rust }})
+        name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         if: matrix.rust != 'nightly'
         with:
           command: build
-          args: --workspace --all-features --all-targets
+          args: --all-features --all-targets --manifest-path=${{ matrix.crate }}/Cargo.toml
       - uses: actions-rs/cargo@v1
-        name: Build (${{ matrix.os }} / ${{ matrix.rust }})
+        name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         if: matrix.rust == 'nightly'
         with:
           command: build
           # https://github.com/rust-lang/cargo/issues/8088 for unstable-options
-          args: --workspace --all-features --all-targets -Zunstable-options -Zfeatures=dev_dep,host_dep
+          args: --all-features --all-targets --manifest-path=${{ matrix.crate }}/Cargo.toml -Zunstable-options -Zfeatures=dev_dep,host_dep
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests
       # since doctests are important this should not be added
       # https://github.com/rust-lang/cargo/issues/6669
       - uses: actions-rs/cargo@v1
-        name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }}) Build
+        name: "Test Build (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         with:
           command: test
-          args: --workspace --no-default-features --no-run
+          # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
+          # This is no longer necessary for Rust 1.51 or resolver="2"
+          # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
+          args: --no-default-features --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
       - uses: actions-rs/cargo@v1
-        name: Test "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }}) Run
+        name: "Test Run (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         with:
           command: test
-          args: --workspace --no-default-features --no-fail-fast
-
+          args: --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
       - uses: actions-rs/cargo@v1
-        name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }}) Build
+        name: "Test Build (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         with:
           command: test
-          args: --workspace --no-run
+          # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
+          # This is no longer necessary for Rust 1.51 or resolver="2"
+          # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
+          args: --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
       - uses: actions-rs/cargo@v1
-        name: Test "Default" (${{ matrix.os }} / ${{ matrix.rust }}) Run
+        name: "Test Run (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         with:
           command: test
-          args: --workspace --no-fail-fast
-
+          args: --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
       - uses: actions-rs/cargo@v1
-        name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }}) Build
+        name: "Test Build (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         with:
           command: test
-          args: --workspace --all-features --no-run
+          # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
+          # This is no longer necessary for Rust 1.51 or resolver="2"
+          # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
+          args: --all-features  --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
       - uses: actions-rs/cargo@v1
-        name: Test "All Features" (${{ matrix.os }} / ${{ matrix.rust }}) Run
+        name: "Test Run (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
         with:
           command: test
-          args: --workspace --all-features --no-fail-fast
+          args: --all-features --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
