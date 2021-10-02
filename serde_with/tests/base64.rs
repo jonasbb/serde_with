@@ -1,3 +1,6 @@
+// This allows the tests to be written more uniform and not have to special case the last clone().
+#![allow(clippy::redundant_clone)]
+
 mod utils;
 
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
