@@ -164,7 +164,7 @@ This allows it to seamlessly work with types from dependencies without running i
 
 ```rust
 # #[cfg(FALSE)] {
-struct Localtype;
+struct LocalType;
 
 impl SerializeAs<RemoteType> for LocalType {
     fn serialize_as<S>(value: &RemoteType, serializer: S) -> Result<S::Ok, S::Error>
