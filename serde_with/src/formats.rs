@@ -72,9 +72,9 @@ create_format!(
     /// Use in combination with [`OneOrMany`](crate::OneOrMany). Always emit the list form.
     PreferMany
 
-    /// TODO
+    /// Emit padding during serialization.
     Padded
-    /// TODO
+    /// Do not emit padding during serialization.
     Unpadded
 );
 

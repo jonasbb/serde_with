@@ -1,4 +1,8 @@
-//!TODO
+//! De/Serialization of base64 encoded bytes
+//!
+//! This modules is only available when using the `base64` feature of the crate.
+//!
+//! Please check the documentation on the [`Base64`] type for details.
 
 use crate::{formats, DeserializeAs, SerializeAs};
 use serde::de::Error;
@@ -7,7 +11,59 @@ use std::convert::{TryFrom, TryInto};
 use std::default::Default;
 use std::marker::PhantomData;
 
-/// todo
+/// Serialize bytes with base64
+///
+/// The type serializes a sequence of bytes as a base64 string.
+/// It works on any type implementing `AsRef<[u8]>` for serialization and `TryFrom<Vec<u8>>` for deserialization.
+///
+/// The type allows customizing the character set and the padding behavior.
+/// The `CHARSET` is a type implementing [`CharacterSet`].
+/// `PADDING` specifies if serializing should emit padding.
+/// Deserialization always supports padded and unpadded formats.
+/// [`formats::Padded`] emits padding and [`formats::Unpadded`] leaves it off.
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde_with::serde_as;
+/// use serde_with::base64::{Base64, Bcrypt, BinHex, Standard};
+/// use serde_with::formats::{Padded, Unpadded};
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct B64 {
+///     // The default is the same as Standard character set with padding
+///     #[serde_as(as = "Base64")]
+///     default: Vec<u8>,
+///     // Only change the character set, implies padding
+///     #[serde_as(as = "Base64<BinHex>")]
+///     charset_binhex: Vec<u8>,
+///
+///     #[serde_as(as = "Base64<Standard, Padded>")]
+///     explicit_padding: Vec<u8>,
+///     #[serde_as(as = "Base64<Bcrypt, Unpadded>")]
+///     no_padding: Vec<u8>,
+/// }
+///
+/// let b64 = B64 {
+///     default: b"Hello World".to_vec(),
+///     charset_binhex: b"Hello World".to_vec(),
+///     explicit_padding: b"Hello World".to_vec(),
+///     no_padding: b"Hello World".to_vec(),
+/// };
+/// let json = serde_json::json!({
+///     "default": "SGVsbG8gV29ybGQ=",
+///     "charset_binhex": "5'8VD'mI8epaD'3=",
+///     "explicit_padding": "SGVsbG8gV29ybGQ=",
+///     "no_padding": "QETqZE6eT07wZEO",
+/// });
+///
+/// // Test serialization and deserialization
+/// assert_eq!(json, serde_json::to_value(&b64).unwrap());
+/// assert_eq!(b64, serde_json::from_value(json).unwrap());
+/// # }
+/// ```
 
 // The padding might be better as `const PADDING: bool = true`
 // https://blog.rust-lang.org/inside-rust/2021/09/06/Splitting-const-generics.html#featureconst_generics_default/
@@ -76,7 +132,9 @@ where
 
 /// A base64 character set from [this list](base64_crate::CharacterSet).
 pub trait CharacterSet {
-    /// todo
+    /// Return a specific character set.
+    ///
+    /// Return one enum variant of the [`base64::CharacterSet`](base64_crate::CharacterSet) enum.
     fn charset() -> base64_crate::CharacterSet;
 }
 
