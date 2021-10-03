@@ -2,24 +2,44 @@
 
 This page lists the transformations implemented in this crate and supported by `serde_as`.
 
-1. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
-2. [Borrow from the input for `Cow` type](#borrow-from-the-input-for-cow-type)
-3. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
-4. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
-5. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
-6. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
-7. [`Default` from `null`](#default-from-null)
-8. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-9. [`Duration` as seconds](#duration-as-seconds)
-10. [Ignore deserialization errors](#ignore-deserialization-errors)
-11. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-12. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-13. [`None` as empty `String`](#none-as-empty-string)
-14. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
-15. [Pick first successful deserialization](#pick-first-successful-deserialization)
-16. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-17. [Value into JSON String](#value-into-json-string)
-18. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+1. [Base64 encode bytes](#base64-encode-bytes)
+2. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
+3. [Borrow from the input for `Cow` type](#borrow-from-the-input-for-cow-type)
+4. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
+5. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
+6. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
+7. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
+8. [`Default` from `null`](#default-from-null)
+9. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+10. [`Duration` as seconds](#duration-as-seconds)
+11. [Ignore deserialization errors](#ignore-deserialization-errors)
+12. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+13. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+14. [`None` as empty `String`](#none-as-empty-string)
+15. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
+16. [Pick first successful deserialization](#pick-first-successful-deserialization)
+17. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+18. [Value into JSON String](#value-into-json-string)
+19. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+
+## Base64 encode bytes
+
+[`Base64`]
+
+Requires the `base64` feature.
+The character set and padding behavior can be configured.
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::base64::Base64")]
+value: Vec<u8>,
+#[serde_as(as = "Base64<Bcrypt, Unpadded>")]
+bcrypt_unpadded: Vec<u8>,
+
+// JSON
+"value": "SGVsbG8gV29ybGQ=",
+"bcrypt_unpadded": "QETqZE6eT07wZEO",
+```
 
 ## Big Array support (Rust 1.51+)
 
@@ -339,6 +359,7 @@ This includes `BinaryHeap<(K, V)>`, `BTreeSet<(K, V)>`, `HashSet<(K, V)>`, `Link
 
 The [inverse operation](#maps-to-vec-of-tuples) is also available.
 
+[`Base64`]: crate::base64::Base64
 [`Bytes`]: crate::Bytes
 [`chrono::DateTime<Local>`]: chrono_crate::DateTime
 [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
