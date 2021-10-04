@@ -69,7 +69,7 @@ jobs:
         # breakage occurs in intermediate versions.
         # IMPORTANT: Synchronize the MSRV with the Cargo.toml values.
         rust: ["1.46", "1.50", "1.55", "stable", "beta", "nightly"]
-        crate: ["serde_with", "serde_with_macros", "serde_with_test"]
+        crate: ["serde_content", "serde_with", "serde_with_macros", "serde_with_test"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
