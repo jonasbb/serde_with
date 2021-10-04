@@ -3,11 +3,18 @@
 This crate has the following features which can be enabled.
 Each entry will explain the feature in more detail.
 
-1. [`chrono`](#chrono)
-2. [`guide`](#guide)
-3. [`hex`](#hex)
-4. [`json`](#json)
-5. [`macros`](#macros)
+1. [`base64`](#base64)
+2. [`chrono`](#chrono)
+3. [`guide`](#guide)
+4. [`hex`](#hex)
+5. [`json`](#json)
+6. [`macros`](#macros)
+
+## `base64`
+
+The `base64` feature enables serializing data in base64 format.
+
+This pulls in `base64` as a dependency.
 
 ## `chrono`
 

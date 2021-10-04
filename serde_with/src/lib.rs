@@ -251,6 +251,9 @@
 #[doc(hidden)]
 pub extern crate serde;
 
+#[cfg(feature = "base64")]
+#[cfg_attr(docsrs, doc(cfg(feature = "base64")))]
+pub mod base64;
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 pub mod chrono;

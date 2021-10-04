@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Serialize bytes as base64 encoded strings.  
+    The character set and padding behavior can be configured.
+
+    ```rust
+    // Rust
+    #[serde_as(as = "serde_with::base64::Base64")]
+    value: Vec<u8>,
+    #[serde_as(as = "Base64<Bcrypt, Unpadded>")]
+    bcrypt_unpadded: Vec<u8>,
+
+    // JSON
+    "value": "SGVsbG8gV29ybGQ=",
+    "bcrypt_unpadded": "QETqZE6eT07wZEO",
+    ```
+
 ## [1.10.0] - 2021-09-04
 
 ### Added

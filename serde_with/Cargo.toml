@@ -23,6 +23,7 @@ maintenance = {status = "actively-developed"}
 
 # When adding new features update the documentation in feature-flags.md
 [features]
+base64 = ["base64_crate"]
 chrono = ["chrono_crate"]
 default = ["macros"]
 guide = ["doc-comment", "macros"]
@@ -31,6 +32,7 @@ macros = ["serde_with_macros"]
 
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
+base64_crate = {package = "base64", version = "0.13.0", optional = true}
 chrono_crate = {package = "chrono", version = "0.4.1", features = ["serde"], optional = true}
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.2", optional = true}
@@ -52,6 +54,11 @@ serde_derive = "1.0.122"
 serde_json = {version = "1.0.25", features = ["preserve_order"]}
 serde_test = "1.0.124"
 version-sync = "0.9.1"
+
+[[test]]
+name = "base64"
+path = "tests/base64.rs"
+required-features = ["base64", "macros"]
 
 [[test]]
 name = "chrono"
