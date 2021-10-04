@@ -262,6 +262,7 @@ pub mod chrono;
 mod content;
 pub mod de;
 mod duplicate_key_impls;
+pub mod enum_map;
 mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
