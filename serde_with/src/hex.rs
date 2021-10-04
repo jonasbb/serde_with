@@ -1,6 +1,8 @@
 //! De/Serialization of hexadecimal encoded bytes
 //!
 //! This modules is only available when using the `hex` feature of the crate.
+//!
+//! Please check the documentation on the [`Hex`] type for details.
 
 use crate::de::DeserializeAs;
 use crate::formats::{Format, Lowercase, Uppercase};
@@ -14,7 +16,7 @@ use std::marker::PhantomData;
 /// Serialize bytes as a hex string
 ///
 /// The type serializes a sequence of bytes as a hexadecimal string.
-/// It works on any type implementing `AsRef<[u8]>` for serialization and `From<Vec<u8>>` for deserialization.
+/// It works on any type implementing `AsRef<[u8]>` for serialization and `TryFrom<Vec<u8>>` for deserialization.
 ///
 /// The format type parameter specifies if the hex string should use lower- or uppercase characters.
 /// Valid options are the types [`Lowercase`] and [`Uppercase`].

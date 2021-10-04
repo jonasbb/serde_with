@@ -6,12 +6,12 @@ This page lists the transformations implemented in this crate and supported by `
 2. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
 3. [Borrow from the input for `Cow` type](#borrow-from-the-input-for-cow-type)
 4. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
-5. [Bytes / `Vec<u8>` to hex string](#bytes--vecu8-to-hex-string)
-6. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
-7. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
-8. [`Default` from `null`](#default-from-null)
-9. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-10. [`Duration` as seconds](#duration-as-seconds)
+5. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
+6. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
+7. [`Default` from `null`](#default-from-null)
+8. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+9. [`Duration` as seconds](#duration-as-seconds)
+10. [Hex encode bytes](#hex-encode-bytes)
 11. [Ignore deserialization errors](#ignore-deserialization-errors)
 12. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
 13. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
@@ -80,21 +80,6 @@ value: Vec<u8>,
 
 // JSON
 "value": [0, 1, 2, 3, ...],
-```
-
-## Bytes / `Vec<u8>` to hex string
-
-[`Hex`]
-
-Requires the `hex` feature.
-
-```ignore
-// Rust
-#[serde_as(as = "serde_with::hex::Hex")]
-value: Vec<u8>,
-
-// JSON
-"value": "deadbeef",
 ```
 
 ## Convert to an intermediate type using `Into`
@@ -199,6 +184,25 @@ value: Duration,
 ```
 
 The same conversions are also implemented for [`chrono::Duration`] with the `chrono` feature.
+
+## Hex encode bytes
+
+[`Hex`]
+
+Requires the `hex` feature.
+The hex string can use upper- and lowercase characters.
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::hex::Hex")]
+lowercase: Vec<u8>,
+#[serde_as(as = "serde_with::hex::Hex<serde_with::formats::Uppercase>")]
+uppercase: Vec<u8>,
+
+// JSON
+"lowercase": "deadbeef",
+"uppercase": "DEADBEEF",
+```
 
 ## Ignore deserialization errors
 
