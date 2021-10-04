@@ -6,6 +6,7 @@ authors = [
 ]
 name = "serde_with"
 version = "1.10.0"
+rust-version = "1.46"
 
 categories = ["encoding"]
 description = "Custom de/serialization functions for Rust's serde"
