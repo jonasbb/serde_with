@@ -697,9 +697,11 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::{serde_as, DeserializeAs, SerializeAs};
     use serde::{Deserialize, Serialize};
     use serde_test::Configure;
     use std::fmt;
+    use std::marker::PhantomData;
     use std::net::IpAddr;
     use std::str::FromStr;
 
@@ -738,24 +740,42 @@ mod test {
         Extra(serde_json::Value),
     }
 
-    #[derive(Debug, Clone, PartialEq, Eq)]
-    struct VecEnumValues(Vec<EnumValue>);
+    #[serde_as(crate = "crate")]
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+    struct VecEnumValues {
+        #[serde_as(as = "VecEnumMap")]
+        vec: Vec<EnumValue>,
+    }
 
-    impl Serialize for VecEnumValues {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    struct VecEnumMap;
+
+    impl<T> SerializeAs<Vec<T>> for VecEnumMap
+    where
+        T: Serialize,
+    {
+        fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
         where
             S: Serializer,
         {
-            self.0.serialize(MyVecSerializer(serializer))
+            source.serialize(MyVecSerializer(serializer))
         }
     }
 
-    impl<'de> Deserialize<'de> for VecEnumValues {
-        fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-            struct MyVisitor;
+    impl<'de, T> DeserializeAs<'de, Vec<T>> for VecEnumMap
+    where
+        T: Deserialize<'de>,
+    {
+        fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            struct MyVisitor<T>(PhantomData<T>);
 
-            impl<'de> Visitor<'de> for MyVisitor {
-                type Value = VecEnumValues;
+            impl<'de, T> Visitor<'de> for MyVisitor<T>
+            where
+                T: Deserialize<'de>,
+            {
+                type Value = Vec<T>;
 
                 fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                     write!(formatter, "TODO")
@@ -764,47 +784,51 @@ mod test {
                 fn visit_map<A: MapAccess<'de>>(self, map: A) -> Result<Self::Value, A::Error> {
                     let deserializer = MyVecDeserializer(map);
                     let v = Vec::deserialize(deserializer)?;
-                    Ok(VecEnumValues(v))
+                    Ok(v)
                 }
             }
 
-            deserializer.deserialize_map(MyVisitor)
+            deserializer.deserialize_map(MyVisitor(PhantomData))
         }
     }
 
     #[test]
     fn json_round_trip() {
-        let values = VecEnumValues(vec![
-            EnumValue::Int(123),
-            EnumValue::String("FooBar".to_string()),
-            EnumValue::Int(456),
-            EnumValue::String("XXX".to_string()),
-            EnumValue::Unit,
-            EnumValue::Tuple(1, "Middle".to_string(), false),
-            EnumValue::Struct {
-                a: 666,
-                b: "BBB".to_string(),
-                c: true,
-            },
-        ]);
+        let values = VecEnumValues {
+            vec: vec![
+                EnumValue::Int(123),
+                EnumValue::String("FooBar".to_string()),
+                EnumValue::Int(456),
+                EnumValue::String("XXX".to_string()),
+                EnumValue::Unit,
+                EnumValue::Tuple(1, "Middle".to_string(), false),
+                EnumValue::Struct {
+                    a: 666,
+                    b: "BBB".to_string(),
+                    c: true,
+                },
+            ],
+        };
 
         let json = serde_json::to_string_pretty(&values).unwrap();
         expect_test::expect![[r#"
             {
-              "Int": 123,
-              "String": "FooBar",
-              "Int": 456,
-              "String": "XXX",
-              "Unit": null,
-              "Tuple": [
-                1,
-                "Middle",
-                false
-              ],
-              "Struct": {
-                "a": 666,
-                "b": "BBB",
-                "c": true
+              "vec": {
+                "Int": 123,
+                "String": "FooBar",
+                "Int": 456,
+                "String": "XXX",
+                "Unit": null,
+                "Tuple": [
+                  1,
+                  "Middle",
+                  false
+                ],
+                "Struct": {
+                  "a": 666,
+                  "b": "BBB",
+                  "c": true
+                }
               }
             }"#]]
         .assert_eq(&json);
@@ -814,35 +838,39 @@ mod test {
 
     #[test]
     fn ron_serialize() {
-        let values = VecEnumValues(vec![
-            EnumValue::Int(123),
-            EnumValue::String("FooBar".to_string()),
-            EnumValue::Int(456),
-            EnumValue::String("XXX".to_string()),
-            EnumValue::Unit,
-            EnumValue::Tuple(1, "Middle".to_string(), false),
-            EnumValue::Struct {
-                a: 666,
-                b: "BBB".to_string(),
-                c: true,
-            },
-        ]);
+        let values = VecEnumValues {
+            vec: vec![
+                EnumValue::Int(123),
+                EnumValue::String("FooBar".to_string()),
+                EnumValue::Int(456),
+                EnumValue::String("XXX".to_string()),
+                EnumValue::Unit,
+                EnumValue::Tuple(1, "Middle".to_string(), false),
+                EnumValue::Struct {
+                    a: 666,
+                    b: "BBB".to_string(),
+                    c: true,
+                },
+            ],
+        };
 
         let ron = ron::ser::to_string_pretty(&values, ron::ser::PrettyConfig::new()).unwrap();
         expect_test::expect![[r#"
-            {
-                "Int": 123,
-                "String": "FooBar",
-                "Int": 456,
-                "String": "XXX",
-                "Unit": (),
-                "Tuple": (1, "Middle", false),
-                "Struct": (
-                    a: 666,
-                    b: "BBB",
-                    c: true,
-                ),
-            }"#]]
+            (
+                vec: {
+                    "Int": 123,
+                    "String": "FooBar",
+                    "Int": 456,
+                    "String": "XXX",
+                    "Unit": (),
+                    "Tuple": (1, "Middle", false),
+                    "Struct": (
+                        a: 666,
+                        b: "BBB",
+                        c: true,
+                    ),
+                },
+            )"#]]
         .assert_eq(&ron);
         // TODO deserializing a Strings as an Identifier seems unsupported
         let deser_values: ron::Value = ron::de::from_str(&ron).unwrap();
@@ -851,62 +879,70 @@ mod test {
                 Map(
                     {
                         String(
-                            "Int",
-                        ): Number(
-                            Integer(
-                                456,
-                            ),
-                        ),
-                        String(
-                            "String",
-                        ): String(
-                            "XXX",
-                        ),
-                        String(
-                            "Struct",
+                            "vec",
                         ): Map(
                             Map(
                                 {
                                     String(
-                                        "a",
+                                        "Int",
                                     ): Number(
                                         Integer(
-                                            666,
+                                            456,
                                         ),
                                     ),
                                     String(
-                                        "b",
+                                        "String",
                                     ): String(
-                                        "BBB",
+                                        "XXX",
                                     ),
                                     String(
-                                        "c",
-                                    ): Bool(
-                                        true,
+                                        "Struct",
+                                    ): Map(
+                                        Map(
+                                            {
+                                                String(
+                                                    "a",
+                                                ): Number(
+                                                    Integer(
+                                                        666,
+                                                    ),
+                                                ),
+                                                String(
+                                                    "b",
+                                                ): String(
+                                                    "BBB",
+                                                ),
+                                                String(
+                                                    "c",
+                                                ): Bool(
+                                                    true,
+                                                ),
+                                            },
+                                        ),
                                     ),
+                                    String(
+                                        "Tuple",
+                                    ): Seq(
+                                        [
+                                            Number(
+                                                Integer(
+                                                    1,
+                                                ),
+                                            ),
+                                            String(
+                                                "Middle",
+                                            ),
+                                            Bool(
+                                                false,
+                                            ),
+                                        ],
+                                    ),
+                                    String(
+                                        "Unit",
+                                    ): Unit,
                                 },
                             ),
                         ),
-                        String(
-                            "Tuple",
-                        ): Seq(
-                            [
-                                Number(
-                                    Integer(
-                                        1,
-                                    ),
-                                ),
-                                String(
-                                    "Middle",
-                                ),
-                                Bool(
-                                    false,
-                                ),
-                            ],
-                        ),
-                        String(
-                            "Unit",
-                        ): Unit,
                     },
                 ),
             )
@@ -915,47 +951,60 @@ mod test {
     }
 
     #[test]
-    fn xml_serialize() {
-        let values = VecEnumValues(vec![
-            EnumValue::Int(123),
-            EnumValue::String("FooBar".to_string()),
-            EnumValue::Int(456),
-            EnumValue::String("XXX".to_string()),
-            EnumValue::Unit,
-            // serialize_tuple and variants are not supported by XML
-            // EnumValue::Tuple(1, "Middle".to_string(), false),
-            EnumValue::Struct {
-                a: 666,
-                b: "BBB".to_string(),
-                c: true,
-            },
-        ]);
+    fn xml_round_trip() {
+        let values = VecEnumValues {
+            vec: vec![
+                EnumValue::Int(123),
+                EnumValue::String("FooBar".to_string()),
+                EnumValue::Int(456),
+                EnumValue::String("XXX".to_string()),
+                EnumValue::Unit,
+                // serialize_tuple and variants are not supported by XML
+                // EnumValue::Tuple(1, "Middle".to_string(), false),
+                // Cannot be deserialized. It serializes to:
+                // <Struct><EnumValue><a>666</a><b>BBB</b><c>true</c></EnumValue></Struct>
+                // EnumValue::Struct {
+                //     a: 666,
+                //     b: "BBB".to_string(),
+                //     c: true,
+                // },
+            ],
+        };
 
         let xml = serde_xml_rs::to_string(&values).unwrap();
-        expect_test::expect![[r#"<Int>123</Int><String>FooBar</String><Int>456</Int><String>XXX</String><Unit></Unit><Struct><EnumValue><a>666</a><b>BBB</b><c>true</c></EnumValue></Struct>"#]]
+        expect_test::expect![[r#"<VecEnumValues><vec><Int>123</Int><String>FooBar</String><Int>456</Int><String>XXX</String><Unit></Unit></vec></VecEnumValues>"#]]
         .assert_eq(&xml);
+        let deser_values: VecEnumValues = serde_xml_rs::from_str(&xml).unwrap();
+        assert_eq!(values, deser_values);
     }
 
     #[test]
     fn serde_test_round_trip() {
-        let values = VecEnumValues(vec![
-            EnumValue::Int(123),
-            EnumValue::String("FooBar".to_string()),
-            EnumValue::Int(456),
-            EnumValue::String("XXX".to_string()),
-            EnumValue::Unit,
-            EnumValue::Tuple(1, "Middle".to_string(), false),
-            EnumValue::Struct {
-                a: 666,
-                b: "BBB".to_string(),
-                c: true,
-            },
-        ]);
+        let values = VecEnumValues {
+            vec: vec![
+                EnumValue::Int(123),
+                EnumValue::String("FooBar".to_string()),
+                EnumValue::Int(456),
+                EnumValue::String("XXX".to_string()),
+                EnumValue::Unit,
+                EnumValue::Tuple(1, "Middle".to_string(), false),
+                EnumValue::Struct {
+                    a: 666,
+                    b: "BBB".to_string(),
+                    c: true,
+                },
+            ],
+        };
 
         use serde_test::Token::*;
         serde_test::assert_tokens(
             &values.readable(),
             &[
+                Struct {
+                    name: "VecEnumValues",
+                    len: 1,
+                },
+                Str("vec"),
                 Map {
                     len: Option::Some(7),
                 },
@@ -991,21 +1040,29 @@ mod test {
                 Bool(true),
                 StructEnd,
                 MapEnd,
+                StructEnd,
             ],
         );
     }
 
     #[test]
     fn serde_test_round_trip_human_readable() {
-        let values = VecEnumValues(vec![EnumValue::Ip(
-            IpAddr::from_str("127.0.0.1").unwrap(),
-            IpAddr::from_str("::7777:dead:beef").unwrap(),
-        )]);
+        let values = VecEnumValues {
+            vec: vec![EnumValue::Ip(
+                IpAddr::from_str("127.0.0.1").unwrap(),
+                IpAddr::from_str("::7777:dead:beef").unwrap(),
+            )],
+        };
 
         use serde_test::Token::*;
         serde_test::assert_tokens(
             &values.clone().readable(),
             &[
+                Struct {
+                    name: "VecEnumValues",
+                    len: 1,
+                },
+                Str("vec"),
                 Map {
                     len: Option::Some(1),
                 },
@@ -1018,12 +1075,18 @@ mod test {
                 Str("::7777:dead:beef"),
                 TupleStructEnd,
                 MapEnd,
+                StructEnd,
             ],
         );
 
         serde_test::assert_tokens(
             &values.compact(),
             &[
+                Struct {
+                    name: "VecEnumValues",
+                    len: 1,
+                },
+                Str("vec"),
                 Map {
                     len: Option::Some(1),
                 },
@@ -1066,6 +1129,7 @@ mod test {
                 TupleEnd,
                 TupleStructEnd,
                 MapEnd,
+                StructEnd,
             ],
         );
     }
@@ -1075,26 +1139,28 @@ mod test {
 
     #[test]
     fn rmp_round_trip() {
-        let values = VecEnumValues(vec![
-            EnumValue::Int(123),
-            EnumValue::String("FooBar".to_string()),
-            EnumValue::Int(456),
-            EnumValue::String("XXX".to_string()),
-            EnumValue::Unit,
-            EnumValue::Tuple(1, "Middle".to_string(), false),
-            EnumValue::Struct {
-                a: 666,
-                b: "BBB".to_string(),
-                c: true,
-            },
-            EnumValue::Ip(
-                IpAddr::from_str("127.0.0.1").unwrap(),
-                IpAddr::from_str("::7777:dead:beef").unwrap(),
-            ),
-        ]);
+        let values = VecEnumValues {
+            vec: vec![
+                EnumValue::Int(123),
+                EnumValue::String("FooBar".to_string()),
+                EnumValue::Int(456),
+                EnumValue::String("XXX".to_string()),
+                EnumValue::Unit,
+                EnumValue::Tuple(1, "Middle".to_string(), false),
+                EnumValue::Struct {
+                    a: 666,
+                    b: "BBB".to_string(),
+                    c: true,
+                },
+                EnumValue::Ip(
+                    IpAddr::from_str("127.0.0.1").unwrap(),
+                    IpAddr::from_str("::7777:dead:beef").unwrap(),
+                ),
+            ],
+        };
 
         let rmp = rmp_serde::to_vec(&values).unwrap();
-        expect_test::expect![[r#"\x88\xa3Int{\xa6String\xa6FooBar\xa3Int\xcd\x01\xc8\xa6String\xa3XXX\xa4Unit\xc0\xa5Tuple\x93\x01\xa6Middle\xc2\xa6Struct\x93\xcd\x02\x9a\xa3BBB\xc3\xa2Ip\x92\x81\x00\x94\x7f\x00\x00\x01\x81\x01\xdc\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ww\xcc\xde\xcc\xad\xcc\xbe\xcc\xef"#]]
+        expect_test::expect![[r#"\x91\x88\xa3Int{\xa6String\xa6FooBar\xa3Int\xcd\x01\xc8\xa6String\xa3XXX\xa4Unit\xc0\xa5Tuple\x93\x01\xa6Middle\xc2\xa6Struct\x93\xcd\x02\x9a\xa3BBB\xc3\xa2Ip\x92\x81\x00\x94\x7f\x00\x00\x01\x81\x01\xdc\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ww\xcc\xde\xcc\xad\xcc\xbe\xcc\xef"#]]
         .assert_eq(&bytes_debug_readable(&rmp));
         let deser_values: VecEnumValues = rmp_serde::from_read(&*rmp).unwrap();
         assert_eq!(values, deser_values);
@@ -1103,34 +1169,37 @@ mod test {
     #[test]
     fn yaml_round_trip() {
         // Duplicate enum variants do not work with YAML
-        let values = VecEnumValues(vec![
-            EnumValue::Int(123),
-            EnumValue::String("FooBar".to_string()),
-            // EnumValue::Int(456),
-            // EnumValue::String("XXX".to_string()),
-            EnumValue::Unit,
-            EnumValue::Tuple(1, "Middle".to_string(), false),
-            EnumValue::Struct {
-                a: 666,
-                b: "BBB".to_string(),
-                c: true,
-            },
-        ]);
+        let values = VecEnumValues {
+            vec: vec![
+                EnumValue::Int(123),
+                EnumValue::String("FooBar".to_string()),
+                // EnumValue::Int(456),
+                // EnumValue::String("XXX".to_string()),
+                EnumValue::Unit,
+                EnumValue::Tuple(1, "Middle".to_string(), false),
+                EnumValue::Struct {
+                    a: 666,
+                    b: "BBB".to_string(),
+                    c: true,
+                },
+            ],
+        };
 
         let yaml = serde_yaml::to_string(&values).unwrap();
         expect_test::expect![[r#"
             ---
-            Int: 123
-            String: FooBar
-            Unit: ~
-            Tuple:
-              - 1
-              - Middle
-              - false
-            Struct:
-              a: 666
-              b: BBB
-              c: true
+            vec:
+              Int: 123
+              String: FooBar
+              Unit: ~
+              Tuple:
+                - 1
+                - Middle
+                - false
+              Struct:
+                a: 666
+                b: BBB
+                c: true
         "#]]
         .assert_eq(&yaml);
         let deser_values: VecEnumValues = serde_yaml::from_str(&yaml).unwrap();
