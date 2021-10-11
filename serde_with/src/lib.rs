@@ -262,7 +262,7 @@ pub mod chrono;
 mod content;
 pub mod de;
 mod duplicate_key_impls;
-pub mod enum_map;
+mod enum_map;
 mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
@@ -318,7 +318,9 @@ generate_guide! {
 }
 
 #[doc(inline)]
-pub use crate::{de::DeserializeAs, rust::StringWithSeparator, ser::SerializeAs};
+pub use crate::{
+    de::DeserializeAs, enum_map::EnumMap, rust::StringWithSeparator, ser::SerializeAs,
+};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]

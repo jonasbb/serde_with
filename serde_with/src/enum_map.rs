@@ -5,11 +5,61 @@
 #![allow(unused_variables)]
 
 use crate::content::ser::{Content, ContentSerializer};
+use crate::{DeserializeAs, SerializeAs};
 use serde::de::{DeserializeSeed, EnumAccess, Error, MapAccess, SeqAccess, VariantAccess, Visitor};
 use serde::ser::{
     Impossible, SerializeMap, SerializeSeq, SerializeStructVariant, SerializeTupleVariant,
 };
-use serde::{ser, Deserializer, Serialize, Serializer};
+use serde::{ser, Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
+use std::marker::PhantomData;
+
+/// TODO
+#[derive(Debug, Copy, Clone)]
+pub struct EnumMap;
+
+impl<T> SerializeAs<Vec<T>> for EnumMap
+where
+    T: Serialize,
+{
+    fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source.serialize(MyVecSerializer(serializer))
+    }
+}
+
+impl<'de, T> DeserializeAs<'de, Vec<T>> for EnumMap
+where
+    T: Deserialize<'de>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MyVisitor<T>(PhantomData<T>);
+
+        impl<'de, T> Visitor<'de> for MyVisitor<T>
+        where
+            T: Deserialize<'de>,
+        {
+            type Value = Vec<T>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(formatter, "TODO")
+            }
+
+            fn visit_map<A: MapAccess<'de>>(self, map: A) -> Result<Self::Value, A::Error> {
+                let deserializer = MyVecDeserializer(map);
+                let v = Vec::deserialize(deserializer)?;
+                Ok(v)
+            }
+        }
+
+        deserializer.deserialize_map(MyVisitor(PhantomData))
+    }
+}
 
 static END_OF_MAP_IDENTIFIER: &str = "__PRIVATE_END_OF_MAP_MARKER__";
 
@@ -40,78 +90,78 @@ where
     type SerializeStructVariant = Impossible<S::Ok, S::Error>;
 
     fn serialize_bool(self, _v: bool) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
     {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_unit_struct(self, name: &'static str) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_unit_variant(
@@ -120,7 +170,7 @@ where
         variant_index: u32,
         variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_newtype_struct<T: ?Sized>(
@@ -131,7 +181,7 @@ where
     where
         T: Serialize,
     {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_newtype_variant<T: ?Sized>(
@@ -144,7 +194,7 @@ where
     where
         T: Serialize,
     {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
@@ -156,7 +206,7 @@ where
     }
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_tuple_struct(
@@ -164,7 +214,7 @@ where
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_tuple_variant(
@@ -174,11 +224,11 @@ where
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_struct(
@@ -186,7 +236,7 @@ where
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_struct_variant(
@@ -196,7 +246,7 @@ where
         variant: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 }
 
@@ -262,78 +312,78 @@ where
     type SerializeStructVariant = MySerializeVariant<'a, M>;
 
     fn serialize_bool(self, v: bool) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i8(self, v: i8) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i16(self, v: i16) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i32(self, v: i32) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u16(self, v: u16) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u32(self, v: u32) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_f64(self, v: f64) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_char(self, v: char) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_some<T: ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error>
     where
         T: Serialize,
     {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_unit_struct(self, name: &'static str) -> Result<Self::Ok, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_unit_variant(
@@ -354,7 +404,7 @@ where
     where
         T: Serialize,
     {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_newtype_variant<T: ?Sized>(
@@ -372,11 +422,11 @@ where
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_tuple_struct(
@@ -384,7 +434,7 @@ where
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeTupleStruct, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_tuple_variant(
@@ -403,7 +453,7 @@ where
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_struct(
@@ -411,7 +461,7 @@ where
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct, Self::Error> {
-        Err(ser::Error::custom("wrong type for VecEnumMap"))
+        Err(ser::Error::custom("wrong type for EnumMap"))
     }
 
     fn serialize_struct_variant(
@@ -697,11 +747,8 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{serde_as, DeserializeAs, SerializeAs};
     use serde::{Deserialize, Serialize};
     use serde_test::Configure;
-    use std::fmt;
-    use std::marker::PhantomData;
     use std::net::IpAddr;
     use std::str::FromStr;
 
@@ -740,56 +787,11 @@ mod test {
         Extra(serde_json::Value),
     }
 
-    #[serde_as(crate = "crate")]
+    #[crate::serde_as(crate = "crate")]
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
     struct VecEnumValues {
-        #[serde_as(as = "VecEnumMap")]
+        #[serde_as(as = "EnumMap")]
         vec: Vec<EnumValue>,
-    }
-
-    struct VecEnumMap;
-
-    impl<T> SerializeAs<Vec<T>> for VecEnumMap
-    where
-        T: Serialize,
-    {
-        fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            source.serialize(MyVecSerializer(serializer))
-        }
-    }
-
-    impl<'de, T> DeserializeAs<'de, Vec<T>> for VecEnumMap
-    where
-        T: Deserialize<'de>,
-    {
-        fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
-        where
-            D: Deserializer<'de>,
-        {
-            struct MyVisitor<T>(PhantomData<T>);
-
-            impl<'de, T> Visitor<'de> for MyVisitor<T>
-            where
-                T: Deserialize<'de>,
-            {
-                type Value = Vec<T>;
-
-                fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                    write!(formatter, "TODO")
-                }
-
-                fn visit_map<A: MapAccess<'de>>(self, map: A) -> Result<Self::Value, A::Error> {
-                    let deserializer = MyVecDeserializer(map);
-                    let v = Vec::deserialize(deserializer)?;
-                    Ok(v)
-                }
-            }
-
-            deserializer.deserialize_map(MyVisitor(PhantomData))
-        }
     }
 
     #[test]
