@@ -34,7 +34,7 @@ macros = ["serde_with_macros"]
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
 base64_crate = {package = "base64", version = "0.13.0", optional = true}
-chrono_crate = {package = "chrono", version = "0.4.1", features = ["serde"], optional = true}
+chrono_crate = {package = "chrono", version = "0.4.1", features = ["clock", "serde", "std"], optional = true, default-features = false}
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.2", optional = true}
 rustversion = "1.0.0"
