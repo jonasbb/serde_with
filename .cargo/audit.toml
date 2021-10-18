@@ -1,7 +1,9 @@
 [advisories]
 ignore = [
-    # difference is unmaintained, is a dependency of pretty_assertions
-    "RUSTSEC-2020-0095",
+    # chrono: Potential segfault in `localtime_r` invocations
+    # chrono is an optional depenency, so we can ignore the warning.
+    # Right now there is no safe version of chrono to upgrade to.
+    "RUSTSEC-2020-0159",
 ]
 # warn for categories of informational advisories
 informational_warnings = [
