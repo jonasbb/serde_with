@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [1.5.1] - 2021-10-18
+
+### Added
+
+* The minimal supported Rust version (MSRV) is now specified in the `Cargo.toml` via the `rust-version` field. The field is supported in Rust 1.56 and has no effect on versions before.
+
+    More details: https://doc.rust-lang.org/nightly/cargo/reference/manifest.html#the-rust-version-field
+
 ## [1.5.0] - 2021-09-04
 
 ### Added

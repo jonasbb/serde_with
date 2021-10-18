@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.11.0] - 2021-10-18
+
 ### Added
 
 * Serialize bytes as base64 encoded strings.  
@@ -23,6 +25,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     "value": "SGVsbG8gV29ybGQ=",
     "bcrypt_unpadded": "QETqZE6eT07wZEO",
     ```
+
+* The minimal supported Rust version (MSRV) is now specified in the `Cargo.toml` via the `rust-version` field. The field is supported in Rust 1.56 and has no effect on versions before.
+
+    More details: https://doc.rust-lang.org/nightly/cargo/reference/manifest.html#the-rust-version-field
+
+### Fixed
+
+* Fixed RUSTSEC-2020-0071 in the `time` v0.1 dependency, but changing the feature flags of the `chrono` dependency. This should not change anything. Crates requiring the `oldtime` feature of `chrono` can enable it separately.
 
 ## [1.10.0] - 2021-09-04
 
