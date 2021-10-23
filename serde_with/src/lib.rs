@@ -1902,3 +1902,14 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BorrowCow;
+
+/// Deserialize a sequence into `Vec<T>`, skipping elements with error.
+///
+/// # Examples
+///
+/// ```rust
+/// todo!(321)
+/// ```
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct VecSkipError<T>(PhantomData<T>);
