@@ -19,6 +19,7 @@ Some common use cases are:
 * Apply a prefix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
 * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
      Check the documentation for [`serde_with::rust::StringWithSeparator::<CommaSeparator>`][StringWithSeparator].
+* Deserialize a sequence into a `Vec<T>` ignoring elements with errors, using [`serde_with::VecSkipError`][VecSkipError].
 
 ### Getting Help
 
@@ -115,6 +116,28 @@ Foo {a: None, b: None, c: None, d: Some(4), e: None, f: None, g: Some(7)}
 {"d": 4, "g": 7}
 ```
 
+### `VecSkipError<_>`
+
+For formats with heterogenous-typed sequences, we can collect only the deserializable elements.
+This is also useful for unknown enum variants.
+
+```rust
+#[derive(Debug, Deserialize)]
+#[non_exhaustive]
+enum Color {
+    Red,
+    Green,
+    Blue,
+}
+struct Palette(#[serde_with(as = "VecSkipError<_>"] Vec<Color>)
+
+// This JSON array
+["Blue", "Yellow", "Green"]
+
+// will deserialize as
+Palette([Blue, Green,])
+```
+
 ### Advanced `serde_as` usage
 
 This example is mainly supposed to highlight the flexibility of the `serde_as`-annotation compared to [serde's with-annotation][with-annotation].
@@ -161,6 +184,7 @@ Foo {
 [feature flags]: https://docs.rs/serde_with/1.11.0/serde_with/guide/feature_flags/index.html
 [skip_serializing_none]: https://docs.rs/serde_with/1.11.0/serde_with/attr.skip_serializing_none.html
 [StringWithSeparator]: https://docs.rs/serde_with/1.11.0/serde_with/rust/struct.StringWithSeparator.html
+[VecSkipError]: https://docs.rs/serde_with/1.11.0/serde_with/struct.VecSkipError.html
 [user guide]: https://docs.rs/serde_with/1.11.0/serde_with/guide/index.html
 [with-annotation]: https://serde.rs/field-attrs.html#with
 [as-annotation]: https://docs.rs/serde_with/1.11.0/serde_with/guide/serde_as/index.html
