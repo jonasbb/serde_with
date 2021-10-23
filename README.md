@@ -122,23 +122,25 @@ For formats with heterogenous-typed sequences, we can collect only the deseriali
 This is also useful for unknown enum variants.
 
 ```rust
-#[derive(Debug, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize)]
 #[non_exhaustive]
 enum Color {
     Red,
     Green,
     Blue,
 }
+use Color::*;
 
 #[serde_as]
-#[derive(Debug, Deserialize)]
-struct Palette(#[serde_with(as = "VecSkipError<_>")] Vec<Color>)
+#[derive(Debug, PartialEq, Deserialize)]
+struct Palette(#[serde_as(as = "VecSkipError<_>")] Vec<Color>)
 
-// This JSON array
-["Blue", "Yellow", "Green"]
-
-// will deserialize as
-Palette([Blue, Green,])
+assert_eq!(
+    serde_json::from_str(
+        r#"["Blue", "Yellow", "Green"]"#
+    ).unwrap(),
+    Palette(vec![Blue, Green,])
+);
 ```
 
 ### Advanced `serde_as` usage

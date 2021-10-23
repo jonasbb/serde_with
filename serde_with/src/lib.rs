@@ -1925,7 +1925,7 @@ pub struct BorrowCow;
 /// # #[derive(Debug, PartialEq)]
 /// #[derive(Deserialize, Serialize)]
 /// struct Palette(#[serde_as(as = "VecSkipError<_>")] Vec<Color>);
-/// 
+///
 /// let data = Palette(vec![Blue, Green,]);
 /// let source_json = r#"["Blue", "Yellow", "Green"]"#;
 /// let data_json = r#"["Blue","Green"]"#;
