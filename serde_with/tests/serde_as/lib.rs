@@ -459,6 +459,36 @@ fn string_with_separator() {
 }
 
 #[test]
+fn test_vec_skip_error() {
+    use serde_with::VecSkipError;
+
+    #[serde_as]
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S {
+        tag: String,
+        #[serde_as(as = "VecSkipError<_>")]
+        values: Vec<u8>,
+    }
+
+    let v = serde_json::from_value::<S>(serde_json::json!([
+        "type",
+        [0, "str", 1, [999, 998], -2, {}, 300,]
+    ]))
+    .unwrap();
+    assert_eq!(
+        v,
+        S {
+            tag: "type".into(),
+            values: vec![0, 1,]
+        }
+    );
+    assert_eq!(
+        r#"{"tag":"type","values":[0,1]}"#,
+        serde_json::to_string(&v).unwrap()
+    );
+}
+
+#[test]
 fn test_serialize_reference() {
     #[serde_as]
     #[derive(Debug, Serialize)]
