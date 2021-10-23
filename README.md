@@ -129,7 +129,10 @@ enum Color {
     Green,
     Blue,
 }
-struct Palette(#[serde_with(as = "VecSkipError<_>"] Vec<Color>)
+
+#[serde_as]
+#[derive(Debug, Deserialize)]
+struct Palette(#[serde_with(as = "VecSkipError<_>")] Vec<Color>)
 
 // This JSON array
 ["Blue", "Yellow", "Green"]
