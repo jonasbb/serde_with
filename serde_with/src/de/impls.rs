@@ -576,7 +576,7 @@ where
                         values.push(value.into_inner());
                     }
                 }
-                Ok(values.into())
+                Ok(values)
             }
         }
 
