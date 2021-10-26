@@ -459,6 +459,41 @@ fn string_with_separator() {
 }
 
 #[test]
+fn test_vec_skip_error() {
+    use serde_with::VecSkipError;
+
+    #[serde_as]
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S {
+        tag: String,
+        #[serde_as(as = "VecSkipError<_>")]
+        values: Vec<u8>,
+    }
+
+    check_deserialization(
+        S {
+            tag: "type".into(),
+            values: vec![0, 1],
+        },
+        r#"{"tag":"type","values":[0, "str", 1, [10, 11], -2, {}, 300]}"#,
+    );
+    is_equal(
+        S {
+            tag: "round-trip".into(),
+            values: vec![0, 255],
+        },
+        expect![[r#"
+        {
+          "tag": "round-trip",
+          "values": [
+            0,
+            255
+          ]
+        }"#]],
+    );
+}
+
+#[test]
 fn test_serialize_reference() {
     #[serde_as]
     #[derive(Debug, Serialize)]

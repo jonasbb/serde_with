@@ -524,6 +524,70 @@ map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 ///////////////////////////////////////////////////////////////////////////////
 // region: Conversion types which cause different serialization behavior
 
+impl<'de, T, U> DeserializeAs<'de, Vec<T>> for VecSkipError<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        #[serde(
+            untagged,
+            bound(deserialize = "DeserializeAsWrap<T, TAs>: Deserialize<'de>")
+        )]
+        enum GoodOrError<'a, T, TAs>
+        where
+            TAs: DeserializeAs<'a, T>,
+        {
+            Good(DeserializeAsWrap<T, TAs>),
+            // This consumes one "item" when `T` errors while deserializing.
+            // This is necessary to make this work, when instead of having a direct value
+            // like integer or string, the deserializer sees a list or map.
+            Error(IgnoredAny),
+            #[serde(skip)]
+            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
+        }
+
+        struct SeqVisitor<T, U> {
+            marker: PhantomData<T>,
+            marker2: PhantomData<U>,
+        }
+
+        impl<'de, T, U> Visitor<'de> for SeqVisitor<T, U>
+        where
+            U: DeserializeAs<'de, T>,
+        {
+            type Value = Vec<T>;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut values = Vec::with_capacity(seq.size_hint().unwrap_or_default());
+
+                while let Some(value) = seq.next_element()? {
+                    if let GoodOrError::<T, U>::Good(value) = value {
+                        values.push(value.into_inner());
+                    }
+                }
+                Ok(values)
+            }
+        }
+
+        let visitor = SeqVisitor::<T, U> {
+            marker: PhantomData,
+            marker2: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
+    }
+}
+
 impl<'de, Str> DeserializeAs<'de, Option<Str>> for NoneAsEmptyString
 where
     Str: FromStr,

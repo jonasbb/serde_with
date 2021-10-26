@@ -1902,3 +1902,41 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BorrowCow;
+
+/// Deserialize a sequence into `Vec<T>`, skipping elements which fail to deserialize.
+///
+/// The serialization behavior is identical to `Vec<T>`. This is an alternative to `Vec<T>`
+/// which is resilient against unexpected data.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_with::{serde_as, VecSkipError};
+/// #
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// # #[non_exhaustive]
+/// enum Color {
+///     Red,
+///     Green,
+///     Blue,
+/// }
+/// # use Color::*;
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Palette(#[serde_as(as = "VecSkipError<_>")] Vec<Color>);
+///
+/// let data = Palette(vec![Blue, Green,]);
+/// let source_json = r#"["Blue", "Yellow", "Green"]"#;
+/// let data_json = r#"["Blue","Green"]"#;
+/// // Ensure serialization and deserialization produce the expected results
+/// assert_eq!(data_json, serde_json::to_string(&data).unwrap());
+/// assert_eq!(data, serde_json::from_str(source_json).unwrap());
+/// # }
+/// ```
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct VecSkipError<T>(PhantomData<T>);

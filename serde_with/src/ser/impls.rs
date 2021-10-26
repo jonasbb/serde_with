@@ -341,6 +341,18 @@ map_as_tuple_seq!(HashMap<K, V>);
 ///////////////////////////////////////////////////////////////////////////////
 // region: Conversion types which cause different serialization behavior
 
+impl<T, U> SerializeAs<Vec<T>> for VecSkipError<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer)
+    }
+}
+
 impl<AsRefStr> SerializeAs<Option<AsRefStr>> for NoneAsEmptyString
 where
     AsRefStr: AsRef<str>,
