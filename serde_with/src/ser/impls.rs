@@ -341,16 +341,15 @@ map_as_tuple_seq!(HashMap<K, V>);
 ///////////////////////////////////////////////////////////////////////////////
 // region: Conversion types which cause different serialization behavior
 
-impl<T, U> SerializeAs<Vec<U>> for VecSkipError<T>
+impl<T, U> SerializeAs<Vec<T>> for VecSkipError<U>
 where
-    T: SerializeAs<U>,
-    U: Serialize,
+    T: Serialize,
 {
-    fn serialize_as<S>(source: &Vec<U>, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.collect_seq(source.iter())
+        source.serialize(serializer)
     }
 }
 
