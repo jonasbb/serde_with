@@ -343,13 +343,13 @@ map_as_tuple_seq!(HashMap<K, V>);
 
 impl<T, U> SerializeAs<Vec<T>> for VecSkipError<U>
 where
-    T: Serialize,
+    U: SerializeAs<T>,
 {
     fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        source.serialize(serializer)
+        SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer)
     }
 }
 
