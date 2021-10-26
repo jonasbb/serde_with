@@ -9,19 +9,20 @@ This page lists the transformations implemented in this crate and supported by `
 5. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
 6. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
 7. [`Default` from `null`](#default-from-null)
-8. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-9. [`Duration` as seconds](#duration-as-seconds)
-10. [Hex encode bytes](#hex-encode-bytes)
-11. [Ignore deserialization errors](#ignore-deserialization-errors)
-12. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-13. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-14. [`None` as empty `String`](#none-as-empty-string)
-15. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
-16. [Pick first successful deserialization](#pick-first-successful-deserialization)
-17. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-18. [Value into JSON String](#value-into-json-string)
-19. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
-20. [Deserialize into `Vec`, ignoring errors](#deserialize-into-vec-ignoring-errors)
+8. [De/Serialize into `Vec`, ignoring errors](#deserialize-into-vec-ignoring-errors)
+9. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+10. [`Duration` as seconds](#duration-as-seconds)
+11. [Hex encode bytes](#hex-encode-bytes)
+12. [Ignore deserialization errors](#ignore-deserialization-errors)
+13. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+14. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+15. [`None` as empty `String`](#none-as-empty-string)
+16. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
+17. [Pick first successful deserialization](#pick-first-successful-deserialization)
+18. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+19. [Value into JSON String](#value-into-json-string)
+20. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+
 ## Base64 encode bytes
 
 [`Base64`]
@@ -128,6 +129,31 @@ value2: u32,
 
 // Deserializes null into the Default value, i.e.,
 null => 0
+```
+
+## De/Serialize into `Vec`, ignoring errors
+
+[`VecSkipError`]
+
+For formats with heterogenous-typed sequences, we can collect only the deserializable elements.
+This is also useful for unknown enum variants.
+
+```ignore
+#[derive(serde::Deserialize)]
+enum Color {
+    Red,
+    Green,
+    Blue,
+}
+
+// JSON
+"colors": ["Blue", "Yellow", "Green"],
+
+// Rust
+#[serde_as(as = "VecSkipError<_>")]
+colors: Vec<Color>,
+
+// => vec![Blue, Green]
 ```
 
 ## De/Serialize with `FromStr` and `Display`
@@ -380,32 +406,4 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
 [`TryFromInto`]: crate::TryFromInto
-
-### Deserialize into `Vec`, ignoring errors
-
-[`VecSkipError`]
-
-For formats with heterogenous-typed sequences, we can collect only the deserializable elements.
-This is also useful for unknown enum variants.
-
-```rust
-#[derive(Debug, PartialEq, Deserialize)]
-#[non_exhaustive]
-enum Color {
-    Red,
-    Green,
-    Blue,
-}
-use Color::*;
-
-#[serde_as]
-#[derive(Debug, PartialEq, Deserialize)]
-struct Palette(#[serde_as(as = "VecSkipError<_>")] Vec<Color>)
-
-assert_eq!(
-    serde_json::from_str(
-        r#"["Blue", "Yellow", "Green"]"#
-    ).unwrap(),
-    Palette(vec![Blue, Green,])
-);
-```
+[`VecSkipError`]: crate::VecSkipError
