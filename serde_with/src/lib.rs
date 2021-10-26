@@ -1904,7 +1904,7 @@ pub struct TryFromInto<T>(PhantomData<T>);
 pub struct BorrowCow;
 
 /// Deserialize a sequence into `Vec<T>`, skipping elements which fail to deserialize.
-/// 
+///
 /// The serialization behavior is identical to `Vec<T>`. This is an alternative to `Vec<T>`
 /// which is resilient against unexpected data.
 ///
