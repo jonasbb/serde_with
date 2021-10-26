@@ -21,7 +21,7 @@ This page lists the transformations implemented in this crate and supported by `
 17. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
 18. [Value into JSON String](#value-into-json-string)
 19. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
-
+20. [Deserialize into `Vec`, ignoring errors](#deserialize-into-vec-ignoring-errors)
 ## Base64 encode bytes
 
 [`Base64`]
@@ -380,3 +380,32 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
 [`TryFromInto`]: crate::TryFromInto
+
+### Deserialize into `Vec`, ignoring errors
+
+[`VecSkipError`]
+
+For formats with heterogenous-typed sequences, we can collect only the deserializable elements.
+This is also useful for unknown enum variants.
+
+```rust
+#[derive(Debug, PartialEq, Deserialize)]
+#[non_exhaustive]
+enum Color {
+    Red,
+    Green,
+    Blue,
+}
+use Color::*;
+
+#[serde_as]
+#[derive(Debug, PartialEq, Deserialize)]
+struct Palette(#[serde_as(as = "VecSkipError<_>")] Vec<Color>)
+
+assert_eq!(
+    serde_json::from_str(
+        r#"["Blue", "Yellow", "Green"]"#
+    ).unwrap(),
+    Palette(vec![Blue, Green,])
+);
+```
