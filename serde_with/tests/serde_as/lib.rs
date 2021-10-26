@@ -470,21 +470,26 @@ fn test_vec_skip_error() {
         values: Vec<u8>,
     }
 
-    let v = serde_json::from_value::<S>(serde_json::json!([
-        "type",
-        [0, "str", 1, [999, 998], -2, {}, 300,]
-    ]))
-    .unwrap();
-    assert_eq!(
-        v,
+    check_deserialization(
         S {
             tag: "type".into(),
-            values: vec![0, 1,]
-        }
+            values: vec![0, 1],
+        },
+        r#"{"tag":"type","values":[0, "str", 1, [10, 11], -2, {}, 300]}"#,
     );
-    assert_eq!(
-        r#"{"tag":"type","values":[0,1]}"#,
-        serde_json::to_string(&v).unwrap()
+    is_equal(
+        S {
+            tag: "round-trip".into(),
+            values: vec![0, 255],
+        },
+        expect![[r#"
+        {
+          "tag": "round-trip",
+          "values": [
+            0,
+            255
+          ]
+        }"#]],
     );
 }
 
