@@ -377,19 +377,6 @@ map_impl2!(
     map,
     HashMap::with_capacity_and_hasher(utils::size_hint_cautious(map.size_hint()), S::default()));
 
-impl<'de, T> DeserializeAs<'de, T> for DisplayFromStr
-where
-    T: FromStr,
-    T::Err: Display,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        crate::rust::display_fromstr::deserialize(deserializer)
-    }
-}
-
 macro_rules! tuple_impl {
     ($len:literal $($n:tt $t:ident $tas:ident)+) => {
         impl<'de, $($t, $tas,)+> DeserializeAs<'de, ($($t,)+)> for ($($tas,)+)
@@ -455,15 +442,6 @@ tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
-impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
-    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        T::deserialize(deserializer)
-    }
-}
-
 macro_rules! map_as_tuple_seq {
     ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V>) => {
         impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $ty<K, V>> for Vec<(KAs, VAs)>
@@ -523,6 +501,28 @@ map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 // endregion
 ///////////////////////////////////////////////////////////////////////////////
 // region: Conversion types which cause different serialization behavior
+
+impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        T::deserialize(deserializer)
+    }
+}
+
+impl<'de, T> DeserializeAs<'de, T> for DisplayFromStr
+where
+    T: FromStr,
+    T::Err: Display,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        crate::rust::display_fromstr::deserialize(deserializer)
+    }
+}
 
 impl<'de, T, U> DeserializeAs<'de, Vec<T>> for VecSkipError<U>
 where
