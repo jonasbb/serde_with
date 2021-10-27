@@ -251,18 +251,6 @@ macro_rules! map_impl {
 map_impl!(BTreeMap<K, V>);
 map_impl!(HashMap<K, V, H: Sized>);
 
-impl<T> SerializeAs<T> for DisplayFromStr
-where
-    T: Display,
-{
-    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        crate::rust::display_fromstr::serialize(source, serializer)
-    }
-}
-
 macro_rules! tuple_impl {
     ($len:literal $($n:tt $t:ident $tas:ident)+) => {
         impl<$($t, $tas,)+> SerializeAs<($($t,)+)> for ($($tas,)+)
@@ -301,18 +289,6 @@ tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
-impl<T> SerializeAs<T> for Same
-where
-    T: Serialize + ?Sized,
-{
-    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        source.serialize(serializer)
-    }
-}
-
 macro_rules! map_as_tuple_seq {
     ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V >) => {
         impl<K, KAs, V, VAs> SerializeAs<$ty<K, V>> for Vec<(KAs, VAs)>
@@ -341,6 +317,30 @@ map_as_tuple_seq!(HashMap<K, V>);
 ///////////////////////////////////////////////////////////////////////////////
 // region: Conversion types which cause different serialization behavior
 
+impl<T> SerializeAs<T> for Same
+where
+    T: Serialize + ?Sized,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source.serialize(serializer)
+    }
+}
+
+impl<T> SerializeAs<T> for DisplayFromStr
+where
+    T: Display,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        crate::rust::display_fromstr::serialize(source, serializer)
+    }
+}
+
 impl<T, U> SerializeAs<Vec<T>> for VecSkipError<U>
 where
     U: SerializeAs<T>,
@@ -349,7 +349,7 @@ where
     where
         S: Serializer,
     {
-        SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer)
+        Vec::<U>::serialize_as(source, serializer)
     }
 }
 
