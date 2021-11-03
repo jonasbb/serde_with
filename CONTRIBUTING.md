@@ -34,6 +34,7 @@ This repository provides a devcontainer setup, which can be used with VS Code or
     * A changelog entry can also be added.
 3. Contributions must pass `cargo clippy` and `cargo fmt`.
     This is also checked by CI and needs to pass before the PR can be merged.
+    The CI does not allow any warnings in the compiled code.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall
