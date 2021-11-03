@@ -1,8 +1,10 @@
-#![deny(
+#![warn(
+    clippy::semicolon_if_nothing_returned,
     missing_copy_implementations,
     // missing_crate_level_docs, not available in MSRV
     missing_debug_implementations,
     missing_docs,
+    rust_2018_idioms,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
@@ -10,7 +12,6 @@
     unused_qualifications,
     variant_size_differences
 )]
-#![warn(rust_2018_idioms)]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_copy_implementations,
