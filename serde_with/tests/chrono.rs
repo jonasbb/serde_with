@@ -576,7 +576,7 @@ fn test_chrono_timestamp_seconds_with_frac() {
 }
 
 macro_rules! smoketest {
-    ($($valuety:ty, $adapter:literal, $value:ident, $expect:tt;)*) => {
+    ($($valuety:ty, $adapter:literal, $value:expr, $expect:tt;)*) => {
         $({
             #[serde_as]
             #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -589,6 +589,7 @@ macro_rules! smoketest {
 
 #[test]
 fn test_duration_smoketest() {
+    let zero = Duration::seconds(0);
     let one_second = Duration::seconds(1);
 
     smoketest! {
@@ -611,6 +612,14 @@ fn test_duration_smoketest() {
         Duration, "DurationMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
         Duration, "DurationNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         Duration, "DurationNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
+    };
+
+    smoketest! {
+        Duration, "DurationSecondsWithFrac", zero, {expect![[r#"0.0"#]]};
+        Duration, "DurationSecondsWithFrac", zero + Duration::nanoseconds(500_000_000), {expect![[r#"0.5"#]]};
+        Duration, "DurationSecondsWithFrac", zero + Duration::seconds(1), {expect![[r#"1.0"#]]};
+        Duration, "DurationSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
+        Duration, "DurationSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
     };
 }
 
@@ -640,6 +649,14 @@ fn test_datetime_utc_smoketest() {
         DateTime<Utc>, "TimestampNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         DateTime<Utc>, "TimestampNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
     };
+
+    smoketest! {
+        DateTime<Utc>, "TimestampSecondsWithFrac", zero, {expect![[r#"0.0"#]]};
+        DateTime<Utc>, "TimestampSecondsWithFrac", zero + Duration::nanoseconds(500_000_000), {expect![[r#"0.5"#]]};
+        DateTime<Utc>, "TimestampSecondsWithFrac", zero + Duration::seconds(1), {expect![[r#"1.0"#]]};
+        DateTime<Utc>, "TimestampSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
+        DateTime<Utc>, "TimestampSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
+    };
 }
 
 #[test]
@@ -668,5 +685,49 @@ fn test_datetime_local_smoketest() {
         DateTime<Local>, "TimestampMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
         DateTime<Local>, "TimestampNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         DateTime<Local>, "TimestampNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
+    };
+
+    smoketest! {
+        DateTime<Local>, "TimestampSecondsWithFrac", zero, {expect![[r#"0.0"#]]};
+        DateTime<Local>, "TimestampSecondsWithFrac", zero + Duration::nanoseconds(500_000_000), {expect![[r#"0.5"#]]};
+        DateTime<Local>, "TimestampSecondsWithFrac", zero + Duration::seconds(1), {expect![[r#"1.0"#]]};
+        DateTime<Local>, "TimestampSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
+        DateTime<Local>, "TimestampSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
+    };
+}
+
+#[test]
+fn test_naive_datetime_smoketest() {
+    let zero = NaiveDateTime::from_timestamp(0, 0);
+    let one_second = zero + Duration::seconds(1);
+
+    smoketest! {
+        NaiveDateTime, "TimestampSeconds<i64>", one_second, {expect![[r#"1"#]]};
+        NaiveDateTime, "TimestampSeconds<f64>", one_second, {expect![[r#"1.0"#]]};
+        NaiveDateTime, "TimestampMilliSeconds<i64>", one_second, {expect![[r#"1000"#]]};
+        NaiveDateTime, "TimestampMilliSeconds<f64>", one_second, {expect![[r#"1000.0"#]]};
+        NaiveDateTime, "TimestampMicroSeconds<i64>", one_second, {expect![[r#"1000000"#]]};
+        NaiveDateTime, "TimestampMicroSeconds<f64>", one_second, {expect![[r#"1000000.0"#]]};
+        NaiveDateTime, "TimestampNanoSeconds<i64>", one_second, {expect![[r#"1000000000"#]]};
+        NaiveDateTime, "TimestampNanoSeconds<f64>", one_second, {expect![[r#"1000000000.0"#]]};
+    };
+
+    smoketest! {
+        NaiveDateTime, "TimestampSecondsWithFrac", one_second, {expect![[r#"1.0"#]]};
+        NaiveDateTime, "TimestampSecondsWithFrac<String>", one_second, {expect![[r#""1""#]]};
+        NaiveDateTime, "TimestampMilliSecondsWithFrac", one_second, {expect![[r#"1000.0"#]]};
+        NaiveDateTime, "TimestampMilliSecondsWithFrac<String>", one_second, {expect![[r#""1000""#]]};
+        NaiveDateTime, "TimestampMicroSecondsWithFrac", one_second, {expect![[r#"1000000.0"#]]};
+        NaiveDateTime, "TimestampMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
+        NaiveDateTime, "TimestampNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
+        NaiveDateTime, "TimestampNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
+    };
+
+    smoketest! {
+        NaiveDateTime, "TimestampSecondsWithFrac", zero, {expect![[r#"0.0"#]]};
+        NaiveDateTime, "TimestampSecondsWithFrac", zero + Duration::nanoseconds(500_000_000), {expect![[r#"0.5"#]]};
+        NaiveDateTime, "TimestampSecondsWithFrac", zero + Duration::seconds(1), {expect![[r#"1.0"#]]};
+        NaiveDateTime, "TimestampSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
+        NaiveDateTime, "TimestampSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
     };
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## Changed
+
+* The `Timestamp*Seconds` and `Timestamp*SecondsWithFrac` types can now be used with `chrono::NaiveDateTime`.
+
 ## [1.11.0] - 2021-10-18
 
 ### Added

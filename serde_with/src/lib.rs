@@ -1199,7 +1199,7 @@ pub struct TimestampSeconds<
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct timestamp and allows deserialization from any type.
 /// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports [`chrono::DateTime`][DateTime] with the `chrono`-[feature flag].
+/// This type also supports [`chrono::DateTime`][DateTime] and [`chrono::NaiveDateTime`][NaiveDateTime] with the `chrono`-[feature flag].
 ///
 /// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
 /// | ------------------------- | -------------------------- | ---------------------- |
@@ -1209,6 +1209,8 @@ pub struct TimestampSeconds<
 /// | `chrono::DateTime<Utc>`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
 /// | `chrono::DateTime<Local>` | `TimestampSeconds`         | `i64`, `f64`, `String` |
 /// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | `f64`, `String`        |
+/// | `chrono::NaiveDateTime`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
+/// | `chrono::NaiveDateTime`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
 ///
 /// # Examples
 ///
@@ -1310,6 +1312,7 @@ pub struct TimestampSeconds<
 ///
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: chrono_crate::DateTime
+/// [NaiveDateTime]: chrono_crate::NaiveDateTime
 /// [feature flag]: https://docs.rs/serde_with/1.11.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<

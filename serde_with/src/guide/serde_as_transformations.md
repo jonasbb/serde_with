@@ -346,7 +346,7 @@ value: SystemTime,
 "value": "1.234",
 ```
 
-The same conversions are also implemented for [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] with the `chrono` feature.
+The same conversions are also implemented for [`chrono::DateTime<Utc>`], [`chrono::DateTime<Local>`], and [`chrono::NaiveDateTime`] with the `chrono` feature.
 
 ## Value into JSON String
 
@@ -394,6 +394,7 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`chrono::DateTime<Local>`]: chrono_crate::DateTime
 [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
 [`chrono::Duration`]: https://docs.rs/chrono/latest/chrono/struct.Duration.html
+[`chrono::NaiveDateTime`]: chrono_crate::NaiveDateTime
 [`DefaultOnError`]: crate::DefaultOnError
 [`DefaultOnNull`]: crate::DefaultOnNull
 [`DisplayFromStr`]: crate::DisplayFromStr

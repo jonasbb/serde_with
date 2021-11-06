@@ -23,9 +23,14 @@ fn unix_epoch_utc() -> DateTime<Utc> {
     DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc)
 }
 
-/// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
+/// Create a [`DateTime`] for the Unix Epoch using the [`Local`] timezone
 fn unix_epoch_local() -> DateTime<Local> {
     DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc).with_timezone(&Local)
+}
+
+/// Create a [`NaiveDateTime`] for the Unix Epoch
+fn unix_epoch_naive() -> NaiveDateTime {
+    NaiveDateTime::from_timestamp(0, 0)
 }
 
 /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
@@ -273,6 +278,10 @@ where
     duration_into_duration_signed(&source.clone().signed_duration_since(unix_epoch_utc()))
 }
 
+fn naive_datetime_to_duration(source: &NaiveDateTime) -> DurationSigned {
+    duration_into_duration_signed(&source.signed_duration_since(unix_epoch_naive()))
+}
+
 use_duration_signed_ser!(
     DurationSeconds DurationSeconds,
     DurationMilliSeconds DurationMilliSeconds,
@@ -298,6 +307,20 @@ use_duration_signed_ser!(
     }
 );
 use_duration_signed_ser!(
+    TimestampSeconds DurationSeconds,
+    TimestampMilliSeconds DurationMilliSeconds,
+    TimestampMicroSeconds DurationMicroSeconds,
+    TimestampNanoSeconds DurationNanoSeconds,
+    => {
+        NaiveDateTime; naive_datetime_to_duration =>
+        {i64, STRICTNESS => STRICTNESS: Strictness}
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+);
+
+// Duration/Timestamp WITH FRACTIONS
+use_duration_signed_ser!(
     DurationSecondsWithFrac DurationSecondsWithFrac,
     DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
     DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
@@ -317,6 +340,17 @@ use_duration_signed_ser!(
         DateTime<TZ>; datetime_to_duration =>
         {f64, STRICTNESS => TZ: TimeZone, STRICTNESS: Strictness}
         {String, STRICTNESS => TZ: TimeZone, STRICTNESS: Strictness}
+    }
+);
+use_duration_signed_ser!(
+    TimestampSecondsWithFrac DurationSecondsWithFrac,
+    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
+    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
+    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
+    => {
+        NaiveDateTime; naive_datetime_to_duration =>
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        {String, STRICTNESS => STRICTNESS: Strictness}
     }
 );
 
@@ -367,6 +401,13 @@ where
     Ok(unix_epoch_local() + duration_from_duration_signed::<D>(dur)?)
 }
 
+fn duration_to_naive_datetime<'de, D>(dur: DurationSigned) -> Result<NaiveDateTime, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(unix_epoch_naive() + duration_from_duration_signed::<D>(dur)?)
+}
+
 // No subsecond precision
 use_duration_signed_de!(
     DurationSeconds DurationSeconds,
@@ -407,6 +448,19 @@ use_duration_signed_de!(
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+use_duration_signed_de!(
+    TimestampSeconds DurationSeconds,
+    TimestampMilliSeconds DurationMilliSeconds,
+    TimestampMicroSeconds DurationMicroSeconds,
+    TimestampNanoSeconds DurationNanoSeconds,
+    => {
+        NaiveDateTime; duration_to_naive_datetime =>
+        {i64, Strict =>}
+        {f64, Strict =>}
+        {String, Strict =>}
+        {FORMAT, Flexible => FORMAT: Format}
+    }
+);
 
 // Duration/Timestamp WITH FRACTIONS
 use_duration_signed_de!(
@@ -440,6 +494,18 @@ use_duration_signed_de!(
     TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
         DateTime<Local>; duration_to_datetime_local =>
+        {f64, Strict =>}
+        {String, Strict =>}
+        {FORMAT, Flexible => FORMAT: Format}
+    }
+);
+use_duration_signed_de!(
+    TimestampSecondsWithFrac DurationSecondsWithFrac,
+    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
+    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
+    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
+    => {
+        NaiveDateTime; duration_to_naive_datetime =>
         {f64, Strict =>}
         {String, Strict =>}
         {FORMAT, Flexible => FORMAT: Format}
