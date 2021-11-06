@@ -12,6 +12,11 @@ on:
     - trying
   schedule:
     - cron: '0 0 * * *'
+
+# Allow the action to post about found problems
+permissions:
+  issues: write
+
 jobs:
   security_audit:
     name: Rustsec Audit
