@@ -28,31 +28,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          override: true
-          components: clippy
+      - name: "Install/Update the Rust version"
+        run: |
+          rustup toolchain install ${{ matrix.rust }} --profile minimal --component clippy
+          rustup default ${{ matrix.rust }}
+          cargo --version
+          rustc --version
       - uses: Swatinem/rust-cache@v1
-      - uses: actions-rs/clippy-check@v1
-        name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --workspace --no-default-features --all-targets -- -D warnings
-          name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
-      - uses: actions-rs/clippy-check@v1
-        name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --workspace --all-targets -- -D warnings
-          name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
-      - uses: actions-rs/clippy-check@v1
-        name: clippy "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --workspace --all-features --all-targets -- -D warnings
-          name: clippy "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
+      - name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        run: cargo clippy --workspace --no-default-features --all-targets
+      - name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
+        run: cargo clippy --workspace --all-targets
+      - name: clippy "All Features" (${{ matrix.os }} / ${{ matrix.rust }})
+        run: cargo clippy --workspace --all-features --all-targets
 
   rustfmt:
     name: Rustfmt
@@ -63,17 +51,14 @@ jobs:
           - stable
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          override: true
-          components: rustfmt
-      - uses: actions-rs/cargo@v1
-        name: Rustfmt Check (${{ matrix.rust }})
-        with:
-          command: fmt
-          args: --all -- --check
+      - name: "Install/Update the Rust version"
+        run: |
+          rustup toolchain install ${{ matrix.rust }} --profile minimal --component rustfmt
+          rustup default ${{ matrix.rust }}
+          cargo --version
+          rustc --version
+      - name: Rustfmt Check (${{ matrix.rust }})
+        run: cargo fmt --all -- --check
 
   build_and_test:
     name: Build and Test
@@ -88,79 +73,44 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          override: true
+      - name: "Install/Update the Rust version"
+        run: |
+          rustup toolchain install ${{ matrix.rust }} --profile minimal
+          rustup default ${{ matrix.rust }}
+          cargo --version
+          rustc --version
       - uses: Swatinem/rust-cache@v1
 
       # Build the project
-      - uses: actions-rs/cargo@v1
-        name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        if: matrix.rust != 'nightly'
-        with:
-          command: build
-          args: --all-features --all-targets --manifest-path=${{ matrix.crate }}/Cargo.toml
-      - uses: actions-rs/cargo@v1
-        name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        if: matrix.rust == 'nightly'
-        with:
-          command: build
-          # https://github.com/rust-lang/cargo/issues/8088 for unstable-options
-          args: --all-features --all-targets --manifest-path=${{ matrix.crate }}/Cargo.toml -Zunstable-options -Zfeatures=dev_dep,host_dep
+      - name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo build --all-features --all-targets --manifest-path=${{ matrix.crate }}/Cargo.toml
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests
       # since doctests are important this should not be added
       # https://github.com/rust-lang/cargo/issues/6669
-      - uses: actions-rs/cargo@v1
-        name: "Test Build (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        with:
-          command: test
-          # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
-          # This is no longer necessary for Rust 1.51 or resolver="2"
-          # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
-          args: --no-default-features --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
-      - uses: actions-rs/cargo@v1
-        name: "Test Run (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        with:
-          command: test
-          args: --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
-      - uses: actions-rs/cargo@v1
-        name: "Test Build (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        with:
-          command: test
-          # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
-          # This is no longer necessary for Rust 1.51 or resolver="2"
-          # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
-          args: --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
-      - uses: actions-rs/cargo@v1
-        name: "Test Run (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        with:
-          command: test
-          args: --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
-      - uses: actions-rs/cargo@v1
-        name: "Test Build (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        with:
-          command: test
-          # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
-          # This is no longer necessary for Rust 1.51 or resolver="2"
-          # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
-          args: --all-features  --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
-      - uses: actions-rs/cargo@v1
-        name: "Test Run (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        with:
-          command: test
-          args: --all-features --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
+      #
+      # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
+      # This is no longer necessary for Rust 1.51 or resolver="2"
+      # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
+      - name: "Test Build (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo test --no-default-features --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
+      - name: "Test Run (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo test --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
+      - name: "Test Build (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo test --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
+      - name: "Test Run (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo test --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
+      - name: "Test Build (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo test --all-features  --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
+      - name: "Test Run (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo test --all-features --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
 
       - name: Run cargo-tarpaulin
-        uses: actions-rs/tarpaulin@v0.1
         if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'
-        with:
-          # tarpaulin already runs with --all-targets
-          args: "--workspace --all-features -- --test-threads=1"
-          version: "latest"
+        run: |
+          cargo install cargo-tarpaulin
+          cargo tarpaulin --out Xml --workspace --all-features -- --test-threads=1
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v2
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
