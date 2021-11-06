@@ -5,6 +5,10 @@ on:
       - "macros-v*"
 name: Publish to crates.io
 
+# Limit to write releases
+permissions:
+  contents: write
+
 jobs:
   publish_serde_with:
     runs-on: ubuntu-latest
@@ -29,15 +33,14 @@ jobs:
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./serde_with/CHANGELOG.md
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # This pulls from the "Get Changelog Entry" step above, referencing it's ID to get its outputs object.
           # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           tag_name: "v${{ steps.changelog_reader.outputs.version }}"
-          release_name: "serde_with v${{ steps.changelog_reader.outputs.version }}"
+          name: "serde_with v${{ steps.changelog_reader.outputs.version }}"
           body: ${{ steps.changelog_reader.outputs.changes }}
           prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
           draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
@@ -68,15 +71,14 @@ jobs:
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./serde_with_macros/CHANGELOG.md
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # This pulls from the "Get Changelog Entry" step above, referencing it's ID to get its outputs object.
           # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           tag_name: "macros-v${{ steps.changelog_reader.outputs.version }}"
-          release_name: "serde_with_macros v${{ steps.changelog_reader.outputs.version }}"
+          name: "serde_with_macros v${{ steps.changelog_reader.outputs.version }}"
           body: ${{ steps.changelog_reader.outputs.changes }}
           prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
           draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
