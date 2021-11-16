@@ -551,6 +551,8 @@ where
 // Below is deserialization code
 
 /// Deserialize the sequence of enum instances.
+///
+/// The main [`Deserializer`] implementation handles the outer sequence (e.g., `Vec`), while the [`SeqAccess`] implementation is responsible for the inner elements.
 struct SeqDeserializer<M>(M);
 
 impl<'de, M> Deserializer<'de> for SeqDeserializer<M>
@@ -563,7 +565,7 @@ where
     where
         V: Visitor<'de>,
     {
-        visitor.visit_seq(SeqElementDeserializer(self.0))
+        visitor.visit_seq(self)
     }
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -580,10 +582,7 @@ where
     }
 }
 
-/// Deserialize one element of a sequence, i.e., an enum instance.
-struct SeqElementDeserializer<M>(M);
-
-impl<'de, M> SeqAccess<'de> for SeqElementDeserializer<M>
+impl<'de, M> SeqAccess<'de> for SeqDeserializer<M>
 where
     M: MapAccess<'de>,
 {
@@ -613,7 +612,9 @@ where
 
 /// Deserialize an enum from a map element
 ///
-/// Forward to [`EnumVariantFromMap`] for the actual deserialization.
+/// The [`Deserializer`] implementation is the starting point, which first calls the [`EnumAccess`] methods.
+/// The [`EnumAccess`] is used to deserialize the enum variant type of the enum.
+/// The [`VariantAccess`] is used to deserialize the value part of the enum.
 struct EnumDeserializer<M>(M);
 
 impl<'de, M> Deserializer<'de> for EnumDeserializer<M>
@@ -630,7 +631,7 @@ where
     }
 
     fn deserialize_enum<V>(
-        mut self,
+        self,
         _name: &'static str,
         _variants: &'static [&'static str],
         visitor: V,
@@ -638,7 +639,7 @@ where
     where
         V: Visitor<'de>,
     {
-        visitor.visit_enum(EnumVariantFromMap(&mut self.0))
+        visitor.visit_enum(self)
     }
 
     serde::forward_to_deserialize_any! {
@@ -648,24 +649,19 @@ where
     }
 }
 
-/// Deserialize enum variant
-///
-/// Forward the deserialization of the value to [`EnumValueFromMap`].
-struct EnumVariantFromMap<M>(M);
-
-impl<'de, M> EnumAccess<'de> for EnumVariantFromMap<M>
+impl<'de, M> EnumAccess<'de> for EnumDeserializer<M>
 where
     M: MapAccess<'de>,
 {
     type Error = M::Error;
-    type Variant = EnumValueFromMap<M>;
+    type Variant = Self;
 
     fn variant_seed<T>(mut self, seed: T) -> Result<(T::Value, Self::Variant), Self::Error>
     where
         T: DeserializeSeed<'de>,
     {
         match self.0.next_key_seed(seed)? {
-            Some(key) => Ok((key, EnumValueFromMap(self.0))),
+            Some(key) => Ok((key, self)),
 
             // Unfortunately we loose the optional aspect of MapAccess, so we need to special case an error value to mark the end of the map.
             None => Err(Error::custom(END_OF_MAP_IDENTIFIER)),
@@ -673,12 +669,7 @@ where
     }
 }
 
-/// Deserialize the value part of an enum variant via a `MapAccess`.
-///
-/// Original Source: <https://docs.rs/serde/1.0.130/src/serde/de/value.rs.html#1532>
-struct EnumValueFromMap<M>(M);
-
-impl<'de, M> VariantAccess<'de> for EnumValueFromMap<M>
+impl<'de, M> VariantAccess<'de> for EnumDeserializer<M>
 where
     M: MapAccess<'de>,
 {
