@@ -7,44 +7,68 @@ use crate::size_hint;
 use serde::de::{
     self, Deserialize, DeserializeSeed, Deserializer, EnumAccess, MapAccess, SeqAccess,
 };
-use std::fmt;
+use std::fmt::{self, Debug};
 use std::marker::PhantomData;
 
-/// Used from generated code to buffer the contents of the Deserializer when
-/// deserializing untagged enums and internally tagged enums.
+/// Implementation of the [serde data model] for deserialization.
+///
+/// [serde data model]: https://serde.rs/data-model.html
 #[derive(Debug)]
 pub enum Content<'de> {
+    /// A boolean value
     Bool(bool),
 
+    /// A `u8` value
     U8(u8),
+    /// A `u16` value
     U16(u16),
+    /// A `u32` value
     U32(u32),
+    /// A `u64` value
     U64(u64),
 
+    /// An `i8` value
     I8(i8),
+    /// An `i16` value
     I16(i16),
+    /// An `i32` value
     I32(i32),
+    /// An `i64` value
     I64(i64),
 
+    /// A `f32` value
     F32(f32),
+    /// A `f64` value
     F64(f64),
 
+    /// A `char` value
     Char(char),
+    /// A `String` value
     String(String),
+    /// A borrowed `&str` value
     Str(&'de str),
+    /// A `Vec<u8>` bytes value
     ByteBuf(Vec<u8>),
+    /// A borrowed `&[u8]` bytes value
     Bytes(&'de [u8]),
 
+    /// `None` option value
     None,
+    /// `Some` option value
     Some(Box<Content<'de>>),
 
+    /// Unit value
     Unit,
+    /// A newtype struct value
     Newtype(Box<Content<'de>>),
+    /// A sequence value
     Seq(Vec<Content<'de>>),
+    /// A map value
     Map(Vec<(Content<'de>, Content<'de>)>),
 }
 
 impl<'de> Content<'de> {
+    /// Turn strings and bytes into `&str`
     pub fn as_str(&self) -> Option<&str> {
         match *self {
             Content::Str(x) => Some(x),
@@ -102,10 +126,7 @@ where
     type Deserializer = ContentDeserializer<'de, E>;
 
     fn into_deserializer(self) -> Self::Deserializer {
-        ContentDeserializer {
-            content: self,
-            err: PhantomData,
-        }
+        ContentDeserializer::new(self)
     }
 }
 
@@ -320,6 +341,7 @@ impl<'de> de::Visitor<'de> for ContentVisitor<'de> {
     }
 }
 
+/// A deserializer holding a [`Content`].
 pub struct ContentDeserializer<'de, E> {
     content: Content<'de>,
     err: PhantomData<E>,
@@ -368,6 +390,15 @@ where
             Content::I64(v) => visitor.visit_i64(v),
             _ => Err(self.invalid_type(&visitor)),
         }
+    }
+}
+
+impl<'de, E> Debug for ContentDeserializer<'de, E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ContentDeserializer")
+            .field("content", &self.content)
+            .finish()
     }
 }
 
@@ -754,7 +785,7 @@ where
 }
 
 impl<'de, E> ContentDeserializer<'de, E> {
-    pub fn new(content: Content<'de>) -> Self {
+    fn new(content: Content<'de>) -> Self {
         ContentDeserializer {
             content,
             err: PhantomData,
@@ -1034,6 +1065,7 @@ where
     }
 }
 
+/// A deserializer holding a [`&'a Content`][Content].
 pub struct ContentRefDeserializer<'a, 'de, E> {
     content: &'a Content<'de>,
     err: PhantomData<E>,
@@ -1082,6 +1114,15 @@ where
             Content::I64(v) => visitor.visit_i64(v),
             _ => Err(self.invalid_type(&visitor)),
         }
+    }
+}
+
+impl<'a, 'de, E> Debug for ContentRefDeserializer<'a, 'de, E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ContentRefDeserializer")
+            .field("content", &self.content)
+            .finish()
     }
 }
 
@@ -1459,7 +1500,7 @@ where
 }
 
 impl<'a, 'de, E> ContentRefDeserializer<'a, 'de, E> {
-    pub fn new(content: &'a Content<'de>) -> Self {
+    fn new(content: &'a Content<'de>) -> Self {
         ContentRefDeserializer {
             content,
             err: PhantomData,

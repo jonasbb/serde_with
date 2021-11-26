@@ -1,44 +1,76 @@
 //! TODO
 
 use serde::ser::{self, Serialize, Serializer};
+use std::fmt::{self, Debug};
 use std::marker::PhantomData;
 
+/// Implementation of the [serde data model] for serialization.
+///
+/// [serde data model]: https://serde.rs/data-model.html
 #[derive(Debug)]
 pub enum Content {
+    /// A boolean value
     Bool(bool),
 
+    /// A `u8` value
     U8(u8),
+    /// A `u16` value
     U16(u16),
+    /// A `u32` value
     U32(u32),
+    /// A `u64` value
     U64(u64),
 
+    /// An `i8` value
     I8(i8),
+    /// An `i16` value
     I16(i16),
+    /// An `i32` value
     I32(i32),
+    /// An `i64` value
     I64(i64),
 
+    /// A `f32` value
     F32(f32),
+    /// A `f64` value
     F64(f64),
 
+    /// A `char` value
     Char(char),
+    /// A `String` value
     String(String),
+    /// A `Vec<u8>` bytes value
     Bytes(Vec<u8>),
 
+    /// `None` option value
     None,
+    /// `Some` option value
     Some(Box<Content>),
 
+    /// Unit value
     Unit,
+    /// A unit struct value
     UnitStruct(&'static str),
+    /// A unit variant value
     UnitVariant(&'static str, u32, &'static str),
+    /// A newtype struct value
     NewtypeStruct(&'static str, Box<Content>),
+    /// A newtype variant value
     NewtypeVariant(&'static str, u32, &'static str, Box<Content>),
 
+    /// A sequence value
     Seq(Vec<Content>),
+    /// A tuple value
     Tuple(Vec<Content>),
+    /// A tuple struct value
     TupleStruct(&'static str, Vec<Content>),
+    /// A tuple variant value
     TupleVariant(&'static str, u32, &'static str, Vec<Content>),
+    /// A map value
     Map(Vec<(Content, Content)>),
+    /// A struct value
     Struct(&'static str, Vec<(&'static str, Content)>),
+    /// A struct variant value
     StructVariant(
         &'static str,
         u32,
@@ -129,11 +161,13 @@ impl Serialize for Content {
     }
 }
 
+/// A [`Serializer`] producing a [`Content`]
 pub struct ContentSerializer<E> {
     error: PhantomData<E>,
 }
 
 impl<E> ContentSerializer<E> {
+    /// Create a new [`ContentSerializer`]
     pub fn new() -> Self {
         ContentSerializer { error: PhantomData }
     }
@@ -142,6 +176,12 @@ impl<E> ContentSerializer<E> {
 impl<E> Default for ContentSerializer<E> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl<E> Debug for ContentSerializer<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.debug_struct("ContentSerializer").finish()
     }
 }
 
@@ -351,9 +391,19 @@ where
     }
 }
 
+/// Handles [`Serializer::serialize_seq`] for [`ContentSerializer`].
 pub struct SerializeSeq<E> {
     elements: Vec<Content>,
     error: PhantomData<E>,
+}
+
+impl<E> Debug for SerializeSeq<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SerializeSeq")
+            .field("elements", &self.elements)
+            .finish()
+    }
 }
 
 impl<E> ser::SerializeSeq for SerializeSeq<E>
@@ -377,9 +427,19 @@ where
     }
 }
 
+/// Handles [`Serializer::serialize_tuple`] for [`ContentSerializer`].
 pub struct SerializeTuple<E> {
     elements: Vec<Content>,
     error: PhantomData<E>,
+}
+
+impl<E> Debug for SerializeTuple<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SerializeTuple")
+            .field("elements", &self.elements)
+            .finish()
+    }
 }
 
 impl<E> ser::SerializeTuple for SerializeTuple<E>
@@ -403,10 +463,21 @@ where
     }
 }
 
+/// Handles [`Serializer::serialize_tuple_struct`] for [`ContentSerializer`].
 pub struct SerializeTupleStruct<E> {
     name: &'static str,
     fields: Vec<Content>,
     error: PhantomData<E>,
+}
+
+impl<E> Debug for SerializeTupleStruct<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SerializeTupleStruct")
+            .field("name", &self.name)
+            .field("fields", &self.fields)
+            .finish()
+    }
 }
 
 impl<E> ser::SerializeTupleStruct for SerializeTupleStruct<E>
@@ -430,12 +501,25 @@ where
     }
 }
 
+/// Handles [`Serializer::serialize_tuple_variant`] for [`ContentSerializer`].
 pub struct SerializeTupleVariant<E> {
     name: &'static str,
     variant_index: u32,
     variant: &'static str,
     fields: Vec<Content>,
     error: PhantomData<E>,
+}
+
+impl<E> Debug for SerializeTupleVariant<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SerializeTupleVariant")
+            .field("name", &self.name)
+            .field("variant_index", &self.variant_index)
+            .field("variant", &self.variant)
+            .field("fields", &self.fields)
+            .finish()
+    }
 }
 
 impl<E> ser::SerializeTupleVariant for SerializeTupleVariant<E>
@@ -464,10 +548,21 @@ where
     }
 }
 
+/// Handles [`Serializer::serialize_map`] for [`ContentSerializer`].
 pub struct SerializeMap<E> {
     entries: Vec<(Content, Content)>,
     key: Option<Content>,
     error: PhantomData<E>,
+}
+
+impl<E> Debug for SerializeMap<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SerializeMap")
+            .field("entries", &self.entries)
+            .field("key", &self.key)
+            .finish()
+    }
 }
 
 impl<E> ser::SerializeMap for SerializeMap<E>
@@ -515,10 +610,21 @@ where
     }
 }
 
+/// Handles [`Serializer::serialize_struct`] for [`ContentSerializer`].
 pub struct SerializeStruct<E> {
     name: &'static str,
     fields: Vec<(&'static str, Content)>,
     error: PhantomData<E>,
+}
+
+impl<E> Debug for SerializeStruct<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SerializeStruct")
+            .field("name", &self.name)
+            .field("fields", &self.fields)
+            .finish()
+    }
 }
 
 impl<E> ser::SerializeStruct for SerializeStruct<E>
@@ -542,12 +648,25 @@ where
     }
 }
 
+/// Handles [`Serializer::serialize_struct_variant`] for [`ContentSerializer`].
 pub struct SerializeStructVariant<E> {
     name: &'static str,
     variant_index: u32,
     variant: &'static str,
     fields: Vec<(&'static str, Content)>,
     error: PhantomData<E>,
+}
+
+impl<E> Debug for SerializeStructVariant<E> {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SerializeStructVariant")
+            .field("name", &self.name)
+            .field("variant_index", &self.variant_index)
+            .field("variant", &self.variant)
+            .field("fields", &self.fields)
+            .finish()
+    }
 }
 
 impl<E> ser::SerializeStructVariant for SerializeStructVariant<E>
