@@ -3,6 +3,17 @@ name = "serde_content"
 version = "0.1.0"
 edition = "2018"
 rust-version = "1.46"
+# Code taken from https://github.com/serde-rs/serde
+# with original authors being:
+# authors = ["Erick Tryzelaar <erick.tryzelaar@gmail.com>", "David Tolnay <dtolnay@gmail.com>"]
+
+categories = ["encoding"]
+description = "Generic value trees for later de-/serialization or processing"
+documentation = "https://docs.rs/serde_with/"
+keywords = ["serde", "utilities", "serialization", "deserialization"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/jonasbb/serde_with"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
