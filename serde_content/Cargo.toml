@@ -1,6 +1,6 @@
 [package]
 name = "serde_content"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2018"
 rust-version = "1.46"
 # Code taken from https://github.com/serde-rs/serde
@@ -19,3 +19,6 @@ repository = "https://github.com/jonasbb/serde_with"
 
 [dependencies]
 serde = "1.0.130"
+
+[dev-dependencies]
+version-sync = "0.9.3"
