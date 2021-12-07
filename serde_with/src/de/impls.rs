@@ -223,6 +223,10 @@ macro_rules! seq_impl {
         $with_capacity:expr,
         $append:ident
     ) => {
+        // Fix for clippy regression in macros on stable
+        // The bug no longer exists on nightly
+        // https://github.com/rust-lang/rust-clippy/issues/7768
+        #[allow(clippy::semicolon_if_nothing_returned)]
         impl<'de, T, U> DeserializeAs<'de, $ty<T>> for $ty<U>
         where
             U: DeserializeAs<'de, T>,
@@ -316,6 +320,10 @@ macro_rules! map_impl2 {
         $access:ident,
         $with_capacity:expr
     ) => {
+        // Fix for clippy regression in macros on stable
+        // The bug no longer exists on nightly
+        // https://github.com/rust-lang/rust-clippy/issues/7768
+        #[allow(clippy::semicolon_if_nothing_returned)]
         impl<'de, K, V, KU, VU $(, $typaram)*> DeserializeAs<'de, $ty<K, V $(, $typaram)*>> for $ty<KU, VU $(, $typaram)*>
         where
             KU: DeserializeAs<'de, K>,
