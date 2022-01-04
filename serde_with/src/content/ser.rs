@@ -11,11 +11,13 @@ pub(crate) enum Content {
     U16(u16),
     U32(u32),
     U64(u64),
+    U128(u128),
 
     I8(i8),
     I16(i16),
     I32(i32),
     I64(i64),
+    I128(i128),
 
     F32(f32),
     F64(f64),
@@ -58,10 +60,12 @@ impl Serialize for Content {
             Content::U16(u) => serializer.serialize_u16(u),
             Content::U32(u) => serializer.serialize_u32(u),
             Content::U64(u) => serializer.serialize_u64(u),
+            Content::U128(u) => serializer.serialize_u128(u),
             Content::I8(i) => serializer.serialize_i8(i),
             Content::I16(i) => serializer.serialize_i16(i),
             Content::I32(i) => serializer.serialize_i32(i),
             Content::I64(i) => serializer.serialize_i64(i),
+            Content::I128(i) => serializer.serialize_i128(i),
             Content::F32(f) => serializer.serialize_f32(f),
             Content::F64(f) => serializer.serialize_f64(f),
             Content::Char(c) => serializer.serialize_char(c),
@@ -188,6 +192,10 @@ where
         Ok(Content::I64(v))
     }
 
+    fn serialize_i128(self, v: i128) -> Result<Content, E> {
+        Ok(Content::I128(v))
+    }
+
     fn serialize_u8(self, v: u8) -> Result<Content, E> {
         Ok(Content::U8(v))
     }
@@ -202,6 +210,10 @@ where
 
     fn serialize_u64(self, v: u64) -> Result<Content, E> {
         Ok(Content::U64(v))
+    }
+
+    fn serialize_u128(self, v: u128) -> Result<Content, E> {
+        Ok(Content::U128(v))
     }
 
     fn serialize_f32(self, v: f32) -> Result<Content, E> {
