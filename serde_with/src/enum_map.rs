@@ -703,6 +703,25 @@ mod test {
     use std::net::IpAddr;
     use std::str::FromStr;
 
+    fn bytes_debug_readable(bytes: &[u8]) -> String {
+        let mut result = String::with_capacity(bytes.len() * 2);
+        for &byte in bytes {
+            match byte {
+                control if control < 0x20 || control == 0x7f => {
+                    result.push_str(&format!("\\x{:02x}", byte));
+                }
+                non_ascii if non_ascii > 0x7f => {
+                    result.push_str(&format!("\\x{:02x}", byte));
+                }
+                b'\\' => result.push_str("\\\\"),
+                _ => {
+                    result.push(byte as char);
+                }
+            }
+        }
+        result
+    }
+
     #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
     enum EnumValue {
         Int(i32),
@@ -987,11 +1006,6 @@ mod test {
         serde_test::assert_tokens(
             &values.clone().readable(),
             &[
-                Struct {
-                    name: "VecEnumValues",
-                    len: 1,
-                },
-                Str("vec"),
                 Map {
                     len: Option::Some(1),
                 },
@@ -1004,18 +1018,12 @@ mod test {
                 Str("::7777:dead:beef"),
                 TupleStructEnd,
                 MapEnd,
-                StructEnd,
             ],
         );
 
         serde_test::assert_tokens(
             &values.compact(),
             &[
-                Struct {
-                    name: "VecEnumValues",
-                    len: 1,
-                },
-                Str("vec"),
                 Map {
                     len: Option::Some(1),
                 },
@@ -1058,7 +1066,6 @@ mod test {
                 TupleEnd,
                 TupleStructEnd,
                 MapEnd,
-                StructEnd,
             ],
         );
     }
@@ -1087,8 +1094,8 @@ mod test {
         ]);
 
         let rmp = rmp_serde::to_vec(&values).unwrap();
-        expect_test::expect![[r#"[136, 163, 73, 110, 116, 123, 166, 83, 116, 114, 105, 110, 103, 166, 70, 111, 111, 66, 97, 114, 163, 73, 110, 116, 205, 1, 200, 166, 83, 116, 114, 105, 110, 103, 163, 88, 88, 88, 164, 85, 110, 105, 116, 192, 165, 84, 117, 112, 108, 101, 147, 1, 166, 77, 105, 100, 100, 108, 101, 194, 166, 83, 116, 114, 117, 99, 116, 147, 205, 2, 154, 163, 66, 66, 66, 195, 162, 73, 112, 146, 129, 0, 148, 127, 0, 0, 1, 129, 1, 220, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 119, 119, 204, 222, 204, 173, 204, 190, 204, 239]"#]]
-        .assert_eq(&format!("{:?}", rmp));
+        expect_test::expect![[r#"\x88\xa3Int{\xa6String\xa6FooBar\xa3Int\xcd\x01\xc8\xa6String\xa3XXX\xa4Unit\xc0\xa5Tuple\x93\x01\xa6Middle\xc2\xa6Struct\x93\xcd\x02\x9a\xa3BBB\xc3\xa2Ip\x92\x81\x00\x94\x7f\x00\x00\x01\x81\x01\xdc\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00ww\xcc\xde\xcc\xad\xcc\xbe\xcc\xef"#]]
+        .assert_eq(&bytes_debug_readable(&rmp));
         let deser_values: VecEnumValues = rmp_serde::from_read(&*rmp).unwrap();
         assert_eq!(values, deser_values);
     }
