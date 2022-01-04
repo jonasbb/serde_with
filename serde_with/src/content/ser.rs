@@ -4,7 +4,7 @@ use serde::ser::{self, Serialize, Serializer};
 use std::marker::PhantomData;
 
 #[derive(Debug)]
-pub enum Content {
+pub(crate) enum Content {
     Bool(bool),
 
     U8(u8),
@@ -129,13 +129,13 @@ impl Serialize for Content {
     }
 }
 
-pub struct ContentSerializer<E> {
+pub(crate) struct ContentSerializer<E> {
     is_human_readable: bool,
     error: PhantomData<E>,
 }
 
 impl<E> ContentSerializer<E> {
-    pub fn new(is_human_readable: bool) -> Self {
+    pub(crate) fn new(is_human_readable: bool) -> Self {
         ContentSerializer {
             is_human_readable,
             error: PhantomData,
@@ -366,7 +366,7 @@ where
     }
 }
 
-pub struct SerializeSeq<E> {
+pub(crate) struct SerializeSeq<E> {
     is_human_readable: bool,
     elements: Vec<Content>,
     error: PhantomData<E>,
@@ -393,7 +393,7 @@ where
     }
 }
 
-pub struct SerializeTuple<E> {
+pub(crate) struct SerializeTuple<E> {
     is_human_readable: bool,
     elements: Vec<Content>,
     error: PhantomData<E>,
@@ -420,7 +420,7 @@ where
     }
 }
 
-pub struct SerializeTupleStruct<E> {
+pub(crate) struct SerializeTupleStruct<E> {
     is_human_readable: bool,
     name: &'static str,
     fields: Vec<Content>,
@@ -448,7 +448,7 @@ where
     }
 }
 
-pub struct SerializeTupleVariant<E> {
+pub(crate) struct SerializeTupleVariant<E> {
     is_human_readable: bool,
     name: &'static str,
     variant_index: u32,
@@ -483,7 +483,7 @@ where
     }
 }
 
-pub struct SerializeMap<E> {
+pub(crate) struct SerializeMap<E> {
     is_human_readable: bool,
     entries: Vec<(Content, Content)>,
     key: Option<Content>,
@@ -535,7 +535,7 @@ where
     }
 }
 
-pub struct SerializeStruct<E> {
+pub(crate) struct SerializeStruct<E> {
     is_human_readable: bool,
     name: &'static str,
     fields: Vec<(&'static str, Content)>,
@@ -563,7 +563,7 @@ where
     }
 }
 
-pub struct SerializeStructVariant<E> {
+pub(crate) struct SerializeStructVariant<E> {
     is_human_readable: bool,
     name: &'static str,
     variant_index: u32,
