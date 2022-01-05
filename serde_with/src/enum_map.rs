@@ -1,8 +1,3 @@
-//! TODO
-//!
-//! Could fix this:
-//! https://github.com/serde-rs/json/issues/743
-
 use crate::content::ser::{Content, ContentSerializer};
 use crate::{DeserializeAs, SerializeAs};
 use serde::de::{DeserializeSeed, EnumAccess, Error, MapAccess, SeqAccess, VariantAccess, Visitor};
@@ -13,7 +8,154 @@ use serde::{ser, Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 use std::marker::PhantomData;
 
-/// TODO
+/// Represent a list of enum values as a map.
+///
+/// This **only works** if the enum uses the default *externally tagged* representation.
+/// Other enum representations are not supported.
+///
+/// serde data formats often represent *externally tagged* enums as maps with a single key.
+/// The key is the enum variant name, and the value is the variant value.
+/// Sometimes a map with multiple keys should be treated like a list of enum values.
+///
+/// # Examples
+///
+/// ## JSON Map with multiple keys
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// use serde_with::EnumMap;
+///
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// enum EnumValue {
+///     Int(i32),
+///     String(String),
+///     Unit,
+///     Tuple(i32, String, bool),
+///     Struct {
+///         a: i32,
+///         b: String,
+///         c: bool,
+///     },
+/// }
+///
+/// #[serde_with::serde_as]
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct VecEnumValues (
+///     #[serde_as(as = "EnumMap")]
+///     Vec<EnumValue>,
+/// );
+///
+/// // ---
+///
+/// // This will serialize this list of values
+/// let values = VecEnumValues(vec![
+///     EnumValue::Int(123),
+///     EnumValue::String("FooBar".to_string()),
+///     EnumValue::Int(456),
+///     EnumValue::String("XXX".to_string()),
+///     EnumValue::Unit,
+///     EnumValue::Tuple(1, "Middle".to_string(), false),
+///     EnumValue::Struct {
+///         a: 666,
+///         b: "BBB".to_string(),
+///         c: true,
+///     },
+/// ]);
+///
+/// // into this JSON map
+/// // Duplicate keys are emitted for identical enum variants.
+/// let expected =
+/// r#"{
+///   "Int": 123,
+///   "String": "FooBar",
+///   "Int": 456,
+///   "String": "XXX",
+///   "Unit": null,
+///   "Tuple": [
+///     1,
+///     "Middle",
+///     false
+///   ],
+///   "Struct": {
+///     "a": 666,
+///     "b": "BBB",
+///     "c": true
+///   }
+/// }"#;
+///
+/// // Both serialization and deserialization work flawlessly.
+/// let serialized = serde_json::to_string_pretty(&values).unwrap();
+/// assert_eq!(expected, serialized);
+/// let deserialized: VecEnumValues = serde_json::from_str(&serialized).unwrap();
+/// assert_eq!(values, deserialized);
+/// # }
+/// ```
+///
+/// ## XML structure with varying keys
+///
+/// With `serde_xml_rs` tuple and struct variants are not supported since they fail to roundtrip.
+/// The enum may have such variants as long as they are not serialized or deserialized.
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// use serde_with::EnumMap;
+///
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// enum EnumValue {
+///     Int(i32),
+///     String(String),
+///     Unit,
+/// }
+///
+/// #[serde_with::serde_as]
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct VecEnumValues {
+///     #[serde_as(as = "EnumMap")]
+///     vec: Vec<EnumValue>,
+/// }
+///
+/// // ---
+///
+/// // This will serialize this list of values
+/// let values = VecEnumValues {
+///     vec: vec![
+///         EnumValue::Int(123),
+///         EnumValue::String("FooBar".to_string()),
+///         EnumValue::Int(456),
+///         EnumValue::String("XXX".to_string()),
+///         EnumValue::Unit,
+///     ],
+/// };
+///
+/// // into this XML document
+/// // Duplicate keys are emitted for identical enum variants.
+/// let expected = r#"
+/// <VecEnumValues>
+///     <vec>
+///         <Int>123</Int>
+///         <String>FooBar</String>
+///         <Int>456</Int>
+///         <String>XXX</String>
+///         <Unit></Unit>
+///     </vec>
+/// </VecEnumValues>"#
+/// // Remove whitespace
+/// .replace(' ', "")
+/// .replace('\n', "");
+///
+/// // Both serialization and deserialization work flawlessly.
+/// let serialized = serde_xml_rs::to_string(&values).unwrap();
+/// assert_eq!(expected, serialized);
+/// let deserialized: VecEnumValues = serde_xml_rs::from_str(&serialized).unwrap();
+/// assert_eq!(values, deserialized);
+/// # }
+/// ```
 #[derive(Debug, Copy, Clone)]
 pub struct EnumMap;
 
