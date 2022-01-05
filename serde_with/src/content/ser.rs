@@ -1,7 +1,7 @@
 //! Buffer for serializing data.
 //!
 //! This is a copy and improvement of the `serde` private type:
-//! https://github.com/serde-rs/serde/blob/55a7cedd737278a9d75a2efd038c6f38b8c38bd6/serde/src/private/ser.rs#L338-L997
+//! <https://github.com/serde-rs/serde/blob/55a7cedd737278a9d75a2efd038c6f38b8c38bd6/serde/src/private/ser.rs#L338-L997>
 //! The code is very stable in the `serde` crate, so no maintainability problem is expected.
 //!
 //! Since the type is private we copy the type here.
