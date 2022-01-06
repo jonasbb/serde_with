@@ -22,7 +22,6 @@
     unused_extern_crates,
     unused_import_braces,
     unused_qualifications,
-    variant_size_differences,
 ))))]
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`

@@ -14,14 +14,15 @@ This page lists the transformations implemented in this crate and supported by `
 10. [`Duration` as seconds](#duration-as-seconds)
 11. [Hex encode bytes](#hex-encode-bytes)
 12. [Ignore deserialization errors](#ignore-deserialization-errors)
-13. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-14. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-15. [`None` as empty `String`](#none-as-empty-string)
-16. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
-17. [Pick first successful deserialization](#pick-first-successful-deserialization)
-18. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-19. [Value into JSON String](#value-into-json-string)
-20. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+13. [`Maps` to `Vec` of enums](#maps-to-vec-of-enums)
+14. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+15. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+16. [`None` as empty `String`](#none-as-empty-string)
+17. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
+18. [Pick first successful deserialization](#pick-first-successful-deserialization)
+19. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+20. [Value into JSON String](#value-into-json-string)
+21. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 
 ## Base64 encode bytes
 
@@ -234,6 +235,57 @@ uppercase: Vec<u8>,
 
 Check the documentation for [`DefaultOnError`].
 
+## `Maps` to `Vec` of enums
+
+[`EnumMap`]
+
+Combine multiple enum values into a single map.
+The key is the enum variant name, and the value is the variant value.
+This only works with [*externally tagged*] enums, the default enum representation.
+Other forms cannot be supported.
+
+```ignore
+enum EnumValue {
+    Int(i32),
+    String(String),
+    Unit,
+    Tuple(i32, String),
+    Struct {
+        a: i32,
+        b: String,
+    },
+}
+
+// Rust
+VecEnumValues(vec![
+    EnumValue::Int(123),
+    EnumValue::String("Foo".to_string()),
+    EnumValue::Unit,
+    EnumValue::Tuple(1, "Bar".to_string()),
+    EnumValue::Struct {
+        a: 666,
+        b: "Baz".to_string(),
+    },
+]
+
+// JSON
+{
+  "Int": 123,
+  "String": "Foo",
+  "Unit": null,
+  "Tuple": [
+    1,
+    "Bar",
+  ],
+  "Struct": {
+    "a": 666,
+    "b": "Baz",
+  }
+}
+```
+
+[*externally tagged*]: https://serde.rs/enum-representations.html#externally-tagged
+
 ## `Maps` to `Vec` of tuples
 
 ```ignore
@@ -400,6 +452,7 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`DisplayFromStr`]: crate::DisplayFromStr
 [`DurationSeconds`]: crate::DurationSeconds
 [`DurationSecondsWithFrac`]: crate::DurationSecondsWithFrac
+[`EnumMap`]: crate::EnumMap
 [`FromInto`]: crate::FromInto
 [`Hex`]: crate::hex::Hex
 [`JsonString`]: crate::json::JsonString

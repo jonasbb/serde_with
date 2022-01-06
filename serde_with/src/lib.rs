@@ -21,7 +21,6 @@
     unused_extern_crates,
     unused_import_braces,
     unused_qualifications,
-    variant_size_differences,
 ))))]
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
@@ -262,6 +261,7 @@ pub mod chrono;
 mod content;
 pub mod de;
 mod duplicate_key_impls;
+mod enum_map;
 mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
@@ -317,7 +317,9 @@ generate_guide! {
 }
 
 #[doc(inline)]
-pub use crate::{de::DeserializeAs, rust::StringWithSeparator, ser::SerializeAs};
+pub use crate::{
+    de::DeserializeAs, enum_map::EnumMap, rust::StringWithSeparator, ser::SerializeAs,
+};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]

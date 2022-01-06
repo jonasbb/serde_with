@@ -1,4 +1,5 @@
 mod default_on;
+mod enum_map;
 mod frominto;
 mod map_tuple_list;
 mod pickfirst;
