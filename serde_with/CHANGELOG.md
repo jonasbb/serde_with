@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## Added
+
+* Transform between maps and `Vec<Enum>`
+
+    The new `EnumMap` type converts `Vec` of enums into a single map.
+    The key is the enum variant name, and the value is the variant value.
+
+    ```rust
+    // Rust
+    VecEnumValues(vec![
+        EnumValue::Int(123),
+        EnumValue::String("Foo".to_string()),
+        EnumValue::Unit,
+        EnumValue::Tuple(1, "Bar".to_string()),
+        EnumValue::Struct {
+            a: 666,
+            b: "Baz".to_string(),
+        },
+    ]
+
+    // JSON
+    {
+      "Int": 123,
+      "String": "Foo",
+      "Unit": null,
+      "Tuple": [
+        1,
+        "Bar",
+      ],
+      "Struct": {
+        "a": 666,
+        "b": "Baz",
+      }
+    }
+    ```
+
 ## Changed
 
 * The `Timestamp*Seconds` and `Timestamp*SecondsWithFrac` types can now be used with `chrono::NaiveDateTime`.
