@@ -108,7 +108,8 @@ fn ron_serialize() {
         ],
     };
 
-    let ron = ron::ser::to_string_pretty(&values, ron::ser::PrettyConfig::new()).unwrap();
+    let pretty_config = ron::ser::PrettyConfig::new().new_line("\n".into());
+    let ron = ron::ser::to_string_pretty(&values, pretty_config).unwrap();
     expect_test::expect![[r#"
             (
                 vec: {
