@@ -1,18 +1,19 @@
+name: Publish to crates.io
 on:
   push:
     tags:
       - "v*"
       - "macros-v*"
-name: Publish to crates.io
-
-# Limit to write releases
-permissions:
-  contents: write
+permissions: read-all
 
 jobs:
   publish_serde_with:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      # Needed to publish releases
+      contents: write
+
     steps:
       - uses: actions/checkout@v2
       - name: "Install/Update the Rust version"
@@ -52,6 +53,10 @@ jobs:
   publish_serde_with_macros:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/macros-v')
+    permissions:
+      # Needed to publish releases
+      contents: write
+
     steps:
       - uses: actions/checkout@v2
       - name: "Install/Update the Rust version"
