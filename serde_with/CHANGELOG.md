@@ -9,7 +9,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Added
 
-* Transform between maps and `Vec<Enum>`
+* Deserialize a `Vec` and skip all elements failing to deserialize #383
+
+    `VecSkipError` acts like a `Vec`, but elements which fail to deserialize, like the `"Yellow"` are ignored.
+
+    ```rust
+    #[derive(serde::Deserialize)]
+    enum Color {
+        Red,
+        Green,
+        Blue,
+    }
+    // JSON
+    "colors": ["Blue", "Yellow", "Green"],
+    // Rust
+    #[serde_as(as = "VecSkipError<_>")]
+    colors: Vec<Color>,
+    // => vec![Blue, Green]
+    ```
+
+    Thanks to @hdhoang for creating the PR.
+
+* Transform between maps and `Vec<Enum>` #375
 
     The new `EnumMap` type converts `Vec` of enums into a single map.
     The key is the enum variant name, and the value is the variant value.
@@ -45,7 +66,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Changed
 
-* The `Timestamp*Seconds` and `Timestamp*SecondsWithFrac` types can now be used with `chrono::NaiveDateTime`.
+* The `Timestamp*Seconds` and `Timestamp*SecondsWithFrac` types can now be used with `chrono::NaiveDateTime`. #389
 
 ## [1.11.0] - 2021-10-18
 
