@@ -12,15 +12,15 @@ on:
     - trying
   schedule:
     - cron: '0 0 * * *'
-
-# Allow the action to post about found problems
-permissions:
-  issues: write
+permissions: read-all
 
 jobs:
   security_audit:
     name: Rustsec Audit
     runs-on: ubuntu-latest
+    permissions:
+      # Allow the action to post about found problems
+      issues: write
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/audit-check@v1
