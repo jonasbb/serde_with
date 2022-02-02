@@ -94,6 +94,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 * Fixed RUSTSEC-2020-0071 in the `time` v0.1 dependency, but changing the feature flags of the `chrono` dependency. This should not change anything. Crates requiring the `oldtime` feature of `chrono` can enable it separately.
+* Allow `HashSet`s with custom hashers to be deserialized when used in combination with `serde_as`.  #408
 
 ## [1.10.0] - 2021-09-04
 
