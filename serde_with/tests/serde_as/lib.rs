@@ -1,3 +1,4 @@
+mod collections;
 mod default_on;
 mod enum_map;
 mod frominto;

@@ -218,7 +218,7 @@ where
 
 macro_rules! seq_impl {
     (
-        $ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* >,
+        $ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)* )* >,
         $access:ident,
         $with_capacity:expr,
         $append:ident
@@ -227,26 +227,27 @@ macro_rules! seq_impl {
         // The bug no longer exists on nightly
         // https://github.com/rust-lang/rust-clippy/issues/7768
         #[allow(clippy::semicolon_if_nothing_returned)]
-        impl<'de, T, U> DeserializeAs<'de, $ty<T>> for $ty<U>
+        impl<'de, T, U $(, $typaram)*> DeserializeAs<'de, $ty<T $(, $typaram)*>> for $ty<U $(, $typaram)*>
         where
             U: DeserializeAs<'de, T>,
             $(T: $tbound1 $(+ $tbound2)*,)*
+            $($typaram: $bound1 $(+ $bound2)*),*
         {
-            fn deserialize_as<D>(deserializer: D) -> Result<$ty<T>, D::Error>
+            fn deserialize_as<D>(deserializer: D) -> Result<$ty<T $(, $typaram)*>, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct SeqVisitor<T, U> {
-                    marker: PhantomData<T>,
-                    marker2: PhantomData<U>,
+                struct SeqVisitor<T, U $(, $typaram)*> {
+                    marker: PhantomData<(T, U $(, $typaram)*)>,
                 }
 
-                impl<'de, T, U> Visitor<'de> for SeqVisitor<T, U>
+                impl<'de, T, U $(, $typaram)*> Visitor<'de> for SeqVisitor<T, U $(, $typaram)*>
                 where
                     U: DeserializeAs<'de, T>,
                     $(T: $tbound1 $(+ $tbound2)*,)*
+                    $($typaram: $bound1 $(+ $bound2)*),*
                 {
-                    type Value = $ty<T>;
+                    type Value = $ty<T $(, $typaram)*>;
 
                     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str("a sequence")
@@ -269,9 +270,8 @@ macro_rules! seq_impl {
                     }
                 }
 
-                let visitor = SeqVisitor::<T, U> {
+                let visitor = SeqVisitor::<T, U $(, $typaram)*> {
                     marker: PhantomData,
-                    marker2: PhantomData,
                 };
                 deserializer.deserialize_seq(visitor)
             }
@@ -294,9 +294,9 @@ seq_impl!(
 );
 seq_impl!(BTreeSet<T: Ord>, seq, BTreeSet::new(), insert);
 seq_impl!(
-    HashSet<T: Eq + Hash>,
+    HashSet<T: Eq + Hash, S: BuildHasher + Default>,
     seq,
-    HashSet::with_capacity(utils::size_hint_cautious(seq.size_hint())),
+    HashSet::with_capacity_and_hasher(utils::size_hint_cautious(seq.size_hint()), S::default()),
     insert
 );
 seq_impl!(LinkedList<T>, seq, LinkedList::new(), push_back);
