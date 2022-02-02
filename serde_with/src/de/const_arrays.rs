@@ -21,7 +21,7 @@ where
     E: Error,
 {
     fn drop_array_elems<T, const N: usize>(num: usize, mut arr: [MaybeUninit<T>; N]) {
-        (&mut arr[0..num]).iter_mut().for_each(|elem| {
+        arr[..num].iter_mut().for_each(|elem| {
             // TODO This would be better with assume_init_drop nightly function
             // https://github.com/rust-lang/rust/issues/63567
             unsafe { std::ptr::drop_in_place(elem.as_mut_ptr()) };
@@ -41,7 +41,7 @@ where
     // uninitialized value to be dropped. Also if there is a panic during
     // this loop, we have a memory leak, but there is no memory safety
     // issue.
-    for (idx, elem) in (&mut arr[..]).iter_mut().enumerate() {
+    for (idx, elem) in arr[..].iter_mut().enumerate() {
         *elem = match iter.next() {
             Some(Ok(value)) => MaybeUninit::new(value),
             Some(Err(err)) => {
