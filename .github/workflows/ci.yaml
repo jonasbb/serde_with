@@ -35,6 +35,7 @@ jobs:
           rustup default ${{ matrix.rust }}
           cargo --version
           rustc --version
+      - run: echo "::add-matcher::.github/rust.json"
       - uses: Swatinem/rust-cache@v1
       - name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         run: cargo clippy --workspace --no-default-features --all-targets
@@ -58,6 +59,7 @@ jobs:
           rustup default ${{ matrix.rust }}
           cargo --version
           rustc --version
+      - run: echo "::add-matcher::.github/rust.json"
       - name: Rustfmt Check (${{ matrix.rust }})
         run: cargo fmt --all -- --check
 
@@ -80,6 +82,7 @@ jobs:
           rustup default ${{ matrix.rust }}
           cargo --version
           rustc --version
+      - run: echo "::add-matcher::.github/rust.json"
       - uses: Swatinem/rust-cache@v1
 
       # Build the project
