@@ -34,7 +34,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies.serde_with]
-version = "1.11.0"
+version = "1.12.0"
 features = [ "..." ]
 ```
 
@@ -156,15 +156,15 @@ Foo {
 }
 ```
 
-[`DisplayFromStr`]: https://docs.rs/serde_with/1.11.0/serde_with/struct.DisplayFromStr.html
-[`with_prefix!`]: https://docs.rs/serde_with/1.11.0/serde_with/macro.with_prefix.html
-[display_fromstr]: https://docs.rs/serde_with/1.11.0/serde_with/rust/display_fromstr/index.html
-[feature flags]: https://docs.rs/serde_with/1.11.0/serde_with/guide/feature_flags/index.html
-[skip_serializing_none]: https://docs.rs/serde_with/1.11.0/serde_with/attr.skip_serializing_none.html
-[StringWithSeparator]: https://docs.rs/serde_with/1.11.0/serde_with/rust/struct.StringWithSeparator.html
-[user guide]: https://docs.rs/serde_with/1.11.0/serde_with/guide/index.html
+[`DisplayFromStr`]: https://docs.rs/serde_with/1.12.0/serde_with/struct.DisplayFromStr.html
+[`with_prefix!`]: https://docs.rs/serde_with/1.12.0/serde_with/macro.with_prefix.html
+[display_fromstr]: https://docs.rs/serde_with/1.12.0/serde_with/rust/display_fromstr/index.html
+[feature flags]: https://docs.rs/serde_with/1.12.0/serde_with/guide/feature_flags/index.html
+[skip_serializing_none]: https://docs.rs/serde_with/1.12.0/serde_with/attr.skip_serializing_none.html
+[StringWithSeparator]: https://docs.rs/serde_with/1.12.0/serde_with/rust/struct.StringWithSeparator.html
+[user guide]: https://docs.rs/serde_with/1.12.0/serde_with/guide/index.html
 [with-annotation]: https://serde.rs/field-attrs.html#with
-[as-annotation]: https://docs.rs/serde_with/1.11.0/serde_with/guide/serde_as/index.html
+[as-annotation]: https://docs.rs/serde_with/1.12.0/serde_with/guide/serde_as/index.html
 
 ## License
 
