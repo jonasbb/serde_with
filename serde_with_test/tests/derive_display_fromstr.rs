@@ -24,3 +24,37 @@ impl ::std::fmt::Display for A {
         ::std::unimplemented!()
     }
 }
+
+#[derive(DeserializeFromStr, SerializeDisplay)]
+#[serde_with(crate = "::s_with")]
+struct G<T>(T);
+
+impl<T> ::std::str::FromStr for G<T> {
+    type Err = ::std::string::String;
+    fn from_str(_: &str) -> ::std::result::Result<Self, Self::Err> {
+        ::std::unimplemented!()
+    }
+}
+
+impl<T> ::std::fmt::Display for G<T> {
+    fn fmt(&self, _: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::std::unimplemented!()
+    }
+}
+
+#[derive(DeserializeFromStr, SerializeDisplay)]
+#[serde_with(crate = "::s_with")]
+struct LT<'a>(&'a ());
+
+impl ::std::str::FromStr for LT<'_> {
+    type Err = ::std::string::String;
+    fn from_str(_: &str) -> ::std::result::Result<Self, Self::Err> {
+        ::std::unimplemented!()
+    }
+}
+
+impl ::std::fmt::Display for LT<'_> {
+    fn fmt(&self, _: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::std::unimplemented!()
+    }
+}
