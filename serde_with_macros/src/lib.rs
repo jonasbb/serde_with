@@ -44,7 +44,7 @@ extern crate proc_macro;
 
 mod utils;
 
-use crate::utils::{DeriveOptions, IteratorExt as _};
+use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _};
 use darling::util::Override;
 use darling::{Error as DarlingError, FromField, FromMeta};
 use proc_macro::TokenStream;
@@ -877,15 +877,17 @@ pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
     ))
 }
 
-fn deserialize_fromstr(input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
+fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
     let ident = input.ident;
+    let where_clause = &mut input.generics.make_where_clause().predicates;
+    where_clause.push(parse_quote!(Self: ::std::str::FromStr));
+    where_clause.push(parse_quote!(
+        <Self as ::std::str::FromStr>::Err: ::std::fmt::Display
+    ));
+    let (de_impl_generics, ty_generics, where_clause) = split_with_de_lifetime(&input.generics);
     quote! {
         #[automatically_derived]
-        impl<'de> #serde_with_crate_path::serde::Deserialize<'de> for #ident
-        where
-            Self: ::std::str::FromStr,
-            <Self as ::std::str::FromStr>::Err: ::std::fmt::Display,
-        {
+        impl #de_impl_generics #serde_with_crate_path::serde::Deserialize<'de> for #ident #ty_generics #where_clause {
             fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
             where
                 D: #serde_with_crate_path::serde::Deserializer<'de>,
@@ -987,14 +989,17 @@ pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
     ))
 }
 
-fn serialize_display(input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
+fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
     let ident = input.ident;
+    input
+        .generics
+        .make_where_clause()
+        .predicates
+        .push(parse_quote!(Self: ::std::fmt::Display));
+    let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     quote! {
         #[automatically_derived]
-        impl<'de> #serde_with_crate_path::serde::Serialize for #ident
-        where
-            Self: ::std::fmt::Display,
-        {
+        impl #impl_generics #serde_with_crate_path::serde::Serialize for #ident #ty_generics #where_clause {
             fn serialize<S>(&self, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
             where
                 S: #serde_with_crate_path::serde::Serializer,

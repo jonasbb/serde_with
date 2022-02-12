@@ -1,7 +1,9 @@
 use darling::FromDeriveInput;
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
+use quote::ToTokens;
 use std::iter::Iterator;
-use syn::{Error, Path};
+use syn::{parse_quote, Error, Generics, Path, TypeGenerics};
 
 /// Merge multiple [`syn::Error`] into one.
 pub(crate) trait IteratorExt {
@@ -43,5 +45,33 @@ impl DeriveOptions {
         self.alt_crate_path
             .clone()
             .unwrap_or_else(|| syn::parse_str("::serde_with").unwrap())
+    }
+}
+
+// Inspired by https://github.com/serde-rs/serde/blob/fb2fe409c8f7ad6c95e3096e5e9ede865c8cfb49/serde_derive/src/de.rs#L3120
+// Serde is also licences Apache 2 + MIT
+pub(crate) fn split_with_de_lifetime(
+    generics: &Generics,
+) -> (
+    DeImplGenerics<'_>,
+    TypeGenerics<'_>,
+    Option<&syn::WhereClause>,
+) {
+    let de_impl_generics = DeImplGenerics(generics);
+    let (_, ty_generics, where_clause) = generics.split_for_impl();
+    (de_impl_generics, ty_generics, where_clause)
+}
+
+pub(crate) struct DeImplGenerics<'a>(&'a Generics);
+
+impl<'a> ToTokens for DeImplGenerics<'a> {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        let mut generics = self.0.clone();
+        generics.params = Some(parse_quote!('de))
+            .into_iter()
+            .chain(generics.params)
+            .collect();
+        let (impl_generics, _, _) = generics.split_for_impl();
+        impl_generics.to_tokens(tokens);
     }
 }
