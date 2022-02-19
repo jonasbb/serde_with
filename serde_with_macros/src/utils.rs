@@ -1,5 +1,4 @@
 use darling::FromDeriveInput;
-use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
 use std::iter::Iterator;
@@ -34,13 +33,6 @@ pub(crate) struct DeriveOptions {
 }
 
 impl DeriveOptions {
-    pub(crate) fn from_derive_input(input: &syn::DeriveInput) -> Result<Self, TokenStream> {
-        match <Self as FromDeriveInput>::from_derive_input(input) {
-            Ok(v) => Ok(v),
-            Err(e) => Err(TokenStream::from(e.write_errors())),
-        }
-    }
-
     pub(crate) fn get_serde_with_path(&self) -> Path {
         self.alt_crate_path
             .clone()

@@ -46,7 +46,7 @@ mod utils;
 
 use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _};
 use darling::util::Override;
-use darling::{Error as DarlingError, FromField, FromMeta};
+use darling::{Error as DarlingError, FromDeriveInput, FromField, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
@@ -865,27 +865,24 @@ fn has_type_embedded(type_: &Type, embedded_type: &syn::Ident) -> bool {
 #[proc_macro_derive(DeserializeFromStr, attributes(serde_with))]
 pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(item);
-    let derive_options = match DeriveOptions::from_derive_input(&input) {
-        Ok(opt) => opt,
-        Err(err) => {
-            return err;
-        }
-    };
-    TokenStream::from(deserialize_fromstr(
-        input,
-        derive_options.get_serde_with_path(),
-    ))
+    match deserialize_fromstr(input) {
+        Ok(ts) => TokenStream::from(ts),
+        Err(err) => TokenStream::from(err.write_errors()),
+    }
 }
 
-fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
+fn deserialize_fromstr(mut input: DeriveInput) -> Result<TokenStream2, DarlingError> {
+    let derive_options = DeriveOptions::from_derive_input(&input)?;
+    let serde_with_crate_path = derive_options.get_serde_with_path();
     let ident = input.ident;
+
     let where_clause = &mut input.generics.make_where_clause().predicates;
     where_clause.push(parse_quote!(Self: ::std::str::FromStr));
     where_clause.push(parse_quote!(
         <Self as ::std::str::FromStr>::Err: ::std::fmt::Display
     ));
     let (de_impl_generics, ty_generics, where_clause) = split_with_de_lifetime(&input.generics);
-    quote! {
+    Ok(quote! {
         #[automatically_derived]
         impl #de_impl_generics #serde_with_crate_path::serde::Deserialize<'de> for #ident #ty_generics #where_clause {
             fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
@@ -924,7 +921,7 @@ fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> T
                 deserializer.deserialize_str(Helper(::std::marker::PhantomData))
             }
         }
-    }
+    })
 }
 
 /// Serialize value by using it's [`Display`] implementation
@@ -977,27 +974,24 @@ fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> T
 #[proc_macro_derive(SerializeDisplay, attributes(serde_with))]
 pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(item);
-    let derive_options = match DeriveOptions::from_derive_input(&input) {
-        Ok(opt) => opt,
-        Err(err) => {
-            return err;
-        }
-    };
-    TokenStream::from(serialize_display(
-        input,
-        derive_options.get_serde_with_path(),
-    ))
+    match serialize_display(input) {
+        Ok(ts) => TokenStream::from(ts),
+        Err(err) => TokenStream::from(err.write_errors()),
+    }
 }
 
-fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
+fn serialize_display(mut input: DeriveInput) -> Result<TokenStream2, DarlingError> {
+    let derive_options = DeriveOptions::from_derive_input(&input)?;
+    let serde_with_crate_path = derive_options.get_serde_with_path();
     let ident = input.ident;
+
     input
         .generics
         .make_where_clause()
         .predicates
         .push(parse_quote!(Self: ::std::fmt::Display));
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
-    quote! {
+    Ok(quote! {
         #[automatically_derived]
         impl #impl_generics #serde_with_crate_path::serde::Serialize for #ident #ty_generics #where_clause {
             fn serialize<S>(&self, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
@@ -1007,7 +1001,7 @@ fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> Tok
                 serializer.collect_str(&self)
             }
         }
-    }
+    })
 }
 
 #[doc(hidden)]
