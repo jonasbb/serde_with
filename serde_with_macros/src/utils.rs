@@ -40,6 +40,14 @@ impl DeriveOptions {
     }
 }
 
+/// Type to parse `#[serde(remote = "...")]` attributes
+#[derive(FromDeriveInput, Debug)]
+#[darling(attributes(serde), allow_unknown_fields)]
+pub(crate) struct SerdeRemoteOption {
+    /// Path to the remote type
+    pub(crate) remote: Path,
+}
+
 // Inspired by https://github.com/serde-rs/serde/blob/fb2fe409c8f7ad6c95e3096e5e9ede865c8cfb49/serde_derive/src/de.rs#L3120
 // Serde is also licences Apache 2 + MIT
 pub(crate) fn split_with_de_lifetime(

@@ -44,7 +44,7 @@ extern crate proc_macro;
 
 mod utils;
 
-use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _};
+use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _, SerdeRemoteOption};
 use darling::util::Override;
 use darling::{Error as DarlingError, FromDeriveInput, FromField, FromMeta};
 use proc_macro::TokenStream;
@@ -999,6 +999,72 @@ fn serialize_display(mut input: DeriveInput) -> Result<TokenStream2, DarlingErro
                 S: #serde_with_crate_path::serde::Serializer,
             {
                 serializer.collect_str(&self)
+            }
+        }
+    })
+}
+
+#[proc_macro_derive(SerializeAs, attributes(serde_with, serde))]
+pub fn derive_serialize_as(item: TokenStream) -> TokenStream {
+    let input: DeriveInput = parse_macro_input!(item);
+    match serialize_as(input) {
+        Ok(ts) => TokenStream::from(ts),
+        Err(err) => TokenStream::from(err.write_errors()),
+    }
+}
+
+fn serialize_as(input: DeriveInput) -> Result<TokenStream2, DarlingError> {
+    let serde_with = DeriveOptions::from_derive_input(&input)?;
+    let serde = SerdeRemoteOption::from_derive_input(&input)?;
+    let serde_with_crate_path = serde_with.get_serde_with_path();
+    let ident = input.ident;
+    let remote_ty = serde.remote;
+
+    let (impl_generics, ty_generics, _) = input.generics.split_for_impl();
+    Ok(quote! {
+        #[automatically_derived]
+        impl #impl_generics #serde_with_crate_path::SerializeAs<#remote_ty #ty_generics> for #ident #ty_generics
+        where
+            #remote_ty #ty_generics: #serde_with_crate_path::serde::Serialize,
+        {
+            fn serialize_as<S>(value: &#remote_ty #ty_generics, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+            where
+                S: #serde_with_crate_path::serde::Serializer,
+            {
+                #serde_with_crate_path::serde::Serialize::serialize(value, serializer)
+            }
+        }
+    })
+}
+
+#[proc_macro_derive(DeserializeAs, attributes(serde_with, serde))]
+pub fn derive_deserialize_as(item: TokenStream) -> TokenStream {
+    let input: DeriveInput = parse_macro_input!(item);
+    match deserialize_as(input) {
+        Ok(ts) => TokenStream::from(ts),
+        Err(err) => TokenStream::from(err.write_errors()),
+    }
+}
+
+fn deserialize_as(input: DeriveInput) -> Result<TokenStream2, DarlingError> {
+    let serde_with = DeriveOptions::from_derive_input(&input)?;
+    let serde = SerdeRemoteOption::from_derive_input(&input)?;
+    let serde_with_crate_path = serde_with.get_serde_with_path();
+    let ident = input.ident;
+    let remote_ty = serde.remote;
+
+    let (de_impl_generics, ty_generics, _) = split_with_de_lifetime(&input.generics);
+    Ok(quote! {
+        #[automatically_derived]
+        impl #de_impl_generics #serde_with_crate_path::DeserializeAs<'de, #remote_ty #ty_generics> for #ident #ty_generics
+        where
+            #remote_ty #ty_generics: #serde_with_crate_path::serde::Deserialize<'de>,
+        {
+            fn deserialize_as<D>(deserializer: D) -> ::std::result::Result<#remote_ty #ty_generics, D::Error>
+            where
+                D: #serde_with_crate_path::serde::Deserializer<'de>,
+            {
+                #serde_with_crate_path::serde::Deserialize::deserialize(deserializer)
             }
         }
     })
