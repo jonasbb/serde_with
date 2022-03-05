@@ -28,7 +28,7 @@ jobs:
         rust: ["stable", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
         run: |
           rustup toolchain install ${{ matrix.rust }} --profile minimal --component clippy
@@ -52,7 +52,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
         run: |
           rustup toolchain install ${{ matrix.rust }} --profile minimal --component rustfmt
@@ -75,7 +75,7 @@ jobs:
         crate: ["serde_with", "serde_with_macros", "serde_with_test"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
         run: |
           rustup toolchain install ${{ matrix.rust }} --profile minimal
