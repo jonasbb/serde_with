@@ -27,6 +27,10 @@
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with/1.12.0")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+// clippy is broken and shows wrong warnings
+// clippy on stable does not know yet about the lint name
+// https://github.com/rust-lang/rust-clippy/issues/8560
+#![allow(unknown_lints, clippy::only_used_in_recursion)]
 
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
 //! [![Build Status](https://github.com/jonasbb/serde_with/workflows/Rust%20CI/badge.svg)](https://github.com/jonasbb/serde_with)
