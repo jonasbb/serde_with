@@ -264,6 +264,9 @@ pub mod base64;
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 pub mod chrono;
+#[cfg(feature = "time_0_3")]
+#[cfg_attr(docsrs, doc(cfg(feature = "time_0_3")))]
+pub mod time_0_3;
 mod content;
 pub mod de;
 mod duplicate_key_impls;
