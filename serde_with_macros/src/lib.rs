@@ -525,12 +525,12 @@ fn serde_as_add_attr_to_field(
     #[derive(FromField, Debug)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
-        #[darling(rename = "as", map = "parse_type_from_string", default)]
-        r#as: Option<Result<Type, Error>>,
-        #[darling(map = "parse_type_from_string", default)]
-        deserialize_as: Option<Result<Type, Error>>,
-        #[darling(map = "parse_type_from_string", default)]
-        serialize_as: Option<Result<Type, Error>>,
+        #[darling(rename = "as", default)]
+        r#as: Option<Type>,
+        #[darling(default)]
+        deserialize_as: Option<Type>,
+        #[darling(default)]
+        serialize_as: Option<Type>,
     }
 
     impl SerdeAsOptions {
@@ -592,7 +592,7 @@ fn serde_as_add_attr_to_field(
 
     let type_same = &syn::parse_quote!(#serde_with_crate_path::Same);
     let type_borrowcow = &syn::parse_quote!(BorrowCow);
-    if let Some(Ok(type_)) = serde_as_options.r#as {
+    if let Some(type_) = serde_as_options.r#as {
         // If the field is not borrowed yet, check if we need to borrow it.
         if serde_options.borrow.is_none() && has_type_embedded(&type_, type_borrowcow) {
             let attr_borrow = parse_quote!(#[serde(borrow)]);
@@ -604,7 +604,7 @@ fn serde_as_add_attr_to_field(
         let attr = parse_quote!(#[serde(with = #attr_inner_tokens)]);
         field.attrs.push(attr);
     }
-    if let Some(Ok(type_)) = serde_as_options.deserialize_as {
+    if let Some(type_) = serde_as_options.deserialize_as {
         // If the field is not borrowed yet, check if we need to borrow it.
         if serde_options.borrow.is_none() && has_type_embedded(&type_, type_borrowcow) {
             let attr_borrow = parse_quote!(#[serde(borrow)]);
@@ -617,7 +617,7 @@ fn serde_as_add_attr_to_field(
         let attr = parse_quote!(#[serde(deserialize_with = #attr_inner_tokens)]);
         field.attrs.push(attr);
     }
-    if let Some(Ok(type_)) = serde_as_options.serialize_as {
+    if let Some(type_) = serde_as_options.serialize_as {
         let replacement_type = replace_infer_type_with_type(type_, type_same);
         let attr_inner_tokens =
             quote!(#serde_with_crate_path::As::<#replacement_type>::serialize).to_string();
@@ -626,15 +626,6 @@ fn serde_as_add_attr_to_field(
     }
 
     Ok(())
-}
-
-/// Parse a [`String`] and return a [`syn::Type`]
-
-// Return type is required by the darling struct fields
-// It needs to be an Option, such that is represents an optional field
-#[allow(clippy::unnecessary_wraps)]
-fn parse_type_from_string(s: String) -> Option<Result<Type, Error>> {
-    Some(syn::parse_str(&*s))
 }
 
 /// Recursively replace all occurrences of `_` with `replacement` in a [Type][]
