@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
+
+## [1.5.2] - 2022-04-07
 
 ### Fixed
 
 * Account for generics when deriving implementations with `SerializeDisplay` and `DeserializeFromStr` #413
+* Provide better error messages when parsing types fails #423
 
 ## [1.5.1] - 2021-10-18
 
