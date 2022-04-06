@@ -60,7 +60,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
-        run: rustup toolchain install stable --profile minimal
+        run: |
+          rustup toolchain install stable --profile minimal
           rustup default stable
           cargo --version
           rustc --version
