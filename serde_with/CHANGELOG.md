@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+
+## [1.12.1] - 2022-04-07
+
+## Fixes
+
+* Depend on a newer `serde_with_macros` version to pull in some fixes.
+    * Account for generics when deriving implementations with `SerializeDisplay` and `DeserializeFromStr` #413
+    * Provide better error messages when parsing types fails #423
+
 
 ## [1.12.0] - 2022-02-07
 
