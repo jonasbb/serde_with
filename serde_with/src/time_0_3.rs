@@ -9,20 +9,23 @@ use crate::{
     TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
     TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use serde::{de, Deserializer, Serializer};
+use serde::ser::Error as _;
+use serde::{de, Deserializer, Serialize, Serializer};
 use std::convert::TryInto;
+use std::fmt;
 use std::time::Duration as StdDuration;
-use time_0_3::{Date, Duration, OffsetDateTime, PrimitiveDateTime, Time};
+use time_0_3::format_description::well_known::{Rfc2822, Rfc3339};
+use time_0_3::{Duration, OffsetDateTime, PrimitiveDateTime};
 
 /// Create a [`PrimitiveDateTime`] for the Unix Epoch
 fn unix_epoch_primitive() -> PrimitiveDateTime {
     PrimitiveDateTime::new(
-        Date::from_ordinal_date(1970, 1).unwrap(),
-        Time::from_hms_nano(0, 0, 0, 0).unwrap(),
+        time_0_3::Date::from_ordinal_date(1970, 1).unwrap(),
+        time_0_3::Time::from_hms_nano(0, 0, 0, 0).unwrap(),
     )
 }
 
-/// Convert a [`chrono::Duration`] into a [`DurationSigned`]
+/// Convert a [`time::Duration`][time_0_3::Duration] into a [`DurationSigned`]
 fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     let std_dur = StdDuration::new(
         dur.whole_seconds().abs() as _,
@@ -30,10 +33,11 @@ fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     );
 
     DurationSigned::with_duration(
-        if dur.is_positive() {
-            Sign::Positive
-        } else {
+        // A duration of 0 is not positive, so check for negative value.
+        if dur.is_negative() {
             Sign::Negative
+        } else {
+            Sign::Positive
         },
         std_dur,
     )
@@ -302,3 +306,71 @@ use_duration_signed_de!(
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+
+impl SerializeAs<OffsetDateTime> for Rfc2822 {
+    fn serialize_as<S>(datetime: &OffsetDateTime, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        datetime
+            .format(&Rfc2822)
+            .map_err(S::Error::custom)?
+            .serialize(serializer)
+    }
+}
+
+impl<'de> DeserializeAs<'de, OffsetDateTime> for Rfc2822 {
+    fn deserialize_as<D>(deserializer: D) -> Result<OffsetDateTime, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct Visitor;
+        impl<'de> de::Visitor<'de> for Visitor {
+            type Value = OffsetDateTime;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a RFC2822-formatted `OffsetDateTime`")
+            }
+
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                Self::Value::parse(value, &Rfc2822).map_err(E::custom)
+            }
+        }
+
+        deserializer.deserialize_str(Visitor)
+    }
+}
+
+impl SerializeAs<OffsetDateTime> for Rfc3339 {
+    fn serialize_as<S>(datetime: &OffsetDateTime, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        datetime
+            .format(&Rfc3339)
+            .map_err(S::Error::custom)?
+            .serialize(serializer)
+    }
+}
+
+impl<'de> DeserializeAs<'de, OffsetDateTime> for Rfc3339 {
+    fn deserialize_as<D>(deserializer: D) -> Result<OffsetDateTime, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct Visitor;
+        impl<'de> de::Visitor<'de> for Visitor {
+            type Value = OffsetDateTime;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a RFC3339-formatted `OffsetDateTime`")
+            }
+
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                Self::Value::parse(value, &Rfc3339).map_err(E::custom)
+            }
+        }
+
+        deserializer.deserialize_str(Visitor)
+    }
+}
