@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.12.1] - 2022-04-07
 
-## Fixes
+### Fixed
 
 * Depend on a newer `serde_with_macros` version to pull in some fixes.
     * Account for generics when deriving implementations with `SerializeDisplay` and `DeserializeFromStr` #413
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [1.12.0] - 2022-02-07
 
-## Added
+### Added
 
 * Deserialize a `Vec` and skip all elements failing to deserialize #383
 
@@ -74,7 +74,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     }
     ```
 
-## Changed
+### Changed
 
 * The `Timestamp*Seconds` and `Timestamp*SecondsWithFrac` types can now be used with `chrono::NaiveDateTime`. #389
 
