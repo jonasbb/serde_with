@@ -116,7 +116,7 @@ jobs:
           cargo install cargo-tarpaulin
           cargo tarpaulin --out Xml --workspace --all-features -- --test-threads=1
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
 
   # Added to summarize the matrix (otherwise we would need to list every single
