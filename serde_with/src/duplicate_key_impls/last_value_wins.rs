@@ -1,3 +1,5 @@
+#[cfg(feature = "indexmap")]
+use indexmap_crate::IndexSet;
 use std::collections::{BTreeSet, HashSet};
 use std::hash::{BuildHasher, Hash};
 
@@ -9,6 +11,27 @@ pub trait DuplicateInsertsLastWinsSet<T> {
 }
 
 impl<T, S> DuplicateInsertsLastWinsSet<T> for HashSet<T, S>
+where
+    T: Eq + Hash,
+    S: BuildHasher + Default,
+{
+    #[inline]
+    fn new(size_hint: Option<usize>) -> Self {
+        match size_hint {
+            Some(size) => Self::with_capacity_and_hasher(size, S::default()),
+            None => Self::with_hasher(S::default()),
+        }
+    }
+
+    #[inline]
+    fn replace(&mut self, value: T) {
+        // Hashset already fulfils the contract
+        self.replace(value);
+    }
+}
+
+#[cfg(feature = "indexmap")]
+impl<T, S> DuplicateInsertsLastWinsSet<T> for IndexSet<T, S>
 where
     T: Eq + Hash,
     S: BuildHasher + Default,

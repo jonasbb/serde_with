@@ -7,8 +7,9 @@ Each entry will explain the feature in more detail.
 2. [`chrono`](#chrono)
 3. [`guide`](#guide)
 4. [`hex`](#hex)
-5. [`json`](#json)
-6. [`macros`](#macros)
+5. [`indexmap`](#indexmap)
+6. [`json`](#json)
+7. [`macros`](#macros)
 
 ## `base64`
 
@@ -33,6 +34,11 @@ The feature only changes the rustdoc output and enables no other effects.
 The `hex` feature enables serializing data in hex format.
 
 This pulls in `hex` as a dependency.
+
+## `indexmap`
+
+The `indexmap` feature enables implementations of `indexmap` specific checks.
+This includes support for checking duplicate keys
 
 ## `json`
 
