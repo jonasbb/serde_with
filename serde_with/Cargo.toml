@@ -28,6 +28,7 @@ base64 = ["base64_crate"]
 chrono = ["chrono_crate"]
 default = ["macros"]
 guide = ["doc-comment", "macros"]
+indexmap = ["indexmap_crate"]
 json = ["serde_json"]
 macros = ["serde_with_macros"]
 
@@ -41,6 +42,7 @@ rustversion = "1.0.0"
 serde = {version = "1.0.122", features = ["derive"]}
 serde_json = {version = "1.0.1", optional = true}
 serde_with_macros = {path = "../serde_with_macros", version = "1.5.0", optional = true}
+indexmap_crate = {package = "indexmap", version = "1.8", optional = true}
 
 [dev-dependencies]
 expect-test = "1.0.0"
