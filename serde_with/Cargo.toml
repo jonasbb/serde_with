@@ -38,11 +38,11 @@ base64_crate = {package = "base64", version = "0.13.0", optional = true}
 chrono_crate = {package = "chrono", version = "0.4.1", features = ["clock", "serde", "std"], optional = true, default-features = false}
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.2", optional = true}
+indexmap_crate = {package = "indexmap", version = "1.8", optional = true}
 rustversion = "1.0.0"
 serde = {version = "1.0.122", features = ["derive"]}
 serde_json = {version = "1.0.1", optional = true}
-serde_with_macros = {path = "../serde_with_macros", version = "1.5.0", optional = true}
-indexmap_crate = {package = "indexmap", version = "1.8", optional = true}
+serde_with_macros = {path = "../serde_with_macros", version = "1.5.2", optional = true}
 
 [dev-dependencies]
 expect-test = "1.0.0"

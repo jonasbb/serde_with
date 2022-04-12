@@ -257,6 +257,11 @@ enum EnumValue {
 }
 
 // Rust
+struct VecEnumValues (
+    #[serde_as(as = "EnumMap")]
+    Vec<EnumValue>,
+);
+
 VecEnumValues(vec![
     EnumValue::Int(123),
     EnumValue::String("Foo".to_string()),
@@ -266,7 +271,7 @@ VecEnumValues(vec![
         a: 666,
         b: "Baz".to_string(),
     },
-]
+])
 
 // JSON
 {
@@ -459,5 +464,7 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`NoneAsEmptyString`]: crate::NoneAsEmptyString
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
+[`TimestampSeconds`]: crate::TimestampSeconds
+[`TimestampSecondsWithFrac`]: crate::TimestampSecondsWithFrac
 [`TryFromInto`]: crate::TryFromInto
 [`VecSkipError`]: crate::VecSkipError
