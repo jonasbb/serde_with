@@ -484,7 +484,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
     #[derive(FromMeta, Debug)]
     struct SerdeContainerOptions {
-        #[darling(rename = "crate", default)]
+        #[darling(rename = "crate")]
         alt_crate_path: Option<String>,
     }
 
@@ -525,11 +525,9 @@ fn serde_as_add_attr_to_field(
     #[derive(FromField, Debug)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
-        #[darling(rename = "as", default)]
+        #[darling(rename = "as")]
         r#as: Option<Type>,
-        #[darling(default)]
         deserialize_as: Option<Type>,
-        #[darling(default)]
         serialize_as: Option<Type>,
     }
 
@@ -542,14 +540,10 @@ fn serde_as_add_attr_to_field(
     #[derive(FromField, Debug)]
     #[darling(attributes(serde), allow_unknown_fields)]
     struct SerdeOptions {
-        #[darling(default)]
         with: Option<String>,
-        #[darling(default)]
         deserialize_with: Option<String>,
-        #[darling(default)]
         serialize_with: Option<String>,
 
-        #[darling(default)]
         borrow: Option<Override<String>>,
     }
 
