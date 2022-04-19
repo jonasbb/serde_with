@@ -20,7 +20,7 @@ The `serde_as` scheme is based on two new traits: [`SerializeAs`] and [`Deserial
 ### Example
 
 ```rust
-# use serde_derive::{Deserialize, Serialize};
+# use serde::{Deserialize, Serialize};
 # use serde_with::{serde_as, DisplayFromStr};
 # use std::collections::HashMap;
 # use std::net::Ipv4Addr;
@@ -80,7 +80,7 @@ The example shows a similar setup as in the `serde_as` example above, but using 
 ### Example
 
 ```rust
-# use serde_derive::{Deserialize, Serialize};
+# use serde::{Deserialize, Serialize};
 # use std::net::Ipv4Addr;
 #
 # #[derive(Debug, PartialEq, Eq)]

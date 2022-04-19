@@ -56,7 +56,7 @@ use std::fmt;
 /// An implementation of the Challonge API would use `with_prefix!` like this:
 ///
 /// ```rust
-/// use serde_derive::{Deserialize, Serialize};
+/// use serde::{Deserialize, Serialize};
 /// use serde_with::with_prefix;
 ///
 /// #[derive(Serialize, Deserialize)]

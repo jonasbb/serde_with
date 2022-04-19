@@ -14,7 +14,7 @@ use serde::{Deserializer, Serialize, Serializer};
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
@@ -97,7 +97,7 @@ pub mod nested {
 ///
 /// ```
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{serde_as, json::JsonString};
 /// #
 /// #[serde_as]

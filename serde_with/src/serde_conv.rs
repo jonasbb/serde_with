@@ -21,7 +21,7 @@
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Serialize, Deserialize};
+/// # use serde::{Serialize, Deserialize};
 ///
 /// #[derive(Clone, Copy, Debug, PartialEq)]
 /// struct Rgb {

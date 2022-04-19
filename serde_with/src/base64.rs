@@ -24,7 +24,7 @@ use std::marker::PhantomData;
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// use serde_with::base64::{Base64, Bcrypt, BinHex, Standard};
 /// use serde_with::formats::{Padded, Unpadded};
