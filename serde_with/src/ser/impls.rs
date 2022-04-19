@@ -3,6 +3,8 @@ use crate::formats::Strictness;
 use crate::rust::StringWithSeparator;
 use crate::utils::duration::DurationSigned;
 use crate::Separator;
+#[cfg(feature = "indexmap")]
+use indexmap_crate::{IndexMap, IndexSet};
 use serde::ser::Error;
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
@@ -228,6 +230,8 @@ seq_impl!(LinkedList<T>);
 seq_impl!(Slice<T>);
 seq_impl!(Vec<T>);
 seq_impl!(VecDeque<T>);
+#[cfg(feature = "indexmap")]
+seq_impl!(IndexSet<T, H: Sized>);
 
 macro_rules! map_impl {
     ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound:ident)* >) => {
@@ -250,6 +254,8 @@ macro_rules! map_impl {
 
 map_impl!(BTreeMap<K, V>);
 map_impl!(HashMap<K, V, H: Sized>);
+#[cfg(feature = "indexmap")]
+map_impl!(IndexMap<K, V, H: Sized>);
 
 macro_rules! tuple_impl {
     ($len:literal $($n:tt $t:ident $tas:ident)+) => {
@@ -311,7 +317,10 @@ macro_rules! map_as_tuple_seq {
     };
 }
 map_as_tuple_seq!(BTreeMap<K, V>);
+// TODO HashMap with a custom hasher support would be better, but results in "unconstrained type parameter"
 map_as_tuple_seq!(HashMap<K, V>);
+#[cfg(feature = "indexmap")]
+map_as_tuple_seq!(IndexMap<K, V>);
 
 // endregion
 ///////////////////////////////////////////////////////////////////////////////
@@ -403,6 +412,8 @@ tuple_seq_as_map_impl! {
     Vec<(K, V)>,
     VecDeque<(K, V)>,
 }
+#[cfg(feature = "indexmap")]
+tuple_seq_as_map_impl!(IndexSet<(K, V)>);
 
 impl<T, TAs> SerializeAs<T> for DefaultOnError<TAs>
 where

@@ -1,3 +1,5 @@
+#[cfg(feature = "indexmap")]
+use indexmap_crate::IndexMap;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::hash::{BuildHasher, Hash};
 
@@ -70,6 +72,34 @@ where
     #[inline]
     fn insert(&mut self, key: K, value: V) {
         use std::collections::hash_map::Entry;
+
+        match self.entry(key) {
+            // we want to keep the first value, so do nothing
+            Entry::Occupied(_) => {}
+            Entry::Vacant(vacant) => {
+                vacant.insert(value);
+            }
+        }
+    }
+}
+
+#[cfg(feature = "indexmap")]
+impl<K, V, S> DuplicateInsertsFirstWinsMap<K, V> for IndexMap<K, V, S>
+where
+    K: Eq + Hash,
+    S: BuildHasher + Default,
+{
+    #[inline]
+    fn new(size_hint: Option<usize>) -> Self {
+        match size_hint {
+            Some(size) => Self::with_capacity_and_hasher(size, S::default()),
+            None => Self::with_hasher(S::default()),
+        }
+    }
+
+    #[inline]
+    fn insert(&mut self, key: K, value: V) {
+        use indexmap_crate::map::Entry;
 
         match self.entry(key) {
             // we want to keep the first value, so do nothing
