@@ -3,6 +3,8 @@ use crate::formats::{Flexible, Format, Strict};
 use crate::rust::StringWithSeparator;
 use crate::utils;
 use crate::utils::duration::DurationSigned;
+#[cfg(feature = "indexmap")]
+use indexmap_crate::{IndexMap, IndexSet};
 use serde::de::*;
 use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
@@ -312,8 +314,15 @@ seq_impl!(
     VecDeque::with_capacity(utils::size_hint_cautious(seq.size_hint())),
     push_back
 );
+#[cfg(feature = "indexmap")]
+seq_impl!(
+    IndexSet<T: Eq + Hash, S: BuildHasher + Default>,
+    seq,
+    IndexSet::with_capacity_and_hasher(utils::size_hint_cautious(seq.size_hint()), S::default()),
+    insert
+);
 
-macro_rules! map_impl2 {
+macro_rules! map_impl {
     (
         $ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >,
         // We need an external name, such that we can use it in the `with_capacity` expression
@@ -375,15 +384,19 @@ macro_rules! map_impl2 {
     }
 }
 
-map_impl2!(
+map_impl!(
     BTreeMap<K: Ord, V>,
     map,
     BTreeMap::new());
-
-map_impl2!(
+map_impl!(
     HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
     HashMap::with_capacity_and_hasher(utils::size_hint_cautious(map.size_hint()), S::default()));
+#[cfg(feature = "indexmap")]
+map_impl!(
+    IndexMap<K: Eq + Hash, V, S: BuildHasher + Default>,
+    map,
+    IndexMap::with_capacity_and_hasher(utils::size_hint_cautious(map.size_hint()), S::default()));
 
 macro_rules! tuple_impl {
     ($len:literal $($n:tt $t:ident $tas:ident)+) => {
@@ -505,6 +518,8 @@ macro_rules! map_as_tuple_seq {
 }
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
 map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
+#[cfg(feature = "indexmap")]
+map_as_tuple_seq!(IndexMap<K: Eq + Hash, V>);
 
 // endregion
 ///////////////////////////////////////////////////////////////////////////////
@@ -680,6 +695,8 @@ tuple_seq_as_map_impl! {
     Vec<(K, V)>,
     VecDeque<(K, V)>,
 }
+#[cfg(feature = "indexmap")]
+tuple_seq_as_map_impl!(IndexSet<(K: Eq + Hash, V: Eq + Hash)>);
 
 macro_rules! tuple_seq_as_map_option_impl {
     ($($ty:ident $(,)?)+) => {$(
