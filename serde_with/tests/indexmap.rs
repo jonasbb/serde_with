@@ -5,6 +5,7 @@ use expect_test::expect;
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr, Same};
+use std::iter::FromIterator;
 use std::net::IpAddr;
 
 #[test]
@@ -113,7 +114,7 @@ fn test_tuple_list_as_map() {
     );
 
     is_equal(
-        SI(IndexSet::from([(1, ip), (10, ip), (200, ip2)])),
+        SI(IndexSet::from_iter(vec![(1, ip), (10, ip), (200, ip2)])),
         expect![[r#"
             {
               "1": "1.2.3.4",
@@ -130,7 +131,7 @@ fn duplicate_key_first_wins_indexmap() {
 
     // Different value and key always works
     is_equal(
-        S(IndexMap::from([(1, 1), (2, 2), (3, 3)])),
+        S(IndexMap::from_iter(vec![(1, 1), (2, 2), (3, 3)])),
         expect![[r#"
             {
               "1": 1,
@@ -141,7 +142,7 @@ fn duplicate_key_first_wins_indexmap() {
 
     // Same value for different keys is ok
     is_equal(
-        S(IndexMap::from([(1, 1), (2, 1), (3, 1)])),
+        S(IndexMap::from_iter(vec![(1, 1), (2, 1), (3, 1)])),
         expect![[r#"
             {
               "1": 1,
@@ -152,7 +153,7 @@ fn duplicate_key_first_wins_indexmap() {
 
     // Duplicate keys, the first one is used
     check_deserialization(
-        S(IndexMap::from([(1, 1), (2, 2)])),
+        S(IndexMap::from_iter(vec![(1, 1), (2, 2)])),
         r#"{"1": 1, "2": 2, "1": 3}"#,
     );
 }
@@ -166,7 +167,7 @@ fn prohibit_duplicate_key_indexmap() {
 
     // Different value and key always works
     is_equal(
-        S(IndexMap::from([(1, 1), (2, 2), (3, 3)])),
+        S(IndexMap::from_iter(vec![(1, 1), (2, 2), (3, 3)])),
         expect![[r#"
             {
               "1": 1,
@@ -177,7 +178,7 @@ fn prohibit_duplicate_key_indexmap() {
 
     // Same value for different keys is ok
     is_equal(
-        S(IndexMap::from([(1, 1), (2, 1), (3, 1)])),
+        S(IndexMap::from_iter(vec![(1, 1), (2, 1), (3, 1)])),
         expect![[r#"
             {
               "1": 1,
@@ -216,7 +217,11 @@ fn duplicate_value_last_wins_indexset() {
 
     // Different values always work
     is_equal(
-        S(IndexSet::from([W(1, true), W(2, false), W(3, true)])),
+        S(IndexSet::from_iter(vec![
+            W(1, true),
+            W(2, false),
+            W(3, true),
+        ])),
         expect![[r#"
             [
               [
@@ -256,7 +261,7 @@ fn prohibit_duplicate_value_indexset() {
     struct S(#[serde(with = "::serde_with::rust::sets_duplicate_value_is_error")] IndexSet<usize>);
 
     is_equal(
-        S(IndexSet::from([1, 2, 3, 4])),
+        S(IndexSet::from_iter(vec![1, 2, 3, 4])),
         expect![[r#"
             [
               1,
