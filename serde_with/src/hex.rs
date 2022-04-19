@@ -26,7 +26,7 @@ use std::marker::PhantomData;
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::serde_as;
 /// #

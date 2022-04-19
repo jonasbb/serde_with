@@ -81,7 +81,7 @@
 //!
 //! ```rust
 //! # #[cfg(feature = "macros")]
-//! # use serde_derive::{Deserialize, Serialize};
+//! # use serde::{Deserialize, Serialize};
 //! # #[cfg(feature = "macros")]
 //! # use serde_with::{serde_as, DisplayFromStr};
 //! # #[cfg(feature = "macros")]
@@ -154,7 +154,7 @@
 //!
 //! ```rust
 //! # #[cfg(feature = "macros")]
-//! # use serde_derive::{Deserialize, Serialize};
+//! # use serde::{Deserialize, Serialize};
 //! # #[cfg(feature = "macros")]
 //! # use serde_with::skip_serializing_none;
 //! # #[cfg(feature = "macros")]
@@ -194,7 +194,7 @@
 //! ```rust
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! # use {
-//! #     serde_derive::{Deserialize, Serialize},
+//! #     serde::{Deserialize, Serialize},
 //! #     serde_with::{serde_as, DisplayFromStr, DurationSeconds, hex::Hex},
 //! #     std::time::Duration,
 //! #     std::collections::BTreeMap,
@@ -373,7 +373,7 @@ impl Separator for CommaSeparator {
 /// If the use of the use of the proc-macro is not acceptable, then `As` can be used directly with serde.
 ///
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{As, DisplayFromStr};
 /// #
 /// #[derive(Deserialize, Serialize)]
@@ -387,7 +387,7 @@ impl Separator for CommaSeparator {
 /// It implements [`DeserializeAs`][]/[`SerializeAs`][], when the underlying type implements `Deserialize`/`Serialize`.
 ///
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{As, DisplayFromStr, Same};
 /// # use std::collections::BTreeMap;
 /// #
@@ -458,7 +458,7 @@ pub struct Same;
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DisplayFromStr};
 /// #
@@ -502,7 +502,7 @@ pub struct DisplayFromStr;
 ///
 /// ```
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, NoneAsEmptyString};
 /// #
@@ -550,7 +550,7 @@ pub struct NoneAsEmptyString;
 ///
 /// ```
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, DefaultOnError};
 /// #
 /// #[serde_as]
@@ -584,7 +584,7 @@ pub struct NoneAsEmptyString;
 ///
 /// ```
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, DefaultOnError};
 /// #
 /// #[serde_as]
@@ -606,7 +606,7 @@ pub struct NoneAsEmptyString;
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DefaultOnError, DisplayFromStr};
 /// #
@@ -639,7 +639,7 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 ///
 /// ```
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, DefaultOnNull};
 /// #
 /// #[serde_as]
@@ -664,7 +664,7 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DefaultOnNull, DisplayFromStr};
 /// #
@@ -693,7 +693,7 @@ pub struct DefaultOnNull<T = Same>(PhantomData<T>);
 /// # Example
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, BytesOrString};
 /// #
@@ -756,7 +756,7 @@ pub struct BytesOrString;
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSeconds};
 /// use std::time::Duration;
@@ -811,7 +811,7 @@ pub struct BytesOrString;
 ///
 /// ```rust
 /// # #[cfg(all(feature = "macros", feature = "chrono"))] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSeconds};
 /// # use chrono_crate::Duration;
@@ -896,7 +896,7 @@ pub struct DurationSeconds<
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSecondsWithFrac};
 /// use std::time::Duration;
@@ -945,7 +945,7 @@ pub struct DurationSeconds<
 ///
 /// ```rust
 /// # #[cfg(all(feature = "macros", feature = "chrono"))] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSecondsWithFrac};
 /// # use chrono_crate::Duration;
@@ -1078,7 +1078,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSeconds};
 /// use std::time::{Duration, SystemTime};
@@ -1133,7 +1133,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///
 /// ```rust
 /// # #[cfg(all(feature = "macros", feature = "chrono"))] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSeconds};
 /// # use chrono_crate::{DateTime, Local, TimeZone, Utc};
@@ -1223,7 +1223,7 @@ pub struct TimestampSeconds<
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSecondsWithFrac};
 /// use std::time::{Duration, SystemTime};
@@ -1272,7 +1272,7 @@ pub struct TimestampSeconds<
 ///
 /// ```rust
 /// # #[cfg(all(feature = "macros", feature = "chrono"))] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSecondsWithFrac};
 /// # use chrono_crate::{DateTime, Local, TimeZone, Utc};

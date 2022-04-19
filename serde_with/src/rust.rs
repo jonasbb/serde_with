@@ -29,7 +29,7 @@ use std::str::FromStr;
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, DisplayFromStr};
 /// #
 /// #[serde_as]
@@ -44,7 +44,7 @@ use std::str::FromStr;
 /// # Examples
 ///
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
@@ -147,7 +147,7 @@ pub mod display_fromstr {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// use std::collections::BTreeSet;
 /// use std::net::Ipv4Addr;
@@ -269,7 +269,7 @@ pub mod seq_display_fromstr {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, SpaceSeparator, StringWithSeparator};
 /// #
 /// #[serde_as]
@@ -284,7 +284,7 @@ pub mod seq_display_fromstr {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// use serde_with::{CommaSeparator, SpaceSeparator};
 /// use std::collections::BTreeSet;
@@ -376,7 +376,7 @@ where
 /// # Examples
 ///
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// # #[derive(Debug, PartialEq, Eq)]
 /// #[derive(Deserialize, Serialize)]
@@ -447,7 +447,7 @@ pub mod double_option {
 /// # Example
 ///
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize, Serialize)]
@@ -532,7 +532,7 @@ pub mod unwrap_or_skip {
 ///
 /// ```rust
 /// # use std::{collections::HashSet, iter::FromIterator};
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
@@ -630,7 +630,7 @@ pub mod sets_duplicate_value_is_error {
 /// # Example
 ///
 /// ```rust
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use std::collections::HashMap;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -867,7 +867,7 @@ pub mod sets_last_value_wins {
 /// # Example
 ///
 /// ```rust
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use std::collections::HashMap;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -970,7 +970,7 @@ pub mod maps_first_key_wins {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, NoneAsEmptyString};
 /// #
 /// #[serde_as]
@@ -985,7 +985,7 @@ pub mod maps_first_key_wins {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::rust::string_empty_as_none;
 /// #
@@ -1099,7 +1099,7 @@ pub mod string_empty_as_none {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// # use std::collections::{BTreeMap, HashMap};
 /// #
@@ -1117,7 +1117,7 @@ pub mod string_empty_as_none {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use std::collections::BTreeMap;
 /// #
@@ -1141,7 +1141,7 @@ pub mod string_empty_as_none {
 /// The helper is generic over the hasher type of the [`HashMap`] and works with different variants, such as `FnvHashMap`.
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// #
 /// use fnv::FnvHashMap;
@@ -1236,7 +1236,7 @@ pub mod map_as_tuple_list {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// # use std::collections::HashMap;
 /// #
@@ -1252,7 +1252,7 @@ pub mod map_as_tuple_list {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use std::collections::HashMap;
 /// #
@@ -1276,7 +1276,7 @@ pub mod map_as_tuple_list {
 /// The helper is generic over the hasher type of the [`HashMap`] and works with different variants, such as `FnvHashMap`.
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// #
 /// use fnv::FnvHashMap;
@@ -1340,7 +1340,7 @@ pub mod hashmap_as_tuple_list {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// # use std::collections::BTreeMap;
 /// #
@@ -1356,7 +1356,7 @@ pub mod hashmap_as_tuple_list {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use std::collections::BTreeMap;
 /// #
@@ -1413,7 +1413,7 @@ pub mod btreemap_as_tuple_list {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// # use serde_with::serde_as;
 /// # use std::collections::BTreeMap;
 /// #
@@ -1431,7 +1431,7 @@ pub mod btreemap_as_tuple_list {
 /// `Wrapper` does not implement [`Hash`] nor [`Ord`], thus prohibiting the use [`HashMap`] or [`BTreeMap`].
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// #[derive(Debug, Deserialize, Serialize, Default)]
 /// struct S {
@@ -1466,7 +1466,7 @@ pub mod btreemap_as_tuple_list {
 /// In this example, the serialized format contains duplicate keys, which is not supported with [`HashMap`] or [`BTreeMap`].
 ///
 /// ```
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
 /// struct S {
@@ -1557,7 +1557,7 @@ pub mod tuple_list_as_map {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, BytesOrString};
 /// #
 /// #[serde_as]
@@ -1571,7 +1571,7 @@ pub mod tuple_list_as_map {
 ///
 /// # Example
 /// ```rust
-/// # use serde_derive::{Deserialize, Serialize};
+/// # use serde::{Deserialize, Serialize};
 /// #
 /// #[derive(Debug, Deserialize, Serialize, PartialEq, Default)]
 /// struct S {
@@ -1670,7 +1670,7 @@ pub mod bytes_or_string {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, DefaultOnError, DisplayFromStr};
 /// #
 /// #[serde_as]
@@ -1690,7 +1690,7 @@ pub mod bytes_or_string {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// #
 /// #[derive(Deserialize)]
 /// struct A {
@@ -1720,7 +1720,7 @@ pub mod bytes_or_string {
 /// Deserializing missing values can be supported by adding the `default` field attribute:
 ///
 /// ```
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// #
 /// #[derive(Deserialize)]
 /// struct B {
@@ -1778,7 +1778,7 @@ pub mod default_on_error {
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// # use serde_with::{serde_as, DefaultOnNull, DisplayFromStr};
 /// #
 /// #[serde_as]
@@ -1798,7 +1798,7 @@ pub mod default_on_error {
 /// # Examples
 ///
 /// ```
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// #
 /// #[derive(Deserialize)]
 /// struct A {

@@ -41,7 +41,7 @@ fn unix_epoch_naive() -> NaiveDateTime {
 ///
 /// ```
 /// # use chrono_crate::{DateTime, Utc};
-/// # use serde_derive::Deserialize;
+/// # use serde::Deserialize;
 /// #
 /// #[derive(Debug, Deserialize)]
 /// struct S {
