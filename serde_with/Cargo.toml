@@ -5,8 +5,8 @@ authors = [
     "Marcin Kaźmierczak",
 ]
 name = "serde_with"
-version = "1.12.1"
 rust-version = "1.46"
+version = "1.13.0"
 
 categories = ["encoding"]
 description = "Custom de/serialization functions for Rust's serde"
@@ -17,7 +17,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/jonasbb/serde_with"
 
-include = ["src/**/*", "LICENSE-*", "README.*", "CHANGELOG.md"]
+include = ["src/**/*", "tests/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
 
 [badges]
 maintenance = {status = "actively-developed"}
@@ -103,4 +103,3 @@ rustdoc-args = [
     # https://github.com/rust-lang/rust/pull/84176
     "-Zunstable-options", "--generate-link-to-definition"
 ]
-

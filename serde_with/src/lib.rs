@@ -25,7 +25,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with/1.12.1")]
+#![doc(html_root_url = "https://docs.rs/serde_with/1.13.0")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 // clippy is broken and shows wrong warnings
 // clippy on stable does not know yet about the lint name
@@ -66,7 +66,7 @@
 //!
 //! ```toml
 //! [dependencies.serde_with]
-//! version = "1.12.1"
+//! version = "1.13.0"
 //! features = [ "..." ]
 //! ```
 //!
@@ -243,15 +243,15 @@
 //! # }
 //! ```
 //!
-//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.12.1/serde_with/struct.DisplayFromStr.html
-//! [`with_prefix!`]: https://docs.rs/serde_with/1.12.1/serde_with/macro.with_prefix.html
-//! [display_fromstr]: https://docs.rs/serde_with/1.12.1/serde_with/rust/display_fromstr/index.html
-//! [feature flags]: https://docs.rs/serde_with/1.12.1/serde_with/guide/feature_flags/index.html
-//! [skip_serializing_none]: https://docs.rs/serde_with/1.12.1/serde_with/attr.skip_serializing_none.html
-//! [StringWithSeparator]: https://docs.rs/serde_with/1.12.1/serde_with/rust/struct.StringWithSeparator.html
-//! [user guide]: https://docs.rs/serde_with/1.12.1/serde_with/guide/index.html
+//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.13.0/serde_with/struct.DisplayFromStr.html
+//! [`with_prefix!`]: https://docs.rs/serde_with/1.13.0/serde_with/macro.with_prefix.html
+//! [display_fromstr]: https://docs.rs/serde_with/1.13.0/serde_with/rust/display_fromstr/index.html
+//! [feature flags]: https://docs.rs/serde_with/1.13.0/serde_with/guide/feature_flags/index.html
+//! [skip_serializing_none]: https://docs.rs/serde_with/1.13.0/serde_with/attr.skip_serializing_none.html
+//! [StringWithSeparator]: https://docs.rs/serde_with/1.13.0/serde_with/rust/struct.StringWithSeparator.html
+//! [user guide]: https://docs.rs/serde_with/1.13.0/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
-//! [as-annotation]: https://docs.rs/serde_with/1.12.1/serde_with/guide/serde_as/index.html
+//! [as-annotation]: https://docs.rs/serde_with/1.13.0/serde_with/guide/serde_as/index.html
 
 #[doc(hidden)]
 pub extern crate serde;
@@ -399,7 +399,7 @@ impl Separator for CommaSeparator {
 /// # }
 /// ```
 ///
-/// [serde_as]: https://docs.rs/serde_with/1.12.1/serde_with/attr.serde_as.html
+/// [serde_as]: https://docs.rs/serde_with/1.13.0/serde_with/attr.serde_as.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct As<T: ?Sized>(PhantomData<T>);
 
@@ -865,7 +865,7 @@ pub struct BytesOrString;
 /// ```
 ///
 /// [`chrono::Duration`]: chrono_crate::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.12.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.13.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
@@ -991,7 +991,7 @@ pub struct DurationSeconds<
 /// ```
 ///
 /// [`chrono::Duration`]: chrono_crate::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.12.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.13.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1188,7 +1188,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: chrono_crate::DateTime
-/// [feature flag]: https://docs.rs/serde_with/1.12.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.13.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
@@ -1320,7 +1320,7 @@ pub struct TimestampSeconds<
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: chrono_crate::DateTime
 /// [NaiveDateTime]: chrono_crate::NaiveDateTime
-/// [feature flag]: https://docs.rs/serde_with/1.12.1/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/1.13.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,

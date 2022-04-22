@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2022-04-23
+
+### Added
+
+* Added support for `indexmap::IndexMap` and `indexmap::IndexSet` types. #431, #436
+
+    Both types are now compatible with these functions: `maps_duplicate_key_is_error`, `maps_first_key_wins`, `sets_duplicate_value_is_error`, `sets_last_value_wins`.
+    `serde_as` integration is provided by implementing both `SerializeAs` and `DeserializeAs` for both types.
+    `IndexMap`s can also be serialized as a list of types via the `serde_as(as = "Vec<(_, _)>")` annotation.
+
+    All implementations are gated behind the `indexmap` feature.
+
+    Thanks to @jgrund for providing parts of the implementation.
 
 ## [1.12.1] - 2022-04-07
 

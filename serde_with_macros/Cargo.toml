@@ -1,8 +1,8 @@
 [package]
 authors = ["Jonas Bushart"]
 name = "serde_with_macros"
-version = "1.5.2"
 rust-version = "1.46"
+version = "1.5.2"
 
 categories = ["encoding"]
 description = "proc-macro library for serde_with"
@@ -13,7 +13,15 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/jonasbb/serde_with/"
 
-include = ["src/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
+include = [
+    "src/**/*",
+    "tests/**/*",
+    # These tests are a bit more volatile as future compiler upgrade might break them
+    "!tests/compile-fail/**",
+    "LICENSE-*",
+    "README.md",
+    "CHANGELOG.md",
+]
 
 [lib]
 proc-macro = true
