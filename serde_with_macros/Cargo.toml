@@ -1,8 +1,8 @@
 [package]
 authors = ["Jonas Bushart"]
 name = "serde_with_macros"
-version = "1.5.2"
 rust-version = "1.46"
+version = "1.5.2"
 
 categories = ["encoding"]
 description = "proc-macro library for serde_with"

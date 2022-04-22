@@ -5,8 +5,8 @@ authors = [
     "Marcin Kaźmierczak",
 ]
 name = "serde_with"
-version = "1.12.1"
 rust-version = "1.46"
+version = "1.13.0"
 
 categories = ["encoding"]
 description = "Custom de/serialization functions for Rust's serde"
