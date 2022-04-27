@@ -44,6 +44,7 @@ Check the [feature flags][] section for information about all available features
 ## Examples
 
 Annotate your struct or enum to enable the custom de/serializer.
+The `#[serde_as]` attribute must be place *before* the `#[derive]`.
 
 ### `DisplayFromStr`
 
@@ -95,6 +96,7 @@ assert!(serde_json::to_string(&arrays).is_ok());
 
 This situation often occurs with JSON, but other formats also support optional fields.
 If many fields are optional, putting the annotations on the structs can become tedious.
+The `#[skip_serializing_none]` attribute must be place *before* the `#[derive]`.
 
 ```rust
 #[skip_serializing_none]
