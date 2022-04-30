@@ -1,7 +1,10 @@
+#[cfg(feature = "std")]
 use super::*;
+#[cfg(feature = "std")]
 use fnv::{FnvHashMap, FnvHashSet};
 
 /// Test that HashSets are also supported with non-default hashers.
+#[cfg(feature = "std")]
 #[test]
 fn test_fnv_hashset() {
     #[serde_as]
@@ -24,6 +27,7 @@ fn test_fnv_hashset() {
 }
 
 /// Test that HashSets are also supported with non-default hashers.
+#[cfg(feature = "std")]
 #[test]
 fn test_fnv_hashmap() {
     #[serde_as]

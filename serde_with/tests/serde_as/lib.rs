@@ -25,6 +25,7 @@ use serde_with::{
     formats::Flexible, serde_as, BytesOrString, CommaSeparator, DisplayFromStr, NoneAsEmptyString,
     OneOrMany, Same, StringWithSeparator,
 };
+#[cfg(feature = "std")]
 use std::{
     collections::HashMap,
     sync::{Mutex, RwLock},
@@ -81,7 +82,11 @@ fn test_basic_wrappers() {
     struct SRefCell(#[serde_as(as = "RefCell<DisplayFromStr>")] RefCell<u32>);
 
     is_equal(SRefCell(RefCell::new(123)), expect![[r#""123""#]]);
+}
 
+#[cfg(feature = "std")]
+#[test]
+fn test_basic_wrappers_std() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize)]
     struct SMutex(#[serde_as(as = "Mutex<DisplayFromStr>")] Mutex<u32>);

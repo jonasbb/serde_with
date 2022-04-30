@@ -1,5 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
+#[cfg(feature = "std")]
 use std::collections::HashMap;
 
 macro_rules! array_impl {

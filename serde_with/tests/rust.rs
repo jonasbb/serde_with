@@ -38,6 +38,7 @@ fn string_collection() {
     );
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn prohibit_duplicate_value_hashset() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -80,6 +81,7 @@ fn prohibit_duplicate_value_btreeset() {
     );
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn prohibit_duplicate_key_hashmap() {
     #[derive(Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -152,6 +154,7 @@ fn prohibit_duplicate_key_btreemap() {
     );
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn duplicate_key_first_wins_hashmap() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -282,6 +285,7 @@ fn duplicate_value_first_wins_hashset() {
     assert!(entries[1].1);
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn duplicate_value_last_wins_hashset() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]

@@ -3,10 +3,15 @@ use core::time::Duration;
 use serde_with::{
     DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
-    DurationSeconds, DurationSecondsWithFrac, TimestampMicroSeconds, TimestampMicroSecondsWithFrac,
-    TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
-    TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
+    DurationSeconds, DurationSecondsWithFrac,
 };
+#[cfg(feature = "std")]
+use serde_with::{
+    TimestampMicroSeconds, TimestampMicroSecondsWithFrac, TimestampMilliSeconds,
+    TimestampMilliSecondsWithFrac, TimestampNanoSeconds, TimestampNanoSecondsWithFrac,
+    TimestampSeconds, TimestampSecondsWithFrac,
+};
+#[cfg(feature = "std")]
 use std::time::SystemTime;
 
 #[test]
@@ -210,6 +215,7 @@ fn test_duration_seconds_with_frac() {
     );
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_timestamp_seconds_systemtime() {
     let zero = SystemTime::UNIX_EPOCH;
@@ -354,6 +360,7 @@ fn test_timestamp_seconds_systemtime() {
     );
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_timestamp_seconds_with_frac_systemtime() {
     let zero = SystemTime::UNIX_EPOCH;
@@ -491,6 +498,7 @@ fn test_duration_smoketest() {
     };
 }
 
+#[cfg(feature = "std")]
 #[test]
 fn test_timestamp_systemtime_smoketest() {
     let one_second = SystemTime::UNIX_EPOCH

@@ -1095,7 +1095,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///     st_f64: SystemTime,
 ///     #[serde_as(as = "TimestampSeconds<String>")]
 ///     st_string: SystemTime,
-/// };
+/// }
 ///
 /// // Serialization
 /// // See how the values get rounded, since subsecond precision is not allowed.

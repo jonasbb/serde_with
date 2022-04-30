@@ -19,6 +19,7 @@ use serde::{
     de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
     ser::{Serialize, Serializer},
 };
+#[cfg(feature = "std")]
 #[cfg(doc)]
 use std::collections::HashMap;
 

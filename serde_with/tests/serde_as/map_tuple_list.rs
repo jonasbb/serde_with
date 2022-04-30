@@ -2,7 +2,7 @@ use super::*;
 use std::net::IpAddr;
 
 #[test]
-fn test_map_as_tuple_list() {
+fn test_map_as_tuple_list_btreemap() {
     let ip = "1.2.3.4".parse().unwrap();
     let ip2 = "255.255.255.255".parse().unwrap();
 
@@ -52,6 +52,13 @@ fn test_map_as_tuple_list() {
               ]
             ]"#]],
     );
+}
+
+#[cfg(feature = "std")]
+#[test]
+fn test_map_as_tuple_list_hashmap() {
+    let ip = "1.2.3.4".parse().unwrap();
+    let ip2 = "255.255.255.255".parse().unwrap();
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -103,8 +110,10 @@ fn test_map_as_tuple_list() {
     );
 }
 
+#[cfg(feature = "std")]
+// test_tuple_list_as_btreemap is the more extensive version
 #[test]
-fn test_tuple_list_as_map() {
+fn test_tuple_list_as_hashmap() {
     let ip = "1.2.3.4".parse().unwrap();
     let ip2 = "255.255.255.255".parse().unwrap();
 
@@ -121,6 +130,12 @@ fn test_tuple_list_as_map() {
               "200": "255.255.255.255"
             }"#]],
     );
+}
+
+#[test]
+fn test_tuple_list_as_btreemap() {
+    let ip = "1.2.3.4".parse().unwrap();
+    let ip2 = "255.255.255.255".parse().unwrap();
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -153,7 +168,7 @@ fn test_tuple_list_as_map() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Sll(
-        #[serde_as(as = "HashMap<DisplayFromStr, DisplayFromStr>")] LinkedList<(u32, IpAddr)>,
+        #[serde_as(as = "BTreeMap<DisplayFromStr, DisplayFromStr>")] LinkedList<(u32, IpAddr)>,
     );
 
     is_equal(
@@ -168,7 +183,7 @@ fn test_tuple_list_as_map() {
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct SO(#[serde_as(as = "HashMap<DisplayFromStr, DisplayFromStr>")] Option<(u32, IpAddr)>);
+    struct SO(#[serde_as(as = "BTreeMap<DisplayFromStr, DisplayFromStr>")] Option<(u32, IpAddr)>);
 
     is_equal(
         SO(Some((1, ip))),
@@ -182,10 +197,103 @@ fn test_tuple_list_as_map() {
 
 #[rustversion::since(1.51)]
 #[test]
-fn test_tuple_array_as_map() {
+fn test_tuple_array_as_btreemap() {
     #[serde_as]
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct S1(#[serde_as(as = "BTreeMap<_, _>")] [(u8, u8); 1]);
+    is_equal(
+        S1([(1, 2)]),
+        expect![[r#"
+            {
+              "1": 2
+            }"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct S2(#[serde_as(as = "BTreeMap<_, _>")] [(u8, u8); 33]);
+    is_equal(
+        S2([
+            (0, 0),
+            (1, 1),
+            (2, 2),
+            (3, 3),
+            (4, 4),
+            (5, 5),
+            (6, 6),
+            (7, 7),
+            (8, 8),
+            (9, 9),
+            (10, 10),
+            (11, 11),
+            (12, 12),
+            (13, 13),
+            (14, 14),
+            (15, 15),
+            (16, 16),
+            (17, 17),
+            (18, 18),
+            (19, 19),
+            (20, 20),
+            (21, 21),
+            (22, 22),
+            (23, 23),
+            (24, 24),
+            (25, 25),
+            (26, 26),
+            (27, 27),
+            (28, 28),
+            (29, 29),
+            (30, 30),
+            (31, 31),
+            (32, 32),
+        ]),
+        expect![[r#"
+            {
+              "0": 0,
+              "1": 1,
+              "2": 2,
+              "3": 3,
+              "4": 4,
+              "5": 5,
+              "6": 6,
+              "7": 7,
+              "8": 8,
+              "9": 9,
+              "10": 10,
+              "11": 11,
+              "12": 12,
+              "13": 13,
+              "14": 14,
+              "15": 15,
+              "16": 16,
+              "17": 17,
+              "18": 18,
+              "19": 19,
+              "20": 20,
+              "21": 21,
+              "22": 22,
+              "23": 23,
+              "24": 24,
+              "25": 25,
+              "26": 26,
+              "27": 27,
+              "28": 28,
+              "29": 29,
+              "30": 30,
+              "31": 31,
+              "32": 32
+            }"#]],
+    );
+}
+
+#[cfg(feature = "std")]
+#[rustversion::since(1.51)]
+#[test]
+fn test_tuple_array_as_hashmap() {
+    #[serde_as]
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct S1(#[serde_as(as = "HashMap<_, _>")] [(u8, u8); 1]);
     is_equal(
         S1([(1, 2)]),
         expect![[r#"

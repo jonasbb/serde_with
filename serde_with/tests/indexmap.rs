@@ -109,7 +109,7 @@ fn test_tuple_list_as_map() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct SI(
-        #[serde_as(as = "std::collections::HashMap<DisplayFromStr, DisplayFromStr>")]
+        #[serde_as(as = "std::collections::BTreeMap<DisplayFromStr, DisplayFromStr>")]
         IndexSet<(u32, IpAddr)>,
     );
 
