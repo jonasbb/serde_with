@@ -2,6 +2,7 @@ use crate::{
     content::ser::{Content, ContentSerializer},
     DeserializeAs, SerializeAs,
 };
+use alloc::{string::ToString, vec::Vec};
 use core::{fmt, marker::PhantomData};
 use serde::{
     de::{DeserializeSeed, EnumAccess, Error, MapAccess, SeqAccess, VariantAccess, Visitor},

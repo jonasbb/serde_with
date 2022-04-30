@@ -3,6 +3,10 @@
 use crate::{utils, Separator};
 #[cfg(doc)]
 use alloc::collections::BTreeMap;
+use alloc::{
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::{
     cmp::Eq,
     fmt::{self, Display},

@@ -5,6 +5,7 @@
 //! Please check the documentation on the [`Base64`] type for details.
 
 use crate::{formats, DeserializeAs, SerializeAs};
+use alloc::{format, string::String, vec::Vec};
 use core::{
     convert::{TryFrom, TryInto},
     default::Default,

@@ -15,7 +15,9 @@ use crate::{
     TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
     TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
+use alloc::{format, string::String, vec::Vec};
 use chrono_crate::{DateTime, Duration, Local, NaiveDateTime, TimeZone, Utc};
+use core::fmt;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
@@ -57,6 +59,7 @@ fn unix_epoch_naive() -> NaiveDateTime {
 /// assert!(serde_json::from_str::<S>(r#"{ "date": "1478563200.123" }"#).is_ok());
 /// ```
 pub mod datetime_utc_ts_seconds_from_any {
+    use super::*;
     use chrono_crate::{DateTime, NaiveDateTime, Utc};
     use serde::de::{Deserializer, Error, Unexpected, Visitor};
 
@@ -69,7 +72,7 @@ pub mod datetime_utc_ts_seconds_from_any {
         impl<'de> Visitor<'de> for Helper {
             type Value = DateTime<Utc>;
 
-            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter
                     .write_str("an integer, float, or string with optional subsecond precision.")
             }

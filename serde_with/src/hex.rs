@@ -9,7 +9,7 @@ use crate::{
     formats::{Format, Lowercase, Uppercase},
     ser::SerializeAs,
 };
-use alloc::borrow::Cow;
+use alloc::{borrow::Cow, format, vec::Vec};
 use core::{
     convert::{TryFrom, TryInto},
     marker::PhantomData,
