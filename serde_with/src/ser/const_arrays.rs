@@ -1,5 +1,6 @@
 use super::*;
-use alloc::{borrow::Cow, collections::BTreeMap};
+use alloc::{borrow::Cow, boxed::Box, collections::BTreeMap};
+#[cfg(feature = "std")]
 use std::collections::HashMap;
 
 impl<T, As, const N: usize> SerializeAs<[T; N]> for [As; N]
@@ -42,6 +43,7 @@ macro_rules! tuple_seq_as_map_impl_intern {
     };
 }
 tuple_seq_as_map_impl_intern!([(K, V); N], BTreeMap<K, V>);
+#[cfg(feature = "std")]
 tuple_seq_as_map_impl_intern!([(K, V); N], HashMap<K, V>);
 
 impl<const N: usize> SerializeAs<[u8; N]> for Bytes {

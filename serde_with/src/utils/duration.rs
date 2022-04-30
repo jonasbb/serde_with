@@ -6,11 +6,17 @@ use crate::{
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
     DurationSeconds, DurationSecondsWithFrac, SerializeAs,
 };
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::{fmt, ops::Neg, time::Duration};
 use serde::{
     de::{self, Unexpected, Visitor},
     ser, Deserialize, Deserializer, Serialize, Serializer,
 };
+#[cfg(feature = "std")]
 use std::time::SystemTime;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -60,6 +66,7 @@ impl DurationSigned {
         Self { sign, duration }
     }
 
+    #[cfg(feature = "std")]
     pub(crate) fn to_system_time<'de, D>(self) -> Result<SystemTime, D::Error>
     where
         D: Deserializer<'de>,
@@ -93,6 +100,7 @@ impl From<&Duration> for DurationSigned {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<&SystemTime> for DurationSigned {
     fn from(time: &SystemTime) -> Self {
         match time.duration_since(SystemTime::UNIX_EPOCH) {
@@ -108,7 +116,7 @@ impl From<&SystemTime> for DurationSigned {
     }
 }
 
-impl std::ops::Mul<u32> for DurationSigned {
+impl core::ops::Mul<u32> for DurationSigned {
     type Output = DurationSigned;
 
     fn mul(mut self, rhs: u32) -> Self::Output {
@@ -117,7 +125,7 @@ impl std::ops::Mul<u32> for DurationSigned {
     }
 }
 
-impl std::ops::Div<u32> for DurationSigned {
+impl core::ops::Div<u32> for DurationSigned {
     type Output = DurationSigned;
 
     fn div(mut self, rhs: u32) -> Self::Output {
@@ -303,7 +311,7 @@ struct DurationVisitorFlexible;
 impl<'de> Visitor<'de> for DurationVisitorFlexible {
     type Value = DurationSigned;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> ::std::fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("an integer, a float, or a string containing a number")
     }
 

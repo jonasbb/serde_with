@@ -6,16 +6,20 @@ use crate::{
     utils::duration::DurationSigned,
 };
 use alloc::{
-    borrow::Cow,
+    borrow::{Cow, ToOwned},
+    boxed::Box,
     collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
     rc::{Rc, Weak as RcWeak},
+    string::String,
     sync::{Arc, Weak as ArcWeak},
+    vec::Vec,
 };
+#[cfg(any(feature = "indexmap", feature = "std"))]
+use core::hash::{BuildHasher, Hash};
 use core::{
     cell::{Cell, RefCell},
     convert::TryInto,
     fmt::{self, Display},
-    hash::{BuildHasher, Hash},
     iter::FromIterator,
     str::FromStr,
     time::Duration,
@@ -23,6 +27,7 @@ use core::{
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::de::*;
+#[cfg(feature = "std")]
 use std::{
     collections::{HashMap, HashSet},
     sync::{Mutex, RwLock},
@@ -177,6 +182,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<'de, T, U> DeserializeAs<'de, Mutex<T>> for Mutex<U>
 where
     U: DeserializeAs<'de, T>,
@@ -191,6 +197,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<'de, T, U> DeserializeAs<'de, RwLock<T>> for RwLock<U>
 where
     U: DeserializeAs<'de, T>,
@@ -306,6 +313,7 @@ seq_impl!(
     push
 );
 seq_impl!(BTreeSet<T: Ord>, seq, BTreeSet::new(), insert);
+#[cfg(feature = "std")]
 seq_impl!(
     HashSet<T: Eq + Hash, S: BuildHasher + Default>,
     seq,
@@ -399,6 +407,7 @@ map_impl!(
     BTreeMap<K: Ord, V>,
     map,
     BTreeMap::new());
+#[cfg(feature = "std")]
 map_impl!(
     HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
@@ -528,6 +537,7 @@ macro_rules! map_as_tuple_seq {
     };
 }
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
+#[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 #[cfg(feature = "indexmap")]
 map_as_tuple_seq!(IndexMap<K: Eq + Hash, V>);
@@ -595,7 +605,7 @@ where
         {
             type Value = Vec<T>;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a sequence")
             }
 
@@ -694,6 +704,7 @@ macro_rules! tuple_seq_as_map_impl_intern {
 macro_rules! tuple_seq_as_map_impl {
     ($($tyorig:ident < (K $(: $($kbound:ident $(+)?)+)?, V $(: $($vbound:ident $(+)?)+)?)> $(,)?)+) => {$(
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, BTreeMap<KAs, VAs>);
+        #[cfg(feature = "std")]
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, HashMap<KAs, VAs>);
     )+}
 }
@@ -701,11 +712,12 @@ macro_rules! tuple_seq_as_map_impl {
 tuple_seq_as_map_impl! {
     BinaryHeap<(K: Ord, V: Ord)>,
     BTreeSet<(K: Ord, V: Ord)>,
-    HashSet<(K: Eq + Hash, V: Eq + Hash)>,
     LinkedList<(K, V)>,
     Vec<(K, V)>,
     VecDeque<(K, V)>,
 }
+#[cfg(feature = "std")]
+tuple_seq_as_map_impl!(HashSet<(K: Eq + Hash, V: Eq + Hash)>);
 #[cfg(feature = "indexmap")]
 tuple_seq_as_map_impl!(IndexSet<(K: Eq + Hash, V: Eq + Hash)>);
 
@@ -762,7 +774,9 @@ macro_rules! tuple_seq_as_map_option_impl {
         }
     )+}
 }
-tuple_seq_as_map_option_impl!(BTreeMap, HashMap);
+tuple_seq_as_map_option_impl!(BTreeMap);
+#[cfg(feature = "std")]
+tuple_seq_as_map_option_impl!(HashMap);
 
 impl<'de, T, TAs> DeserializeAs<'de, T> for DefaultOnError<TAs>
 where
@@ -889,6 +903,7 @@ use_signed_duration!(
     }
 );
 
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSeconds DurationSeconds,
     TimestampMilliSeconds DurationMilliSeconds,
@@ -902,6 +917,7 @@ use_signed_duration!(
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSecondsWithFrac DurationSecondsWithFrac,
     TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
@@ -1119,7 +1135,7 @@ where
 
         let h: Helper<'de, T, U> = Deserialize::deserialize(deserializer)?;
         match h {
-            Helper::One(one) => Ok(vec![one.into_inner()]),
+            Helper::One(one) => Ok(alloc::vec![one.into_inner()]),
             Helper::Many(many) => Ok(many.into_inner()),
             Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
         }

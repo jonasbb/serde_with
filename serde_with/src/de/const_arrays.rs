@@ -1,8 +1,9 @@
 use super::*;
 use crate::utils::{MapIter, SeqIter};
-use alloc::{borrow::Cow, collections::BTreeMap};
+use alloc::{borrow::Cow, boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 use core::{convert::TryInto, fmt, mem::MaybeUninit};
 use serde::de::*;
+#[cfg(feature = "std")]
 use std::collections::HashMap;
 
 // TODO this should probably be moved into the utils module when const generics are available for MSRV
@@ -22,7 +23,7 @@ where
         arr[..num].iter_mut().for_each(|elem| {
             // TODO This would be better with assume_init_drop nightly function
             // https://github.com/rust-lang/rust/issues/63567
-            unsafe { std::ptr::drop_in_place(elem.as_mut_ptr()) };
+            unsafe { core::ptr::drop_in_place(elem.as_mut_ptr()) };
         });
     }
 
@@ -57,7 +58,7 @@ where
     // initialized type.
     // A normal transmute is not possible because of:
     // https://github.com/rust-lang/rust/issues/61956
-    Ok(unsafe { std::mem::transmute_copy::<_, [T; N]>(&arr) })
+    Ok(unsafe { core::mem::transmute_copy::<_, [T; N]>(&arr) })
 }
 
 impl<'de, T, As, const N: usize> DeserializeAs<'de, [T; N]> for [As; N]
@@ -145,6 +146,7 @@ macro_rules! tuple_seq_as_map_impl_intern {
     }
 }
 tuple_seq_as_map_impl_intern!([(K, V); N], BTreeMap<KAs, VAs>);
+#[cfg(feature = "std")]
 tuple_seq_as_map_impl_intern!([(K, V); N], HashMap<KAs, VAs>);
 
 impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {

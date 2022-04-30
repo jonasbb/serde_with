@@ -1,5 +1,6 @@
 pub(crate) mod duration;
 
+use alloc::string::String;
 use core::marker::PhantomData;
 use serde::de::{Deserialize, MapAccess, SeqAccess};
 
@@ -88,7 +89,7 @@ where
     }
 }
 
-pub(crate) fn duration_as_secs_f64(dur: &std::time::Duration) -> f64 {
+pub(crate) fn duration_as_secs_f64(dur: &core::time::Duration) -> f64 {
     (dur.as_secs() as f64) + (dur.subsec_nanos() as f64) / (NANOS_PER_SEC as f64)
 }
 
