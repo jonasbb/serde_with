@@ -24,13 +24,15 @@ maintenance = {status = "actively-developed"}
 
 # When adding new features update the documentation in feature-flags.md
 [features]
+alloc = []
 base64 = ["base64_crate"]
 chrono = ["chrono_crate"]
-default = ["macros"]
+default = ["macros", "std"]
 guide = ["doc-comment", "macros"]
 indexmap = ["indexmap_crate"]
 json = ["serde_json"]
 macros = ["serde_with_macros"]
+std = ["alloc"]
 
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
