@@ -1,9 +1,8 @@
+use alloc::collections::{BTreeMap, BTreeSet};
+use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
-use std::{
-    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
-    hash::{BuildHasher, Hash},
-};
+use std::collections::{HashMap, HashSet};
 
 pub trait PreventDuplicateInsertsSet<T> {
     fn new(size_hint: Option<usize>) -> Self;

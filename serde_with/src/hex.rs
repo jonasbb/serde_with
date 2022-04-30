@@ -9,12 +9,12 @@ use crate::{
     formats::{Format, Lowercase, Uppercase},
     ser::SerializeAs,
 };
-use serde::{de::Error, Deserialize, Deserializer, Serializer};
-use std::{
-    borrow::Cow,
+use alloc::borrow::Cow;
+use core::{
     convert::{TryFrom, TryInto},
     marker::PhantomData,
 };
+use serde::{de::Error, Deserialize, Deserializer, Serializer};
 
 /// Serialize bytes as a hex string
 ///

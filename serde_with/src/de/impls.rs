@@ -5,21 +5,28 @@ use crate::{
     utils,
     utils::duration::DurationSigned,
 };
-#[cfg(feature = "indexmap")]
-use indexmap_crate::{IndexMap, IndexSet};
-use serde::de::*;
-use std::{
+use alloc::{
     borrow::Cow,
+    collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
+    rc::{Rc, Weak as RcWeak},
+    sync::{Arc, Weak as ArcWeak},
+};
+use core::{
     cell::{Cell, RefCell},
-    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
     convert::TryInto,
     fmt::{self, Display},
     hash::{BuildHasher, Hash},
     iter::FromIterator,
-    rc::{Rc, Weak as RcWeak},
     str::FromStr,
-    sync::{Arc, Mutex, RwLock, Weak as ArcWeak},
-    time::{Duration, SystemTime},
+    time::Duration,
+};
+#[cfg(feature = "indexmap")]
+use indexmap_crate::{IndexMap, IndexSet};
+use serde::de::*;
+use std::{
+    collections::{HashMap, HashSet},
+    sync::{Mutex, RwLock},
+    time::SystemTime,
 };
 
 ///////////////////////////////////////////////////////////////////////////////

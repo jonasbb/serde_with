@@ -2,18 +2,25 @@ use super::*;
 use crate::{
     formats::Strictness, rust::StringWithSeparator, utils::duration::DurationSigned, Separator,
 };
+use alloc::{
+    borrow::Cow,
+    collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
+    rc::{Rc, Weak as RcWeak},
+    sync::{Arc, Weak as ArcWeak},
+};
+use core::{
+    cell::{Cell, RefCell},
+    convert::TryInto,
+    fmt::Display,
+    time::Duration,
+};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::ser::Error;
 use std::{
-    borrow::Cow,
-    cell::{Cell, RefCell},
-    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
-    convert::TryInto,
-    fmt::Display,
-    rc::{Rc, Weak as RcWeak},
-    sync::{Arc, Mutex, RwLock, Weak as ArcWeak},
-    time::{Duration, SystemTime},
+    collections::{HashMap, HashSet},
+    sync::{Mutex, RwLock},
+    time::SystemTime,
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,5 @@
+extern crate alloc;
+
 mod collections;
 mod default_on;
 mod enum_map;
@@ -11,6 +13,12 @@ mod time;
 mod utils;
 
 use crate::utils::*;
+use alloc::{
+    collections::{BTreeMap, BTreeSet, LinkedList, VecDeque},
+    rc::{Rc, Weak as RcWeak},
+    sync::{Arc, Weak as ArcWeak},
+};
+use core::cell::{Cell, RefCell};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
@@ -18,10 +26,8 @@ use serde_with::{
     OneOrMany, Same, StringWithSeparator,
 };
 use std::{
-    cell::{Cell, RefCell},
-    collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
-    rc::{Rc, Weak as RcWeak},
-    sync::{Arc, Mutex, RwLock, Weak as ArcWeak},
+    collections::HashMap,
+    sync::{Mutex, RwLock},
 };
 
 #[test]
@@ -687,9 +693,9 @@ fn test_bytes() {
     // https://github.com/serde-rs/bytes/blob/cbae606b9dc225fc094b031cc84eac9493da2058/tests/test_derive.rs
     // Original code by @dtolnay
 
+    use alloc::borrow::Cow;
     use serde_test::{assert_de_tokens, assert_tokens, Token};
     use serde_with::Bytes;
-    use std::borrow::Cow;
 
     #[serde_as]
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -915,9 +921,9 @@ fn test_one_or_many_prefer_many() {
 /// Test that Cow borrows from the input
 #[test]
 fn test_borrow_cow_str() {
+    use alloc::borrow::Cow;
     use serde_test::{assert_ser_tokens, Token};
     use serde_with::BorrowCow;
-    use std::borrow::Cow;
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]

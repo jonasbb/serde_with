@@ -1,10 +1,10 @@
 use super::*;
-use pretty_assertions::assert_eq;
-use serde_with::DeserializeFromStr;
-use std::{
+use core::{
     num::ParseIntError,
     str::{FromStr, ParseBoolError},
 };
+use pretty_assertions::assert_eq;
+use serde_with::DeserializeFromStr;
 
 #[derive(Debug, PartialEq, DeserializeFromStr)]
 struct A {

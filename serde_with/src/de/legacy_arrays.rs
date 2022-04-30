@@ -1,5 +1,5 @@
 use super::*;
-use std::fmt;
+use core::fmt;
 use serde::de::*;
 
 macro_rules! array_impl {

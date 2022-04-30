@@ -1,6 +1,6 @@
-use std::borrow::Cow;
 use super::*;
-use std::collections::{BTreeMap, HashMap};
+use alloc::{borrow::Cow, collections::BTreeMap};
+use std::collections::HashMap;
 
 impl<T, As, const N: usize> SerializeAs<[T; N]> for [As; N]
 where

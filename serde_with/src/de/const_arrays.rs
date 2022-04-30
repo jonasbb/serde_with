@@ -1,11 +1,9 @@
 use super::*;
 use crate::utils::{MapIter, SeqIter};
+use alloc::{borrow::Cow, collections::BTreeMap};
+use core::{convert::TryInto, fmt, mem::MaybeUninit};
 use serde::de::*;
-use std::borrow::Cow;
-use std::collections::{BTreeMap, HashMap};
-use std::convert::TryInto;
-use std::fmt;
-use std::mem::MaybeUninit;
+use std::collections::HashMap;
 
 // TODO this should probably be moved into the utils module when const generics are available for MSRV
 
