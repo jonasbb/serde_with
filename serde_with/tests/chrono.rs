@@ -1,9 +1,13 @@
+extern crate alloc;
+
 mod utils;
 
 use crate::utils::{
     check_deserialization, check_error_deserialization, check_serialization, is_equal,
 };
+use alloc::collections::BTreeMap;
 use chrono_crate::{DateTime, Duration, Local, NaiveDateTime, Utc};
+use core::{iter::FromIterator, str::FromStr};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
@@ -13,7 +17,6 @@ use serde_with::{
     TimestampMicroSecondsWithFrac, TimestampMilliSeconds, TimestampMilliSecondsWithFrac,
     TimestampNanoSeconds, TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use std::{collections::BTreeMap, iter::FromIterator, str::FromStr};
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
     DateTime::from_utc(NaiveDateTime::from_timestamp(secs, nsecs), Utc)

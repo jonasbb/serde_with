@@ -1,12 +1,12 @@
 pub(crate) mod duration;
 
+use core::marker::PhantomData;
 use serde::de::{Deserialize, MapAccess, SeqAccess};
-use std::marker::PhantomData;
 
 /// Re-Implementation of `serde::private::de::size_hint::cautious`
 #[inline]
 pub(crate) fn size_hint_cautious(hint: Option<usize>) -> usize {
-    std::cmp::min(hint.unwrap_or(0), 4096)
+    core::cmp::min(hint.unwrap_or(0), 4096)
 }
 
 pub(crate) const NANOS_PER_SEC: u32 = 1_000_000_000;

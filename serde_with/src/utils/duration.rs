@@ -6,15 +6,12 @@ use crate::{
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
     DurationSeconds, DurationSecondsWithFrac, SerializeAs,
 };
+use core::{fmt, ops::Neg, time::Duration};
 use serde::{
     de::{self, Unexpected, Visitor},
     ser, Deserialize, Deserializer, Serialize, Serializer,
 };
-use std::{
-    fmt,
-    ops::Neg,
-    time::{Duration, SystemTime},
-};
+use std::time::SystemTime;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Sign {

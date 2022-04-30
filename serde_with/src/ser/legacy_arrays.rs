@@ -1,5 +1,6 @@
 use super::*;
-use std::collections::{BTreeMap, HashMap};
+use alloc::collections::BTreeMap;
+use std::collections::HashMap;
 
 macro_rules! array_impl {
     ($($len:literal)+) => {$(

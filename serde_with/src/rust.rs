@@ -1,13 +1,9 @@
 //! De/Serialization for Rust's builtin and std types
 
 use crate::{utils, Separator};
-use serde::{
-    de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
-    ser::{Serialize, Serializer},
-};
 #[cfg(doc)]
-use std::collections::{BTreeMap, HashMap};
-use std::{
+use alloc::collections::BTreeMap;
+use core::{
     cmp::Eq,
     fmt::{self, Display},
     hash::Hash,
@@ -15,6 +11,12 @@ use std::{
     marker::PhantomData,
     str::FromStr,
 };
+use serde::{
+    de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
+    ser::{Serialize, Serializer},
+};
+#[cfg(doc)]
+use std::collections::HashMap;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
 ///

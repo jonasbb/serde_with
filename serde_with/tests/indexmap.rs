@@ -1,11 +1,12 @@
 mod utils;
 
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
+use core::iter::FromIterator;
 use expect_test::expect;
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr, Same};
-use std::{iter::FromIterator, net::IpAddr};
+use std::net::IpAddr;
 
 #[test]
 fn test_indexmap() {

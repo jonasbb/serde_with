@@ -1,13 +1,14 @@
+extern crate alloc;
+
 mod utils;
 
 use crate::utils::is_equal;
+use alloc::collections::BTreeMap;
+use core::iter::FromIterator;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::with_prefix;
-use std::{
-    collections::{BTreeMap, HashMap},
-    iter::FromIterator,
-};
+use std::collections::HashMap;
 
 #[test]
 fn test_flatten_with_prefix() {
