@@ -1,22 +1,26 @@
 use super::*;
-use crate::formats::{Flexible, Format, Strict};
-use crate::rust::StringWithSeparator;
-use crate::utils;
-use crate::utils::duration::DurationSigned;
+use crate::{
+    formats::{Flexible, Format, Strict},
+    rust::StringWithSeparator,
+    utils,
+    utils::duration::DurationSigned,
+};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::de::*;
-use std::borrow::Cow;
-use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
-use std::convert::TryInto;
-use std::fmt::{self, Display};
-use std::hash::{BuildHasher, Hash};
-use std::iter::FromIterator;
-use std::rc::{Rc, Weak as RcWeak};
-use std::str::FromStr;
-use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
-use std::time::{Duration, SystemTime};
+use std::{
+    borrow::Cow,
+    cell::{Cell, RefCell},
+    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
+    convert::TryInto,
+    fmt::{self, Display},
+    hash::{BuildHasher, Hash},
+    iter::FromIterator,
+    rc::{Rc, Weak as RcWeak},
+    str::FromStr,
+    sync::{Arc, Mutex, RwLock, Weak as ArcWeak},
+    time::{Duration, SystemTime},
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)

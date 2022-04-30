@@ -13,15 +13,16 @@ mod utils;
 use crate::utils::*;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
-use serde_with::formats::Flexible;
 use serde_with::{
-    serde_as, BytesOrString, CommaSeparator, DisplayFromStr, NoneAsEmptyString, OneOrMany, Same,
-    StringWithSeparator,
+    formats::Flexible, serde_as, BytesOrString, CommaSeparator, DisplayFromStr, NoneAsEmptyString,
+    OneOrMany, Same, StringWithSeparator,
 };
-use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque};
-use std::rc::{Rc, Weak as RcWeak};
-use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
+use std::{
+    cell::{Cell, RefCell},
+    collections::{BTreeMap, BTreeSet, HashMap, LinkedList, VecDeque},
+    rc::{Rc, Weak as RcWeak},
+    sync::{Arc, Mutex, RwLock, Weak as ArcWeak},
+};
 
 #[test]
 fn test_basic_wrappers() {
@@ -427,8 +428,7 @@ fn test_bytes_or_string() {
 
 #[test]
 fn string_with_separator() {
-    use serde_with::rust::StringWithSeparator;
-    use serde_with::{CommaSeparator, SpaceSeparator};
+    use serde_with::{rust::StringWithSeparator, CommaSeparator, SpaceSeparator};
 
     #[serde_as]
     #[derive(Deserialize, Serialize)]

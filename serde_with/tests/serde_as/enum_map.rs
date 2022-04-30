@@ -1,9 +1,7 @@
 use super::*;
 use serde_test::Configure;
 use serde_with::EnumMap;
-use std::fmt::Write as _;
-use std::net::IpAddr;
-use std::str::FromStr;
+use std::{fmt::Write as _, net::IpAddr, str::FromStr};
 
 fn bytes_debug_readable(bytes: &[u8]) -> String {
     let mut result = String::with_capacity(bytes.len() * 2);

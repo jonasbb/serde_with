@@ -1,16 +1,20 @@
 //! Internal Helper types
 
-use crate::formats::{Flexible, Format, Strict, Strictness};
 use crate::{
+    formats::{Flexible, Format, Strict, Strictness},
     utils, DeserializeAs, DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
     DurationSeconds, DurationSecondsWithFrac, SerializeAs,
 };
-use serde::de::{self, Unexpected, Visitor};
-use serde::{ser, Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt;
-use std::ops::Neg;
-use std::time::{Duration, SystemTime};
+use serde::{
+    de::{self, Unexpected, Visitor},
+    ser, Deserialize, Deserializer, Serialize, Serializer,
+};
+use std::{
+    fmt,
+    ops::Neg,
+    time::{Duration, SystemTime},
+};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Sign {

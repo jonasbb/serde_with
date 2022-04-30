@@ -2,8 +2,7 @@
 
 use expect_test::Expect;
 use pretty_assertions::assert_eq;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
+use serde::{de::DeserializeOwned, Serialize};
 use std::fmt::Debug;
 
 #[track_caller]

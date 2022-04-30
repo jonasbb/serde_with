@@ -6,18 +6,14 @@ use crate::utils::{
 use chrono_crate::{DateTime, Duration, Local, NaiveDateTime, Utc};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
-use serde_with::formats::Flexible;
 use serde_with::{
-    serde_as, DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
-    DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
-    DurationSeconds, DurationSecondsWithFrac, TimestampMicroSeconds, TimestampMicroSecondsWithFrac,
-    TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
-    TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
+    formats::Flexible, serde_as, DurationMicroSeconds, DurationMicroSecondsWithFrac,
+    DurationMilliSeconds, DurationMilliSecondsWithFrac, DurationNanoSeconds,
+    DurationNanoSecondsWithFrac, DurationSeconds, DurationSecondsWithFrac, TimestampMicroSeconds,
+    TimestampMicroSecondsWithFrac, TimestampMilliSeconds, TimestampMilliSecondsWithFrac,
+    TimestampNanoSeconds, TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-
-use std::collections::BTreeMap;
-use std::iter::FromIterator;
-use std::str::FromStr;
+use std::{collections::BTreeMap, iter::FromIterator, str::FromStr};
 
 fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
     DateTime::from_utc(NaiveDateTime::from_timestamp(secs, nsecs), Utc)

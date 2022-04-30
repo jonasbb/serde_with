@@ -1,8 +1,10 @@
 use super::*;
 use pretty_assertions::assert_eq;
 use serde_with::DeserializeFromStr;
-use std::num::ParseIntError;
-use std::str::{FromStr, ParseBoolError};
+use std::{
+    num::ParseIntError,
+    str::{FromStr, ParseBoolError},
+};
 
 #[derive(Debug, PartialEq, DeserializeFromStr)]
 struct A {
@@ -39,8 +41,7 @@ fn test_deserialize_fromstr() {
 
 #[test]
 fn test_deserialize_from_bytes() {
-    use serde::de::value::Error;
-    use serde::de::{Deserialize, Deserializer, Visitor};
+    use serde::de::{value::Error, Deserialize, Deserializer, Visitor};
 
     // Unfortunately serde_json is too clever (i.e. handles bytes gracefully)
     // so instead create a custom deserializer which can only deserialize bytes.

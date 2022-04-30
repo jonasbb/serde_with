@@ -5,11 +5,12 @@
 //! Please check the documentation on the [`Base64`] type for details.
 
 use crate::{formats, DeserializeAs, SerializeAs};
-use serde::de::Error;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use std::convert::{TryFrom, TryInto};
-use std::default::Default;
-use std::marker::PhantomData;
+use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
+use std::{
+    convert::{TryFrom, TryInto},
+    default::Default,
+    marker::PhantomData,
+};
 
 /// Serialize bytes with base64
 ///

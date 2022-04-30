@@ -4,11 +4,11 @@
 //!
 //! [chrono]: https://docs.rs/chrono/
 
-use crate::de::DeserializeAs;
-use crate::formats::{Flexible, Format, Strict, Strictness};
-use crate::ser::SerializeAs;
-use crate::utils::duration::{DurationSigned, Sign};
 use crate::{
+    de::DeserializeAs,
+    formats::{Flexible, Format, Strict, Strictness},
+    ser::SerializeAs,
+    utils::duration::{DurationSigned, Sign},
     DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
     DurationSeconds, DurationSecondsWithFrac, TimestampMicroSeconds, TimestampMicroSecondsWithFrac,
