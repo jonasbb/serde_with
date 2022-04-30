@@ -5,8 +5,7 @@ use expect_test::expect;
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr, Same};
-use std::iter::FromIterator;
-use std::net::IpAddr;
+use std::{iter::FromIterator, net::IpAddr};
 
 #[test]
 fn test_indexmap() {

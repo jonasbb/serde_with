@@ -1,8 +1,8 @@
-use serde::de::{
-    self, DeserializeSeed, Deserializer, IgnoredAny, IntoDeserializer, MapAccess, Visitor,
+use serde::{
+    de::{self, DeserializeSeed, Deserializer, IgnoredAny, IntoDeserializer, MapAccess, Visitor},
+    forward_to_deserialize_any,
+    ser::{self, Impossible, Serialize, SerializeMap, SerializeStruct, Serializer},
 };
-use serde::forward_to_deserialize_any;
-use serde::ser::{self, Impossible, Serialize, SerializeMap, SerializeStruct, Serializer};
 use std::fmt;
 
 /// Serialize with an added prefix on every field name and deserialize by

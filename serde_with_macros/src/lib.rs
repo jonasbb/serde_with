@@ -45,16 +45,14 @@ extern crate proc_macro;
 mod utils;
 
 use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _};
-use darling::util::Override;
-use darling::{Error as DarlingError, FromField, FromMeta};
+use darling::{util::Override, Error as DarlingError, FromField, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
-use syn::punctuated::Pair;
-use syn::spanned::Spanned;
 use syn::{
-    parse_macro_input, parse_quote, AttributeArgs, DeriveInput, Error, Field, Fields,
-    GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path, PathArguments, ReturnType, Type,
+    parse_macro_input, parse_quote, punctuated::Pair, spanned::Spanned, AttributeArgs, DeriveInput,
+    Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path,
+    PathArguments, ReturnType, Type,
 };
 
 /// Apply function on every field of structs or enums

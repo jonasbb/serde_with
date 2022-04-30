@@ -4,14 +4,17 @@
 //!
 //! Please check the documentation on the [`Hex`] type for details.
 
-use crate::de::DeserializeAs;
-use crate::formats::{Format, Lowercase, Uppercase};
-use crate::ser::SerializeAs;
-use serde::de::Error;
-use serde::{Deserialize, Deserializer, Serializer};
-use std::borrow::Cow;
-use std::convert::{TryFrom, TryInto};
-use std::marker::PhantomData;
+use crate::{
+    de::DeserializeAs,
+    formats::{Format, Lowercase, Uppercase},
+    ser::SerializeAs,
+};
+use serde::{de::Error, Deserialize, Deserializer, Serializer};
+use std::{
+    borrow::Cow,
+    convert::{TryFrom, TryInto},
+    marker::PhantomData,
+};
 
 /// Serialize bytes as a hex string
 ///

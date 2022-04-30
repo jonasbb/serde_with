@@ -1,19 +1,20 @@
 use super::*;
-use crate::formats::Strictness;
-use crate::rust::StringWithSeparator;
-use crate::utils::duration::DurationSigned;
-use crate::Separator;
+use crate::{
+    formats::Strictness, rust::StringWithSeparator, utils::duration::DurationSigned, Separator,
+};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::ser::Error;
-use std::borrow::Cow;
-use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
-use std::convert::TryInto;
-use std::fmt::Display;
-use std::rc::{Rc, Weak as RcWeak};
-use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
-use std::time::{Duration, SystemTime};
+use std::{
+    borrow::Cow,
+    cell::{Cell, RefCell},
+    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
+    convert::TryInto,
+    fmt::Display,
+    rc::{Rc, Weak as RcWeak},
+    sync::{Arc, Mutex, RwLock, Weak as ArcWeak},
+    time::{Duration, SystemTime},
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
