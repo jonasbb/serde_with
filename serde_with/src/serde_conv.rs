@@ -109,7 +109,7 @@ macro_rules! serde_conv {
 
         #[allow(clippy::ptr_arg)]
         impl $m {
-            $vis fn serialize<S>(x: &$t, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+            $vis fn serialize<S>(x: &$t, serializer: S) -> ::core::result::Result<S::Ok, S::Error>
             where
                 S: $crate::serde::Serializer,
             {
@@ -117,7 +117,7 @@ macro_rules! serde_conv {
                 $crate::serde::Serialize::serialize(&y, serializer)
             }
 
-            $vis fn deserialize<'de, D>(deserializer: D) -> ::std::result::Result<$t, D::Error>
+            $vis fn deserialize<'de, D>(deserializer: D) -> ::core::result::Result<$t, D::Error>
             where
                 D: $crate::serde::Deserializer<'de>,
             {
@@ -127,7 +127,7 @@ macro_rules! serde_conv {
         }
 
         impl $crate::SerializeAs<$t> for $m {
-            fn serialize_as<S>(x: &$t, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+            fn serialize_as<S>(x: &$t, serializer: S) -> ::core::result::Result<S::Ok, S::Error>
             where
                 S: $crate::serde::Serializer,
             {
@@ -136,7 +136,7 @@ macro_rules! serde_conv {
         }
 
         impl<'de> $crate::DeserializeAs<'de, $t> for $m {
-            fn deserialize_as<D>(deserializer: D) -> ::std::result::Result<$t, D::Error>
+            fn deserialize_as<D>(deserializer: D) -> ::core::result::Result<$t, D::Error>
             where
                 D: $crate::serde::Deserializer<'de>,
             {

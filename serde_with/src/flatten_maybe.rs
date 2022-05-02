@@ -51,12 +51,12 @@
 #[macro_export]
 macro_rules! flattened_maybe {
     ($fn:ident, $field:literal) => {
-        fn $fn<'de, T, D>(deserializer: D) -> ::std::result::Result<T, D::Error>
+        fn $fn<'de, T, D>(deserializer: D) -> ::core::result::Result<T, D::Error>
         where
             T: $crate::serde::Deserialize<'de>,
             D: $crate::serde::Deserializer<'de>,
         {
-            use ::std::{
+            use ::core::{
                 option::Option::{self, None, Some},
                 result::Result::{self, Err, Ok},
             };
