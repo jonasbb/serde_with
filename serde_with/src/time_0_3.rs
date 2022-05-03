@@ -1,3 +1,9 @@
+//! De/Serialization of [time v0.3][time] types
+//!
+//! This modules is only available if using the `time_0_3` feature of the crate.
+//!
+//! [time]: https://docs.rs/time/0.3/
+
 use crate::de::DeserializeAs;
 use crate::formats::{Flexible, Format, Strict, Strictness};
 use crate::ser::SerializeAs;

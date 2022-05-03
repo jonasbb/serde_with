@@ -23,6 +23,7 @@ This page lists the transformations implemented in this crate and supported by `
 19. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
 20. [Value into JSON String](#value-into-json-string)
 21. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+22. [Well-known time formats for `OffsetDateTime`](#well-known-time-formats-for-offsetdatetime)
 
 ## Base64 encode bytes
 
@@ -211,6 +212,8 @@ value: Duration,
 ```
 
 The same conversions are also implemented for [`chrono::Duration`] with the `chrono` feature.
+
+The same conversions are also implemented for [`time::Duration`] with the `time_0_3` feature.
 
 ## Hex encode bytes
 
@@ -405,6 +408,8 @@ value: SystemTime,
 
 The same conversions are also implemented for [`chrono::DateTime<Utc>`], [`chrono::DateTime<Local>`], and [`chrono::NaiveDateTime`] with the `chrono` feature.
 
+The conversions are availble for [`time::OffsetDateTime`] and [`time::PrimitiveDateTime`] with the `time_0_3` feature enabled.
+
 ## Value into JSON String
 
 Some JSON APIs are weird and return a JSON encoded string in a JSON response
@@ -446,6 +451,25 @@ This includes `BinaryHeap<(K, V)>`, `BTreeSet<(K, V)>`, `HashSet<(K, V)>`, `Link
 
 The [inverse operation](#maps-to-vec-of-tuples) is also available.
 
+## Well-known time formats for `OffsetDateTime`
+
+[`time::OffsetDateTime`] can be serialized in string format in different well-known formats.
+Two formats are supported, [`time::format_description::well_known::Rfc2822`] and [`time::format_description::well_known::Rfc3339`].
+
+```ignore
+// Rust
+#[serde_as(as = "time::format_description::well_known::Rfc2822")]
+rfc_2822: OffsetDateTime,
+#[serde_as(as = "time::format_description::well_known::Rfc3339")]
+rfc_3339: OffsetDateTime,
+
+// JSON
+"rfc_2822": "Fri, 21 Nov 1997 09:55:06 -0600",
+"rfc_3339": "1997-11-21T09:55:06-06:00",
+```
+
+These conversions are availble with the `time_0_3` feature flag.
+
 [`Base64`]: crate::base64::Base64
 [`Bytes`]: crate::Bytes
 [`chrono::DateTime<Local>`]: chrono_crate::DateTime
@@ -464,6 +488,11 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 [`NoneAsEmptyString`]: crate::NoneAsEmptyString
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
+[`time::Duration`]: time_0_3::Duration
+[`time::format_description::well_known::Rfc2822`]: time_0_3::format_description::well_known::Rfc2822
+[`time::format_description::well_known::Rfc3339`]: time_0_3::format_description::well_known::Rfc3339
+[`time::OffsetDateTime`]: time_0_3::OffsetDateTime
+[`time::PrimitiveDateTime`]: time_0_3::PrimitiveDateTime
 [`TimestampSeconds`]: crate::TimestampSeconds
 [`TimestampSecondsWithFrac`]: crate::TimestampSecondsWithFrac
 [`TryFromInto`]: crate::TryFromInto
