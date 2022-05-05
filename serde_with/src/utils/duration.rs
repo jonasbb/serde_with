@@ -16,7 +16,6 @@ use serde::{
     de::{self, Unexpected, Visitor},
     ser, Deserialize, Deserializer, Serialize, Serializer,
 };
-#[cfg(feature = "std")]
 use std::time::SystemTime;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -66,7 +65,6 @@ impl DurationSigned {
         Self { sign, duration }
     }
 
-    #[cfg(feature = "std")]
     pub(crate) fn to_system_time<'de, D>(self) -> Result<SystemTime, D::Error>
     where
         D: Deserializer<'de>,
@@ -100,7 +98,6 @@ impl From<&Duration> for DurationSigned {
     }
 }
 
-#[cfg(feature = "std")]
 impl From<&SystemTime> for DurationSigned {
     fn from(time: &SystemTime) -> Self {
         match time.duration_since(SystemTime::UNIX_EPOCH) {

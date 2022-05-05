@@ -1,9 +1,7 @@
 use alloc::collections::{BTreeMap, BTreeSet};
-#[cfg(any(feature = "indexmap", feature = "std"))]
 use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::IndexMap;
-#[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
 
 #[deprecated = "This is serde's default behavior."]
@@ -21,7 +19,6 @@ pub trait DuplicateInsertsFirstWinsMap<K, V> {
     fn insert(&mut self, key: K, value: V);
 }
 
-#[cfg(feature = "std")]
 #[allow(deprecated)]
 impl<T, S> DuplicateInsertsFirstWinsSet<T> for HashSet<T, S>
 where
@@ -60,7 +57,6 @@ where
     }
 }
 
-#[cfg(feature = "std")]
 impl<K, V, S> DuplicateInsertsFirstWinsMap<K, V> for HashMap<K, V, S>
 where
     K: Eq + Hash,

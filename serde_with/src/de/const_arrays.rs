@@ -3,7 +3,6 @@ use crate::utils::{MapIter, SeqIter};
 use alloc::{borrow::Cow, boxed::Box, collections::BTreeMap, string::String, vec::Vec};
 use core::{convert::TryInto, fmt, mem::MaybeUninit};
 use serde::de::*;
-#[cfg(feature = "std")]
 use std::collections::HashMap;
 
 // TODO this should probably be moved into the utils module when const generics are available for MSRV
@@ -146,7 +145,6 @@ macro_rules! tuple_seq_as_map_impl_intern {
     }
 }
 tuple_seq_as_map_impl_intern!([(K, V); N], BTreeMap<KAs, VAs>);
-#[cfg(feature = "std")]
 tuple_seq_as_map_impl_intern!([(K, V); N], HashMap<KAs, VAs>);
 
 impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {

@@ -1,9 +1,7 @@
 use alloc::collections::{BTreeMap, BTreeSet};
-#[cfg(any(feature = "indexmap", feature = "std"))]
 use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
-#[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
 
 pub trait PreventDuplicateInsertsSet<T> {
@@ -20,7 +18,6 @@ pub trait PreventDuplicateInsertsMap<K, V> {
     fn insert(&mut self, key: K, value: V) -> bool;
 }
 
-#[cfg(feature = "std")]
 impl<T, S> PreventDuplicateInsertsSet<T> for HashSet<T, S>
 where
     T: Eq + Hash,
@@ -75,7 +72,6 @@ where
     }
 }
 
-#[cfg(feature = "std")]
 impl<K, V, S> PreventDuplicateInsertsMap<K, V> for HashMap<K, V, S>
 where
     K: Eq + Hash,
