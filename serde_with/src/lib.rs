@@ -31,6 +31,7 @@
 // clippy on stable does not know yet about the lint name
 // https://github.com/rust-lang/rust-clippy/issues/8560
 #![allow(unknown_lints, clippy::only_used_in_recursion)]
+#![no_std]
 
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
 //! [![Build Status](https://github.com/jonasbb/serde_with/workflows/Rust%20CI/badge.svg)](https://github.com/jonasbb/serde_with)
@@ -258,6 +259,7 @@
 extern crate alloc;
 #[doc(hidden)]
 pub extern crate serde;
+extern crate std;
 
 #[cfg(feature = "base64")]
 #[cfg_attr(docsrs, doc(cfg(feature = "base64")))]
