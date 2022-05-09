@@ -1,7 +1,7 @@
 # `serde_as` Annotation
 
 This is an alternative to serde's with-annotation.
-It is more flexible and composable but work with fewer types.
+It is more flexible and composable, but work with fewer types.
 
 The scheme is based on two new traits, [`SerializeAs`] and [`DeserializeAs`], which need to be implemented by all types which want to be compatible with `serde_as`.
 The proc-macro attribute [`#[serde_as]`][crate::serde_as] exists as a usability boost for users.
@@ -20,7 +20,7 @@ This page contains some general advice on the usage of `serde_as` and on impleme
 
 ## Switching from serde's with to `serde_as`
 
-For the user the main difference is that instead of
+For the user, the main difference is that instead of
 
 ```rust,ignore
 #[serde(with = "...")]
@@ -35,7 +35,7 @@ you now have to write
 and place the `#[serde_as]` attribute *before* the `#[derive]` attribute.
 You still need the `#[derive(Serialize, Deserialize)]` on the struct/enum.
 
-All together this looks like:
+All together, this looks like:
 
 ```rust
 use serde::{Deserialize, Serialize};
@@ -67,7 +67,7 @@ struct A {
 
 ### Deserializing Optional Fields
 
-During deserialization serde treats fields of `Option<T>` as optional and does not require them to be present.
+During deserialization, serde treats fields of `Option<T>` as optional and does not require them to be present.
 This breaks when adding either the `serde_as` annotation or serde's `with` annotation.
 The default behavior can be restored by adding serde's `default` attribute.
 
@@ -85,7 +85,7 @@ struct A {
 }
 ```
 
-In the future this behavior might change and `default` would be applied on `Option<T>` fields.
+In the future, this behavior might change and `default` would be applied on `Option<T>` fields.
 You can add your feedback at [serde_with#185].
 
 ### Gating `serde_as` on Features
@@ -103,7 +103,7 @@ struct StructC {
 ```
 
 The `serde_as` proc-macro attribute will not recognize the `serde_as` attribute on the field and will not perform the necessary translation steps.
-The problem can be avoided by forcing Rust to to evaluate all cfg-expressions before running `serde_as`.
+The problem can be avoided by forcing Rust to evaluate all cfg-expressions before running `serde_as`.
 This is possible with the `#[cfg_eval]` attribute, which is considered for stabilization ([rust#82679], [rust#87221]).
 
 As a workaround, it is possible to remove the `serde_as` proc-macro attribute and perform the transformation manually.
@@ -124,14 +124,14 @@ map: HashMap<(i32,i32), i32>,
 ## Implementing `SerializeAs` / `DeserializeAs`
 
 You can support [`SerializeAs`] / [`DeserializeAs`] on your own types too.
-Most "leaf" types do not need to implement these traits since they are supported implicitly.
+Most "leaf" types do not need to implement these traits, since they are supported implicitly.
 "Leaf" type refers to types which directly serialize like plain data types.
-[`SerializeAs`] / [`DeserializeAs`] is very important for collection types, like `Vec` or `BTreeMap`, since they need special handling for they key/value de/serialization such that the conversions can be done on the key/values.
+[`SerializeAs`] / [`DeserializeAs`] is very important for collection types, like `Vec` or `BTreeMap`, since they need special handling for the key/value de/serialization such that the conversions can be done on the key/values.
 You also find them implemented on the conversion types, such as the [`DisplayFromStr`] type.
 These make up the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
 
-In many cases conversion is only required from one serializable type to another one, without requiring the full power of the `Serialize` or `Deserialize` traits.
-In these cases the [`serde_conv!`] macro conveniently allows to define conversion types without the boilerplate.
+In many cases, conversion is only required from one serializable type to another one, without requiring the full power of the `Serialize` or `Deserialize` traits.
+In these cases, the [`serde_conv!`] macro conveniently allows defining conversion types without the boilerplate.
 The documentation of [`serde_conv!`] contains more details how to use it.
 
 The trait documentations for [`SerializeAs`] and [`DeserializeAs`] describe in details how to implement them for container types like `Box` or `Vec` and other types.
@@ -145,7 +145,7 @@ We assume we have a module containing a `serialize` and a `deserialize` function
 You find an example in the [official serde documentation](https://serde.rs/custom-date-format.html).
 
 Our goal is to serialize this `Data` struct.
-Right now we do not have anything we can use to replace `???` with, since `_` only works if `RemoteType` would implement `Serialize`, which it does not.
+Right now, we do not have anything we can use to replace `???` with, since `_` only works if `RemoteType` would implement `Serialize`, which it does not.
 
 ```rust
 # #[cfg(FALSE)] {
@@ -188,7 +188,7 @@ impl<'de> DeserializeAs<'de, RemoteType> for LocalType {
 
 This is how the final implementation looks like.
 We assumed we have a module `MODULE` with a `serialize` function already, which we use here to provide the implementation.
-As can be seen this is mostly boilerplate, since the most part is encapsulated in `$module::serialize`.
+As can be seen, this is mostly boilerplate, since the most part is encapsulated in `$module::serialize`.
 The final `Data` struct will now look like:
 
 ```rust
@@ -205,7 +205,7 @@ struct Data {
 ### Using `#[serde_as]` with serde's remote derives
 
 A special case of the above section is using it on remote derives.
-This is a special functionality of serde where it derives the de/serialization code for a type from another crate if all fields are `pub`.
+This is a special functionality of serde, where it derives the de/serialization code for a type from another crate if all fields are `pub`.
 You can find all the details in the [official serde documentation](https://serde.rs/remote-derive.html).
 
 ```rust
@@ -236,7 +236,7 @@ struct DurationDef {
 # }
 ```
 
-Our goal is it now to use `Duration` within `serde_as`.
+Our goal is now to use `Duration` within `serde_as`.
 We use the existing `DurationDef` type and its `serialize` and `deserialize` functions.
 We can write this implementation.
 The implementation for `DeserializeAs` works analogue.

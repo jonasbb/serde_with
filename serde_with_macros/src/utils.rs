@@ -49,7 +49,7 @@ impl DeriveOptions {
 }
 
 // Inspired by https://github.com/serde-rs/serde/blob/fb2fe409c8f7ad6c95e3096e5e9ede865c8cfb49/serde_derive/src/de.rs#L3120
-// Serde is also licences Apache 2 + MIT
+// Serde is also licensed Apache 2 + MIT
 pub(crate) fn split_with_de_lifetime(
     generics: &Generics,
 ) -> (

@@ -1,14 +1,14 @@
 /// Create new conversion adapters from functions
 ///
 /// The macro lets you create a new converter, which is usable for serde's with-attribute and `#[serde_as]`.
-/// Its main use case is to write simple converters for types which are not serializable.
+/// Its main use case is to write simple converters for types, which are not serializable.
 /// Another use-case is to change the serialization behavior if the implemented `Serialize`/`Deserialize` trait is insufficient.
 ///
 /// The macro takes four arguments:
 ///
 /// 1. The name of the converter type.
 ///     The type can be prefixed with a visibility modifies like `pub` or `pub(crate)`.
-///     By default the type is not marked as public (`pub(self)`).
+///     By default, the type is not marked as public (`pub(self)`).
 /// 2. The type `T` we want to extend with custom behavior.
 /// 3. A function or macro taking a `&T` and returning a serializable type.
 /// 4. A function or macro taking a deserializable type and returning a `Result<T, E>`.
@@ -16,7 +16,7 @@
 ///
 /// # Example
 ///
-/// In this example we write custom serialization behavior for a `Rgb` type.
+/// In this example, we write custom serialization behavior for a `Rgb` type.
 /// We want to serialize it as a `[u8; 3]`.
 ///
 /// ```rust

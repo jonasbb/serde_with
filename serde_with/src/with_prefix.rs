@@ -34,7 +34,7 @@ use std::fmt;
 /// }
 /// ```
 ///
-/// In Rust we would ideally like to model this data as a pair of `Player`
+/// In Rust, we would ideally like to model this data as a pair of `Player`
 /// structs, rather than repeating the fields of `Player` for each prefix.
 ///
 /// ```rust

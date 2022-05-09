@@ -1,6 +1,6 @@
 # `serde_with` User Guide
 
-This crate provides helper functions to extend and change how [`serde`] serializes different datatypes.
+This crate provides helper functions to extend and change how [`serde`] serializes different data types.
 For example, you can serialize [a map as a sequence of tuples][crate::guide::serde_as#maps-to-vec-of-tuples], serialize [using the `Display` and `FromStr` traits][`DisplayFromStr`], or serialize [an empty `String` like `None`][NoneAsEmptyString].
 `serde_with` covers types from the Rust Standard Library and some common crates like [`chrono`][serde_with_chrono].
 
@@ -64,7 +64,7 @@ assert_eq!(data, serde_json::from_str(json).unwrap());
 
 ## 2. Integration with serde's with-annotation
 
-[serde's with-annotation][with-annotation] allows to specify a different serialization or deserialization function for a field.
+[serde's with-annotation][with-annotation] allows specifying a different serialization or deserialization function for a field.
 It is useful to adapt the serialization of existing types to the requirements of a protocol.
 Most modules in this crate can be used together with the with-annotation.
 
@@ -129,7 +129,7 @@ For further details, please refer to the documentation of each proc-macro.
 
 ## 4. Derive macros to implement `Deserialize` and `Serialize`
 
-The derive macros work similar to the serde provided ones but they do implement other de/serialization schemes.
+The derive macros work similar to the serde provided ones, but they do implement other de/serialization schemes.
 For example, the derives [`DeserializeFromStr`] and [`SerializeDisplay`] require that the type also implement [`FromStr`] and [`Display`] and de/serializes from/to a string instead of the usual way of iterating over all fields.
 
 ## Migrating from the with-annotations to `serde_as`
