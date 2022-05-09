@@ -245,7 +245,7 @@ where
 ///
 /// Existing `skip_serializing_if` annotations will not be altered.
 ///
-/// If some values should always be serialized, then the `serialize_always` can be used.
+/// If some values should always be serialized, then `serialize_always` can be used.
 ///
 /// # Limitations
 ///
@@ -269,7 +269,7 @@ where
 /// ```
 ///
 /// Likewise, if you import a type and name it `Option`, the `skip_serializing_if` attributes will be added and compile errors will occur, if `Option::is_none` is not a valid function.
-/// Here the function `Vec::is_none` does not exist and therefore the example fails to compile.
+/// Here the function `Vec::is_none` does not exist, and therefore the example fails to compile.
 ///
 /// ```rust,compile_fail
 /// # use serde::Serialize;
@@ -436,7 +436,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// # What this macro does
 ///
 /// The `serde_as` macro only serves a convenience function.
-/// All the steps it performs, can easily be done manually, in case the cost of an attribute macro is deemed to high.
+/// All the steps it performs, can easily be done manually, in case the cost of an attribute macro is deemed too high.
 /// The functionality can best be described with an example.
 ///
 /// ```rust,ignore
@@ -449,13 +449,13 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// ```
 ///
 /// 1. All the placeholder type `_` will be replaced with `::serde_with::Same`.
-///     The placeholder type `_` marks all the places where the types `Serialize` implementation should be used.
+///     The placeholder type `_` marks all the places where the type's `Serialize` implementation should be used.
 ///     In the example, it means that the `u32` values will serialize with the `Serialize` implementation of `u32`.
 ///     The `Same` type implements `SerializeAs` whenever the underlying type implements `Serialize` and is used to make the two traits compatible.
 ///
 ///     If you specify a custom path for `serde_with` via the `crate` attribute, the path to the `Same` type will be altered accordingly.
 /// 2. Wrap the type from the annotation inside a `::serde_with::As`.
-///     In the above example we know have something like `::serde_with::As::<Vec<::serde_with::Same>>`.
+///     In the above example we now have something like `::serde_with::As::<Vec<::serde_with::Same>>`.
 ///     The `As` type acts as the opposite of the `Same` type.
 ///     It allows using a `SerializeAs` type whenever a `Serialize` is required.
 /// 3. Translate the `*as` attributes into the serde equivalent ones.
@@ -787,7 +787,7 @@ fn has_type_embedded(type_: &Type, embedded_type: &syn::Ident) -> bool {
 
 /// Deserialize value by using its [`FromStr`] implementation
 ///
-/// This is an alternative way to implement `Deserialize` for types which also implement [`FromStr`] by deserializing the type from string.
+/// This is an alternative way to implement `Deserialize` for types, which also implement [`FromStr`] by deserializing the type from string.
 /// Ensure that the struct/enum also implements [`FromStr`].
 /// If the implementation is missing, you will get an error message like
 /// ```text
@@ -914,7 +914,7 @@ fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> T
 
 /// Serialize value by using it's [`Display`] implementation
 ///
-/// This is an alternative way to implement `Serialize` for types which also implement [`Display`] by serializing the type as string.
+/// This is an alternative way to implement `Serialize` for types, which also implement [`Display`] by serializing the type as string.
 /// Ensure that the struct/enum also implements [`Display`].
 /// If the implementation is missing, you will get an error message like
 /// ```text
@@ -1003,7 +1003,7 @@ fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> Tok
 /// The intend is that keeping the field attributes allows downstream crates to consume and act on them without causing an ordering dependency to the serde_as macro.
 /// Otherwise, downstream proc-macros would need to be placed *in front of* the main `#[serde_as]` attribute, since otherwise the field attributes would already be stripped off.
 ///
-/// More details about the use-cases in the Github discussion: <https://github.com/jonasbb/serde_with/discussions/260>.
+/// More details about the use-cases in the GitHub discussion: <https://github.com/jonasbb/serde_with/discussions/260>.
 #[proc_macro_derive(__private_consume_serde_as_attributes, attributes(serde_as))]
 pub fn __private_consume_serde_as_attributes(_: TokenStream) -> TokenStream {
     TokenStream::new()

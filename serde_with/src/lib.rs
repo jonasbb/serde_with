@@ -58,7 +58,7 @@
 //! **Check out the [user guide][user guide] to find out more tips and tricks about this crate.**
 //!
 //! For further help using this crate you can [open a new discussion](https://github.com/jonasbb/serde_with/discussions/new) or ask on [users.rust-lang.org](https://users.rust-lang.org/).
-//! For bugs please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on Github.
+//! For bugs, please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on GitHub.
 //!
 //! # Use `serde_with` in your Project
 //!
@@ -113,7 +113,7 @@
 //! ## Large and const-generic arrays
 //!
 //! serde does not support arrays with more than 32 elements or using const-generics.
-//! The `serde_as` attribute allows to circumvent this restriction, even for nested types and nested arrays.
+//! The `serde_as` attribute allows circumventing this restriction, even for nested types and nested arrays.
 //!
 //! ```rust
 //! # #[cfg(FALSE)] {
@@ -603,7 +603,7 @@ pub struct NoneAsEmptyString;
 /// ```
 ///
 /// `DefaultOnError` can be combined with other conversion methods.
-/// In this example we deserialize a `Vec`, each element is deserialized from a string.
+/// In this example, we deserialize a `Vec`, each element is deserialized from a string.
 /// If the string does not parse as a number, then we get the default value of 0.
 ///
 /// ```rust
@@ -661,7 +661,7 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 /// ```
 ///
 /// `DefaultOnNull` can be combined with other conversion methods.
-/// In this example we deserialize a `Vec`, each element is deserialized from a string.
+/// In this example, we deserialize a `Vec`, each element is deserialized from a string.
 /// If we encounter null, then we get the default value of 0.
 ///
 /// ```rust
@@ -783,7 +783,7 @@ pub struct BytesOrString;
 ///     d_f64: Duration::new(12345, 500_000_000),
 ///     d_string: Duration::new(12345, 999_999_999),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "d_u64": 12345,
 ///     "d_f64": 12346.0,
@@ -841,7 +841,7 @@ pub struct BytesOrString;
 ///     d_f64: Duration::seconds(-12345) + Duration::milliseconds(500),
 ///     d_string: Duration::seconds(12345) + Duration::nanoseconds(999_999_999),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "d_i64": -12345,
 ///     "d_f64": -12345.0,
@@ -920,7 +920,7 @@ pub struct DurationSeconds<
 ///     d_f64: Duration::new(12345, 500_000_000), // Create from seconds and nanoseconds
 ///     d_string: Duration::new(12345, 999_999_000),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "d_f64": 12345.5,
 ///     "d_string": "12345.999999",
@@ -971,7 +971,7 @@ pub struct DurationSeconds<
 ///     d_f64: Duration::seconds(-12345) + Duration::milliseconds(500),
 ///     d_string: Duration::seconds(12345) + Duration::nanoseconds(999_999_000),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "d_f64": -12344.5,
 ///     "d_string": "12345.999999",
@@ -1105,7 +1105,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///     st_f64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 500_000_000)).unwrap(),
 ///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 999_999_999)).unwrap(),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "st_i64": 12345,
 ///     "st_f64": 12346.0,
@@ -1163,7 +1163,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///     dt_f64: Local.timestamp(-12345, 500_000_000),
 ///     dt_string: Utc.timestamp(12345, 999_999_999),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "dt_i64": -12345,
 ///     "dt_f64": -12345.0,
@@ -1247,7 +1247,7 @@ pub struct TimestampSeconds<
 ///     st_f64: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 500_000_000)).unwrap(),
 ///     st_string: SystemTime::UNIX_EPOCH.checked_add(Duration::new(12345, 999_999_000)).unwrap(),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "st_f64": 12345.5,
 ///     "st_string": "12345.999999",
@@ -1298,7 +1298,7 @@ pub struct TimestampSeconds<
 ///     dt_f64: Utc.timestamp(-12345, 500_000_000),
 ///     dt_string: Local.timestamp(12345, 999_999_000),
 /// };
-/// // Observe the different datatypes
+/// // Observe the different data types
 /// let expected = json!({
 ///     "dt_f64": -12344.5,
 ///     "dt_string": "12345.999999",
@@ -1557,7 +1557,7 @@ pub struct Bytes;
 ///
 /// Sometimes it is desirable to have a shortcut in writing 1-element lists in a config file.
 /// Usually, this is done by either writing a list or the list element itself.
-/// This distinction is not semantically important on the Rust side, thus both forms should serialize into the same `Vec`.
+/// This distinction is not semantically important on the Rust side, thus both forms should deserialize into the same `Vec`.
 ///
 /// The `OneOrMany` adapter achieves exactly this use case.
 /// The serialization behavior can be tweaked to either always serialize as a list using `PreferMany` or to serialize as the inner element if possible using `PreferOne`.

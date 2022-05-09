@@ -5,7 +5,7 @@
 //! The code is very stable in the `serde` crate, so no maintainability problem is expected.
 //!
 //! Since the type is private we copy the type here.
-//! `serde` is licences as MIT+Apache2, the same as this crate.
+//! `serde` is licensed as MIT+Apache2, the same as this crate.
 //!
 //! This version carries improvements compared to `serde`'s version.
 //! The types support 128-bit integers, which is supported for all targets in Rust 1.40+.

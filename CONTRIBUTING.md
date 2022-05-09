@@ -9,7 +9,7 @@
 Check out the [user guide][user guide] to find out more tips and tricks about this crate.
 
 For further help using this crate you can [open a new discussion](https://github.com/jonasbb/serde_with/discussions/new) or ask on [users.rust-lang.org](https://users.rust-lang.org/).
-For bugs please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on Github.
+For bugs please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on GitHub.
 
 ## Reporting Bugs
 
