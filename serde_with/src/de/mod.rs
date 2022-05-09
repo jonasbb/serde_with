@@ -135,7 +135,7 @@ pub struct DeserializeAsWrap<T, U> {
     marker: PhantomData<U>,
 }
 
-impl<'de, T, U> DeserializeAsWrap<T, U> {
+impl<T, U> DeserializeAsWrap<T, U> {
     /// Return the inner value of type `T`.
     pub fn into_inner(self) -> T {
         self.value
