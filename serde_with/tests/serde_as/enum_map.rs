@@ -1,6 +1,7 @@
 use super::*;
 use serde_test::Configure;
 use serde_with::EnumMap;
+use std::fmt::Write as _;
 use std::net::IpAddr;
 use std::str::FromStr;
 
@@ -8,11 +9,8 @@ fn bytes_debug_readable(bytes: &[u8]) -> String {
     let mut result = String::with_capacity(bytes.len() * 2);
     for &byte in bytes {
         match byte {
-            control if control < 0x20 || control == 0x7f => {
-                result.push_str(&format!("\\x{:02x}", byte));
-            }
-            non_ascii if non_ascii > 0x7f => {
-                result.push_str(&format!("\\x{:02x}", byte));
+            non_printable if !(0x20..0x7f).contains(&non_printable) => {
+                write!(result, "\\x{:02x}", byte).unwrap();
             }
             b'\\' => result.push_str("\\\\"),
             _ => {
