@@ -54,7 +54,7 @@ impl DurationSigned {
         }
     }
 
-    #[cfg(feature = "chrono")]
+    #[cfg(any(feature = "chrono", feature = "time_0_3"))]
     pub(crate) fn with_duration(sign: Sign, duration: Duration) -> Self {
         Self { sign, duration }
     }

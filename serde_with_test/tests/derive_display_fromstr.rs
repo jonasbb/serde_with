@@ -5,8 +5,6 @@
 #![allow(dead_code, unused_imports)]
 
 use ::s_with::{DeserializeFromStr, SerializeDisplay};
-// Needed for 1.46, unused in 1.50
-use ::std::panic;
 
 #[derive(DeserializeFromStr, SerializeDisplay)]
 #[serde_with(crate = "::s_with")]

@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add support for `time` crate v0.3 #450
+
+    `time::Duration` can now be serialized with the `DurationSeconds` and related converters.
+
+    ```rust
+    // Rust
+    #[serde_as(as = "serde_with::DurationSeconds<u64>")]
+    value: Duration,
+
+    // JSON
+    "value": 86400,
+    ```
+
+    `time::OffsetDateTime` and `time::PrimitiveDateTime` can now be serialized with the `TimestampSeconds` and related converters.
+
+
+    ```rust
+    // Rust
+    #[serde_as(as = "serde_with::TimestampMicroSecondsWithFrac<String>")]
+    value: time::PrimitiveDateTime,
+
+    // JSON
+    "value": "1000000",
+    ```
+
+    `time::OffsetDateTime` can be serialized in string format in different well-known formats.
+    Two formats are supported, `time::format_description::well_known::Rfc2822` and `time::format_description::well_known::Rfc3339`.
+
+    ```rust
+    // Rust
+    #[serde_as(as = "time::format_description::well_known::Rfc2822")]
+    rfc_2822: OffsetDateTime,
+    #[serde_as(as = "Vec<time::format_description::well_known::Rfc3339>")]
+    rfc_3339: Vec<OffsetDateTime>,
+
+    // JSON
+    "rfc_2822": "Fri, 21 Nov 1997 09:55:06 -0600",
+    "rfc_3339": ["1997-11-21T09:55:06-06:00"],
+    ```
+
+### Changed
+
+* Bump MSRV to 1.53, since the new dependency `time` requires that version.
+
 ### Fixed
 
 * Make the documentation clearer by stating that the `#[serde_as]` and `#[skip_serializing_none]` attributes must always be places before `#[derive]`.
@@ -143,9 +189,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     The `#[serde(borrow)]` annotation is automatically added by the `#[serde_as]` attribute.
 
-## Changed
+### Changed
 
-* Bump MSRV to 1.46, since the dev-dependency bitflags requires that version now.
+* Bump MSRV to 1.46, since the dev-dependency `bitflags` requires that version now.
 * `flattened_maybe!` no longer requires the `serde_with` crate to be available with a specific name.
     This allows renaming the crate or using `flattened_maybe!` through a re-export without any complications.
 

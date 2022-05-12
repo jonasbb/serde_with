@@ -4,9 +4,6 @@
 #![no_implicit_prelude]
 #![allow(dead_code, unused_imports)]
 
-// Needed for 1.46, unused in 1.50
-use ::std::panic;
-
 // The macro creates custom deserialization code.
 // You need to specify a function name and the field name of the flattened field.
 ::s_with::flattened_maybe!(deserialize_t, "t");
