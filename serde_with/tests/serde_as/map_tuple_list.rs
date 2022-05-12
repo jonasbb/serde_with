@@ -180,7 +180,6 @@ fn test_tuple_list_as_map() {
     is_equal(SO(None), expect![[r#"{}"#]]);
 }
 
-#[rustversion::since(1.51)]
 #[test]
 fn test_tuple_array_as_map() {
     #[serde_as]

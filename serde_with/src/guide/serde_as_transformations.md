@@ -3,7 +3,7 @@
 This page lists the transformations implemented in this crate and supported by `serde_as`.
 
 1. [Base64 encode bytes](#base64-encode-bytes)
-2. [Big Array support (Rust 1.51+)](#big-array-support-rust-151)
+2. [Big Array support](#big-array-support)
 3. [Borrow from the input for `Cow` type](#borrow-from-the-input-for-cow-type)
 4. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
 5. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
@@ -44,7 +44,7 @@ bcrypt_unpadded: Vec<u8>,
 "bcrypt_unpadded": "QETqZE6eT07wZEO",
 ```
 
-## Big Array support (Rust 1.51+)
+## Big Array support
 
 Support for arrays of arbitrary size.
 
@@ -59,7 +59,7 @@ value: [[u8; 64]; 33],
 
 ## Borrow from the input for `Cow` type
 
-The types `Cow<'_, str>`, `Cow<'_, [u8]>`, or `Cow<'_, [u8; N]>` (Rust 1.51+) can borrow from the input, avoiding extra copies.
+The types `Cow<'_, str>`, `Cow<'_, [u8]>`, or `Cow<'_, [u8; N]>` can borrow from the input, avoiding extra copies.
 
 ```ignore
 // Rust

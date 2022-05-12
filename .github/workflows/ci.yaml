@@ -87,28 +87,24 @@ jobs:
 
       # Build the project
       - name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        run: cargo build --all-features --all-targets --manifest-path=${{ matrix.crate }}/Cargo.toml
+        run: cargo build --all-features --all-targets
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests
       # since doctests are important this should not be added
       # https://github.com/rust-lang/cargo/issues/6669
-      #
-      # We need to specify the manifest path, such that cargo knows where to apply the `no-default-features`.
-      # This is no longer necessary for Rust 1.51 or resolver="2"
-      # https://doc.rust-lang.org/nightly/cargo/reference/features.html#resolver-version-2-command-line-flags
       - name: "Test Build (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        run: cargo test --no-default-features --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
+        run: cargo test --no-default-features --no-run
       - name: "Test Run (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        run: cargo test --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
+        run: cargo test --no-default-features --no-fail-fast
       - name: "Test Build (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        run: cargo test --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
+        run: cargo test --no-run
       - name: "Test Run (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        run: cargo test --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
+        run: cargo test --no-fail-fast
       - name: "Test Build (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        run: cargo test --all-features  --no-run --manifest-path=${{ matrix.crate }}/Cargo.toml
+        run: cargo test --all-features  --no-run
       - name: "Test Run (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
-        run: cargo test --all-features --no-default-features --no-fail-fast --manifest-path=${{ matrix.crate }}/Cargo.toml
+        run: cargo test --all-features --no-default-features --no-fail-fast
 
       - name: Run cargo-tarpaulin
         if: matrix.rust == 'stable'  && matrix.os == 'ubuntu-latest'

@@ -1411,14 +1411,14 @@ pub struct TimestampNanoSecondsWithFrac<
 ///
 /// The type provides de/serialization for these types:
 ///
-/// * `[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
-/// * `&[u8; N]`, Rust 1.51+, not possible using `serde_bytes`
+/// * `[u8; N]`, not possible using `serde_bytes`
+/// * `&[u8; N]`, not possible using `serde_bytes`
 /// * `&[u8]`
-/// * `Box<[u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
+/// * `Box<[u8; N]>`, not possible using `serde_bytes`
 /// * `Box<[u8]>`
 /// * `Vec<u8>`
 /// * `Cow<'_, [u8]>`
-/// * `Cow<'_, [u8; N]>`, Rust 1.51+, not possible using `serde_bytes`
+/// * `Cow<'_, [u8; N]>`, not possible using `serde_bytes`
 ///
 /// [`serde_bytes`]: https://crates.io/crates/serde_bytes
 ///

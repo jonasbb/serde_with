@@ -4,3 +4,4 @@ members = [
     "serde_with_macros",
     "serde_with_test",
 ]
+resolver = "2"
