@@ -632,7 +632,6 @@ fn test_serialize_reference() {
     );
 }
 
-#[rustversion::since(1.51)]
 #[test]
 fn test_big_arrays() {
     // Single Big Array
@@ -679,8 +678,6 @@ fn test_big_arrays() {
     );
 }
 
-// The test requires const-generics to work
-#[rustversion::since(1.51)]
 #[test]
 fn test_bytes() {
     // The test case is copied from

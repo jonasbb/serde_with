@@ -70,11 +70,6 @@ use std::marker::PhantomData;
 ///     serde_json::from_value(json!("00aAbc99FF")).unwrap()
 /// );
 ///
-/// /////////////////////////////////////
-/// // Arrays are supported in Rust 1.48+
-///
-/// # #[rustversion::since(1.48)]
-/// # fn test_array() {
 /// #[serde_as]
 /// # #[derive(Debug, PartialEq, Eq)]
 /// #[derive(Deserialize, Serialize)]
@@ -104,10 +99,6 @@ use std::marker::PhantomData;
 /// let error_result: Result<ByteArray, _> =
 ///     serde_json::from_value(json!("000000000000000000000000000000")); // Too long
 /// error_result.unwrap_err();
-/// # };
-/// # #[rustversion::before(1.48)]
-/// # fn test_array() {}
-/// # test_array();
 /// # }
 /// ```
 #[derive(Copy, Clone, Debug, Default)]
