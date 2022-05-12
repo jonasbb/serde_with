@@ -49,6 +49,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     "rfc_3339": ["1997-11-21T09:55:06-06:00"],
     ```
 
+### Changed
+
+* Bump MSRV to 1.53, since the new dependency `time` requires that version.
+
 ### Fixed
 
 * Make the documentation clearer by stating that the `#[serde_as]` and `#[skip_serializing_none]` attributes must always be places before `#[derive]`.

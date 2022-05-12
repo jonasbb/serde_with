@@ -34,8 +34,8 @@ fn unix_epoch_primitive() -> PrimitiveDateTime {
 /// Convert a [`time::Duration`][time_0_3::Duration] into a [`DurationSigned`]
 fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     let std_dur = StdDuration::new(
-        dur.whole_seconds().abs() as _,
-        dur.subsec_nanoseconds().abs() as _,
+        dur.whole_seconds().unsigned_abs(),
+        dur.subsec_nanoseconds().unsigned_abs(),
     );
 
     DurationSigned::with_duration(
