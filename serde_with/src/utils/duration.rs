@@ -1,16 +1,22 @@
 //! Internal Helper types
 
-use crate::formats::{Flexible, Format, Strict, Strictness};
 use crate::{
+    formats::{Flexible, Format, Strict, Strictness},
     utils, DeserializeAs, DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
     DurationSeconds, DurationSecondsWithFrac, SerializeAs,
 };
-use serde::de::{self, Unexpected, Visitor};
-use serde::{ser, Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt;
-use std::ops::Neg;
-use std::time::{Duration, SystemTime};
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec::Vec,
+};
+use core::{fmt, ops::Neg, time::Duration};
+use serde::{
+    de::{self, Unexpected, Visitor},
+    ser, Deserialize, Deserializer, Serialize, Serializer,
+};
+use std::time::SystemTime;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub(crate) enum Sign {
@@ -107,7 +113,7 @@ impl From<&SystemTime> for DurationSigned {
     }
 }
 
-impl std::ops::Mul<u32> for DurationSigned {
+impl core::ops::Mul<u32> for DurationSigned {
     type Output = DurationSigned;
 
     fn mul(mut self, rhs: u32) -> Self::Output {
@@ -116,7 +122,7 @@ impl std::ops::Mul<u32> for DurationSigned {
     }
 }
 
-impl std::ops::Div<u32> for DurationSigned {
+impl core::ops::Div<u32> for DurationSigned {
     type Output = DurationSigned;
 
     fn div(mut self, rhs: u32) -> Self::Output {
@@ -302,7 +308,7 @@ struct DurationVisitorFlexible;
 impl<'de> Visitor<'de> for DurationVisitorFlexible {
     type Value = DurationSigned;
 
-    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> ::std::fmt::Result {
+    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str("an integer, a float, or a string containing a number")
     }
 

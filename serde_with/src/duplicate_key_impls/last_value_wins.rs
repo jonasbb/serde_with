@@ -1,7 +1,8 @@
+use alloc::collections::BTreeSet;
+use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::IndexSet;
-use std::collections::{BTreeSet, HashSet};
-use std::hash::{BuildHasher, Hash};
+use std::collections::HashSet;
 
 pub trait DuplicateInsertsLastWinsSet<T> {
     fn new(size_hint: Option<usize>) -> Self;

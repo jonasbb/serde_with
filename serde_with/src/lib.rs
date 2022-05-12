@@ -31,6 +31,7 @@
 // clippy on stable does not know yet about the lint name
 // https://github.com/rust-lang/rust-clippy/issues/8560
 #![allow(unknown_lints, clippy::only_used_in_recursion)]
+#![no_std]
 
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)
 //! [![Build Status](https://github.com/jonasbb/serde_with/workflows/Rust%20CI/badge.svg)](https://github.com/jonasbb/serde_with)
@@ -255,8 +256,10 @@
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
 //! [as-annotation]: https://docs.rs/serde_with/1.13.0/serde_with/guide/serde_as/index.html
 
+extern crate alloc;
 #[doc(hidden)]
 pub extern crate serde;
+extern crate std;
 
 #[cfg(feature = "base64")]
 #[cfg_attr(docsrs, doc(cfg(feature = "base64")))]
@@ -329,13 +332,13 @@ generate_guide! {
 pub use crate::{
     de::DeserializeAs, enum_map::EnumMap, rust::StringWithSeparator, ser::SerializeAs,
 };
+use core::marker::PhantomData;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[doc(inline)]
 pub use serde_with_macros::*;
-use std::marker::PhantomData;
 
 /// Separator for string-based collection de/serialization
 pub trait Separator {

@@ -1,12 +1,15 @@
-use crate::content::ser::{Content, ContentSerializer};
-use crate::{DeserializeAs, SerializeAs};
-use serde::de::{DeserializeSeed, EnumAccess, Error, MapAccess, SeqAccess, VariantAccess, Visitor};
-use serde::ser::{
-    Impossible, SerializeMap, SerializeSeq, SerializeStructVariant, SerializeTupleVariant,
+use crate::{
+    content::ser::{Content, ContentSerializer},
+    DeserializeAs, SerializeAs,
 };
-use serde::{ser, Deserialize, Deserializer, Serialize, Serializer};
-use std::fmt;
-use std::marker::PhantomData;
+use alloc::{string::ToString, vec::Vec};
+use core::{fmt, marker::PhantomData};
+use serde::{
+    de::{DeserializeSeed, EnumAccess, Error, MapAccess, SeqAccess, VariantAccess, Visitor},
+    ser,
+    ser::{Impossible, SerializeMap, SerializeSeq, SerializeStructVariant, SerializeTupleVariant},
+    Deserialize, Deserializer, Serialize, Serializer,
+};
 
 /// Represent a list of enum values as a map.
 ///

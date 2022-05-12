@@ -1,19 +1,30 @@
 use super::*;
-use crate::formats::Strictness;
-use crate::rust::StringWithSeparator;
-use crate::utils::duration::DurationSigned;
-use crate::Separator;
+use crate::{
+    formats::Strictness, rust::StringWithSeparator, utils::duration::DurationSigned, Separator,
+};
+use alloc::{
+    borrow::Cow,
+    boxed::Box,
+    collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
+    rc::{Rc, Weak as RcWeak},
+    string::{String, ToString},
+    sync::{Arc, Weak as ArcWeak},
+    vec::Vec,
+};
+use core::{
+    cell::{Cell, RefCell},
+    convert::TryInto,
+    fmt::Display,
+    time::Duration,
+};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::ser::Error;
-use std::borrow::Cow;
-use std::cell::{Cell, RefCell};
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque};
-use std::convert::TryInto;
-use std::fmt::Display;
-use std::rc::{Rc, Weak as RcWeak};
-use std::sync::{Arc, Mutex, RwLock, Weak as ArcWeak};
-use std::time::{Duration, SystemTime};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::{Mutex, RwLock},
+    time::SystemTime,
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
@@ -406,12 +417,12 @@ macro_rules! tuple_seq_as_map_impl {
 tuple_seq_as_map_impl! {
     BinaryHeap<(K, V)>,
     BTreeSet<(K, V)>,
-    HashSet<(K, V)>,
     LinkedList<(K, V)>,
     Option<(K, V)>,
     Vec<(K, V)>,
     VecDeque<(K, V)>,
 }
+tuple_seq_as_map_impl!(HashSet<(K, V)>);
 #[cfg(feature = "indexmap")]
 tuple_seq_as_map_impl!(IndexSet<(K, V)>);
 

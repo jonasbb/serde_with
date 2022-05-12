@@ -4,24 +4,24 @@
 //!
 //! [time]: https://docs.rs/time/0.3/
 
-use crate::de::DeserializeAs;
-use crate::formats::{Flexible, Format, Strict, Strictness};
-use crate::ser::SerializeAs;
-use crate::utils::duration::{DurationSigned, Sign};
 use crate::{
+    de::DeserializeAs,
+    formats::{Flexible, Format, Strict, Strictness},
+    ser::SerializeAs,
+    utils::duration::{DurationSigned, Sign},
     DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
     DurationSeconds, DurationSecondsWithFrac, TimestampMicroSeconds, TimestampMicroSecondsWithFrac,
     TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
     TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use serde::ser::Error as _;
-use serde::{de, Deserializer, Serialize, Serializer};
-use std::convert::TryInto;
-use std::fmt;
-use std::time::Duration as StdDuration;
-use time_0_3::format_description::well_known::{Rfc2822, Rfc3339};
-use time_0_3::{Duration, OffsetDateTime, PrimitiveDateTime};
+use alloc::{format, string::String};
+use serde::{de, ser::Error as _, Deserializer, Serialize, Serializer};
+use std::{convert::TryInto, fmt, time::Duration as StdDuration};
+use time_0_3::{
+    format_description::well_known::{Rfc2822, Rfc3339},
+    Duration, OffsetDateTime, PrimitiveDateTime,
+};
 
 /// Create a [`PrimitiveDateTime`] for the Unix Epoch
 fn unix_epoch_primitive() -> PrimitiveDateTime {

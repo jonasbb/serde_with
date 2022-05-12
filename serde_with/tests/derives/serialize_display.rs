@@ -1,6 +1,6 @@
 use super::*;
+use core::fmt;
 use serde_with::SerializeDisplay;
-use std::fmt;
 
 #[derive(Debug, SerializeDisplay)]
 struct A {

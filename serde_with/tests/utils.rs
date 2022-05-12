@@ -1,10 +1,9 @@
 #![allow(dead_code)]
 
+use core::fmt::Debug;
 use expect_test::Expect;
 use pretty_assertions::assert_eq;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-use std::fmt::Debug;
+use serde::{de::DeserializeOwned, Serialize};
 
 #[track_caller]
 pub fn is_equal<T>(value: T, expected: Expect)

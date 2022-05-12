@@ -1,11 +1,9 @@
 use super::*;
 use crate::utils::{MapIter, SeqIter};
+use alloc::{borrow::Cow, boxed::Box, collections::BTreeMap, string::String, vec::Vec};
+use core::{convert::TryInto, fmt, mem::MaybeUninit};
 use serde::de::*;
-use std::borrow::Cow;
-use std::collections::{BTreeMap, HashMap};
-use std::convert::TryInto;
-use std::fmt;
-use std::mem::MaybeUninit;
+use std::collections::HashMap;
 
 // TODO this should probably be moved into the utils module when const generics are available for MSRV
 
@@ -24,7 +22,7 @@ where
         arr[..num].iter_mut().for_each(|elem| {
             // TODO This would be better with assume_init_drop nightly function
             // https://github.com/rust-lang/rust/issues/63567
-            unsafe { std::ptr::drop_in_place(elem.as_mut_ptr()) };
+            unsafe { core::ptr::drop_in_place(elem.as_mut_ptr()) };
         });
     }
 
@@ -59,7 +57,7 @@ where
     // initialized type.
     // A normal transmute is not possible because of:
     // https://github.com/rust-lang/rust/issues/61956
-    Ok(unsafe { std::mem::transmute_copy::<_, [T; N]>(&arr) })
+    Ok(unsafe { core::mem::transmute_copy::<_, [T; N]>(&arr) })
 }
 
 impl<'de, T, As, const N: usize> DeserializeAs<'de, [T; N]> for [As; N]

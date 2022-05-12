@@ -1,7 +1,8 @@
+use alloc::collections::{BTreeMap, BTreeSet};
+use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::IndexMap;
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
-use std::hash::{BuildHasher, Hash};
+use std::collections::{HashMap, HashSet};
 
 #[deprecated = "This is serde's default behavior."]
 pub trait DuplicateInsertsFirstWinsSet<T> {
@@ -122,7 +123,7 @@ where
 
     #[inline]
     fn insert(&mut self, key: K, value: V) {
-        use std::collections::btree_map::Entry;
+        use alloc::collections::btree_map::Entry;
 
         match self.entry(key) {
             // we want to keep the first value, so do nothing

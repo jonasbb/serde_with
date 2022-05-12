@@ -1,5 +1,7 @@
 //! Specify the format and how lenient the deserialization is
 
+use alloc::string::String;
+
 /// Specify how to serialize/deserialize a type
 ///
 /// The format specifier allows to configure how a value is serialized/deserialized.

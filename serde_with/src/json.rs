@@ -2,10 +2,8 @@
 //!
 //! This modules is only available when using the `json` feature of the crate.
 
-use crate::de::DeserializeAs;
-use crate::ser::SerializeAs;
-use serde::de::DeserializeOwned;
-use serde::{Deserializer, Serialize, Serializer};
+use crate::{de::DeserializeAs, ser::SerializeAs};
+use serde::{de::DeserializeOwned, Deserializer, Serialize, Serializer};
 
 /// Serialize value as string containing JSON
 ///
@@ -38,10 +36,11 @@ use serde::{Deserializer, Serialize, Serializer};
 /// );
 /// ```
 pub mod nested {
-    use serde::de::{DeserializeOwned, Deserializer, Error, Visitor};
-    use serde::ser::{self, Serialize, Serializer};
-    use std::fmt;
-    use std::marker::PhantomData;
+    use core::{fmt, marker::PhantomData};
+    use serde::{
+        de::{DeserializeOwned, Deserializer, Error, Visitor},
+        ser::{self, Serialize, Serializer},
+    };
 
     /// Deserialize value from a string which is valid JSON
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<T, D::Error>

@@ -1,4 +1,5 @@
 use super::*;
+use core::time::Duration;
 use serde_with::{
     DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
@@ -6,11 +7,10 @@ use serde_with::{
     TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
     TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 #[test]
 fn test_duration_seconds() {
-    use std::time::Duration;
     let zero = Duration::new(0, 0);
     let one_second = Duration::new(1, 0);
     let half_second = Duration::new(0, 500_000_000);
@@ -134,7 +134,6 @@ fn test_duration_seconds() {
 
 #[test]
 fn test_duration_seconds_with_frac() {
-    use std::time::Duration;
     let zero = Duration::new(0, 0);
     let one_second = Duration::new(1, 0);
     let half_second = Duration::new(0, 500_000_000);

@@ -11,8 +11,9 @@
 //! The types support 128-bit integers, which is supported for all targets in Rust 1.40+.
 //! The [`ContentSerializer`] can also be configured to human readable or compact representation.
 
+use alloc::{borrow::ToOwned, boxed::Box, string::String, vec::Vec};
+use core::marker::PhantomData;
 use serde::ser::{self, Serialize, Serializer};
-use std::marker::PhantomData;
 
 #[derive(Debug)]
 pub(crate) enum Content {

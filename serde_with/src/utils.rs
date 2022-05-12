@@ -1,12 +1,13 @@
 pub(crate) mod duration;
 
+use alloc::string::String;
+use core::marker::PhantomData;
 use serde::de::{Deserialize, MapAccess, SeqAccess};
-use std::marker::PhantomData;
 
 /// Re-Implementation of `serde::private::de::size_hint::cautious`
 #[inline]
 pub(crate) fn size_hint_cautious(hint: Option<usize>) -> usize {
-    std::cmp::min(hint.unwrap_or(0), 4096)
+    core::cmp::min(hint.unwrap_or(0), 4096)
 }
 
 pub(crate) const NANOS_PER_SEC: u32 = 1_000_000_000;
@@ -88,7 +89,7 @@ where
     }
 }
 
-pub(crate) fn duration_as_secs_f64(dur: &std::time::Duration) -> f64 {
+pub(crate) fn duration_as_secs_f64(dur: &core::time::Duration) -> f64 {
     (dur.as_secs() as f64) + (dur.subsec_nanos() as f64) / (NANOS_PER_SEC as f64)
 }
 

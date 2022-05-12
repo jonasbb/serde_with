@@ -1,15 +1,15 @@
+extern crate alloc;
+
 mod utils;
 
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
+use alloc::collections::{BTreeMap, BTreeSet, LinkedList, VecDeque};
+use core::{cmp, iter::FromIterator as _};
 use expect_test::expect;
 use fnv::{FnvHashMap as HashMap, FnvHashSet as HashSet};
 use pretty_assertions::assert_eq;
-use serde::de::DeserializeOwned;
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_with::CommaSeparator;
-use std::cmp;
-use std::collections::{BTreeMap, BTreeSet, LinkedList, VecDeque};
-use std::iter::FromIterator as _;
 
 #[test]
 fn string_collection() {

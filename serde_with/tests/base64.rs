@@ -6,9 +6,11 @@ mod utils;
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
-use serde_with::base64::{Base64, Bcrypt, BinHex, Crypt, ImapMutf7, Standard, UrlSafe};
-use serde_with::formats::{Padded, Unpadded};
-use serde_with::serde_as;
+use serde_with::{
+    base64::{Base64, Bcrypt, BinHex, Crypt, ImapMutf7, Standard, UrlSafe},
+    formats::{Padded, Unpadded},
+    serde_as,
+};
 
 #[test]
 fn base64_vec() {

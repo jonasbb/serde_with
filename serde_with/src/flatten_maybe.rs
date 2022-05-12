@@ -56,8 +56,10 @@ macro_rules! flattened_maybe {
             T: $crate::serde::Deserialize<'de>,
             D: $crate::serde::Deserializer<'de>,
         {
-            use ::std::option::Option::{self, None, Some};
-            use ::std::result::Result::{self, Err, Ok};
+            use ::std::{
+                option::Option::{self, None, Some},
+                result::Result::{self, Err, Ok},
+            };
             use $crate::serde;
 
             #[derive($crate::serde::Deserialize)]
