@@ -293,6 +293,7 @@ pub mod with_prefix;
 // Originally licensed as MIT+Apache 2
 // https://github.com/shepmaster/snafu/blob/fd37d79d4531ed1d3eebffad0d658928eb860cfe/src/lib.rs#L121-L165
 #[cfg(feature = "guide")]
+#[allow(unused_macro_rules)]
 macro_rules! generate_guide {
     (pub mod $name:ident; $($rest:tt)*) => {
         generate_guide!(@gen ".", pub mod $name { } $($rest)*);
