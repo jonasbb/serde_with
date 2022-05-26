@@ -30,7 +30,8 @@ use core::cell::{Cell, RefCell};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    formats::Flexible, serde_as, BytesOrString, CommaSeparator, DisplayFromStr, NoneAsEmptyString,
+    formats::{Flexible, Strict},
+    serde_as, BoolFromInt, BytesOrString, CommaSeparator, DisplayFromStr, NoneAsEmptyString,
     OneOrMany, Same, StringWithSeparator,
 };
 use std::{
@@ -1058,4 +1059,71 @@ fn test_borrow_cow_str() {
     let mut deser = serde_test::Deserializer::new(tokens);
     let s3 = S3::deserialize(&mut deser).unwrap();
     assert!(matches!(s3.0, Cow::Borrowed(_)));
+}
+
+#[test]
+fn test_boolfromint() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "BoolFromInt")] bool);
+
+    is_equal(S(false), expect![[r#"0"#]]);
+    is_equal(S(true), expect![[r#"1"#]]);
+    check_error_deserialization::<S>(
+        "2",
+        expect![[r#"invalid value: integer `2`, expected 0 or 1 at line 1 column 1"#]],
+    );
+    check_error_deserialization::<S>(
+        "-100",
+        expect![[r#"invalid value: integer `-100`, expected 0 or 1 at line 1 column 4"#]],
+    );
+    check_error_deserialization::<S>(
+        "18446744073709551615",
+        expect![[
+            r#"invalid value: integer `18446744073709551615`, expected 0 or 1 at line 1 column 20"#
+        ]],
+    );
+    check_error_deserialization::<S>(
+        r#""""#,
+        expect![[r#"invalid type: string "", expected an integer 0 or 1 at line 1 column 2"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SStrict(#[serde_as(as = "BoolFromInt<Strict>")] bool);
+
+    is_equal(SStrict(false), expect![[r#"0"#]]);
+    is_equal(SStrict(true), expect![[r#"1"#]]);
+    check_error_deserialization::<SStrict>(
+        "2",
+        expect![[r#"invalid value: integer `2`, expected 0 or 1 at line 1 column 1"#]],
+    );
+    check_error_deserialization::<SStrict>(
+        "-100",
+        expect![[r#"invalid value: integer `-100`, expected 0 or 1 at line 1 column 4"#]],
+    );
+    check_error_deserialization::<SStrict>(
+        "18446744073709551615",
+        expect![[
+            r#"invalid value: integer `18446744073709551615`, expected 0 or 1 at line 1 column 20"#
+        ]],
+    );
+    check_error_deserialization::<SStrict>(
+        r#""""#,
+        expect![[r#"invalid type: string "", expected an integer 0 or 1 at line 1 column 2"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SFlexible(#[serde_as(as = "BoolFromInt<Flexible>")] bool);
+
+    is_equal(SFlexible(false), expect![[r#"0"#]]);
+    is_equal(SFlexible(true), expect![[r#"1"#]]);
+    check_deserialization::<SFlexible>(SFlexible(true), "2");
+    check_deserialization::<SFlexible>(SFlexible(true), "-100");
+    check_deserialization::<SFlexible>(SFlexible(true), "18446744073709551615");
+    check_error_deserialization::<SFlexible>(
+        r#""""#,
+        expect![[r#"invalid type: string "", expected an integer at line 1 column 2"#]],
+    );
 }
