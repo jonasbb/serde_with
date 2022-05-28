@@ -24,7 +24,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     `time::OffsetDateTime` and `time::PrimitiveDateTime` can now be serialized with the `TimestampSeconds` and related converters.
 
-
     ```rust
     // Rust
     #[serde_as(as = "serde_with::TimestampMicroSecondsWithFrac<String>")]
@@ -47,6 +46,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     // JSON
     "rfc_2822": "Fri, 21 Nov 1997 09:55:06 -0600",
     "rfc_3339": ["1997-11-21T09:55:06-06:00"],
+    ```
+
+* Deserialize `bool` from integers #456 462
+
+    Deserialize an integer and convert it into a `bool`.
+    `BoolFromInt<Strict>` (default) deserializes 0 to `false` and `1` to `true`, other numbers are errors.
+    `BoolFromInt<Flexible>` deserializes any non-zero as `true`.
+    Serialization only emits 0/1.
+
+    ```rust
+    // Rust
+    #[serde_as(as = "BoolFromInt")] // BoolFromInt<Strict>
+    b: bool,
+
+    // JSON
+    "b": 1,
     ```
 
 ### Changed

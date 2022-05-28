@@ -1349,4 +1349,160 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for BorrowCow {
     }
 }
 
+impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
+    fn deserialize_as<D>(deserializer: D) -> Result<bool, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct U8Visitor;
+        impl<'de> Visitor<'de> for U8Visitor {
+            type Value = bool;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("an integer 0 or 1")
+            }
+
+            fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(Error::invalid_value(
+                        Unexpected::Unsigned(unexp as u64),
+                        &"0 or 1",
+                    )),
+                }
+            }
+
+            fn visit_i8<E>(self, v: i8) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(Error::invalid_value(
+                        Unexpected::Signed(unexp as i64),
+                        &"0 or 1",
+                    )),
+                }
+            }
+
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(Error::invalid_value(Unexpected::Unsigned(unexp), &"0 or 1")),
+                }
+            }
+
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(Error::invalid_value(Unexpected::Signed(unexp), &"0 or 1")),
+                }
+            }
+
+            fn visit_u128<E>(self, v: u128) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(Error::invalid_value(
+                        Unexpected::Unsigned(unexp as u64),
+                        &"0 or 1",
+                    )),
+                }
+            }
+
+            fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(Error::invalid_value(
+                        Unexpected::Unsigned(unexp as u64),
+                        &"0 or 1",
+                    )),
+                }
+            }
+        }
+
+        deserializer.deserialize_u8(U8Visitor)
+    }
+}
+
+impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Flexible> {
+    fn deserialize_as<D>(deserializer: D) -> Result<bool, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct U8Visitor;
+        impl<'de> Visitor<'de> for U8Visitor {
+            type Value = bool;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("an integer")
+            }
+
+            fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v != 0)
+            }
+
+            fn visit_i8<E>(self, v: i8) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v != 0)
+            }
+
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v != 0)
+            }
+
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v != 0)
+            }
+
+            fn visit_u128<E>(self, v: u128) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v != 0)
+            }
+
+            fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(v != 0)
+            }
+        }
+
+        deserializer.deserialize_u8(U8Visitor)
+    }
+}
+
 // endregion

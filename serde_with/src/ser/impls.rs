@@ -727,4 +727,13 @@ impl<'a> SerializeAs<Cow<'a, [u8]>> for BorrowCow {
     }
 }
 
+impl<STRICTNESS: Strictness> SerializeAs<bool> for BoolFromInt<STRICTNESS> {
+    fn serialize_as<S>(source: &bool, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_u8(*source as u8)
+    }
+}
+
 // endregion

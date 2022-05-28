@@ -1982,3 +1982,52 @@ pub struct BorrowCow;
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct VecSkipError<T>(PhantomData<T>);
+
+/// Deserialize a boolean from a number
+///
+/// Deserialize a number (of `u8`) and turn it into a boolean.
+/// The adapter supports a [`Strict`](crate::formats::Strict) and [`Flexible`](crate::formats::Flexible) format.
+/// In `Strict` mode, the number must be `0` or `1`.
+/// All other values produce an error.
+/// In `Flexible` mode, the number any non-zero value is converted to `true`.
+///
+/// During serialization only `0` or `1` are ever emitted.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, BoolFromInt};
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Data(#[serde_as(as = "BoolFromInt")] bool);
+///
+/// let data = Data(true);
+/// let j = json!(1);
+/// // Ensure serialization and deserialization produce the expected results
+/// assert_eq!(j, serde_json::to_value(&data).unwrap());
+/// assert_eq!(data, serde_json::from_value(j).unwrap());
+///
+/// // false maps to 0
+/// let data = Data(false);
+/// let j = json!(0);
+/// assert_eq!(j, serde_json::to_value(&data).unwrap());
+/// assert_eq!(data, serde_json::from_value(j).unwrap());
+//
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Flexible(#[serde_as(as = "BoolFromInt<serde_with::formats::Flexible>")] bool);
+///
+/// // Flexible turns any non-zero number into true
+/// let data = Flexible(true);
+/// let j = json!(100);
+/// assert_eq!(data, serde_json::from_value(j).unwrap());
+/// # }
+/// ```
+#[derive(Copy, Clone, Debug, Default)]
+pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>);

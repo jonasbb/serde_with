@@ -4,26 +4,27 @@ This page lists the transformations implemented in this crate and supported by `
 
 1. [Base64 encode bytes](#base64-encode-bytes)
 2. [Big Array support](#big-array-support)
-3. [Borrow from the input for `Cow` type](#borrow-from-the-input-for-cow-type)
-4. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
-5. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
-6. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
-7. [`Default` from `null`](#default-from-null)
-8. [De/Serialize into `Vec`, ignoring errors](#deserialize-into-vec-ignoring-errors)
-9. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
-10. [`Duration` as seconds](#duration-as-seconds)
-11. [Hex encode bytes](#hex-encode-bytes)
-12. [Ignore deserialization errors](#ignore-deserialization-errors)
-13. [`Maps` to `Vec` of enums](#maps-to-vec-of-enums)
-14. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
-15. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
-16. [`None` as empty `String`](#none-as-empty-string)
-17. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
-18. [Pick first successful deserialization](#pick-first-successful-deserialization)
-19. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-20. [Value into JSON String](#value-into-json-string)
-21. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
-22. [Well-known time formats for `OffsetDateTime`](#well-known-time-formats-for-offsetdatetime)
+3. [`bool` from integer](#bool-from-integer)
+4. [Borrow from the input for `Cow` type](#borrow-from-the-input-for-cow-type)
+5. [`Bytes` with more efficiency](#bytes-with-more-efficiency)
+6. [Convert to an intermediate type using `Into`](#convert-to-an-intermediate-type-using-into)
+7. [Convert to an intermediate type using `TryInto`](#convert-to-an-intermediate-type-using-tryinto)
+8. [`Default` from `null`](#default-from-null)
+9. [De/Serialize into `Vec`, ignoring errors](#deserialize-into-vec-ignoring-errors)
+10. [De/Serialize with `FromStr` and `Display`](#deserialize-with-fromstr-and-display)
+11. [`Duration` as seconds](#duration-as-seconds)
+12. [Hex encode bytes](#hex-encode-bytes)
+13. [Ignore deserialization errors](#ignore-deserialization-errors)
+14. [`Maps` to `Vec` of enums](#maps-to-vec-of-enums)
+15. [`Maps` to `Vec` of tuples](#maps-to-vec-of-tuples)
+16. [`NaiveDateTime` like UTC timestamp](#naivedatetime-like-utc-timestamp)
+17. [`None` as empty `String`](#none-as-empty-string)
+18. [One or many elements into `Vec`](#one-or-many-elements-into-vec)
+19. [Pick first successful deserialization](#pick-first-successful-deserialization)
+20. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+21. [Value into JSON String](#value-into-json-string)
+22. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+23. [Well-known time formats for `OffsetDateTime`](#well-known-time-formats-for-offsetdatetime)
 
 ## Base64 encode bytes
 
@@ -55,6 +56,22 @@ value: [[u8; 64]; 33],
 
 // JSON
 "value": [[0,0,0,0,0,...], [0,0,0,...], ...],
+```
+
+## `bool` from integer
+
+Deserialize an integer and convert it into a `bool`.
+[`BoolFromInt<Strict>`] (default) deserializes 0 to `false` and `1` to `true`, other numbers are errors.
+[`BoolFromInt<Flexible>`] deserializes any non-zero as `true`.
+Serialization only emits 0/1.
+
+```ignore
+// Rust
+#[serde_as(as = "BoolFromInt")] // BoolFromInt<Strict>
+b: bool,
+
+// JSON
+"b": 1,
 ```
 
 ## Borrow from the input for `Cow` type
@@ -471,6 +488,8 @@ rfc_3339: OffsetDateTime,
 These conversions are availble with the `time_0_3` feature flag.
 
 [`Base64`]: crate::base64::Base64
+[`BoolFromInt<Flexible>`]: crate::BoolFromInt
+[`BoolFromInt<Strict>`]: crate::BoolFromInt
 [`Bytes`]: crate::Bytes
 [`chrono::DateTime<Local>`]: chrono_crate::DateTime
 [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
