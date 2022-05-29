@@ -743,6 +743,7 @@ pub struct DefaultOnNull<T = Same>(PhantomData<T>);
 /// assert_eq!("✨Works!".as_bytes(), &*a.bytes_or_string);
 /// # }
 /// ```
+/// [`String`]: std::string::String
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;
 
