@@ -21,7 +21,7 @@ use super::*;
 /// # Differences to [`Deserialize`]
 ///
 /// The trait is only required for container-like types or types implementing specific conversion functions.
-/// Container-like types are [`Vec`][], [`BTreeMap`][], but also [`Option`][] and [`Box`][].
+/// Container-like types are [`Vec`], [`BTreeMap`], but also [`Option`] and [`Box`].
 /// Conversion types deserialize into a different Rust type.
 /// For example, [`DisplayFromStr`] uses the [`FromStr`] trait after deserializing a string and [`DurationSeconds`] creates a [`Duration`] from either String or integer values.
 ///
@@ -100,9 +100,11 @@ use super::*;
 /// # assert_eq!(false, serde_json::from_str::<S>(r#""false""#).unwrap().0);
 /// # }
 /// ```
+/// [`Box`]: std::boxed::Box
 /// [`BTreeMap`]: std::collections::BTreeMap
 /// [`Duration`]: std::time::Duration
 /// [`FromStr`]: std::str::FromStr
+/// [`Vec`]: std::vec::Vec
 /// [impl-deserialize]: https://serde.rs/impl-deserialize.html
 pub trait DeserializeAs<'de, T>: Sized {
     /// Deserialize this value from the given Serde deserializer.
