@@ -228,6 +228,45 @@ where
     }
 }
 
+impl<'de, T, As, const N: usize> DeserializeAs<'de, [T; N]> for [As; N]
+where
+    As: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<[T; N], D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ArrayVisitor<T, const M: usize>(PhantomData<T>);
+
+        impl<'de, T, As, const M: usize> Visitor<'de> for ArrayVisitor<DeserializeAsWrap<T, As>, M>
+        where
+            As: DeserializeAs<'de, T>,
+        {
+            type Value = [T; M];
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_fmt(format_args!("an array of size {}", M))
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                utils::array_from_iterator(
+                    utils::SeqIter::new(seq).map(
+                        |res: Result<DeserializeAsWrap<T, As>, A::Error>| {
+                            res.map(|t| t.into_inner())
+                        },
+                    ),
+                    &self,
+                )
+            }
+        }
+
+        deserializer.deserialize_tuple(N, ArrayVisitor::<DeserializeAsWrap<T, As>, N>(PhantomData))
+    }
+}
+
 // endregion
 ///////////////////////////////////////////////////////////////////////////////
 // region: Collection Types (e.g., Maps, Sets, Vec)
@@ -535,109 +574,6 @@ map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 #[cfg(feature = "indexmap")]
 map_as_tuple_seq!(IndexMap<K: Eq + Hash, V>);
 
-// endregion
-///////////////////////////////////////////////////////////////////////////////
-// region: Conversion types which cause different serialization behavior
-
-impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
-    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        T::deserialize(deserializer)
-    }
-}
-
-impl<'de, T> DeserializeAs<'de, T> for DisplayFromStr
-where
-    T: FromStr,
-    T::Err: Display,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        crate::rust::display_fromstr::deserialize(deserializer)
-    }
-}
-
-impl<'de, T, U> DeserializeAs<'de, Vec<T>> for VecSkipError<U>
-where
-    U: DeserializeAs<'de, T>,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        #[derive(serde::Deserialize)]
-        #[serde(
-            untagged,
-            bound(deserialize = "DeserializeAsWrap<T, TAs>: Deserialize<'de>")
-        )]
-        enum GoodOrError<'a, T, TAs>
-        where
-            TAs: DeserializeAs<'a, T>,
-        {
-            Good(DeserializeAsWrap<T, TAs>),
-            // This consumes one "item" when `T` errors while deserializing.
-            // This is necessary to make this work, when instead of having a direct value
-            // like integer or string, the deserializer sees a list or map.
-            Error(IgnoredAny),
-            #[serde(skip)]
-            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
-        }
-
-        struct SeqVisitor<T, U> {
-            marker: PhantomData<T>,
-            marker2: PhantomData<U>,
-        }
-
-        impl<'de, T, U> Visitor<'de> for SeqVisitor<T, U>
-        where
-            U: DeserializeAs<'de, T>,
-        {
-            type Value = Vec<T>;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_str("a sequence")
-            }
-
-            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
-            where
-                A: SeqAccess<'de>,
-            {
-                let mut values = Vec::with_capacity(seq.size_hint().unwrap_or_default());
-
-                while let Some(value) = seq.next_element()? {
-                    if let GoodOrError::<T, U>::Good(value) = value {
-                        values.push(value.into_inner());
-                    }
-                }
-                Ok(values)
-            }
-        }
-
-        let visitor = SeqVisitor::<T, U> {
-            marker: PhantomData,
-            marker2: PhantomData,
-        };
-        deserializer.deserialize_seq(visitor)
-    }
-}
-
-impl<'de, Str> DeserializeAs<'de, Option<Str>> for NoneAsEmptyString
-where
-    Str: FromStr,
-    Str::Err: Display,
-{
-    fn deserialize_as<D>(deserializer: D) -> Result<Option<Str>, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        crate::rust::string_empty_as_none::deserialize(deserializer)
-    }
-}
-
 macro_rules! tuple_seq_as_map_impl_intern {
     ($tyorig:ident < (K $(: $($kbound:ident $(+)?)+)?, V $(: $($vbound:ident $(+)?)+)?)>, $ty:ident <KAs, VAs>) => {
         #[allow(clippy::implicit_hasher)]
@@ -767,6 +703,159 @@ macro_rules! tuple_seq_as_map_option_impl {
 }
 tuple_seq_as_map_option_impl!(BTreeMap);
 tuple_seq_as_map_option_impl!(HashMap);
+
+macro_rules! tuple_seq_as_map_arr {
+    ($tyorig:ty, $ty:ident <KAs, VAs>) => {
+        #[allow(clippy::implicit_hasher)]
+        impl<'de, K, KAs, V, VAs, const N: usize> DeserializeAs<'de, $tyorig> for $ty<KAs, VAs>
+        where
+            KAs: DeserializeAs<'de, K>,
+            VAs: DeserializeAs<'de, V>,
+        {
+            fn deserialize_as<D>(deserializer: D) -> Result<$tyorig, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                struct MapVisitor<K, KAs, V, VAs, const M: usize> {
+                    marker: PhantomData<(K, KAs, V, VAs)>,
+                }
+
+                impl<'de, K, KAs, V, VAs, const M: usize> Visitor<'de> for MapVisitor<K, KAs, V, VAs, M>
+                where
+                    KAs: DeserializeAs<'de, K>,
+                    VAs: DeserializeAs<'de, V>,
+                {
+                    type Value = [(K, V); M];
+
+                    fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                        formatter.write_fmt(format_args!("a map of length {}", M))
+                    }
+
+                    fn visit_map<A>(self, access: A) -> Result<Self::Value, A::Error>
+                    where
+                        A: MapAccess<'de>,
+                    {
+                        utils::array_from_iterator(utils::MapIter::new(access).map(
+                            |res: Result<(DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>), A::Error>| {
+                                res.map(|(k, v)| (k.into_inner(), v.into_inner()))
+                            }
+                        ), &self)
+                    }
+                }
+
+                let visitor = MapVisitor::<K, KAs, V, VAs, N> {
+                    marker: PhantomData,
+                };
+                deserializer.deserialize_map(visitor)
+            }
+        }
+    }
+}
+tuple_seq_as_map_arr!([(K, V); N], BTreeMap<KAs, VAs>);
+tuple_seq_as_map_arr!([(K, V); N], HashMap<KAs, VAs>);
+
+// endregion
+///////////////////////////////////////////////////////////////////////////////
+// region: Conversion types which cause different serialization behavior
+
+impl<'de, T: Deserialize<'de>> DeserializeAs<'de, T> for Same {
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        T::deserialize(deserializer)
+    }
+}
+
+impl<'de, T> DeserializeAs<'de, T> for DisplayFromStr
+where
+    T: FromStr,
+    T::Err: Display,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        crate::rust::display_fromstr::deserialize(deserializer)
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, Vec<T>> for VecSkipError<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        #[serde(
+            untagged,
+            bound(deserialize = "DeserializeAsWrap<T, TAs>: Deserialize<'de>")
+        )]
+        enum GoodOrError<'a, T, TAs>
+        where
+            TAs: DeserializeAs<'a, T>,
+        {
+            Good(DeserializeAsWrap<T, TAs>),
+            // This consumes one "item" when `T` errors while deserializing.
+            // This is necessary to make this work, when instead of having a direct value
+            // like integer or string, the deserializer sees a list or map.
+            Error(IgnoredAny),
+            #[serde(skip)]
+            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
+        }
+
+        struct SeqVisitor<T, U> {
+            marker: PhantomData<T>,
+            marker2: PhantomData<U>,
+        }
+
+        impl<'de, T, U> Visitor<'de> for SeqVisitor<T, U>
+        where
+            U: DeserializeAs<'de, T>,
+        {
+            type Value = Vec<T>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut values = Vec::with_capacity(seq.size_hint().unwrap_or_default());
+
+                while let Some(value) = seq.next_element()? {
+                    if let GoodOrError::<T, U>::Good(value) = value {
+                        values.push(value.into_inner());
+                    }
+                }
+                Ok(values)
+            }
+        }
+
+        let visitor = SeqVisitor::<T, U> {
+            marker: PhantomData,
+            marker2: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
+    }
+}
+
+impl<'de, Str> DeserializeAs<'de, Option<Str>> for NoneAsEmptyString
+where
+    Str: FromStr,
+    Str::Err: Display,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Option<Str>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        crate::rust::string_empty_as_none::deserialize(deserializer)
+    }
+}
 
 impl<'de, T, TAs> DeserializeAs<'de, T> for DefaultOnError<TAs>
 where
@@ -1095,6 +1184,190 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
     }
 }
 
+impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<[u8; N], D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ArrayVisitor<const M: usize>;
+
+        impl<'de, const M: usize> Visitor<'de> for ArrayVisitor<M> {
+            type Value = [u8; M];
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_fmt(format_args!("an byte array of size {}", M))
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                utils::array_from_iterator(utils::SeqIter::new(seq), &self)
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.as_bytes()
+                    .try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+        }
+
+        deserializer.deserialize_bytes(ArrayVisitor::<N>)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<&'de [u8; N], D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ArrayVisitor<const M: usize>;
+
+        impl<'de, const M: usize> Visitor<'de> for ArrayVisitor<M> {
+            type Value = &'de [u8; M];
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_fmt(format_args!("a borrowed byte array of size {}", M))
+            }
+
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                v.as_bytes()
+                    .try_into()
+                    .map_err(|_| Error::invalid_length(v.len(), &self))
+            }
+        }
+
+        deserializer.deserialize_bytes(ArrayVisitor::<N>)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8; N]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct CowVisitor<const M: usize>;
+
+        impl<'de, const M: usize> Visitor<'de> for CowVisitor<M> {
+            type Value = Cow<'de, [u8; M]>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a byte array")
+            }
+
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Borrowed(
+                    v.try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Borrowed(
+                    v.as_bytes()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(
+                    v.to_vec()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(Cow::Owned(
+                    v.as_bytes()
+                        .to_vec()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                ))
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                let len = v.len();
+                Ok(Cow::Owned(
+                    v.try_into()
+                        .map_err(|_| Error::invalid_length(len, &self))?,
+                ))
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                let len = v.len();
+                Ok(Cow::Owned(
+                    v.into_bytes()
+                        .try_into()
+                        .map_err(|_| Error::invalid_length(len, &self))?,
+                ))
+            }
+
+            fn visit_seq<V>(self, seq: V) -> Result<Self::Value, V::Error>
+            where
+                V: SeqAccess<'de>,
+            {
+                Ok(Cow::Owned(utils::array_from_iterator(
+                    utils::SeqIter::new(seq),
+                    &self,
+                )?))
+            }
+        }
+
+        deserializer.deserialize_bytes(CowVisitor)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, Box<[u8; N]>> for Bytes {
+    fn deserialize_as<D>(deserializer: D) -> Result<Box<[u8; N]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Bytes::deserialize_as(deserializer).map(Box::new)
+    }
+}
+
 impl<'de, T, U, FORMAT> DeserializeAs<'de, Vec<T>> for OneOrMany<U, FORMAT>
 where
     U: DeserializeAs<'de, T>,
@@ -1342,6 +1615,15 @@ impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
 
 impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for BorrowCow {
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8]>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Bytes::deserialize_as(deserializer)
+    }
+}
+
+impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for BorrowCow {
+    fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8; N]>, D::Error>
     where
         D: Deserializer<'de>,
     {

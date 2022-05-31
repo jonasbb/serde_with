@@ -7,7 +7,6 @@
 //!
 //! [user guide]: crate::guide
 
-mod const_arrays;
 mod impls;
 
 use super::*;
