@@ -1,8 +1,8 @@
 pub(crate) mod duration;
 
 use alloc::string::String;
-use core::marker::PhantomData;
-use serde::de::{Deserialize, MapAccess, SeqAccess};
+use core::{marker::PhantomData, mem::MaybeUninit};
+use serde::de::{Deserialize, Error, Expected, MapAccess, SeqAccess};
 
 /// Re-Implementation of `serde::private::de::size_hint::cautious`
 #[inline]
@@ -117,4 +117,59 @@ pub(crate) fn duration_signed_from_secs_f64(
         (nanos / (NANOS_PER_SEC as u128)) as u64,
         (nanos % (NANOS_PER_SEC as u128)) as u32,
     ))
+}
+
+/// Collect an array of a fixed size from an iterator.
+///
+/// # Safety
+/// The code follow exactly the pattern of initializing an array element-by-element from the standard library.
+/// <https://doc.rust-lang.org/nightly/std/mem/union.MaybeUninit.html#initializing-an-array-element-by-element>
+pub(crate) fn array_from_iterator<I, T, E, const N: usize>(
+    mut iter: I,
+    expected: &dyn Expected,
+) -> Result<[T; N], E>
+where
+    I: Iterator<Item = Result<T, E>>,
+    E: Error,
+{
+    fn drop_array_elems<T, const N: usize>(num: usize, mut arr: [MaybeUninit<T>; N]) {
+        arr[..num].iter_mut().for_each(|elem| {
+            // TODO This would be better with assume_init_drop nightly function
+            // https://github.com/rust-lang/rust/issues/63567
+            unsafe { core::ptr::drop_in_place(elem.as_mut_ptr()) };
+        });
+    }
+
+    // Create an uninitialized array of `MaybeUninit`. The `assume_init` is
+    // safe because the type we are claiming to have initialized here is a
+    // bunch of `MaybeUninit`s, which do not require initialization.
+    //
+    // TODO could be simplified with nightly maybe_uninit_uninit_array feature
+    // https://doc.rust-lang.org/nightly/std/mem/union.MaybeUninit.html#method.uninit_array
+    let mut arr: [MaybeUninit<T>; N] = unsafe { MaybeUninit::uninit().assume_init() };
+
+    // Dropping a `MaybeUninit` does nothing. Thus using raw pointer
+    // assignment instead of `ptr::write` does not cause the old
+    // uninitialized value to be dropped. Also if there is a panic during
+    // this loop, we have a memory leak, but there is no memory safety
+    // issue.
+    for (idx, elem) in arr[..].iter_mut().enumerate() {
+        *elem = match iter.next() {
+            Some(Ok(value)) => MaybeUninit::new(value),
+            Some(Err(err)) => {
+                drop_array_elems(idx, arr);
+                return Err(err);
+            }
+            None => {
+                drop_array_elems(idx, arr);
+                return Err(Error::invalid_length(idx, expected));
+            }
+        };
+    }
+
+    // Everything is initialized. Transmute the array to the
+    // initialized type.
+    // A normal transmute is not possible because of:
+    // https://github.com/rust-lang/rust/issues/61956
+    Ok(unsafe { core::mem::transmute_copy::<_, [T; N]>(&arr) })
 }

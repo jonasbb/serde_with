@@ -209,6 +209,23 @@ where
     }
 }
 
+impl<T, As, const N: usize> SerializeAs<[T; N]> for [As; N]
+where
+    As: SerializeAs<T>,
+{
+    fn serialize_as<S>(array: &[T; N], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        use serde::ser::SerializeTuple;
+        let mut arr = serializer.serialize_tuple(N)?;
+        for elem in array {
+            arr.serialize_element(&SerializeAsWrap::<T, As>::new(elem))?;
+        }
+        arr.end()
+    }
+}
+
 // endregion
 ///////////////////////////////////////////////////////////////////////////////
 // region: Collection Types (e.g., Maps, Sets, Vec)
@@ -333,6 +350,72 @@ map_as_tuple_seq!(HashMap<K, V>);
 #[cfg(feature = "indexmap")]
 map_as_tuple_seq!(IndexMap<K, V>);
 
+macro_rules! tuple_seq_as_map_impl_intern {
+    ($tyorig:ty, $ty:ident <K, V>) => {
+        #[allow(clippy::implicit_hasher)]
+        impl<K, KAs, V, VAs> SerializeAs<$tyorig> for $ty<KAs, VAs>
+        where
+            KAs: SerializeAs<K>,
+            VAs: SerializeAs<V>,
+        {
+            fn serialize_as<S>(source: &$tyorig, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                serializer.collect_map(source.iter().map(|(k, v)| {
+                    (
+                        SerializeAsWrap::<K, KAs>::new(k),
+                        SerializeAsWrap::<V, VAs>::new(v),
+                    )
+                }))
+            }
+        }
+    };
+}
+macro_rules! tuple_seq_as_map_impl {
+    ($($ty:ty $(,)?)+) => {$(
+        tuple_seq_as_map_impl_intern!($ty, BTreeMap<K, V>);
+        tuple_seq_as_map_impl_intern!($ty, HashMap<K, V>);
+    )+}
+}
+
+tuple_seq_as_map_impl! {
+    BinaryHeap<(K, V)>,
+    BTreeSet<(K, V)>,
+    LinkedList<(K, V)>,
+    Option<(K, V)>,
+    Vec<(K, V)>,
+    VecDeque<(K, V)>,
+}
+tuple_seq_as_map_impl!(HashSet<(K, V)>);
+#[cfg(feature = "indexmap")]
+tuple_seq_as_map_impl!(IndexSet<(K, V)>);
+
+macro_rules! tuple_seq_as_map_arr {
+    ($tyorig:ty, $ty:ident <K, V>) => {
+        #[allow(clippy::implicit_hasher)]
+        impl<K, KAs, V, VAs, const N: usize> SerializeAs<$tyorig> for $ty<KAs, VAs>
+        where
+            KAs: SerializeAs<K>,
+            VAs: SerializeAs<V>,
+        {
+            fn serialize_as<S>(source: &$tyorig, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                serializer.collect_map(source.iter().map(|(k, v)| {
+                    (
+                        SerializeAsWrap::<K, KAs>::new(k),
+                        SerializeAsWrap::<V, VAs>::new(v),
+                    )
+                }))
+            }
+        }
+    };
+}
+tuple_seq_as_map_arr!([(K, V); N], BTreeMap<K, V>);
+tuple_seq_as_map_arr!([(K, V); N], HashMap<K, V>);
+
 // endregion
 ///////////////////////////////////////////////////////////////////////////////
 // region: Conversion types which cause different serialization behavior
@@ -384,47 +467,6 @@ where
         crate::rust::string_empty_as_none::serialize(source, serializer)
     }
 }
-
-macro_rules! tuple_seq_as_map_impl_intern {
-    ($tyorig:ty, $ty:ident <K, V>) => {
-        #[allow(clippy::implicit_hasher)]
-        impl<K, KAs, V, VAs> SerializeAs<$tyorig> for $ty<KAs, VAs>
-        where
-            KAs: SerializeAs<K>,
-            VAs: SerializeAs<V>,
-        {
-            fn serialize_as<S>(source: &$tyorig, serializer: S) -> Result<S::Ok, S::Error>
-            where
-                S: Serializer,
-            {
-                serializer.collect_map(source.iter().map(|(k, v)| {
-                    (
-                        SerializeAsWrap::<K, KAs>::new(k),
-                        SerializeAsWrap::<V, VAs>::new(v),
-                    )
-                }))
-            }
-        }
-    };
-}
-macro_rules! tuple_seq_as_map_impl {
-    ($($ty:ty $(,)?)+) => {$(
-        tuple_seq_as_map_impl_intern!($ty, BTreeMap<K, V>);
-        tuple_seq_as_map_impl_intern!($ty, HashMap<K, V>);
-    )+}
-}
-
-tuple_seq_as_map_impl! {
-    BinaryHeap<(K, V)>,
-    BTreeSet<(K, V)>,
-    LinkedList<(K, V)>,
-    Option<(K, V)>,
-    Vec<(K, V)>,
-    VecDeque<(K, V)>,
-}
-tuple_seq_as_map_impl!(HashSet<(K, V)>);
-#[cfg(feature = "indexmap")]
-tuple_seq_as_map_impl!(IndexSet<(K, V)>);
 
 impl<T, TAs> SerializeAs<T> for DefaultOnError<TAs>
 where
@@ -602,6 +644,42 @@ impl<'a> SerializeAs<Cow<'a, [u8]>> for Bytes {
     }
 }
 
+impl<const N: usize> SerializeAs<[u8; N]> for Bytes {
+    fn serialize_as<S>(bytes: &[u8; N], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes)
+    }
+}
+
+impl<const N: usize> SerializeAs<&[u8; N]> for Bytes {
+    fn serialize_as<S>(bytes: &&[u8; N], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(*bytes)
+    }
+}
+
+impl<const N: usize> SerializeAs<Box<[u8; N]>> for Bytes {
+    fn serialize_as<S>(bytes: &Box<[u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(&**bytes)
+    }
+}
+
+impl<'a, const N: usize> SerializeAs<Cow<'a, [u8; N]>> for Bytes {
+    fn serialize_as<S>(bytes: &Cow<'a, [u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(bytes.as_ref())
+    }
+}
+
 impl<T, U> SerializeAs<Vec<T>> for OneOrMany<U, formats::PreferOne>
 where
     U: SerializeAs<T>,
@@ -720,6 +798,15 @@ impl<'a> SerializeAs<Cow<'a, str>> for BorrowCow {
 
 impl<'a> SerializeAs<Cow<'a, [u8]>> for BorrowCow {
     fn serialize_as<S>(value: &Cow<'a, [u8]>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_seq(value.iter())
+    }
+}
+
+impl<'a, const N: usize> SerializeAs<Cow<'a, [u8; N]>> for BorrowCow {
+    fn serialize_as<S>(value: &Cow<'a, [u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
