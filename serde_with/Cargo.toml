@@ -24,13 +24,16 @@ maintenance = {status = "actively-developed"}
 
 # When adding new features update the documentation in feature-flags.md
 [features]
+default = ["std", "macros"]
+
+alloc = ["serde/alloc"]
 base64 = ["base64_crate"]
 chrono = ["chrono_crate"]
-default = ["macros"]
 guide = ["doc-comment", "macros"]
 indexmap = ["indexmap_crate"]
 json = ["serde_json"]
 macros = ["serde_with_macros"]
+std = ["alloc", "serde/std"]
 
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
@@ -39,7 +42,7 @@ chrono_crate = {package = "chrono", version = "0.4.1", features = ["clock", "ser
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.2", optional = true}
 indexmap_crate = {package = "indexmap", version = "1.8", features = ["serde-1"], optional = true}
-serde = {version = "1.0.122", features = ["derive"]}
+serde = {version = "1.0.122", default-features = false, features = ["derive"]}
 serde_json = {version = "1.0.1", optional = true}
 serde_with_macros = {path = "../serde_with_macros", version = "1.5.2", optional = true}
 time_0_3 = {package = "time", version = "~0.3", optional = true, features = ["serde-well-known"]}
