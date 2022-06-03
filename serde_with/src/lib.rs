@@ -278,6 +278,7 @@ mod content;
 pub mod de;
 mod duplicate_key_impls;
 mod enum_map;
+#[cfg(feature = "std")]
 mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
@@ -288,11 +289,13 @@ pub mod hex;
 pub mod json;
 pub mod rust;
 pub mod ser;
+#[cfg(feature = "std")]
 mod serde_conv;
 #[cfg(feature = "time_0_3")]
 #[cfg_attr(docsrs, doc(cfg(feature = "time_0_3")))]
 pub mod time_0_3;
 mod utils;
+#[cfg(feature = "std")]
 #[doc(hidden)]
 pub mod with_prefix;
 
