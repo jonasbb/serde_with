@@ -261,9 +261,11 @@
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
 //! [as-annotation]: https://docs.rs/serde_with/1.14.0/serde_with/guide/serde_as/index.html
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 #[doc(hidden)]
 pub extern crate serde;
+#[cfg(feature = "std")]
 extern crate std;
 
 #[cfg(feature = "base64")]

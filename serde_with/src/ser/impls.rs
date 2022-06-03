@@ -20,6 +20,7 @@ use core::{
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::ser::Error;
+#[cfg(feature = "std")]
 use std::{
     collections::{HashMap, HashSet},
     sync::{Mutex, RwLock},
@@ -162,6 +163,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, U> SerializeAs<Mutex<T>> for Mutex<U>
 where
     U: SerializeAs<T>,
@@ -177,6 +179,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, U> SerializeAs<RwLock<T>> for RwLock<U>
 where
     U: SerializeAs<T>,
@@ -253,6 +256,7 @@ type Slice<T> = [T];
 seq_impl!(BinaryHeap<T>);
 seq_impl!(BoxedSlice<T>);
 seq_impl!(BTreeSet<T>);
+#[cfg(feature = "std")]
 seq_impl!(HashSet<T, H: Sized>);
 seq_impl!(LinkedList<T>);
 seq_impl!(Slice<T>);
@@ -281,6 +285,7 @@ macro_rules! map_impl {
 }
 
 map_impl!(BTreeMap<K, V>);
+#[cfg(feature = "std")]
 map_impl!(HashMap<K, V, H: Sized>);
 #[cfg(feature = "indexmap")]
 map_impl!(IndexMap<K, V, H: Sized>);
@@ -346,6 +351,7 @@ macro_rules! map_as_tuple_seq {
 }
 map_as_tuple_seq!(BTreeMap<K, V>);
 // TODO HashMap with a custom hasher support would be better, but results in "unconstrained type parameter"
+#[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K, V>);
 #[cfg(feature = "indexmap")]
 map_as_tuple_seq!(IndexMap<K, V>);
@@ -375,6 +381,7 @@ macro_rules! tuple_seq_as_map_impl_intern {
 macro_rules! tuple_seq_as_map_impl {
     ($($ty:ty $(,)?)+) => {$(
         tuple_seq_as_map_impl_intern!($ty, BTreeMap<K, V>);
+        #[cfg(feature = "std")]
         tuple_seq_as_map_impl_intern!($ty, HashMap<K, V>);
     )+}
 }
@@ -387,6 +394,7 @@ tuple_seq_as_map_impl! {
     Vec<(K, V)>,
     VecDeque<(K, V)>,
 }
+#[cfg(feature = "std")]
 tuple_seq_as_map_impl!(HashSet<(K, V)>);
 #[cfg(feature = "indexmap")]
 tuple_seq_as_map_impl!(IndexSet<(K, V)>);
@@ -414,6 +422,7 @@ macro_rules! tuple_seq_as_map_arr {
     };
 }
 tuple_seq_as_map_arr!([(K, V); N], BTreeMap<K, V>);
+#[cfg(feature = "std")]
 tuple_seq_as_map_arr!([(K, V); N], HashMap<K, V>);
 
 // endregion
@@ -572,6 +581,7 @@ use_signed_duration!(
     }
 );
 
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSeconds DurationSeconds,
     TimestampMilliSeconds DurationMilliSeconds,
@@ -584,6 +594,7 @@ use_signed_duration!(
         {String, STRICTNESS => STRICTNESS: Strictness}
     }
 );
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSecondsWithFrac DurationSecondsWithFrac,
     TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,

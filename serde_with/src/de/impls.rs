@@ -1,9 +1,10 @@
 use super::*;
+#[cfg(feature = "std")]
+use crate::utils::duration::DurationSigned;
 use crate::{
     formats::{Flexible, Format, Strict},
     rust::StringWithSeparator,
     utils,
-    utils::duration::DurationSigned,
 };
 use alloc::{
     borrow::{Cow, ToOwned},
@@ -14,18 +15,21 @@ use alloc::{
     sync::{Arc, Weak as ArcWeak},
     vec::Vec,
 };
+#[cfg(feature = "std")]
+use core::hash::{BuildHasher, Hash};
+#[cfg(feature = "std")]
+use core::time::Duration;
 use core::{
     cell::{Cell, RefCell},
     convert::TryInto,
     fmt::{self, Display},
-    hash::{BuildHasher, Hash},
     iter::FromIterator,
     str::FromStr,
-    time::Duration,
 };
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::de::*;
+#[cfg(feature = "std")]
 use std::{
     collections::{HashMap, HashSet},
     sync::{Mutex, RwLock},
@@ -180,6 +184,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<'de, T, U> DeserializeAs<'de, Mutex<T>> for Mutex<U>
 where
     U: DeserializeAs<'de, T>,
@@ -194,6 +199,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<'de, T, U> DeserializeAs<'de, RwLock<T>> for RwLock<U>
 where
     U: DeserializeAs<'de, T>,
@@ -348,6 +354,7 @@ seq_impl!(
     push
 );
 seq_impl!(BTreeSet<T: Ord>, seq, BTreeSet::new(), insert);
+#[cfg(feature = "std")]
 seq_impl!(
     HashSet<T: Eq + Hash, S: BuildHasher + Default>,
     seq,
@@ -441,6 +448,7 @@ map_impl!(
     BTreeMap<K: Ord, V>,
     map,
     BTreeMap::new());
+#[cfg(feature = "std")]
 map_impl!(
     HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
@@ -570,6 +578,7 @@ macro_rules! map_as_tuple_seq {
     };
 }
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
+#[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 #[cfg(feature = "indexmap")]
 map_as_tuple_seq!(IndexMap<K: Eq + Hash, V>);
@@ -633,6 +642,7 @@ macro_rules! tuple_seq_as_map_impl_intern {
 macro_rules! tuple_seq_as_map_impl {
     ($($tyorig:ident < (K $(: $($kbound:ident $(+)?)+)?, V $(: $($vbound:ident $(+)?)+)?)> $(,)?)+) => {$(
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, BTreeMap<KAs, VAs>);
+        #[cfg(feature = "std")]
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, HashMap<KAs, VAs>);
     )+}
 }
@@ -644,6 +654,7 @@ tuple_seq_as_map_impl! {
     Vec<(K, V)>,
     VecDeque<(K, V)>,
 }
+#[cfg(feature = "std")]
 tuple_seq_as_map_impl!(HashSet<(K: Eq + Hash, V: Eq + Hash)>);
 #[cfg(feature = "indexmap")]
 tuple_seq_as_map_impl!(IndexSet<(K: Eq + Hash, V: Eq + Hash)>);
@@ -702,6 +713,7 @@ macro_rules! tuple_seq_as_map_option_impl {
     )+}
 }
 tuple_seq_as_map_option_impl!(BTreeMap);
+#[cfg(feature = "std")]
 tuple_seq_as_map_option_impl!(HashMap);
 
 macro_rules! tuple_seq_as_map_arr {
@@ -752,6 +764,7 @@ macro_rules! tuple_seq_as_map_arr {
     }
 }
 tuple_seq_as_map_arr!([(K, V); N], BTreeMap<KAs, VAs>);
+#[cfg(feature = "std")]
 tuple_seq_as_map_arr!([(K, V); N], HashMap<KAs, VAs>);
 
 // endregion
@@ -923,6 +936,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 macro_rules! use_signed_duration {
     (
         $main_trait:ident $internal_trait:ident =>
@@ -956,6 +970,7 @@ macro_rules! use_signed_duration {
     };
 }
 
+#[cfg(feature = "std")]
 use_signed_duration!(
     DurationSeconds DurationSeconds,
     DurationMilliSeconds DurationMilliSeconds,
@@ -969,6 +984,7 @@ use_signed_duration!(
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+#[cfg(feature = "std")]
 use_signed_duration!(
     DurationSecondsWithFrac DurationSecondsWithFrac,
     DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
@@ -982,6 +998,7 @@ use_signed_duration!(
     }
 );
 
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSeconds DurationSeconds,
     TimestampMilliSeconds DurationMilliSeconds,
@@ -995,6 +1012,7 @@ use_signed_duration!(
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSecondsWithFrac DurationSecondsWithFrac,
     TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
