@@ -13,12 +13,6 @@ on:
     - cron: "0 0 * * 1"
 permissions: read-all
 
-env:
-  CARGO_INCREMENTAL: 0
-  # Debug infos are not really needed for CI and this keeps the cache smaller
-  CARGO_PROFILE_DEV_DEBUG: 0
-  RUSTFLAGS: -D warnings
-
 jobs:
   clippy_check:
     strategy:
@@ -30,13 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
-        run: |
-          rustup toolchain install ${{ matrix.rust }} --profile minimal --component clippy
-          rustup default ${{ matrix.rust }}
-          cargo --version
-          rustc --version
-      - run: echo "::add-matcher::.github/rust.json"
-      - uses: Swatinem/rust-cache@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy
+
       - name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         run: cargo clippy --workspace --no-default-features --all-targets
       - name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
@@ -54,12 +46,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
-        run: |
-          rustup toolchain install ${{ matrix.rust }} --profile minimal --component rustfmt
-          rustup default ${{ matrix.rust }}
-          cargo --version
-          rustc --version
-      - run: echo "::add-matcher::.github/rust.json"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+
       - name: Rustfmt Check (${{ matrix.rust }})
         run: cargo fmt --all -- --check
 
@@ -77,13 +67,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
-        run: |
-          rustup toolchain install ${{ matrix.rust }} --profile minimal
-          rustup default ${{ matrix.rust }}
-          cargo --version
-          rustc --version
-      - run: echo "::add-matcher::.github/rust.json"
-      - uses: Swatinem/rust-cache@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
 
       # Build the project
       - name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
