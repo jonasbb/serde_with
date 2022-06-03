@@ -1,5 +1,6 @@
 //! Specify the format and how lenient the deserialization is
 
+#[cfg(feature = "alloc")]
 use alloc::string::String;
 
 /// Specify how to serialize/deserialize a type
@@ -44,6 +45,10 @@ impl_format!(
     i64
     /// Serialize into a u64
     u64
+    /// Serialize into an i128
+    i128
+    /// Serialize into a u128
+    u128
 
     /// Serialize into a f32
     f32
@@ -52,16 +57,12 @@ impl_format!(
 
     /// Serialize into a bool
     bool
-
+);
+#[cfg(feature = "alloc")]
+impl_format!(
     /// Serialize into a String
     String
 );
-serde::serde_if_integer128!(impl_format!(
-    /// Serialize into an i128
-    i128
-    /// Serialize into a u128
-    u128
-););
 
 create_format!(
     /// Use uppercase characters

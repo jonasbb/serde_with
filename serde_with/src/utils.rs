@@ -1,6 +1,5 @@
 pub(crate) mod duration;
 
-use alloc::string::String;
 use core::{marker::PhantomData, mem::MaybeUninit};
 use serde::de::{Deserialize, Error, Expected, MapAccess, SeqAccess};
 
@@ -95,16 +94,16 @@ pub(crate) fn duration_as_secs_f64(dur: &core::time::Duration) -> f64 {
 
 pub(crate) fn duration_signed_from_secs_f64(
     secs: f64,
-) -> Result<self::duration::DurationSigned, String> {
+) -> Result<self::duration::DurationSigned, &'static str> {
     const MAX_NANOS_F64: f64 = ((u64::max_value() as u128 + 1) * (NANOS_PER_SEC as u128)) as f64;
     // TODO why are the seconds converted to nanoseconds first?
     // Does it make sense to just truncate the value?
     let mut nanos = secs * (NANOS_PER_SEC as f64);
     if !nanos.is_finite() {
-        return Err("got non-finite value when converting float to duration".into());
+        return Err("got non-finite value when converting float to duration");
     }
     if nanos >= MAX_NANOS_F64 {
-        return Err("overflow when converting float to duration".into());
+        return Err("overflow when converting float to duration");
     }
     let mut sign = self::duration::Sign::Positive;
     if nanos < 0.0 {
