@@ -13,12 +13,6 @@ on:
     - cron: "0 0 * * 1"
 permissions: read-all
 
-env:
-  CARGO_INCREMENTAL: 0
-  # Debug infos are not really needed for CI and this keeps the cache smaller
-  CARGO_PROFILE_DEV_DEBUG: 0
-  RUSTFLAGS: -D warnings
-
 jobs:
   clippy_check:
     strategy:
@@ -30,13 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
-        run: |
-          rustup toolchain install ${{ matrix.rust }} --profile minimal --component clippy
-          rustup default ${{ matrix.rust }}
-          cargo --version
-          rustc --version
-      - run: echo "::add-matcher::.github/rust.json"
-      - uses: Swatinem/rust-cache@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy
+
       - name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         run: cargo clippy --workspace --no-default-features --all-targets
       - name: clippy "Default" (${{ matrix.os }} / ${{ matrix.rust }})
@@ -54,12 +46,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
-        run: |
-          rustup toolchain install ${{ matrix.rust }} --profile minimal --component rustfmt
-          rustup default ${{ matrix.rust }}
-          cargo --version
-          rustc --version
-      - run: echo "::add-matcher::.github/rust.json"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+
       - name: Rustfmt Check (${{ matrix.rust }})
         run: cargo fmt --all -- --check
 
@@ -72,38 +62,33 @@ jobs:
         # breakage occurs in intermediate versions.
         # IMPORTANT: Synchronize the MSRV with the Cargo.toml values.
         rust: ["1.53", "1.55", "1.60", "stable", "beta", "nightly"]
-        crate: ["serde_with", "serde_with_macros", "serde_with_test"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: "Install/Update the Rust version"
-        run: |
-          rustup toolchain install ${{ matrix.rust }} --profile minimal
-          rustup default ${{ matrix.rust }}
-          cargo --version
-          rustc --version
-      - run: echo "::add-matcher::.github/rust.json"
-      - uses: Swatinem/rust-cache@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
 
       # Build the project
-      - name: "Build (${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Build (${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo build --all-features --all-targets
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests
       # since doctests are important this should not be added
       # https://github.com/rust-lang/cargo/issues/6669
-      - name: "Test Build (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Test Build (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --no-default-features --no-run
-      - name: "Test Run (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Test Run (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --no-default-features --no-fail-fast
-      - name: "Test Build (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Test Build (Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --no-run
-      - name: "Test Run (Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Test Run (Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --no-fail-fast
-      - name: "Test Build (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Test Build (All Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --all-features  --no-run
-      - name: "Test Run (All Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Test Run (All Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --all-features --no-default-features --no-fail-fast
 
       - name: Run cargo-tarpaulin
