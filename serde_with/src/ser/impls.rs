@@ -8,7 +8,7 @@ use alloc::{
     boxed::Box,
     collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
     rc::{Rc, Weak as RcWeak},
-    string::{String, ToString},
+    string::String,
     sync::{Arc, Weak as ArcWeak},
     vec::Vec,
 };
@@ -528,24 +528,19 @@ impl SerializeAs<Vec<u8>> for BytesOrString {
 impl<SEPARATOR, I, T> SerializeAs<I> for StringWithSeparator<SEPARATOR, T>
 where
     SEPARATOR: Separator,
-    for<'a> &'a I: IntoIterator<Item = &'a T>,
-    T: ToString,
+    for<'x> &'x I: IntoIterator<Item = &'x T>,
+    T: Display,
+    // This set of bounds is enough to make the function compile but has inference issues
+    // making it unusable at the moment.
+    // https://github.com/rust-lang/rust/issues/89196#issuecomment-932024770
+    // for<'x> &'x I: IntoIterator,
+    // for<'x> <&'x I as IntoIterator>::Item: Display,
 {
     fn serialize_as<S>(source: &I, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let mut s = String::new();
-        for v in source {
-            s.push_str(&*v.to_string());
-            s.push_str(SEPARATOR::separator());
-        }
-        serializer.serialize_str(if !s.is_empty() {
-            // remove trailing separator if present
-            &s[..s.len() - SEPARATOR::separator().len()]
-        } else {
-            &s[..]
-        })
+        serializer.collect_str(&utils::DisplayWithSeparator::<_, SEPARATOR>::new(source))
     }
 }
 

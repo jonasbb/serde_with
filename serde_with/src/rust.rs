@@ -4,10 +4,7 @@ use crate::{utils, Separator};
 #[cfg(doc)]
 use alloc::collections::BTreeMap;
 #[cfg(feature = "alloc")]
-use alloc::{
-    string::{String, ToString},
-    vec::Vec,
-};
+use alloc::{string::String, vec::Vec};
 use core::{
     cmp::Eq,
     fmt::{self, Display},
@@ -246,9 +243,9 @@ pub mod seq_display_fromstr {
         for<'a> &'a T: IntoIterator<Item = &'a I>,
         I: Display,
     {
-        struct SerializeString<'a, I>(&'a I);
+        struct SerializeString<I>(I);
 
-        impl<'a, I> Serialize for SerializeString<'a, I>
+        impl<I> Serialize for SerializeString<I>
         where
             I: Display,
         {
@@ -256,7 +253,7 @@ pub mod seq_display_fromstr {
             where
                 S: Serializer,
             {
-                serializer.collect_str(self.0)
+                serializer.collect_str(&self.0)
             }
         }
 
@@ -333,23 +330,18 @@ where
     Sep: Separator,
 {
     /// Serialize collection into a string with separator symbol
-    pub fn serialize<S, T, V>(values: T, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S, T, I>(values: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
-        T: IntoIterator<Item = V>,
-        V: Display,
+        for<'x> &'x T: IntoIterator<Item = &'x I>,
+        I: Display,
+        // This set of bounds is enough to make the function compile but has inference issues
+        // making it unusable at the moment.
+        // https://github.com/rust-lang/rust/issues/89196#issuecomment-932024770
+        // for<'x> &'x T: IntoIterator,
+        // for<'x> <&'x T as IntoIterator>::Item: Display,
     {
-        let mut s = String::new();
-        for v in values {
-            s.push_str(&*v.to_string());
-            s.push_str(Sep::separator());
-        }
-        serializer.serialize_str(if !s.is_empty() {
-            // remove trailing separator if present
-            &s[..s.len() - Sep::separator().len()]
-        } else {
-            &s[..]
-        })
+        serializer.collect_str(&utils::DisplayWithSeparator::<_, Sep>::new(values))
     }
 
     /// Deserialize a collection from a string with separator symbol
