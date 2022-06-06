@@ -45,7 +45,10 @@ extern crate proc_macro;
 mod utils;
 
 use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _};
-use darling::{util::Override, Error as DarlingError, FromField, FromMeta};
+use darling::{
+    util::{Flag, Override},
+    Error as DarlingError, FromField, FromMeta,
+};
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
@@ -294,52 +297,47 @@ pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStr
 
 /// Add the skip_serializing_if annotation to each field of the struct
 fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), String> {
-    if let Type::Path(path) = &field.ty {
-        if is_std_option(&path.path) {
-            let has_skip_serializing_if =
-                field_has_attribute(field, "serde", "skip_serializing_if");
+    if is_std_option(&field.ty) {
+        let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
 
-            // Remove the `serialize_always` attribute
-            let mut has_always_attr = false;
-            field.attrs.retain(|attr| {
-                let has_attr = attr.path.is_ident("serialize_always");
-                has_always_attr |= has_attr;
-                !has_attr
-            });
+        // Remove the `serialize_always` attribute
+        let mut has_always_attr = false;
+        field.attrs.retain(|attr| {
+            let has_attr = attr.path.is_ident("serialize_always");
+            has_always_attr |= has_attr;
+            !has_attr
+        });
 
-            // Error on conflicting attributes
-            if has_always_attr && has_skip_serializing_if {
-                let mut msg = r#"The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field"#.to_string();
-                if let Some(ident) = &field.ident {
-                    msg += ": `";
-                    msg += &ident.to_string();
-                    msg += "`";
-                }
-                msg += ".";
-                return Err(msg);
+        // Error on conflicting attributes
+        if has_always_attr && has_skip_serializing_if {
+            let mut msg = r#"The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field"#.to_string();
+            if let Some(ident) = &field.ident {
+                msg += ": `";
+                msg += &ident.to_string();
+                msg += "`";
             }
+            msg += ".";
+            return Err(msg);
+        }
 
-            // Do nothing if `skip_serializing_if` or `serialize_always` is already present
-            if has_skip_serializing_if || has_always_attr {
-                return Ok(());
-            }
+        // Do nothing if `skip_serializing_if` or `serialize_always` is already present
+        if has_skip_serializing_if || has_always_attr {
+            return Ok(());
+        }
 
-            // Add the `skip_serializing_if` attribute
-            let attr = parse_quote!(
-                #[serde(skip_serializing_if = "Option::is_none")]
-            );
-            field.attrs.push(attr);
-        } else {
-            // Warn on use of `serialize_always` on non-Option fields
-            let has_attr = field
-                .attrs
-                .iter()
-                .any(|attr| attr.path.is_ident("serialize_always"));
-            if has_attr {
-                return Err(
-                    "`serialize_always` may only be used on fields of type `Option`.".into(),
-                );
-            }
+        // Add the `skip_serializing_if` attribute
+        let attr = parse_quote!(
+            #[serde(skip_serializing_if = "Option::is_none")]
+        );
+        field.attrs.push(attr);
+    } else {
+        // Warn on use of `serialize_always` on non-Option fields
+        let has_attr = field
+            .attrs
+            .iter()
+            .any(|attr| attr.path.is_ident("serialize_always"));
+        if has_attr {
+            return Err("`serialize_always` may only be used on fields of type `Option`.".into());
         }
     }
     Ok(())
@@ -352,12 +350,39 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
 /// * `Option`
 /// * `std::option::Option`, with or without leading `::`
 /// * `core::option::Option`, with or without leading `::`
-fn is_std_option(path: &Path) -> bool {
-    (path.leading_colon.is_none() && path.segments.len() == 1 && path.segments[0].ident == "Option")
-        || (path.segments.len() == 3
-            && (path.segments[0].ident == "std" || path.segments[0].ident == "core")
-            && path.segments[1].ident == "option"
-            && path.segments[2].ident == "Option")
+fn is_std_option(type_: &Type) -> bool {
+    match type_ {
+        Type::Array(_)
+        | Type::BareFn(_)
+        | Type::ImplTrait(_)
+        | Type::Infer(_)
+        | Type::Macro(_)
+        | Type::Never(_)
+        | Type::Ptr(_)
+        | Type::Reference(_)
+        | Type::Slice(_)
+        | Type::TraitObject(_)
+        | Type::Tuple(_)
+        | Type::Verbatim(_) => false,
+
+        Type::Group(syn::TypeGroup { elem, .. })
+        | Type::Paren(syn::TypeParen { elem, .. })
+        | Type::Path(syn::TypePath {
+            qself: Some(syn::QSelf { ty: elem, .. }),
+            ..
+        }) => is_std_option(elem),
+
+        Type::Path(syn::TypePath { qself: None, path }) => {
+            (path.leading_colon.is_none()
+                && path.segments.len() == 1
+                && path.segments[0].ident == "Option")
+                || (path.segments.len() == 3
+                    && (path.segments[0].ident == "std" || path.segments[0].ident == "core")
+                    && path.segments[1].ident == "option"
+                    && path.segments[2].ident == "Option")
+        }
+        _ => false,
+    }
 }
 
 /// Determine if the `field` has an attribute with given `namespace` and `name`
@@ -443,6 +468,9 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// struct Foo {
 ///     #[serde_as(as = "Vec<_>")]
 ///     bar: Vec<u32>,
+///
+///     #[serde_as(as = "Option<DisplayFromStr>")]
+///     baz: Option<u32>,
 /// }
 /// ```
 ///
@@ -464,6 +492,23 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// 4. It searches `#[serde_as(as = ...)]` if there is a type named `BorrowCow` under any path.
 ///     If `BorrowCow` is found, the attribute `#[serde(borrow)]` is added to the field.
 ///     If `#[serde(borrow)]` or `#[serde(borrow = "...")]` is already present, this step will be skipped.
+/// 5. Restore the ability of accepting missing fields if both the field and the transformation are `Option`.
+///
+///     An `Option` is detected by an exact text match.
+///     Renaming an import or type aliases can cause confusion here.
+///     The following variants are supported.
+///     * `Option`
+///     * `std::option::Option`, with or without leading `::`
+///     * `core::option::Option`, with or without leading `::`
+///
+///     If the field is of type `Option<T>` and the attribute `#[serde_as(as = "Option<S>")]` (also `deserialize_as`; for any `T`/`S`) then `#[serde(default)]` is applied to the field.
+///     This restores the ability of accepting missing fields, which otherwise often leads to confusing [serde_with#185](https://github.com/jonasbb/serde_with/issues/185).
+///     `#[serde(default)]` is not applied, if it already exists.
+///     It only triggers if both field and transformation are `Option`s.
+///     For example, using `#[serde_as(as = "NoneAsEmptyString")]` on `Option<String>` will not see any change.
+///
+///     If the automatically applied attribute is undesired, the behavior can be supressed by adding `#[serde_as(no_default)]`.
+///     This can be combined like `#[serde_as(as = "Option<S>", no_default)]`.
 ///
 /// After all these steps, the code snippet will have transformed into roughly this.
 ///
@@ -473,6 +518,11 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     #[serde_as(as = "Vec<_>")]
 ///     #[serde(with = "::serde_with::As::<Vec<::serde_with::Same>>")]
 ///     bar: Vec<u32>,
+///
+///     #[serde_as(as = "Option<DisplayFromStr>")]
+///     #[serde(default)]
+///     #[serde(with = "::serde_with::As::<Option<DisplayFromStr>>")]
+///     baz: Option<u32>,
 /// }
 /// ```
 ///
@@ -527,6 +577,7 @@ fn serde_as_add_attr_to_field(
         r#as: Option<Type>,
         deserialize_as: Option<Type>,
         serialize_as: Option<Type>,
+        no_default: Flag,
     }
 
     impl SerdeAsOptions {
@@ -543,11 +594,39 @@ fn serde_as_add_attr_to_field(
         serialize_with: Option<String>,
 
         borrow: Option<Override<String>>,
+        default: Option<Override<String>>,
     }
 
     impl SerdeOptions {
         fn has_any_set(&self) -> bool {
             self.with.is_some() || self.deserialize_with.is_some() || self.serialize_with.is_some()
+        }
+    }
+
+    /// Emit a `borrow` annotation, if the replacement type requires borrowing.
+    fn emit_borrow_annotation(serde_options: &SerdeOptions, as_type: &Type, field: &mut Field) {
+        let type_borrowcow = &syn::parse_quote!(BorrowCow);
+        // If the field is not borrowed yet, check if we need to borrow it.
+        if serde_options.borrow.is_none() && has_type_embedded(as_type, type_borrowcow) {
+            let attr_borrow = parse_quote!(#[serde(borrow)]);
+            field.attrs.push(attr_borrow);
+        }
+    }
+
+    /// Emit a `default` annotation, if `as_type` and `field` are both `Option`.
+    fn emit_default_annotation(
+        serde_as_options: &SerdeAsOptions,
+        serde_options: &SerdeOptions,
+        as_type: &Type,
+        field: &mut Field,
+    ) {
+        if !serde_as_options.no_default.is_present()
+            && serde_options.default.is_none()
+            && is_std_option(as_type)
+            && is_std_option(&field.ty)
+        {
+            let attr_borrow = parse_quote!(#[serde(default)]);
+            field.attrs.push(attr_borrow);
         }
     }
 
@@ -583,27 +662,20 @@ fn serde_as_add_attr_to_field(
     }
 
     let type_same = &syn::parse_quote!(#serde_with_crate_path::Same);
-    let type_borrowcow = &syn::parse_quote!(BorrowCow);
-    if let Some(type_) = serde_as_options.r#as {
-        // If the field is not borrowed yet, check if we need to borrow it.
-        if serde_options.borrow.is_none() && has_type_embedded(&type_, type_borrowcow) {
-            let attr_borrow = parse_quote!(#[serde(borrow)]);
-            field.attrs.push(attr_borrow);
-        }
+    if let Some(type_) = &serde_as_options.r#as {
+        emit_borrow_annotation(&serde_options, type_, field);
+        emit_default_annotation(&serde_as_options, &serde_options, type_, field);
 
-        let replacement_type = replace_infer_type_with_type(type_, type_same);
+        let replacement_type = replace_infer_type_with_type(type_.clone(), type_same);
         let attr_inner_tokens = quote!(#serde_with_crate_path::As::<#replacement_type>).to_string();
         let attr = parse_quote!(#[serde(with = #attr_inner_tokens)]);
         field.attrs.push(attr);
     }
-    if let Some(type_) = serde_as_options.deserialize_as {
-        // If the field is not borrowed yet, check if we need to borrow it.
-        if serde_options.borrow.is_none() && has_type_embedded(&type_, type_borrowcow) {
-            let attr_borrow = parse_quote!(#[serde(borrow)]);
-            field.attrs.push(attr_borrow);
-        }
+    if let Some(type_) = &serde_as_options.deserialize_as {
+        emit_borrow_annotation(&serde_options, type_, field);
+        emit_default_annotation(&serde_as_options, &serde_options, type_, field);
 
-        let replacement_type = replace_infer_type_with_type(type_, type_same);
+        let replacement_type = replace_infer_type_with_type(type_.clone(), type_same);
         let attr_inner_tokens =
             quote!(#serde_with_crate_path::As::<#replacement_type>::deserialize).to_string();
         let attr = parse_quote!(#[serde(deserialize_with = #attr_inner_tokens)]);
