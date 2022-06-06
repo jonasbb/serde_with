@@ -9,7 +9,7 @@ use crate::{
     formats::{Format, Lowercase, Uppercase},
     ser::SerializeAs,
 };
-use alloc::{borrow::Cow, format, vec::Vec};
+use alloc::{borrow::Cow, vec::Vec};
 use core::{
     convert::{TryFrom, TryInto},
     marker::PhantomData,
@@ -115,7 +115,7 @@ where
     where
         S: Serializer,
     {
-        serializer.serialize_str(&hex::encode(source))
+        serializer.serialize_str(&hex_crate::encode(source))
     }
 }
 
@@ -127,7 +127,7 @@ where
     where
         S: Serializer,
     {
-        serializer.serialize_str(&hex::encode_upper(source))
+        serializer.serialize_str(&hex_crate::encode_upper(source))
     }
 }
 
@@ -141,11 +141,11 @@ where
         D: Deserializer<'de>,
     {
         <Cow<'de, str> as Deserialize<'de>>::deserialize(deserializer)
-            .and_then(|s| hex::decode(&*s).map_err(Error::custom))
+            .and_then(|s| hex_crate::decode(&*s).map_err(Error::custom))
             .and_then(|vec: Vec<u8>| {
                 let length = vec.len();
                 vec.try_into().map_err(|_e: T::Error| {
-                    Error::custom(format!(
+                    Error::custom(format_args!(
                         "Can't convert a Byte Vector of length {} to the output type.",
                         length
                     ))

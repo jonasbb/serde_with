@@ -26,10 +26,11 @@ maintenance = {status = "actively-developed"}
 [features]
 default = ["std", "macros"]
 
-alloc = ["serde/alloc", "base64_crate?/alloc", "chrono_crate?/alloc"]
+alloc = ["serde/alloc", "base64_crate?/alloc", "chrono_crate?/alloc", "hex_crate?/alloc"]
 base64 = ["base64_crate", "alloc"]
 chrono = ["chrono_crate"]
 guide = ["doc-comment", "macros", "std"]
+hex = ["hex_crate", "alloc"]
 indexmap = ["indexmap_crate"]
 json = ["serde_json"]
 macros = ["serde_with_macros"]
@@ -40,7 +41,7 @@ std = ["alloc", "chrono_crate?/clock", "chrono_crate?/std", "serde/std"]
 base64_crate = {package = "base64", version = "0.13.0", optional = true, default-features = false}
 chrono_crate = {package = "chrono", version = "0.4.1", optional = true, default-features = false, features = ["serde"]}
 doc-comment = {version = "0.3.3", optional = true}
-hex = {version = "0.4.2", optional = true}
+hex_crate = {package = "hex", version = "0.4.2", optional = true, default-features = false}
 indexmap_crate = {package = "indexmap", version = "1.8", features = ["serde-1"], optional = true}
 serde = {version = "1.0.122", default-features = false, features = ["derive"]}
 serde_json = {version = "1.0.1", optional = true}

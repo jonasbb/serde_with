@@ -52,6 +52,7 @@ The feature only changes the rustdoc output and enables no other effects.
 The `hex` feature enables serializing data in hex format.
 
 This pulls in `hex` as a dependency.
+It enables the `alloc` feature.
 
 ## `indexmap`
 
