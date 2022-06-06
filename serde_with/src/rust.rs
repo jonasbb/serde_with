@@ -1079,13 +1079,13 @@ pub mod string_empty_as_none {
     /// Serialize a string from `Option<T>` using `AsRef<str>` or using the empty string if `None`.
     pub fn serialize<T, S>(option: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
     where
-        T: AsRef<str>,
+        T: Display,
         S: Serializer,
     {
         if let Some(value) = option {
-            value.as_ref().serialize(serializer)
+            serializer.collect_str(value)
         } else {
-            "".serialize(serializer)
+            serializer.serialize_str("")
         }
     }
 }

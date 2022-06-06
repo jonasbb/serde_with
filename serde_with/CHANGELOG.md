@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     If an existing `default` attribute is detected, the attribute is not applied again.
     This behavior can be supressed by using `#[serde_as(no_default)]` or `#[serde_as(as = "Option<S>", no_default)]`.
+* `NoneAsEmptyString` and `string_empty_as_none` use a different serialization bound (#388).
+
+    Both types used `AsRef<str>` as the serialization bound.
+    This is limiting for non-string types like `Option<i32>`.
+    The deserialization often was already more flexible, due to the `FromStr` bound.
+
+    For most std types this should have little impact, as the types implementing `AsRef<str>` mostly implement `Display`, too, such as `String`, `Cow<str>`, or `Rc<str>`.
 
 ## [1.14.0] - 2022-05-29
 
@@ -112,7 +119,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Depend on a newer `serde_with_macros` version to pull in some fixes.
     * Account for generics when deriving implementations with `SerializeDisplay` and `DeserializeFromStr` #413
     * Provide better error messages when parsing types fails #423
-
 
 ## [1.12.0] - 2022-02-07
 
