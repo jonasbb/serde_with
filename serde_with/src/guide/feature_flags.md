@@ -38,6 +38,7 @@ It enables the `alloc` feature.
 
 The `chrono` feature enables integration of `chrono` specific conversions.
 This includes support for the timestamp and duration types.
+More features are available in combination with `alloc` or `std`.
 
 This pulls in `chrono` as a dependency.
 

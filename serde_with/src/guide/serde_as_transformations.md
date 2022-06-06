@@ -493,7 +493,7 @@ These conversions are availble with the `time_0_3` feature flag.
 [`Bytes`]: crate::Bytes
 [`chrono::DateTime<Local>`]: chrono_crate::DateTime
 [`chrono::DateTime<Utc>`]: chrono_crate::DateTime
-[`chrono::Duration`]: https://docs.rs/chrono/latest/chrono/struct.Duration.html
+[`chrono::Duration`]: chrono_crate::Duration
 [`chrono::NaiveDateTime`]: chrono_crate::NaiveDateTime
 [`DefaultOnError`]: crate::DefaultOnError
 [`DefaultOnNull`]: crate::DefaultOnNull
