@@ -18,13 +18,13 @@ use serde_with::{
     TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
     TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
 };
-use time_0_3::{Duration, OffsetDateTime, PrimitiveDateTime, UtcOffset};
+use time_0_3_crate::{Duration, OffsetDateTime, PrimitiveDateTime, UtcOffset};
 
 /// Create a [`PrimitiveDateTime`] for the Unix Epoch
 fn unix_epoch_primitive() -> PrimitiveDateTime {
     PrimitiveDateTime::new(
-        time_0_3::Date::from_ordinal_date(1970, 1).unwrap(),
-        time_0_3::Time::from_hms_nano(0, 0, 0, 0).unwrap(),
+        time_0_3_crate::Date::from_ordinal_date(1970, 1).unwrap(),
+        time_0_3_crate::Time::from_hms_nano(0, 0, 0, 0).unwrap(),
     )
 }
 
@@ -152,7 +152,9 @@ fn test_naive_datetime_smoketest() {
 fn test_offset_datetime_rfc2822() {
     #[serde_as]
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
-    struct S(#[serde_as(as = "time_0_3::format_description::well_known::Rfc2822")] OffsetDateTime);
+    struct S(
+        #[serde_as(as = "time_0_3_crate::format_description::well_known::Rfc2822")] OffsetDateTime,
+    );
 
     is_equal(
         S(OffsetDateTime::UNIX_EPOCH),
@@ -173,7 +175,9 @@ fn test_offset_datetime_rfc2822() {
 fn test_offset_datetime_rfc3339() {
     #[serde_as]
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
-    struct S(#[serde_as(as = "time_0_3::format_description::well_known::Rfc3339")] OffsetDateTime);
+    struct S(
+        #[serde_as(as = "time_0_3_crate::format_description::well_known::Rfc3339")] OffsetDateTime,
+    );
 
     is_equal(
         S(OffsetDateTime::UNIX_EPOCH),

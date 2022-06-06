@@ -83,3 +83,4 @@ The `time_0_3` enables integration of `time` v0.3 specific conversions.
 This includes support for the timestamp and duration types.
 
 This pulls in `time` v0.3 as a dependency.
+Some functionality is only available when `alloc` or `std` is enabled too.
