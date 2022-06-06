@@ -32,6 +32,7 @@ The feature enabled by default and also enables `alloc`.
 The `base64` feature enables serializing data in base64 format.
 
 This pulls in `base64` as a dependency.
+It enables the `alloc` feature.
 
 ## `chrono`
 

@@ -5,13 +5,14 @@
 //! Please check the documentation on the [`Base64`] type for details.
 
 use crate::{formats, DeserializeAs, SerializeAs};
-use alloc::{format, string::String, vec::Vec};
+use alloc::vec::Vec;
 use core::{
     convert::{TryFrom, TryInto},
     default::Default,
+    fmt,
     marker::PhantomData,
 };
-use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de::Error, Deserializer, Serialize, Serializer};
 
 /// Serialize bytes with base64
 ///
@@ -112,23 +113,40 @@ where
     where
         D: Deserializer<'de>,
     {
-        String::deserialize(deserializer)
-            .and_then(|s| {
-                base64_crate::decode_config(
-                    &*s,
+        struct Visitor<T, CHARSET>(PhantomData<(T, CHARSET)>);
+
+        impl<'de, T, CHARSET> serde::de::Visitor<'de> for Visitor<T, CHARSET>
+        where
+            T: TryFrom<Vec<u8>>,
+            CHARSET: CharacterSet,
+        {
+            type Value = T;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a base64 encoded string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                let bytes = base64_crate::decode_config(
+                    value,
                     base64_crate::Config::new(CHARSET::charset(), false),
                 )
-                .map_err(Error::custom)
-            })
-            .and_then(|vec: Vec<u8>| {
-                let length = vec.len();
-                vec.try_into().map_err(|_e: T::Error| {
-                    Error::custom(format!(
+                .map_err(Error::custom)?;
+
+                let length = bytes.len();
+                bytes.try_into().map_err(|_e: T::Error| {
+                    Error::custom(format_args!(
                         "Can't convert a Byte Vector of length {} to the output type.",
                         length
                     ))
                 })
-            })
+            }
+        }
+
+        deserializer.deserialize_str(Visitor::<T, CHARSET>(PhantomData))
     }
 }
 
