@@ -5,7 +5,7 @@ authors = [
     "Marcin Kaźmierczak",
 ]
 name = "serde_with"
-rust-version = "1.53"
+rust-version = "1.60"
 version = "1.14.0"
 
 categories = ["encoding", "no-std"]
