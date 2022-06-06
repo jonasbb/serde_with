@@ -456,11 +456,11 @@ where
     }
 }
 
-impl<AsRefStr> SerializeAs<Option<AsRefStr>> for NoneAsEmptyString
+impl<T> SerializeAs<Option<T>> for NoneAsEmptyString
 where
-    AsRefStr: AsRef<str>,
+    T: Display,
 {
-    fn serialize_as<S>(source: &Option<AsRefStr>, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize_as<S>(source: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
