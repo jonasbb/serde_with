@@ -3,14 +3,29 @@
 This crate has the following features which can be enabled.
 Each entry will explain the feature in more detail.
 
-1. [`base64`](#base64)
-2. [`chrono`](#chrono)
-3. [`guide`](#guide)
-4. [`hex`](#hex)
-5. [`indexmap`](#indexmap)
-6. [`json`](#json)
-7. [`macros`](#macros)
-8. [`time_0_3`](#time_0_3)
+`serde_with` is fully `no_std` compatible.
+Using it in a `no_std` environment requires using `default-features = false`, since `std` is enabled by default.
+
+1. [`alloc`](#alloc)
+2. [`std` (default)](#std-default)
+3. [`base64`](#base64)
+4. [`chrono`](#chrono)
+5. [`guide`](#guide)
+6. [`hex`](#hex)
+7. [`indexmap`](#indexmap)
+8. [`json`](#json)
+9. [`macros` (default)](#macros-default)
+10. [`time_0_3`](#time_0_3)
+
+## `alloc`
+
+Enable support for types from the `alloc` crate when running in a `no_std` environment.
+
+## `std` (default)
+
+Enables support for various types from the std library.
+This will enable `std` support in all dependencies too.
+The feature enabled by default and also enables `alloc`.
 
 ## `base64`
 
@@ -47,7 +62,7 @@ The `json` features enables JSON conversions from the `json` module.
 
 This pulls in `serde_json` as a dependency.
 
-## `macros`
+## `macros` (default)
 
 The `macros` features enables all helper macros and derives.
 It is enabled by default, since the macros provide a usability benefit, especially for `serde_as`.
