@@ -468,6 +468,9 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// struct Foo {
 ///     #[serde_as(as = "Vec<_>")]
 ///     bar: Vec<u32>,
+///
+///     #[serde_as(as = "Option<DisplayFromStr>")]
+///     baz: Option<u32>,
 /// }
 /// ```
 ///
@@ -489,6 +492,23 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// 4. It searches `#[serde_as(as = ...)]` if there is a type named `BorrowCow` under any path.
 ///     If `BorrowCow` is found, the attribute `#[serde(borrow)]` is added to the field.
 ///     If `#[serde(borrow)]` or `#[serde(borrow = "...")]` is already present, this step will be skipped.
+/// 5. Restore the ability of accepting missing fields if both the field and the transformation are `Option`.
+///
+///     An `Option` is detected by an exact text match.
+///     Renaming an import or type aliases can cause confusion here.
+///     The following variants are supported.
+///     * `Option`
+///     * `std::option::Option`, with or without leading `::`
+///     * `core::option::Option`, with or without leading `::`
+///
+///     If the field is of type `Option<T>` and the attribute `#[serde_as(as = "Option<S>")]` (also `deserialize_as`; for any `T`/`S`) then `#[serde(default)]` is applied to the field.
+///     This restores the ability of accepting missing fields, which otherwise often leads to confusing [serde_with#185](https://github.com/jonasbb/serde_with/issues/185).
+///     `#[serde(default)]` is not applied, if it already exists.
+///     It only triggers if both field and transformation are `Option`s.
+///     For example, using `#[serde_as(as = "NoneAsEmptyString")]` on `Option<String>` will not see any change.
+///
+///     If the automatically applied attribute is undesired, the behavior can be supressed by adding `#[serde_as(no_default)]`.
+///     This can be combined like `#[serde_as(as = "Option<S>", no_default)]`.
 ///
 /// After all these steps, the code snippet will have transformed into roughly this.
 ///
@@ -498,6 +518,11 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     #[serde_as(as = "Vec<_>")]
 ///     #[serde(with = "::serde_with::As::<Vec<::serde_with::Same>>")]
 ///     bar: Vec<u32>,
+///
+///     #[serde_as(as = "Option<DisplayFromStr>")]
+///     #[serde(default)]
+///     #[serde(with = "::serde_with::As::<Option<DisplayFromStr>>")]
+///     baz: Option<u32>,
 /// }
 /// ```
 ///

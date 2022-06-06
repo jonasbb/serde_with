@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Make `#[serde_as]` behave more intuitive on `Option<T>` fields.
+
+    The `#[serde_as]` macro now detects if a `#[serde_as(as = "Option<S>")]` is used on a field of type `Option<T>` and applies `#[serde(default)]` to the field.
+    This restores the ability to deserialize with missing fields and fixes a common annoyance (#183, #185, #311, #417).
+    This is a breaking change, since now deserialization will pass where it did not before and this might be undesired.
+
+    The `Option` field and transformation are detected by directly matching on the type name.
+    These variants are detected as `Option`.
+    * `Option`
+    * `std::option::Option`, with or without leading `::`
+    * `core::option::Option`, with or without leading `::`
+
+    If an existing `default` attribute is detected, the attribute is not applied again.
+    This behavior can be supressed by using `#[serde_as(no_default)]` or `#[serde_as(as = "Option<S>", no_default)]`.
+
 ## [1.14.0] - 2022-05-29
 
 ### Added
