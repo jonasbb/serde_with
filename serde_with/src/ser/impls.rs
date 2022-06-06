@@ -370,7 +370,7 @@ map_as_tuple_seq!(BTreeMap<K, V>);
 // TODO HashMap with a custom hasher support would be better, but results in "unconstrained type parameter"
 #[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K, V>);
-#[cfg(feature = "indexmap")]
+#[cfg(all(feature = "std", feature = "indexmap"))]
 map_as_tuple_seq!(IndexMap<K, V>);
 
 #[cfg(feature = "alloc")]
@@ -418,7 +418,7 @@ tuple_seq_as_map_impl! {
 }
 #[cfg(feature = "std")]
 tuple_seq_as_map_impl!(HashSet<(K, V)>);
-#[cfg(feature = "indexmap")]
+#[cfg(all(feature = "std", feature = "indexmap"))]
 tuple_seq_as_map_impl!(IndexSet<(K, V)>);
 
 #[cfg(feature = "alloc")]

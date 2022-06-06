@@ -57,7 +57,11 @@ It enables the `alloc` feature.
 ## `indexmap`
 
 The `indexmap` feature enables implementations of `indexmap` specific checks.
-This includes support for checking duplicate keys
+This includes support for checking duplicate keys and duplicate values.
+
+This pulls in `indexmap` as a dependency.
+It enables the `alloc` feature.
+Some functionality is only available when `std` is enabled too.
 
 ## `json`
 

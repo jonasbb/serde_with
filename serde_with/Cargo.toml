@@ -31,10 +31,10 @@ base64 = ["base64_crate", "alloc"]
 chrono = ["chrono_crate"]
 guide = ["doc-comment", "macros", "std"]
 hex = ["hex_crate", "alloc"]
-indexmap = ["indexmap_crate"]
+indexmap = ["indexmap_crate", "alloc"]
 json = ["serde_json"]
 macros = ["serde_with_macros"]
-std = ["alloc", "chrono_crate?/clock", "chrono_crate?/std", "serde/std"]
+std = ["alloc", "chrono_crate?/clock", "chrono_crate?/std", "indexmap_crate?/std", "serde/std"]
 
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
@@ -42,7 +42,7 @@ base64_crate = {package = "base64", version = "0.13.0", optional = true, default
 chrono_crate = {package = "chrono", version = "0.4.1", optional = true, default-features = false, features = ["serde"]}
 doc-comment = {version = "0.3.3", optional = true}
 hex_crate = {package = "hex", version = "0.4.2", optional = true, default-features = false}
-indexmap_crate = {package = "indexmap", version = "1.8", features = ["serde-1"], optional = true}
+indexmap_crate = {package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
 serde = {version = "1.0.122", default-features = false, features = ["derive"]}
 serde_json = {version = "1.0.1", optional = true}
 serde_with_macros = {path = "../serde_with_macros", version = "1.5.2", optional = true}

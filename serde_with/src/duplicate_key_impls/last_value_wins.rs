@@ -1,5 +1,5 @@
 use alloc::collections::BTreeSet;
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "indexmap"))]
 use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
 use indexmap_crate::IndexSet;
