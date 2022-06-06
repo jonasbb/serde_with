@@ -58,7 +58,7 @@ pub mod nested {
             type Value = S;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(formatter, "valid json object")
+                formatter.write_str("valid json object")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<S, E>

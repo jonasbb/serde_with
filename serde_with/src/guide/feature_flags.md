@@ -68,6 +68,7 @@ Some functionality is only available when `std` is enabled too.
 The `json` features enables JSON conversions from the `json` module.
 
 This pulls in `serde_json` as a dependency.
+It enables the `alloc` feature.
 
 ## `macros` (default)
 
