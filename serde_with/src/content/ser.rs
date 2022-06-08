@@ -15,7 +15,6 @@ use alloc::{borrow::ToOwned, boxed::Box, string::String, vec::Vec};
 use core::marker::PhantomData;
 use serde::ser::{self, Serialize, Serializer};
 
-#[derive(Debug)]
 pub(crate) enum Content {
     Bool(bool),
 

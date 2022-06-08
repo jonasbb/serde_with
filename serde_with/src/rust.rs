@@ -6,9 +6,7 @@ use alloc::collections::BTreeMap;
 #[cfg(feature = "alloc")]
 use alloc::{string::String, vec::Vec};
 use core::{
-    cmp::Eq,
     fmt::{self, Display},
-    hash::Hash,
     iter::FromIterator,
     marker::PhantomData,
     str::FromStr,
@@ -322,7 +320,6 @@ pub mod seq_display_fromstr {
 /// ```
 ///
 /// [`serde_as`]: crate::guide::serde_as
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct StringWithSeparator<Sep, T = ()>(PhantomData<(Sep, T)>);
 
 impl<Sep> StringWithSeparator<Sep>
@@ -1775,7 +1772,7 @@ pub mod default_on_error {
         D: Deserializer<'de>,
         T: Deserialize<'de> + Default,
     {
-        #[derive(Debug, serde::Deserialize)]
+        #[derive(serde::Deserialize)]
         #[serde(untagged)]
         enum GoodOrError<T> {
             Good(T),

@@ -110,7 +110,6 @@ pub trait SerializeAs<T: ?Sized> {
 }
 
 /// Helper type to implement [`SerializeAs`] for container-like types.
-#[derive(Debug)]
 pub struct SerializeAsWrap<'a, T: ?Sized, U: ?Sized> {
     value: &'a T,
     marker: PhantomData<U>,

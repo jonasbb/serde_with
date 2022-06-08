@@ -159,7 +159,6 @@ use serde::{
 /// assert_eq!(values, deserialized);
 /// # }
 /// ```
-#[derive(Debug, Copy, Clone)]
 pub struct EnumMap;
 
 impl<T> SerializeAs<Vec<T>> for EnumMap

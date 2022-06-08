@@ -1,8 +1,6 @@
 #![warn(
     clippy::semicolon_if_nothing_returned,
-    missing_copy_implementations,
     // missing_crate_level_docs, not available in MSRV
-    missing_debug_implementations,
     missing_docs,
     rust_2018_idioms,
     trivial_casts,
@@ -14,7 +12,6 @@
 )]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
-    missing_copy_implementations,
     missing_debug_implementations,
     trivial_casts,
     trivial_numeric_casts,
@@ -362,7 +359,6 @@ pub trait Separator {
 }
 
 /// Predefined separator using a single space
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct SpaceSeparator;
 
 impl Separator for SpaceSeparator {
@@ -373,7 +369,6 @@ impl Separator for SpaceSeparator {
 }
 
 /// Predefined separator using a single comma
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Default)]
 pub struct CommaSeparator;
 
 impl Separator for CommaSeparator {
@@ -423,7 +418,6 @@ impl Separator for CommaSeparator {
 /// ```
 ///
 /// [serde_as]: https://docs.rs/serde_with/1.14.0/serde_with/attr.serde_as.html
-#[derive(Copy, Clone, Debug, Default)]
 pub struct As<T: ?Sized>(PhantomData<T>);
 
 impl<T: ?Sized> As<T> {
@@ -460,7 +454,6 @@ impl<T: ?Sized> As<T> {
 /// This is the counter-type to [`As`][].
 /// It can be used whenever a type implementing [`DeserializeAs`][]/[`SerializeAs`][] is required but the normal `Deserialize`/`Serialize` traits should be used.
 /// Check [`As`] for an example.
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Same;
 
 /// De/Serialize using [`Display`] and [`FromStr`] implementation
@@ -511,7 +504,6 @@ pub struct Same;
 ///
 /// [`Display`]: std::fmt::Display
 /// [`FromStr`]: std::str::FromStr
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DisplayFromStr;
 
 /// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
@@ -555,7 +547,6 @@ pub struct DisplayFromStr;
 /// ```
 ///
 /// [`FromStr`]: std::str::FromStr
-#[derive(Copy, Clone, Debug, Default)]
 pub struct NoneAsEmptyString;
 
 /// Deserialize value and return [`Default`] on error
@@ -647,7 +638,6 @@ pub struct NoneAsEmptyString;
 /// # }
 /// ```
 #[cfg(feature = "alloc")]
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DefaultOnError<T = Same>(PhantomData<T>);
 
 /// Deserialize [`Default`] from `null` values
@@ -705,7 +695,6 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 /// assert_eq!(vec![1, 2, 0, 0, 5], c.value);
 /// # }
 /// ```
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DefaultOnNull<T = Same>(PhantomData<T>);
 
 /// Deserialize from bytes or string
@@ -755,7 +744,6 @@ pub struct DefaultOnNull<T = Same>(PhantomData<T>);
 /// ```
 /// [`String`]: std::string::String
 #[cfg(feature = "alloc")]
-#[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;
 
 /// De/Serialize Durations as number of seconds.
@@ -895,7 +883,6 @@ pub struct BytesOrString;
 ///
 /// [`chrono::Duration`]: ::chrono::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1024,7 +1011,6 @@ pub struct DurationSeconds<
 ///
 /// [`chrono::Duration`]: ::chrono::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1033,7 +1019,6 @@ pub struct DurationSecondsWithFrac<
 /// Equivalent to [`DurationSeconds`] with milli-seconds as base unit.
 ///
 /// This type is equivalent to [`DurationSeconds`] except that each unit represents 1 milli-second instead of 1 second for [`DurationSeconds`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMilliSeconds<
     FORMAT: formats::Format = u64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1042,7 +1027,6 @@ pub struct DurationMilliSeconds<
 /// Equivalent to [`DurationSecondsWithFrac`] with milli-seconds as base unit.
 ///
 /// This type is equivalent to [`DurationSecondsWithFrac`] except that each unit represents 1 milli-second instead of 1 second for [`DurationSecondsWithFrac`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMilliSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1051,7 +1035,6 @@ pub struct DurationMilliSecondsWithFrac<
 /// Equivalent to [`DurationSeconds`] with micro-seconds as base unit.
 ///
 /// This type is equivalent to [`DurationSeconds`] except that each unit represents 1 micro-second instead of 1 second for [`DurationSeconds`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMicroSeconds<
     FORMAT: formats::Format = u64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1060,7 +1043,6 @@ pub struct DurationMicroSeconds<
 /// Equivalent to [`DurationSecondsWithFrac`] with micro-seconds as base unit.
 ///
 /// This type is equivalent to [`DurationSecondsWithFrac`] except that each unit represents 1 micro-second instead of 1 second for [`DurationSecondsWithFrac`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationMicroSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1069,7 +1051,6 @@ pub struct DurationMicroSecondsWithFrac<
 /// Equivalent to [`DurationSeconds`] with nano-seconds as base unit.
 ///
 /// This type is equivalent to [`DurationSeconds`] except that each unit represents 1 nano-second instead of 1 second for [`DurationSeconds`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationNanoSeconds<
     FORMAT: formats::Format = u64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1078,7 +1059,6 @@ pub struct DurationNanoSeconds<
 /// Equivalent to [`DurationSecondsWithFrac`] with nano-seconds as base unit.
 ///
 /// This type is equivalent to [`DurationSecondsWithFrac`] except that each unit represents 1 nano-second instead of 1 second for [`DurationSecondsWithFrac`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct DurationNanoSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1226,7 +1206,6 @@ pub struct DurationNanoSecondsWithFrac<
 /// [`SystemTime`]: std::time::SystemTime
 /// [DateTime]: ::chrono::DateTime
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1363,7 +1342,6 @@ pub struct TimestampSeconds<
 /// [DateTime]: ::chrono::DateTime
 /// [NaiveDateTime]: ::chrono::NaiveDateTime
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1372,7 +1350,6 @@ pub struct TimestampSecondsWithFrac<
 /// Equivalent to [`TimestampSeconds`] with milli-seconds as base unit.
 ///
 /// This type is equivalent to [`TimestampSeconds`] except that each unit represents 1 milli-second instead of 1 second for [`TimestampSeconds`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMilliSeconds<
     FORMAT: formats::Format = i64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1381,7 +1358,6 @@ pub struct TimestampMilliSeconds<
 /// Equivalent to [`TimestampSecondsWithFrac`] with milli-seconds as base unit.
 ///
 /// This type is equivalent to [`TimestampSecondsWithFrac`] except that each unit represents 1 milli-second instead of 1 second for [`TimestampSecondsWithFrac`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMilliSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1390,7 +1366,6 @@ pub struct TimestampMilliSecondsWithFrac<
 /// Equivalent to [`TimestampSeconds`] with micro-seconds as base unit.
 ///
 /// This type is equivalent to [`TimestampSeconds`] except that each unit represents 1 micro-second instead of 1 second for [`TimestampSeconds`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMicroSeconds<
     FORMAT: formats::Format = i64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1399,7 +1374,6 @@ pub struct TimestampMicroSeconds<
 /// Equivalent to [`TimestampSecondsWithFrac`] with micro-seconds as base unit.
 ///
 /// This type is equivalent to [`TimestampSecondsWithFrac`] except that each unit represents 1 micro-second instead of 1 second for [`TimestampSecondsWithFrac`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampMicroSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1408,7 +1382,6 @@ pub struct TimestampMicroSecondsWithFrac<
 /// Equivalent to [`TimestampSeconds`] with nano-seconds as base unit.
 ///
 /// This type is equivalent to [`TimestampSeconds`] except that each unit represents 1 nano-second instead of 1 second for [`TimestampSeconds`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampNanoSeconds<
     FORMAT: formats::Format = i64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1417,7 +1390,6 @@ pub struct TimestampNanoSeconds<
 /// Equivalent to [`TimestampSecondsWithFrac`] with nano-seconds as base unit.
 ///
 /// This type is equivalent to [`TimestampSecondsWithFrac`] except that each unit represents 1 nano-second instead of 1 second for [`TimestampSecondsWithFrac`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampNanoSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1590,7 +1562,6 @@ pub struct TimestampNanoSecondsWithFrac<
 /// # ), serde_json::to_value(&test).unwrap());
 /// # }
 /// ```
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Bytes;
 
 /// Deserialize one or many elements
@@ -1651,7 +1622,6 @@ pub struct Bytes;
 /// # }
 /// ```
 #[cfg(feature = "alloc")]
-#[derive(Copy, Clone, Debug, Default)]
 pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomData<(T, FORMAT)>);
 
 /// Try multiple deserialization options until one succeeds.
@@ -1713,7 +1683,6 @@ pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomDat
 /// # }
 /// ```
 #[cfg(feature = "alloc")]
-#[derive(Copy, Clone, Debug, Default)]
 pub struct PickFirst<T>(PhantomData<T>);
 
 /// Serialize value by converting to/from a proxy type with serde support.
@@ -1796,7 +1765,6 @@ pub struct PickFirst<T>(PhantomData<T>);
 /// assert_eq!(color, serde_json::from_value(j).unwrap());
 /// # }
 /// ```
-#[derive(Copy, Clone, Debug, Default)]
 pub struct FromInto<T>(PhantomData<T>);
 
 /// Serialize value by converting to/from a proxy type with serde support.
@@ -1887,7 +1855,6 @@ pub struct FromInto<T>(PhantomData<T>);
 /// assert_eq!("Boolikes can only be constructed from 0 or 1 but found 2", serde_json::from_value::<Data>(j).unwrap_err().to_string());
 /// # }
 /// ```
-#[derive(Copy, Clone, Debug, Default)]
 pub struct TryFromInto<T>(PhantomData<T>);
 
 /// Borrow `Cow` data during deserialization when possible.
@@ -1957,7 +1924,6 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// # }
 /// ```
 #[cfg(feature = "alloc")]
-#[derive(Copy, Clone, Debug, Default)]
 pub struct BorrowCow;
 
 /// Deserialize a sequence into `Vec<T>`, skipping elements which fail to deserialize.
@@ -1995,7 +1961,6 @@ pub struct BorrowCow;
 /// # }
 /// ```
 #[cfg(feature = "alloc")]
-#[derive(Copy, Clone, Debug, Default)]
 pub struct VecSkipError<T>(PhantomData<T>);
 
 /// Deserialize a boolean from a number
@@ -2044,5 +2009,4 @@ pub struct VecSkipError<T>(PhantomData<T>);
 /// assert_eq!(data, serde_json::from_value(j).unwrap());
 /// # }
 /// ```
-#[derive(Copy, Clone, Debug, Default)]
 pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>);

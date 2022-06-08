@@ -104,7 +104,6 @@ use serde::{de::Error, Deserialize, Deserializer, Serializer};
 /// error_result.unwrap_err();
 /// # }
 /// ```
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Hex<FORMAT: Format = Lowercase>(PhantomData<FORMAT>);
 
 impl<T> SerializeAs<T> for Hex<Lowercase>

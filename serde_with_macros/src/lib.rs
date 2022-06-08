@@ -530,7 +530,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// [re-exporting `serde_as`]: https://docs.rs/serde_with/1.14.0/serde_with/guide/serde_as/index.html#re-exporting-serde_as
 #[proc_macro_attribute]
 pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
-    #[derive(FromMeta, Debug)]
+    #[derive(FromMeta)]
     struct SerdeContainerOptions {
         #[darling(rename = "crate")]
         alt_crate_path: Option<String>,
@@ -570,7 +570,7 @@ fn serde_as_add_attr_to_field(
     field: &mut Field,
     serde_with_crate_path: &Path,
 ) -> Result<(), DarlingError> {
-    #[derive(FromField, Debug)]
+    #[derive(FromField)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
         #[darling(rename = "as")]
@@ -586,7 +586,7 @@ fn serde_as_add_attr_to_field(
         }
     }
 
-    #[derive(FromField, Debug)]
+    #[derive(FromField)]
     #[darling(attributes(serde), allow_unknown_fields)]
     struct SerdeOptions {
         with: Option<String>,

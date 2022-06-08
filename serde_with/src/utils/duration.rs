@@ -19,7 +19,8 @@ use serde::{
 #[cfg(feature = "std")]
 use std::time::SystemTime;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub(crate) enum Sign {
     Positive,
     Negative,
@@ -47,7 +48,7 @@ impl Sign {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub(crate) struct DurationSigned {
     pub(crate) sign: Sign,
     pub(crate) duration: Duration,
@@ -482,7 +483,7 @@ where
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub(crate) enum ParseFloatError {
     InvalidValue,
     #[cfg(not(feature = "alloc"))]
