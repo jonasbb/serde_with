@@ -6,16 +6,17 @@ use crate::{
     DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
     DurationSeconds, DurationSecondsWithFrac, SerializeAs,
 };
+#[cfg(feature = "alloc")]
 use alloc::{
     format,
     string::{String, ToString},
-    vec::Vec,
 };
 use core::{fmt, ops::Neg, time::Duration};
 use serde::{
     de::{self, Unexpected, Visitor},
     ser, Deserialize, Deserializer, Serialize, Serializer,
 };
+#[cfg(feature = "std")]
 use std::time::SystemTime;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -65,6 +66,7 @@ impl DurationSigned {
         Self { sign, duration }
     }
 
+    #[cfg(feature = "std")]
     pub(crate) fn to_system_time<'de, D>(self) -> Result<SystemTime, D::Error>
     where
         D: Deserializer<'de>,
@@ -78,6 +80,7 @@ impl DurationSigned {
         })
     }
 
+    #[cfg(feature = "std")]
     pub(crate) fn to_std_duration<'de, D>(self) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
@@ -98,6 +101,7 @@ impl From<&Duration> for DurationSigned {
     }
 }
 
+#[cfg(feature = "std")]
 impl From<&SystemTime> for DurationSigned {
     fn from(time: &SystemTime) -> Self {
         match time.duration_since(SystemTime::UNIX_EPOCH) {
@@ -203,6 +207,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<STRICTNESS> SerializeAs<DurationSigned> for DurationSeconds<String, STRICTNESS>
 where
     STRICTNESS: Strictness,
@@ -240,6 +245,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<STRICTNESS> SerializeAs<DurationSigned> for DurationSecondsWithFrac<String, STRICTNESS>
 where
     STRICTNESS: Strictness,
@@ -376,6 +382,8 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<i64, Strict> {
     }
 }
 
+// round() only works on std
+#[cfg(feature = "std")]
 impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<f64, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<DurationSigned, D::Error>
     where
@@ -386,6 +394,7 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<f64, Strict> {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<String, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<DurationSigned, D::Error>
     where
@@ -440,6 +449,7 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSecondsWithFrac<f64, St
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, DurationSigned> for DurationSecondsWithFrac<String, Strict> {
     fn deserialize_as<D>(deserializer: D) -> Result<DurationSigned, D::Error>
     where
@@ -475,6 +485,9 @@ where
 #[derive(Debug, Eq, PartialEq)]
 pub(crate) enum ParseFloatError {
     InvalidValue,
+    #[cfg(not(feature = "alloc"))]
+    Custom(&'static str),
+    #[cfg(feature = "alloc")]
     Custom(String),
 }
 
@@ -492,23 +505,32 @@ fn parse_float_into_time_parts(mut value: &str) -> Result<(Sign, u64, u32), Pars
         _ => Sign::Positive,
     };
 
-    let parts: Vec<_> = value.split('.').collect();
-    match *parts.as_slice() {
-        [seconds] => {
+    let partslen = value.split('.').count();
+    let mut parts = value.split('.');
+    match partslen {
+        1 => {
+            let seconds = parts.next().expect("Float contains exactly one part");
             if let Ok(seconds) = seconds.parse() {
                 Ok((sign, seconds, 0))
             } else {
                 Err(ParseFloatError::InvalidValue)
             }
         }
-        [seconds, subseconds] => {
+        2 => {
+            let seconds = parts.next().expect("Float contains exactly one part");
             if let Ok(seconds) = seconds.parse() {
+                let subseconds = parts.next().expect("Float contains exactly one part");
                 let subseclen = subseconds.chars().count() as u32;
                 if subseclen > 9 {
+                    #[cfg(feature = "alloc")]
                     return Err(ParseFloatError::Custom(format!(
                         "Duration and Timestamps with no more than 9 digits precision, but '{}' has more",
                         value
                     )));
+                    #[cfg(not(feature = "alloc"))]
+                    return Err(ParseFloatError::Custom(
+                        "Duration and Timestamps with no more than 9 digits precision",
+                    ));
                 }
 
                 if let Ok(mut subseconds) = subseconds.parse() {

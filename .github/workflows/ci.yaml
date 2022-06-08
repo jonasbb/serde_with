@@ -69,10 +69,18 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
+          # Extra toolchain to test no_std
+          target: thumbv7em-none-eabihf
 
       # Build the project
       - name: "Build (${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo build --all-features --all-targets
+
+      # Check no_std works
+      - name: "Check no_std (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo check --package serde_with --no-default-features --target thumbv7em-none-eabihf
+      - name: "Check no_std+alloc (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+        run: cargo check --package serde_with --no-default-features --features=alloc --target thumbv7em-none-eabihf
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests

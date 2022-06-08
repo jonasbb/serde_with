@@ -1,10 +1,14 @@
 use super::*;
+#[cfg(feature = "alloc")]
+use crate::formats::Format;
+#[cfg(feature = "std")]
+use crate::utils::duration::DurationSigned;
 use crate::{
-    formats::{Flexible, Format, Strict},
+    formats::{Flexible, Strict},
     rust::StringWithSeparator,
     utils,
-    utils::duration::DurationSigned,
 };
+#[cfg(feature = "alloc")]
 use alloc::{
     borrow::{Cow, ToOwned},
     boxed::Box,
@@ -14,18 +18,21 @@ use alloc::{
     sync::{Arc, Weak as ArcWeak},
     vec::Vec,
 };
+#[cfg(feature = "std")]
+use core::hash::{BuildHasher, Hash};
+#[cfg(feature = "std")]
+use core::time::Duration;
 use core::{
     cell::{Cell, RefCell},
     convert::TryInto,
     fmt::{self, Display},
-    hash::{BuildHasher, Hash},
     iter::FromIterator,
     str::FromStr,
-    time::Duration,
 };
 #[cfg(feature = "indexmap")]
 use indexmap_crate::{IndexMap, IndexSet};
 use serde::de::*;
+#[cfg(feature = "std")]
 use std::{
     collections::{HashMap, HashSet},
     sync::{Mutex, RwLock},
@@ -35,6 +42,7 @@ use std::{
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
 
+#[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, Box<T>> for Box<U>
 where
     U: DeserializeAs<'de, T>,
@@ -98,6 +106,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, Rc<T>> for Rc<U>
 where
     U: DeserializeAs<'de, T>,
@@ -112,6 +121,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, RcWeak<T>> for RcWeak<U>
 where
     U: DeserializeAs<'de, T>,
@@ -125,6 +135,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, Arc<T>> for Arc<U>
 where
     U: DeserializeAs<'de, T>,
@@ -139,6 +150,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, ArcWeak<T>> for ArcWeak<U>
 where
     U: DeserializeAs<'de, T>,
@@ -180,6 +192,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<'de, T, U> DeserializeAs<'de, Mutex<T>> for Mutex<U>
 where
     U: DeserializeAs<'de, T>,
@@ -194,6 +207,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<'de, T, U> DeserializeAs<'de, RwLock<T>> for RwLock<U>
 where
     U: DeserializeAs<'de, T>,
@@ -271,6 +285,7 @@ where
 ///////////////////////////////////////////////////////////////////////////////
 // region: Collection Types (e.g., Maps, Sets, Vec)
 
+#[cfg(feature = "alloc")]
 macro_rules! seq_impl {
     (
         $ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)* )* >,
@@ -334,33 +349,41 @@ macro_rules! seq_impl {
     };
 }
 
+#[cfg(feature = "alloc")]
 type BoxedSlice<T> = Box<[T]>;
+#[cfg(feature = "alloc")]
 seq_impl!(
     BinaryHeap<T: Ord>,
     seq,
     BinaryHeap::with_capacity(utils::size_hint_cautious(seq.size_hint())),
     push
 );
+#[cfg(feature = "alloc")]
 seq_impl!(
     BoxedSlice<T>,
     seq,
     Vec::with_capacity(utils::size_hint_cautious(seq.size_hint())),
     push
 );
+#[cfg(feature = "alloc")]
 seq_impl!(BTreeSet<T: Ord>, seq, BTreeSet::new(), insert);
+#[cfg(feature = "std")]
 seq_impl!(
     HashSet<T: Eq + Hash, S: BuildHasher + Default>,
     seq,
     HashSet::with_capacity_and_hasher(utils::size_hint_cautious(seq.size_hint()), S::default()),
     insert
 );
+#[cfg(feature = "alloc")]
 seq_impl!(LinkedList<T>, seq, LinkedList::new(), push_back);
+#[cfg(feature = "alloc")]
 seq_impl!(
     Vec<T>,
     seq,
     Vec::with_capacity(utils::size_hint_cautious(seq.size_hint())),
     push
 );
+#[cfg(feature = "alloc")]
 seq_impl!(
     VecDeque<T>,
     seq,
@@ -375,6 +398,7 @@ seq_impl!(
     insert
 );
 
+#[cfg(feature = "alloc")]
 macro_rules! map_impl {
     (
         $ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >,
@@ -437,10 +461,12 @@ macro_rules! map_impl {
     }
 }
 
+#[cfg(feature = "alloc")]
 map_impl!(
     BTreeMap<K: Ord, V>,
     map,
     BTreeMap::new());
+#[cfg(feature = "std")]
 map_impl!(
     HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
@@ -516,6 +542,7 @@ tuple_impl!(14 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14);
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
+#[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq {
     ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V>) => {
         impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $ty<K, V>> for Vec<(KAs, VAs)>
@@ -569,11 +596,14 @@ macro_rules! map_as_tuple_seq {
         }
     };
 }
+#[cfg(feature = "alloc")]
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
+#[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
 #[cfg(feature = "indexmap")]
 map_as_tuple_seq!(IndexMap<K: Eq + Hash, V>);
 
+#[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_impl_intern {
     ($tyorig:ident < (K $(: $($kbound:ident $(+)?)+)?, V $(: $($vbound:ident $(+)?)+)?)>, $ty:ident <KAs, VAs>) => {
         #[allow(clippy::implicit_hasher)]
@@ -630,13 +660,16 @@ macro_rules! tuple_seq_as_map_impl_intern {
         }
     }
 }
+#[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_impl {
     ($($tyorig:ident < (K $(: $($kbound:ident $(+)?)+)?, V $(: $($vbound:ident $(+)?)+)?)> $(,)?)+) => {$(
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, BTreeMap<KAs, VAs>);
+        #[cfg(feature = "std")]
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, HashMap<KAs, VAs>);
     )+}
 }
 
+#[cfg(feature = "alloc")]
 tuple_seq_as_map_impl! {
     BinaryHeap<(K: Ord, V: Ord)>,
     BTreeSet<(K: Ord, V: Ord)>,
@@ -644,10 +677,12 @@ tuple_seq_as_map_impl! {
     Vec<(K, V)>,
     VecDeque<(K, V)>,
 }
+#[cfg(feature = "std")]
 tuple_seq_as_map_impl!(HashSet<(K: Eq + Hash, V: Eq + Hash)>);
 #[cfg(feature = "indexmap")]
 tuple_seq_as_map_impl!(IndexSet<(K: Eq + Hash, V: Eq + Hash)>);
 
+#[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_option_impl {
     ($($ty:ident $(,)?)+) => {$(
         #[allow(clippy::implicit_hasher)]
@@ -701,9 +736,12 @@ macro_rules! tuple_seq_as_map_option_impl {
         }
     )+}
 }
+#[cfg(feature = "alloc")]
 tuple_seq_as_map_option_impl!(BTreeMap);
+#[cfg(feature = "std")]
 tuple_seq_as_map_option_impl!(HashMap);
 
+#[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_arr {
     ($tyorig:ty, $ty:ident <KAs, VAs>) => {
         #[allow(clippy::implicit_hasher)]
@@ -751,7 +789,9 @@ macro_rules! tuple_seq_as_map_arr {
         }
     }
 }
+#[cfg(feature = "alloc")]
 tuple_seq_as_map_arr!([(K, V); N], BTreeMap<KAs, VAs>);
+#[cfg(feature = "std")]
 tuple_seq_as_map_arr!([(K, V); N], HashMap<KAs, VAs>);
 
 // endregion
@@ -780,6 +820,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, Vec<T>> for VecSkipError<U>
 where
     U: DeserializeAs<'de, T>,
@@ -857,6 +898,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, TAs> DeserializeAs<'de, T> for DefaultOnError<TAs>
 where
     TAs: DeserializeAs<'de, T>,
@@ -891,6 +933,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
     where
@@ -911,18 +954,42 @@ where
     where
         D: Deserializer<'de>,
     {
-        let s = String::deserialize(deserializer)?;
-        if s.is_empty() {
-            Ok(None.into_iter().collect())
-        } else {
-            s.split(SEPARATOR::separator())
-                .map(FromStr::from_str)
-                .collect::<Result<_, _>>()
-                .map_err(Error::custom)
+        struct Helper<SEPARATOR, I, T>(PhantomData<(SEPARATOR, I, T)>);
+
+        impl<'de, SEPARATOR, I, T> Visitor<'de> for Helper<SEPARATOR, I, T>
+        where
+            SEPARATOR: Separator,
+            I: FromIterator<T>,
+            T: FromStr,
+            T::Err: Display,
+        {
+            type Value = I;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(formatter, "a string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                if value.is_empty() {
+                    Ok(None.into_iter().collect())
+                } else {
+                    value
+                        .split(SEPARATOR::separator())
+                        .map(FromStr::from_str)
+                        .collect::<Result<_, _>>()
+                        .map_err(Error::custom)
+                }
+            }
         }
+
+        deserializer.deserialize_str(Helper::<SEPARATOR, I, T>(PhantomData))
     }
 }
 
+#[cfg(feature = "std")]
 macro_rules! use_signed_duration {
     (
         $main_trait:ident $internal_trait:ident =>
@@ -956,6 +1023,7 @@ macro_rules! use_signed_duration {
     };
 }
 
+#[cfg(feature = "std")]
 use_signed_duration!(
     DurationSeconds DurationSeconds,
     DurationMilliSeconds DurationMilliSeconds,
@@ -969,6 +1037,7 @@ use_signed_duration!(
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+#[cfg(feature = "std")]
 use_signed_duration!(
     DurationSecondsWithFrac DurationSecondsWithFrac,
     DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
@@ -982,6 +1051,7 @@ use_signed_duration!(
     }
 );
 
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSeconds DurationSeconds,
     TimestampMilliSeconds DurationMilliSeconds,
@@ -995,6 +1065,7 @@ use_signed_duration!(
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+#[cfg(feature = "std")]
 use_signed_duration!(
     TimestampSecondsWithFrac DurationSecondsWithFrac,
     TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
@@ -1039,6 +1110,7 @@ impl<'de> DeserializeAs<'de, &'de [u8]> for Bytes {
 // * visit_byte_buf
 // * visit_str
 // * visit_string
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
     where
@@ -1093,6 +1165,7 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, Box<[u8]>> for Bytes {
     fn deserialize_as<D>(deserializer: D) -> Result<Box<[u8]>, D::Error>
     where
@@ -1114,6 +1187,7 @@ impl<'de> DeserializeAs<'de, Box<[u8]>> for Bytes {
 // * visit_byte_buf
 // * visit_string
 // * visit_seq
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8]>, D::Error>
     where
@@ -1263,6 +1337,7 @@ impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8; N]>, D::Error>
     where
@@ -1359,6 +1434,7 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, const N: usize> DeserializeAs<'de, Box<[u8; N]>> for Bytes {
     fn deserialize_as<D>(deserializer: D) -> Result<Box<[u8; N]>, D::Error>
     where
@@ -1368,6 +1444,7 @@ impl<'de, const N: usize> DeserializeAs<'de, Box<[u8; N]>> for Bytes {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, U, FORMAT> DeserializeAs<'de, Vec<T>> for OneOrMany<U, FORMAT>
 where
     U: DeserializeAs<'de, T>,
@@ -1403,6 +1480,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, TAs1> DeserializeAs<'de, T> for PickFirst<(TAs1,)>
 where
     TAs1: DeserializeAs<'de, T>,
@@ -1415,6 +1493,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, TAs1, TAs2> DeserializeAs<'de, T> for PickFirst<(TAs1, TAs2)>
 where
     TAs1: DeserializeAs<'de, T>,
@@ -1453,6 +1532,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, TAs1, TAs2, TAs3> DeserializeAs<'de, T> for PickFirst<(TAs1, TAs2, TAs3)>
 where
     TAs1: DeserializeAs<'de, T>,
@@ -1496,6 +1576,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, T, TAs1, TAs2, TAs3, TAs4> DeserializeAs<'de, T> for PickFirst<(TAs1, TAs2, TAs3, TAs4)>
 where
     TAs1: DeserializeAs<'de, T>,
@@ -1573,6 +1654,7 @@ where
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, str>, D::Error>
     where
@@ -1613,6 +1695,7 @@ impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for BorrowCow {
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8]>, D::Error>
     where
@@ -1622,6 +1705,7 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for BorrowCow {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for BorrowCow {
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8; N]>, D::Error>
     where

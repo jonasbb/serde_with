@@ -3,10 +3,8 @@
 use crate::{utils, Separator};
 #[cfg(doc)]
 use alloc::collections::BTreeMap;
-use alloc::{
-    string::{String, ToString},
-    vec::Vec,
-};
+#[cfg(feature = "alloc")]
+use alloc::{string::String, vec::Vec};
 use core::{
     cmp::Eq,
     fmt::{self, Display},
@@ -196,6 +194,7 @@ pub mod display_fromstr {
 ///
 /// [`DisplayFromStr`]: crate::DisplayFromStr
 /// [`serde_as`]: crate::guide::serde_as
+#[cfg(feature = "alloc")]
 pub mod seq_display_fromstr {
     use super::*;
 
@@ -244,9 +243,9 @@ pub mod seq_display_fromstr {
         for<'a> &'a T: IntoIterator<Item = &'a I>,
         I: Display,
     {
-        struct SerializeString<'a, I>(&'a I);
+        struct SerializeString<I>(I);
 
-        impl<'a, I> Serialize for SerializeString<'a, I>
+        impl<I> Serialize for SerializeString<I>
         where
             I: Display,
         {
@@ -254,7 +253,7 @@ pub mod seq_display_fromstr {
             where
                 S: Serializer,
             {
-                serializer.collect_str(self.0)
+                serializer.collect_str(&self.0)
             }
         }
 
@@ -331,23 +330,18 @@ where
     Sep: Separator,
 {
     /// Serialize collection into a string with separator symbol
-    pub fn serialize<S, T, V>(values: T, serializer: S) -> Result<S::Ok, S::Error>
+    pub fn serialize<S, T, I>(values: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
-        T: IntoIterator<Item = V>,
-        V: Display,
+        for<'x> &'x T: IntoIterator<Item = &'x I>,
+        I: Display,
+        // This set of bounds is enough to make the function compile but has inference issues
+        // making it unusable at the moment.
+        // https://github.com/rust-lang/rust/issues/89196#issuecomment-932024770
+        // for<'x> &'x T: IntoIterator,
+        // for<'x> <&'x T as IntoIterator>::Item: Display,
     {
-        let mut s = String::new();
-        for v in values {
-            s.push_str(&*v.to_string());
-            s.push_str(Sep::separator());
-        }
-        serializer.serialize_str(if !s.is_empty() {
-            // remove trailing separator if present
-            &s[..s.len() - Sep::separator().len()]
-        } else {
-            &s[..]
-        })
+        serializer.collect_str(&utils::DisplayWithSeparator::<_, Sep>::new(values))
     }
 
     /// Deserialize a collection from a string with separator symbol
@@ -358,15 +352,38 @@ where
         V: FromStr,
         V::Err: Display,
     {
-        let s = String::deserialize(deserializer)?;
-        if s.is_empty() {
-            Ok(None.into_iter().collect())
-        } else {
-            s.split(Sep::separator())
-                .map(FromStr::from_str)
-                .collect::<Result<_, _>>()
-                .map_err(Error::custom)
+        struct Helper<SEPARATOR, I, T>(PhantomData<(SEPARATOR, I, T)>);
+
+        impl<'de, SEPARATOR, I, T> Visitor<'de> for Helper<SEPARATOR, I, T>
+        where
+            SEPARATOR: Separator,
+            I: FromIterator<T>,
+            T: FromStr,
+            T::Err: Display,
+        {
+            type Value = I;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(formatter, "a string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                if value.is_empty() {
+                    Ok(None.into_iter().collect())
+                } else {
+                    value
+                        .split(SEPARATOR::separator())
+                        .map(FromStr::from_str)
+                        .collect::<Result<_, _>>()
+                        .map_err(Error::custom)
+                }
+            }
         }
+
+        deserializer.deserialize_str(Helper::<Sep, T, V>(PhantomData))
     }
 }
 
@@ -561,6 +578,7 @@ pub mod unwrap_or_skip {
 /// let res: Result<Doc, _> = serde_json::from_str(s);
 /// assert!(res.is_err());
 /// ```
+#[cfg(feature = "alloc")]
 pub mod sets_duplicate_value_is_error {
     use super::*;
     use crate::duplicate_key_impls::PreventDuplicateInsertsSet;
@@ -663,6 +681,7 @@ pub mod sets_duplicate_value_is_error {
 /// let res: Result<Doc, _> = serde_json::from_str(s);
 /// assert!(res.is_err());
 /// ```
+#[cfg(feature = "alloc")]
 pub mod maps_duplicate_key_is_error {
     use super::*;
     use crate::duplicate_key_impls::PreventDuplicateInsertsMap;
@@ -733,6 +752,7 @@ pub mod maps_duplicate_key_is_error {
 /// This module implements the default behavior in serde.
 #[deprecated = "This module does nothing. Remove the attribute. Serde's default behavior is to use the first value when deserializing a set."]
 #[allow(deprecated)]
+#[cfg(feature = "alloc")]
 pub mod sets_first_value_wins {
     use super::*;
     use crate::duplicate_key_impls::DuplicateInsertsFirstWinsSet;
@@ -803,6 +823,7 @@ pub mod sets_first_value_wins {
 ///
 /// [`HashSet`]: std::collections::HashSet
 /// [`BTreeSet`]: std::collections::HashSet
+#[cfg(feature = "alloc")]
 pub mod sets_last_value_wins {
     use super::*;
     use crate::duplicate_key_impls::DuplicateInsertsLastWinsSet;
@@ -904,6 +925,7 @@ pub mod sets_last_value_wins {
 /// v.map.insert(2, 2);
 /// assert_eq!(v, serde_json::from_str(s).unwrap());
 /// ```
+#[cfg(feature = "alloc")]
 pub mod maps_first_key_wins {
     use super::*;
     use crate::duplicate_key_impls::DuplicateInsertsFirstWinsMap;
@@ -1054,6 +1076,7 @@ pub mod string_empty_as_none {
                 }
             }
 
+            #[cfg(feature = "alloc")]
             fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
             where
                 E: Error,
@@ -1620,6 +1643,7 @@ pub mod tuple_list_as_map {
 ///
 /// [`BytesOrString`]: crate::BytesOrString
 /// [`serde_as`]: crate::guide::serde_as
+#[cfg(feature = "alloc")]
 pub mod bytes_or_string {
     use super::*;
 
@@ -1644,6 +1668,7 @@ pub mod bytes_or_string {
             Ok(v.to_vec())
         }
 
+        #[cfg(feature = "alloc")]
         fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E> {
             Ok(v)
         }
@@ -1652,6 +1677,7 @@ pub mod bytes_or_string {
             Ok(v.as_bytes().to_vec())
         }
 
+        #[cfg(feature = "alloc")]
         fn visit_string<E>(self, v: String) -> Result<Self::Value, E> {
             Ok(v.into_bytes())
         }
@@ -1739,6 +1765,7 @@ pub mod bytes_or_string {
 /// let b: B = serde_json::from_str(r#"{  }"#).unwrap();
 /// assert_eq!(0, b.value);
 /// ```
+#[cfg(feature = "alloc")]
 pub mod default_on_error {
     use super::*;
 

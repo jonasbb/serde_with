@@ -261,9 +261,11 @@
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
 //! [as-annotation]: https://docs.rs/serde_with/1.14.0/serde_with/guide/serde_as/index.html
 
+#[cfg(feature = "alloc")]
 extern crate alloc;
 #[doc(hidden)]
 pub extern crate serde;
+#[cfg(feature = "std")]
 extern crate std;
 
 #[cfg(feature = "base64")]
@@ -272,10 +274,14 @@ pub mod base64;
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 pub mod chrono;
+#[cfg(feature = "alloc")]
 mod content;
 pub mod de;
+#[cfg(feature = "alloc")]
 mod duplicate_key_impls;
+#[cfg(feature = "alloc")]
 mod enum_map;
+#[cfg(feature = "std")]
 mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
@@ -286,11 +292,13 @@ pub mod hex;
 pub mod json;
 pub mod rust;
 pub mod ser;
+#[cfg(feature = "std")]
 mod serde_conv;
 #[cfg(feature = "time_0_3")]
 #[cfg_attr(docsrs, doc(cfg(feature = "time_0_3")))]
 pub mod time_0_3;
 mod utils;
+#[cfg(feature = "std")]
 #[doc(hidden)]
 pub mod with_prefix;
 
@@ -334,10 +342,11 @@ generate_guide! {
     }
 }
 
+#[cfg(feature = "alloc")]
 #[doc(inline)]
-pub use crate::{
-    de::DeserializeAs, enum_map::EnumMap, rust::StringWithSeparator, ser::SerializeAs,
-};
+pub use crate::enum_map::EnumMap;
+#[doc(inline)]
+pub use crate::{de::DeserializeAs, rust::StringWithSeparator, ser::SerializeAs};
 use core::marker::PhantomData;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
@@ -637,6 +646,7 @@ pub struct NoneAsEmptyString;
 /// assert_eq!(vec![1, 2, 0, 0, 0, 6], c.value);
 /// # }
 /// ```
+#[cfg(feature = "alloc")]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DefaultOnError<T = Same>(PhantomData<T>);
 
@@ -744,6 +754,7 @@ pub struct DefaultOnNull<T = Same>(PhantomData<T>);
 /// # }
 /// ```
 /// [`String`]: std::string::String
+#[cfg(feature = "alloc")]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BytesOrString;
 
@@ -1639,6 +1650,7 @@ pub struct Bytes;
 /// assert_eq!(data, serde_json::from_value(j).unwrap());
 /// # }
 /// ```
+#[cfg(feature = "alloc")]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomData<(T, FORMAT)>);
 
@@ -1700,6 +1712,7 @@ pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomDat
 /// assert_eq!(expected, serde_json::to_value(&data).unwrap());
 /// # }
 /// ```
+#[cfg(feature = "alloc")]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct PickFirst<T>(PhantomData<T>);
 
@@ -1943,6 +1956,7 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// assert!(matches!(deserialized.slice, Cow::Owned(_)));
 /// # }
 /// ```
+#[cfg(feature = "alloc")]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BorrowCow;
 
@@ -1980,7 +1994,7 @@ pub struct BorrowCow;
 /// assert_eq!(data, serde_json::from_str(source_json).unwrap());
 /// # }
 /// ```
-
+#[cfg(feature = "alloc")]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct VecSkipError<T>(PhantomData<T>);
 
