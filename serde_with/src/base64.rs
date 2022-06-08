@@ -9,7 +9,6 @@ use alloc::vec::Vec;
 use base64::Config;
 use core::{
     convert::{TryFrom, TryInto},
-    default::Default,
     fmt,
     marker::PhantomData,
 };
@@ -71,7 +70,6 @@ use serde::{de::Error, Deserializer, Serialize, Serializer};
 
 // The padding might be better as `const PADDING: bool = true`
 // https://blog.rust-lang.org/inside-rust/2021/09/06/Splitting-const-generics.html#featureconst_generics_default/
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Base64<CHARSET: CharacterSet = Standard, PADDING: formats::Format = formats::Padded>(
     PhantomData<(CHARSET, PADDING)>,
 );
@@ -159,7 +157,6 @@ pub trait CharacterSet {
 /// The standard character set (uses `+` and `/`).
 ///
 /// See [RFC 3548](https://tools.ietf.org/html/rfc3548#section-3).
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Standard;
 impl CharacterSet for Standard {
     fn charset() -> base64::CharacterSet {
@@ -170,7 +167,6 @@ impl CharacterSet for Standard {
 /// The URL safe character set (uses `-` and `_`).
 ///
 /// See [RFC 3548](https://tools.ietf.org/html/rfc3548#section-3).
-#[derive(Copy, Clone, Debug, Default)]
 pub struct UrlSafe;
 impl CharacterSet for UrlSafe {
     fn charset() -> base64::CharacterSet {
@@ -181,7 +177,6 @@ impl CharacterSet for UrlSafe {
 /// The `crypt(3)` character set (uses `./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`).
 ///
 /// Not standardized, but folk wisdom on the net asserts that this alphabet is what crypt uses.
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Crypt;
 impl CharacterSet for Crypt {
     fn charset() -> base64::CharacterSet {
@@ -190,7 +185,6 @@ impl CharacterSet for Crypt {
 }
 
 /// The bcrypt character set (uses `./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`).
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Bcrypt;
 impl CharacterSet for Bcrypt {
     fn charset() -> base64::CharacterSet {
@@ -201,7 +195,6 @@ impl CharacterSet for Bcrypt {
 /// The character set used in IMAP-modified UTF-7 (uses `+` and `,`).
 ///
 /// See [RFC 3501](https://tools.ietf.org/html/rfc3501#section-5.1.3).
-#[derive(Copy, Clone, Debug, Default)]
 pub struct ImapMutf7;
 impl CharacterSet for ImapMutf7 {
     fn charset() -> base64::CharacterSet {
@@ -212,7 +205,6 @@ impl CharacterSet for ImapMutf7 {
 /// The character set used in BinHex 4.0 files.
 ///
 /// See [BinHex 4.0 Definition](http://files.stairways.com/other/binhex-40-specs-info.txt).
-#[derive(Copy, Clone, Debug, Default)]
 pub struct BinHex;
 impl CharacterSet for BinHex {
     fn charset() -> base64::CharacterSet {

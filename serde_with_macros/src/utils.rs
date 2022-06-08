@@ -25,7 +25,7 @@ pub(crate) trait IteratorExt {
 impl<I> IteratorExt for I where I: Iterator<Item = Result<(), Error>> + Sized {}
 
 /// Attributes usable for derive macros
-#[derive(FromDeriveInput, Debug)]
+#[derive(FromDeriveInput)]
 #[darling(attributes(serde_with))]
 pub(crate) struct DeriveOptions {
     /// Path to the crate

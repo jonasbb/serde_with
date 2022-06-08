@@ -22,8 +22,7 @@ macro_rules! create_format {
     ($(#[$attr:meta] $t:ident)*) => {
         $(
             #[$attr]
-            #[derive(Copy, Clone, Debug, Default)]
-            pub struct $t;
+                        pub struct $t;
             impl_format!(#[$attr] $t);
         )*
     };
@@ -87,11 +86,9 @@ create_format!(
 pub trait Strictness {}
 
 /// Use strict deserialization behavior, see [`Strictness`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Strict;
 impl Strictness for Strict {}
 
 /// Use a flexible deserialization behavior, see [`Strictness`].
-#[derive(Copy, Clone, Debug, Default)]
 pub struct Flexible;
 impl Strictness for Flexible {}

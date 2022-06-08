@@ -113,7 +113,6 @@ pub trait DeserializeAs<'de, T>: Sized {
 }
 
 /// Helper type to implement [`DeserializeAs`] for container-like types.
-#[derive(Debug)]
 pub struct DeserializeAsWrap<T, U> {
     value: T,
     marker: PhantomData<U>,

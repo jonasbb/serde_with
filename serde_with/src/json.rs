@@ -48,7 +48,6 @@ pub mod nested {
         D: Deserializer<'de>,
         T: DeserializeOwned,
     {
-        #[derive(Default)]
         struct Helper<S: DeserializeOwned>(PhantomData<S>);
 
         impl<'de, S> Visitor<'de> for Helper<S>
@@ -122,7 +121,6 @@ pub mod nested {
 /// );
 /// # }
 /// ```
-#[derive(Copy, Clone, Debug, Default)]
 pub struct JsonString;
 
 impl<T> SerializeAs<T> for JsonString
