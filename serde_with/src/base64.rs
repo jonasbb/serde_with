@@ -6,6 +6,7 @@
 
 use crate::{formats, DeserializeAs, SerializeAs};
 use alloc::vec::Vec;
+use base64::Config;
 use core::{
     convert::{TryFrom, TryInto},
     default::Default,
@@ -84,7 +85,7 @@ where
     where
         S: Serializer,
     {
-        base64_crate::encode_config(source, base64_crate::Config::new(CHARSET::charset(), true))
+        base64::encode_config(source, base64::Config::new(CHARSET::charset(), true))
             .serialize(serializer)
     }
 }
@@ -98,7 +99,7 @@ where
     where
         S: Serializer,
     {
-        base64_crate::encode_config(source, base64_crate::Config::new(CHARSET::charset(), false))
+        base64::encode_config(source, base64::Config::new(CHARSET::charset(), false))
             .serialize(serializer)
     }
 }
@@ -130,11 +131,8 @@ where
             where
                 E: Error,
             {
-                let bytes = base64_crate::decode_config(
-                    value,
-                    base64_crate::Config::new(CHARSET::charset(), false),
-                )
-                .map_err(Error::custom)?;
+                let bytes = base64::decode_config(value, Config::new(CHARSET::charset(), false))
+                    .map_err(Error::custom)?;
 
                 let length = bytes.len();
                 bytes.try_into().map_err(|_e: T::Error| {
@@ -150,12 +148,12 @@ where
     }
 }
 
-/// A base64 character set from [this list](base64_crate::CharacterSet).
+/// A base64 character set from [this list](base64::CharacterSet).
 pub trait CharacterSet {
     /// Return a specific character set.
     ///
-    /// Return one enum variant of the [`base64::CharacterSet`](base64_crate::CharacterSet) enum.
-    fn charset() -> base64_crate::CharacterSet;
+    /// Return one enum variant of the [`base64::CharacterSet`](base64::CharacterSet) enum.
+    fn charset() -> base64::CharacterSet;
 }
 
 /// The standard character set (uses `+` and `/`).
@@ -164,8 +162,8 @@ pub trait CharacterSet {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Standard;
 impl CharacterSet for Standard {
-    fn charset() -> base64_crate::CharacterSet {
-        base64_crate::CharacterSet::Standard
+    fn charset() -> base64::CharacterSet {
+        base64::CharacterSet::Standard
     }
 }
 
@@ -175,8 +173,8 @@ impl CharacterSet for Standard {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct UrlSafe;
 impl CharacterSet for UrlSafe {
-    fn charset() -> base64_crate::CharacterSet {
-        base64_crate::CharacterSet::UrlSafe
+    fn charset() -> base64::CharacterSet {
+        base64::CharacterSet::UrlSafe
     }
 }
 
@@ -186,8 +184,8 @@ impl CharacterSet for UrlSafe {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Crypt;
 impl CharacterSet for Crypt {
-    fn charset() -> base64_crate::CharacterSet {
-        base64_crate::CharacterSet::Crypt
+    fn charset() -> base64::CharacterSet {
+        base64::CharacterSet::Crypt
     }
 }
 
@@ -195,8 +193,8 @@ impl CharacterSet for Crypt {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Bcrypt;
 impl CharacterSet for Bcrypt {
-    fn charset() -> base64_crate::CharacterSet {
-        base64_crate::CharacterSet::Bcrypt
+    fn charset() -> base64::CharacterSet {
+        base64::CharacterSet::Bcrypt
     }
 }
 
@@ -206,8 +204,8 @@ impl CharacterSet for Bcrypt {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct ImapMutf7;
 impl CharacterSet for ImapMutf7 {
-    fn charset() -> base64_crate::CharacterSet {
-        base64_crate::CharacterSet::ImapMutf7
+    fn charset() -> base64::CharacterSet {
+        base64::CharacterSet::ImapMutf7
     }
 }
 
@@ -217,7 +215,7 @@ impl CharacterSet for ImapMutf7 {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct BinHex;
 impl CharacterSet for BinHex {
-    fn charset() -> base64_crate::CharacterSet {
-        base64_crate::CharacterSet::BinHex
+    fn charset() -> base64::CharacterSet {
+        base64::CharacterSet::BinHex
     }
 }

@@ -2,7 +2,7 @@ use alloc::collections::{BTreeMap, BTreeSet};
 #[cfg(any(feature = "std", feature = "indexmap"))]
 use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
-use indexmap_crate::{IndexMap, IndexSet};
+use indexmap::{IndexMap, IndexSet};
 #[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
 

@@ -20,8 +20,8 @@ use alloc::string::String;
 #[cfg(feature = "std")]
 use alloc::vec::Vec;
 #[cfg(feature = "std")]
-use chrono_crate::Local;
-use chrono_crate::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
+use chrono::Local;
+use chrono::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
 #[cfg(feature = "std")]
 use core::fmt;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
@@ -49,7 +49,7 @@ fn unix_epoch_naive() -> NaiveDateTime {
 /// # Examples
 ///
 /// ```
-/// # use chrono_crate::{DateTime, Utc};
+/// # use chrono::{DateTime, Utc};
 /// # use serde::Deserialize;
 /// #
 /// #[derive(Debug, Deserialize)]
@@ -69,7 +69,7 @@ fn unix_epoch_naive() -> NaiveDateTime {
 #[cfg(feature = "std")]
 pub mod datetime_utc_ts_seconds_from_any {
     use super::*;
-    use chrono_crate::{DateTime, NaiveDateTime, Utc};
+    use chrono::{DateTime, NaiveDateTime, Utc};
     use serde::de::{Deserializer, Error, Unexpected, Visitor};
 
     /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.

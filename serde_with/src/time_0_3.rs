@@ -24,14 +24,14 @@ use serde::{de, Deserializer, Serializer};
 #[cfg(feature = "std")]
 use serde::{ser::Error as _, Serialize as _};
 #[cfg(feature = "std")]
-use time_0_3_crate::format_description::well_known::{Rfc2822, Rfc3339};
-use time_0_3_crate::{Duration, OffsetDateTime, PrimitiveDateTime};
+use time_0_3::format_description::well_known::{Rfc2822, Rfc3339};
+use time_0_3::{Duration, OffsetDateTime, PrimitiveDateTime};
 
 /// Create a [`PrimitiveDateTime`] for the Unix Epoch
 fn unix_epoch_primitive() -> PrimitiveDateTime {
     PrimitiveDateTime::new(
-        time_0_3_crate::Date::from_ordinal_date(1970, 1).unwrap(),
-        time_0_3_crate::Time::from_hms_nano(0, 0, 0, 0).unwrap(),
+        time_0_3::Date::from_ordinal_date(1970, 1).unwrap(),
+        time_0_3::Time::from_hms_nano(0, 0, 0, 0).unwrap(),
     )
 }
 

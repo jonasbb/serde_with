@@ -115,7 +115,7 @@ where
     where
         S: Serializer,
     {
-        serializer.serialize_str(&hex_crate::encode(source))
+        serializer.serialize_str(&hex::encode(source))
     }
 }
 
@@ -127,7 +127,7 @@ where
     where
         S: Serializer,
     {
-        serializer.serialize_str(&hex_crate::encode_upper(source))
+        serializer.serialize_str(&hex::encode_upper(source))
     }
 }
 
@@ -141,7 +141,7 @@ where
         D: Deserializer<'de>,
     {
         <Cow<'de, str> as Deserialize<'de>>::deserialize(deserializer)
-            .and_then(|s| hex_crate::decode(&*s).map_err(Error::custom))
+            .and_then(|s| hex::decode(&*s).map_err(Error::custom))
             .and_then(|vec: Vec<u8>| {
                 let length = vec.len();
                 vec.try_into().map_err(|_e: T::Error| {

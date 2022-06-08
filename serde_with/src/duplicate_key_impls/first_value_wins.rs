@@ -2,7 +2,7 @@ use alloc::collections::{BTreeMap, BTreeSet};
 #[cfg(any(feature = "std", feature = "indexmap"))]
 use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "indexmap")]
-use indexmap_crate::IndexMap;
+use indexmap::IndexMap;
 #[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
 
@@ -104,7 +104,7 @@ where
 
     #[inline]
     fn insert(&mut self, key: K, value: V) {
-        use indexmap_crate::map::Entry;
+        use indexmap::map::Entry;
 
         match self.entry(key) {
             // we want to keep the first value, so do nothing

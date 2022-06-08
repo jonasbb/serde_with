@@ -30,7 +30,7 @@ use core::{
     str::FromStr,
 };
 #[cfg(feature = "indexmap")]
-use indexmap_crate::{IndexMap, IndexSet};
+use indexmap::{IndexMap, IndexSet};
 use serde::de::*;
 #[cfg(feature = "std")]
 use std::{

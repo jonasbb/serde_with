@@ -19,7 +19,7 @@ use core::{
     time::Duration,
 };
 #[cfg(feature = "indexmap")]
-use indexmap_crate::{IndexMap, IndexSet};
+use indexmap::{IndexMap, IndexSet};
 use serde::ser::Error;
 #[cfg(feature = "std")]
 use std::{
