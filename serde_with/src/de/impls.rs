@@ -18,7 +18,7 @@ use alloc::{
     sync::{Arc, Weak as ArcWeak},
     vec::Vec,
 };
-#[cfg(feature = "std")]
+#[cfg(any(feature = "std", feature = "indexmap"))]
 use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "std")]
 use core::time::Duration;
@@ -30,7 +30,7 @@ use core::{
     str::FromStr,
 };
 #[cfg(feature = "indexmap")]
-use indexmap_crate::{IndexMap, IndexSet};
+use indexmap::{IndexMap, IndexSet};
 use serde::de::*;
 #[cfg(feature = "std")]
 use std::{
@@ -600,7 +600,7 @@ macro_rules! map_as_tuple_seq {
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
 #[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
-#[cfg(feature = "indexmap")]
+#[cfg(all(feature = "std", feature = "indexmap"))]
 map_as_tuple_seq!(IndexMap<K: Eq + Hash, V>);
 
 #[cfg(feature = "alloc")]
@@ -679,7 +679,7 @@ tuple_seq_as_map_impl! {
 }
 #[cfg(feature = "std")]
 tuple_seq_as_map_impl!(HashSet<(K: Eq + Hash, V: Eq + Hash)>);
-#[cfg(feature = "indexmap")]
+#[cfg(all(feature = "std", feature = "indexmap"))]
 tuple_seq_as_map_impl!(IndexSet<(K: Eq + Hash, V: Eq + Hash)>);
 
 #[cfg(feature = "alloc")]

@@ -843,7 +843,7 @@ pub struct BytesOrString;
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSeconds};
-/// # use chrono_crate::Duration;
+/// # use chrono::Duration;
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::Duration;
 /// # */
@@ -893,7 +893,7 @@ pub struct BytesOrString;
 /// # }
 /// ```
 ///
-/// [`chrono::Duration`]: chrono_crate::Duration
+/// [`chrono::Duration`]: ::chrono::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSeconds<
@@ -980,7 +980,7 @@ pub struct DurationSeconds<
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSecondsWithFrac};
-/// # use chrono_crate::Duration;
+/// # use chrono::Duration;
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::Duration;
 /// # */
@@ -1022,7 +1022,7 @@ pub struct DurationSeconds<
 /// # }
 /// ```
 ///
-/// [`chrono::Duration`]: chrono_crate::Duration
+/// [`chrono::Duration`]: ::chrono::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct DurationSecondsWithFrac<
@@ -1173,7 +1173,7 @@ pub struct DurationNanoSecondsWithFrac<
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSeconds};
-/// # use chrono_crate::{DateTime, Local, TimeZone, Utc};
+/// # use chrono::{DateTime, Local, TimeZone, Utc};
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::{DateTime, Local, TimeZone, Utc};
 /// # */
@@ -1224,7 +1224,7 @@ pub struct DurationNanoSecondsWithFrac<
 /// ```
 ///
 /// [`SystemTime`]: std::time::SystemTime
-/// [DateTime]: chrono_crate::DateTime
+/// [DateTime]: ::chrono::DateTime
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSeconds<
@@ -1317,7 +1317,7 @@ pub struct TimestampSeconds<
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSecondsWithFrac};
-/// # use chrono_crate::{DateTime, Local, TimeZone, Utc};
+/// # use chrono::{DateTime, Local, TimeZone, Utc};
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::{DateTime, Local, TimeZone, Utc};
 /// # */
@@ -1360,8 +1360,8 @@ pub struct TimestampSeconds<
 /// ```
 ///
 /// [`SystemTime`]: std::time::SystemTime
-/// [DateTime]: chrono_crate::DateTime
-/// [NaiveDateTime]: chrono_crate::NaiveDateTime
+/// [DateTime]: ::chrono::DateTime
+/// [NaiveDateTime]: ::chrono::NaiveDateTime
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 #[derive(Copy, Clone, Debug, Default)]
 pub struct TimestampSecondsWithFrac<

@@ -61,7 +61,7 @@ jobs:
         # It is good to test more than the MSRV and stable since sometimes
         # breakage occurs in intermediate versions.
         # IMPORTANT: Synchronize the MSRV with the Cargo.toml values.
-        rust: ["1.53", "1.55", "1.60", "stable", "beta", "nightly"]
+        rust: ["1.60", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -77,10 +77,12 @@ jobs:
         run: cargo build --all-features --all-targets
 
       # Check no_std works
-      - name: "Check no_std (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Check no_std (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo check --package serde_with --no-default-features --target thumbv7em-none-eabihf
-      - name: "Check no_std+alloc (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }} / Crate ${{ matrix.crate }})"
+      - name: "Check no_std+alloc (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo check --package serde_with --no-default-features --features=alloc --target thumbv7em-none-eabihf
+      - name: "Check no_std+alloc+optional (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
+        run: cargo check --package serde_with --no-default-features --features=alloc,base64,chrono,hex,indexmap,json,time_0_3 --target thumbv7em-none-eabihf
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests

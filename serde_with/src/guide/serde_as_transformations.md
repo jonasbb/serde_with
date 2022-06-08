@@ -491,10 +491,10 @@ These conversions are availble with the `time_0_3` feature flag.
 [`BoolFromInt<Flexible>`]: crate::BoolFromInt
 [`BoolFromInt<Strict>`]: crate::BoolFromInt
 [`Bytes`]: crate::Bytes
-[`chrono::DateTime<Local>`]: chrono_crate::DateTime
-[`chrono::DateTime<Utc>`]: chrono_crate::DateTime
-[`chrono::Duration`]: https://docs.rs/chrono/latest/chrono/struct.Duration.html
-[`chrono::NaiveDateTime`]: chrono_crate::NaiveDateTime
+[`chrono::DateTime<Local>`]: chrono::DateTime
+[`chrono::DateTime<Utc>`]: chrono::DateTime
+[`chrono::Duration`]: chrono::Duration
+[`chrono::NaiveDateTime`]: chrono::NaiveDateTime
 [`DefaultOnError`]: crate::DefaultOnError
 [`DefaultOnNull`]: crate::DefaultOnNull
 [`DisplayFromStr`]: crate::DisplayFromStr

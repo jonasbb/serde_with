@@ -9,7 +9,7 @@ use crate::{
     formats::{Format, Lowercase, Uppercase},
     ser::SerializeAs,
 };
-use alloc::{borrow::Cow, format, vec::Vec};
+use alloc::{borrow::Cow, vec::Vec};
 use core::{
     convert::{TryFrom, TryInto},
     marker::PhantomData,
@@ -145,7 +145,7 @@ where
             .and_then(|vec: Vec<u8>| {
                 let length = vec.len();
                 vec.try_into().map_err(|_e: T::Error| {
-                    Error::custom(format!(
+                    Error::custom(format_args!(
                         "Can't convert a Byte Vector of length {} to the output type.",
                         length
                     ))

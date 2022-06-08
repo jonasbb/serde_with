@@ -32,11 +32,13 @@ The feature enabled by default and also enables `alloc`.
 The `base64` feature enables serializing data in base64 format.
 
 This pulls in `base64` as a dependency.
+It enables the `alloc` feature.
 
 ## `chrono`
 
 The `chrono` feature enables integration of `chrono` specific conversions.
 This includes support for the timestamp and duration types.
+More features are available in combination with `alloc` or `std`.
 
 This pulls in `chrono` as a dependency.
 
@@ -50,17 +52,23 @@ The feature only changes the rustdoc output and enables no other effects.
 The `hex` feature enables serializing data in hex format.
 
 This pulls in `hex` as a dependency.
+It enables the `alloc` feature.
 
 ## `indexmap`
 
 The `indexmap` feature enables implementations of `indexmap` specific checks.
-This includes support for checking duplicate keys
+This includes support for checking duplicate keys and duplicate values.
+
+This pulls in `indexmap` as a dependency.
+It enables the `alloc` feature.
+Some functionality is only available when `std` is enabled too.
 
 ## `json`
 
 The `json` features enables JSON conversions from the `json` module.
 
 This pulls in `serde_json` as a dependency.
+It enables the `alloc` feature.
 
 ## `macros` (default)
 
@@ -75,3 +83,4 @@ The `time_0_3` enables integration of `time` v0.3 specific conversions.
 This includes support for the timestamp and duration types.
 
 This pulls in `time` v0.3 as a dependency.
+Some functionality is only available when `alloc` or `std` is enabled too.
