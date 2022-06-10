@@ -12,7 +12,7 @@ This crate provides custom de/serialization helpers to use in combination with [
 Some common use cases are:
 
 * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
-     Check [`DisplayFromStr`][] or [`serde_with::rust::display_fromstr`][display_fromstr] for details.
+     Check [`DisplayFromStr`] for details.
 * Support for arrays larger than 32 elements or using const generics.
     With `serde_as` large arrays are supported, even if they are nested in other types.
     `[bool; 64]`, `Option<[u8; M]>`, and `Box<[[u8; 64]; N]>` are all supported, as [this examples shows](#large-and-const-generic-arrays).
@@ -44,7 +44,7 @@ Check the [feature flags][] section for information about all available features
 ## Examples
 
 Annotate your struct or enum to enable the custom de/serializer.
-The `#[serde_as]` attribute must be place *before* the `#[derive]`.
+The `#[serde_as]` attribute must be placed *before* the `#[derive]`.
 
 ### `DisplayFromStr`
 
@@ -67,7 +67,7 @@ Foo {bar: 12}
 ### Large and const-generic arrays
 
 serde does not support arrays with more than 32 elements or using const-generics.
-The `serde_as` attribute allows to circumvent this restriction, even for nested types and nested arrays.
+The `serde_as` attribute allows circumventing this restriction, even for nested types and nested arrays.
 
 ```rust
 #[serde_as]
@@ -96,7 +96,7 @@ assert!(serde_json::to_string(&arrays).is_ok());
 
 This situation often occurs with JSON, but other formats also support optional fields.
 If many fields are optional, putting the annotations on the structs can become tedious.
-The `#[skip_serializing_none]` attribute must be place *before* the `#[derive]`.
+The `#[skip_serializing_none]` attribute must be placed *before* the `#[derive]`.
 
 ```rust
 #[skip_serializing_none]
@@ -160,7 +160,6 @@ Foo {
 
 [`DisplayFromStr`]: https://docs.rs/serde_with/1.14.0/serde_with/struct.DisplayFromStr.html
 [`with_prefix!`]: https://docs.rs/serde_with/1.14.0/serde_with/macro.with_prefix.html
-[display_fromstr]: https://docs.rs/serde_with/1.14.0/serde_with/rust/display_fromstr/index.html
 [feature flags]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 [skip_serializing_none]: https://docs.rs/serde_with/1.14.0/serde_with/attr.skip_serializing_none.html
 [StringWithSeparator]: https://docs.rs/serde_with/1.14.0/serde_with/rust/struct.StringWithSeparator.html

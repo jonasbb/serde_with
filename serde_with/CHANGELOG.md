@@ -32,6 +32,40 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     For most std types this should have little impact, as the types implementing `AsRef<str>` mostly implement `Display`, too, such as `String`, `Cow<str>`, or `Rc<str>`.
 * Bump MSRV to 1.60. This is required for the optional depedency feature syntax in cargo.
 
+### Removed
+
+* Remove old module based conversions.
+
+    The newer `serde_as` based conversions are prefered.
+
+    * `seq_display_fromstr`: Use `DisplayFromStr` in combination with your container type:
+
+        ```rust
+        #[serde_as(as = "BTreeSet<DisplayFromStr>")]
+        addresses: BTreeSet<Ipv4Addr>,
+        #[serde_as(as = "Vec<DisplayFromStr>")]
+        bools: Vec<bool>,
+        ```
+    * `tuple_list_as_map`: Use `BTreeMap` on a `Vec` of tuples:
+
+        ```rust
+        #[serde_as(as = "BTreeMap<_, _>")] // HashMap will also work
+        s: Vec<(i32, String)>,
+        ```
+    * `map_as_tuple_list` can be replaced with `#[serde_as(as = "Vec<(_, _)>")]`.
+    * `display_fromstr` can be replaced with `#[serde_as(as = "DisplayFromStr")]`.
+    * `bytes_or_string` can be replaced with `#[serde_as(as = "BytesOrString")]`.
+    * `default_on_error` can be replaced with `#[serde_as(as = "DefaultOnError")]`.
+    * `default_on_null` can be replaced with `#[serde_as(as = "DefaultOnNull")]`.
+    * `string_empty_as_none` can be replaced with `#[serde_as(as = "NoneAsEmptyString")]`.
+    * `StringWithSeparator` can now only be used in `serde_as`.
+        The definition of the `Separator` trait and its implementations have been moved to the `formats` module.
+
+* Remove previously deprecated modules.
+
+    * `sets_first_value_wins`
+    * `btreemap_as_tuple_list` and `hashmap_as_tuple_list` can be replaced with `#[serde_as(as = "Vec<(_, _)>")]`.
+
 ## [1.14.0] - 2022-05-29
 
 ### Added

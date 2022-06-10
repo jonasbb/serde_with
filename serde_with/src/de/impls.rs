@@ -4,9 +4,8 @@ use crate::formats::Format;
 #[cfg(feature = "std")]
 use crate::utils::duration::DurationSigned;
 use crate::{
-    formats::{Flexible, Strict},
-    rust::StringWithSeparator,
-    utils,
+    formats::{Flexible, Separator, Strict},
+    utils, StringWithSeparator,
 };
 #[cfg(feature = "alloc")]
 use alloc::{
@@ -816,7 +815,27 @@ where
     where
         D: Deserializer<'de>,
     {
-        crate::rust::display_fromstr::deserialize(deserializer)
+        struct Helper<S>(PhantomData<S>);
+        impl<'de, S> Visitor<'de> for Helper<S>
+        where
+            S: FromStr,
+            <S as FromStr>::Err: Display,
+        {
+            type Value = S;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(formatter, "a string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                value.parse::<Self::Value>().map_err(Error::custom)
+            }
+        }
+
+        deserializer.deserialize_str(Helper(PhantomData))
     }
 }
 
@@ -894,7 +913,38 @@ where
     where
         D: Deserializer<'de>,
     {
-        crate::rust::string_empty_as_none::deserialize(deserializer)
+        struct OptionStringEmptyNone<S>(PhantomData<S>);
+        impl<'de, S> Visitor<'de> for OptionStringEmptyNone<S>
+        where
+            S: FromStr,
+            S::Err: Display,
+        {
+            type Value = Option<S>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                match value {
+                    "" => Ok(None),
+                    v => S::from_str(v).map(Some).map_err(Error::custom),
+                }
+            }
+
+            // handles the `null` case
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: Error,
+            {
+                Ok(None)
+            }
+        }
+
+        deserializer.deserialize_any(OptionStringEmptyNone(PhantomData))
     }
 }
 
@@ -939,7 +989,40 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
     where
         D: Deserializer<'de>,
     {
-        crate::rust::bytes_or_string::deserialize(deserializer)
+        struct BytesOrStringVisitor;
+        impl<'de> Visitor<'de> for BytesOrStringVisitor {
+            type Value = Vec<u8>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a list of bytes or a string")
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E> {
+                Ok(v.to_vec())
+            }
+
+            #[cfg(feature = "alloc")]
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E> {
+                Ok(v)
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> {
+                Ok(v.as_bytes().to_vec())
+            }
+
+            #[cfg(feature = "alloc")]
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E> {
+                Ok(v.into_bytes())
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                utils::SeqIter::new(seq).collect()
+            }
+        }
+        deserializer.deserialize_any(BytesOrStringVisitor)
     }
 }
 

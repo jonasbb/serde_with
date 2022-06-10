@@ -1,6 +1,6 @@
 pub(crate) mod duration;
 
-use core::{fmt, marker::PhantomData, mem::MaybeUninit};
+use core::{marker::PhantomData, mem::MaybeUninit};
 use serde::de::{Deserialize, Error, Expected, MapAccess, SeqAccess};
 
 /// Re-Implementation of `serde::private::de::size_hint::cautious`
@@ -172,33 +172,4 @@ where
     // A normal transmute is not possible because of:
     // https://github.com/rust-lang/rust/issues/61956
     Ok(unsafe { core::mem::transmute_copy::<_, [T; N]>(&arr) })
-}
-
-pub(crate) struct DisplayWithSeparator<'a, I, SEPARATOR>(&'a I, PhantomData<SEPARATOR>);
-
-impl<'a, I, SEPARATOR> DisplayWithSeparator<'a, I, SEPARATOR> {
-    pub(crate) fn new(iter: &'a I) -> Self {
-        Self(iter, PhantomData)
-    }
-}
-
-impl<'a, I, SEPARATOR> fmt::Display for DisplayWithSeparator<'a, I, SEPARATOR>
-where
-    SEPARATOR: crate::Separator,
-    &'a I: IntoIterator,
-    <&'a I as IntoIterator>::Item: fmt::Display,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut iter = self.0.into_iter();
-
-        if let Some(first) = iter.next() {
-            first.fmt(f)?;
-        }
-        for elem in iter {
-            f.write_str(SEPARATOR::separator())?;
-            elem.fmt(f)?;
-        }
-
-        Ok(())
-    }
 }

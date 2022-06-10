@@ -92,3 +92,49 @@ impl Strictness for Strict {}
 /// Use a flexible deserialization behavior, see [`Strictness`].
 pub struct Flexible;
 impl Strictness for Flexible {}
+
+/// Separator for string-based collection de/serialization
+pub trait Separator {
+    /// Return the string delimiting two elements in the string-based collection
+    fn separator() -> &'static str;
+}
+
+/// Predefined separator using a single space
+pub struct SpaceSeparator;
+
+impl Separator for SpaceSeparator {
+    #[inline]
+    fn separator() -> &'static str {
+        " "
+    }
+}
+
+/// Predefined separator using a single comma
+pub struct CommaSeparator;
+
+impl Separator for CommaSeparator {
+    #[inline]
+    fn separator() -> &'static str {
+        ","
+    }
+}
+
+/// Predefined separator using a single semicolon
+pub struct SemicolonSeparator;
+
+impl Separator for SemicolonSeparator {
+    #[inline]
+    fn separator() -> &'static str {
+        ";"
+    }
+}
+
+/// Predefined separator using a single semicolon
+pub struct ColonSeparator;
+
+impl Separator for ColonSeparator {
+    #[inline]
+    fn separator() -> &'static str {
+        ":"
+    }
+}

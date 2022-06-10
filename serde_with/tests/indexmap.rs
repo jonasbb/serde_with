@@ -110,29 +110,6 @@ fn test_map_as_tuple_list() {
 }
 
 #[test]
-fn test_tuple_list_as_map() {
-    let ip = "1.2.3.4".parse().unwrap();
-    let ip2 = "255.255.255.255".parse().unwrap();
-
-    #[serde_as]
-    #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct SI(
-        #[serde_as(as = "std::collections::HashMap<DisplayFromStr, DisplayFromStr>")]
-        IndexSet<(u32, IpAddr)>,
-    );
-
-    is_equal(
-        SI(IndexSet::from_iter(vec![(1, ip), (10, ip), (200, ip2)])),
-        expect![[r#"
-            {
-              "1": "1.2.3.4",
-              "10": "1.2.3.4",
-              "200": "255.255.255.255"
-            }"#]],
-    );
-}
-
-#[test]
 fn duplicate_key_first_wins_indexmap() {
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     struct S(#[serde(with = "::serde_with::rust::maps_first_key_wins")] IndexMap<usize, usize>);
