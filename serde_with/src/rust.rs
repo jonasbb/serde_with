@@ -2,9 +2,12 @@
 
 #[cfg(doc)]
 use alloc::collections::BTreeMap;
+#[cfg(feature = "alloc")]
 use core::{fmt, marker::PhantomData};
+#[cfg(feature = "alloc")]
+use serde::de::{Error, MapAccess, SeqAccess, Visitor};
 use serde::{
-    de::{Deserialize, DeserializeOwned, Deserializer, Error, MapAccess, SeqAccess, Visitor},
+    de::{Deserialize, DeserializeOwned, Deserializer},
     ser::{Serialize, Serializer},
 };
 #[cfg(doc)]
