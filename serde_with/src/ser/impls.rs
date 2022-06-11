@@ -1,6 +1,8 @@
 use super::*;
 use crate::{
-    formats::Strictness, rust::StringWithSeparator, utils::duration::DurationSigned, Separator,
+    formats::{Separator, Strictness},
+    utils::duration::DurationSigned,
+    StringWithSeparator,
 };
 #[cfg(feature = "alloc")]
 use alloc::{
@@ -473,7 +475,7 @@ where
     where
         S: Serializer,
     {
-        crate::rust::display_fromstr::serialize(source, serializer)
+        serializer.collect_str(source)
     }
 }
 
@@ -498,7 +500,11 @@ where
     where
         S: Serializer,
     {
-        crate::rust::string_empty_as_none::serialize(source, serializer)
+        if let Some(value) = source {
+            serializer.collect_str(value)
+        } else {
+            serializer.serialize_str("")
+        }
     }
 }
 
@@ -540,7 +546,37 @@ where
     where
         S: Serializer,
     {
-        serializer.collect_str(&utils::DisplayWithSeparator::<_, SEPARATOR>::new(source))
+        use core::fmt;
+        pub(crate) struct DisplayWithSeparator<'a, I, SEPARATOR>(&'a I, PhantomData<SEPARATOR>);
+
+        impl<'a, I, SEPARATOR> DisplayWithSeparator<'a, I, SEPARATOR> {
+            pub(crate) fn new(iter: &'a I) -> Self {
+                Self(iter, PhantomData)
+            }
+        }
+
+        impl<'a, I, SEPARATOR> Display for DisplayWithSeparator<'a, I, SEPARATOR>
+        where
+            SEPARATOR: Separator,
+            &'a I: IntoIterator,
+            <&'a I as IntoIterator>::Item: Display,
+        {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                let mut iter = self.0.into_iter();
+
+                if let Some(first) = iter.next() {
+                    first.fmt(f)?;
+                }
+                for elem in iter {
+                    f.write_str(SEPARATOR::separator())?;
+                    elem.fmt(f)?;
+                }
+
+                Ok(())
+            }
+        }
+
+        serializer.collect_str(&DisplayWithSeparator::<I, SEPARATOR>::new(source))
     }
 }
 

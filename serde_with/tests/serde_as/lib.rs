@@ -30,9 +30,9 @@ use core::cell::{Cell, RefCell};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    formats::{Flexible, Strict},
-    serde_as, BoolFromInt, BytesOrString, CommaSeparator, DisplayFromStr, NoneAsEmptyString,
-    OneOrMany, Same, StringWithSeparator,
+    formats::{CommaSeparator, Flexible, Strict},
+    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, NoneAsEmptyString, OneOrMany, Same,
+    StringWithSeparator,
 };
 use std::{
     collections::HashMap,
@@ -443,7 +443,10 @@ fn test_bytes_or_string() {
 
 #[test]
 fn string_with_separator() {
-    use serde_with::{rust::StringWithSeparator, CommaSeparator, SpaceSeparator};
+    use serde_with::{
+        formats::{CommaSeparator, SpaceSeparator},
+        StringWithSeparator,
+    };
 
     #[serde_as]
     #[derive(Deserialize, Serialize)]

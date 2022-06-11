@@ -202,7 +202,7 @@ where
 /// Add `skip_serializing_if` annotations to [`Option`] fields.
 ///
 /// The attribute can be added to structs and enums.
-/// The `#[skip_serializing_none]` attribute must be places *before* the `#[derive]` attribute.
+/// The `#[skip_serializing_none]` attribute must be placed *before* the `#[derive]` attribute.
 ///
 /// # Example
 ///
@@ -417,7 +417,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// Convenience macro to use the [`serde_as`] system.
 ///
 /// The [`serde_as`] system is designed as a more flexible alternative to serde's with-annotation.
-/// The `#[serde_as]` attribute must be places *before* the `#[derive]` attribute
+/// The `#[serde_as]` attribute must be placed *before* the `#[derive]` attribute
 ///
 /// # Example
 ///

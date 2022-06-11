@@ -1,5 +1,8 @@
 use super::*;
-use serde_with::{CommaSeparator, PickFirst, SpaceSeparator, StringWithSeparator};
+use serde_with::{
+    formats::{CommaSeparator, SpaceSeparator},
+    PickFirst, StringWithSeparator,
+};
 
 #[test]
 fn test_pick_first_two() {

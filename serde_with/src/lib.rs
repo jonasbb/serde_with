@@ -47,14 +47,14 @@
 //! Some common use cases are:
 //!
 //! * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
-//!      Check [`DisplayFromStr`][] or [`serde_with::rust::display_fromstr`][display_fromstr] for details.
+//!      Check [`DisplayFromStr`] for details.
 //! * Support for arrays larger than 32 elements or using const generics.
 //!     With `serde_as` large arrays are supported, even if they are nested in other types.
 //!     `[bool; 64]`, `Option<[u8; M]>`, and `Box<[[u8; 64]; N]>` are all supported, as [this examples shows](#large-and-const-generic-arrays).
 //! * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
 //! * Apply a prefix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
 //! * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
-//!      Check the documentation for [`serde_with::rust::StringWithSeparator::<CommaSeparator>`][StringWithSeparator].
+//!      Check the documentation for [`serde_with::StringWithSeparator::<CommaSeparator, T>`][StringWithSeparator].
 //!
 //! ## Getting Help
 //!
@@ -79,7 +79,7 @@
 //! # Examples
 //!
 //! Annotate your struct or enum to enable the custom de/serializer.
-//! The `#[serde_as]` attribute must be place *before* the `#[derive]`.
+//! The `#[serde_as]` attribute must be placed *before* the `#[derive]`.
 //!
 //! ## `DisplayFromStr`
 //!
@@ -155,7 +155,7 @@
 //!
 //! This situation often occurs with JSON, but other formats also support optional fields.
 //! If many fields are optional, putting the annotations on the structs can become tedious.
-//! The `#[skip_serializing_none]` attribute must be place *before* the `#[derive]`.
+//! The `#[skip_serializing_none]` attribute must be placed *before* the `#[derive]`.
 //!
 //! ```rust
 //! # #[cfg(feature = "macros")]
@@ -250,7 +250,6 @@
 //!
 //! [`DisplayFromStr`]: https://docs.rs/serde_with/1.14.0/serde_with/struct.DisplayFromStr.html
 //! [`with_prefix!`]: https://docs.rs/serde_with/1.14.0/serde_with/macro.with_prefix.html
-//! [display_fromstr]: https://docs.rs/serde_with/1.14.0/serde_with/rust/display_fromstr/index.html
 //! [feature flags]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 //! [skip_serializing_none]: https://docs.rs/serde_with/1.14.0/serde_with/attr.skip_serializing_none.html
 //! [StringWithSeparator]: https://docs.rs/serde_with/1.14.0/serde_with/rust/struct.StringWithSeparator.html
@@ -343,7 +342,7 @@ generate_guide! {
 #[doc(inline)]
 pub use crate::enum_map::EnumMap;
 #[doc(inline)]
-pub use crate::{de::DeserializeAs, rust::StringWithSeparator, ser::SerializeAs};
+pub use crate::{de::DeserializeAs, ser::SerializeAs};
 use core::marker::PhantomData;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
@@ -351,32 +350,6 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 #[doc(inline)]
 pub use serde_with_macros::*;
-
-/// Separator for string-based collection de/serialization
-pub trait Separator {
-    /// Return the string delimiting two elements in the string-based collection
-    fn separator() -> &'static str;
-}
-
-/// Predefined separator using a single space
-pub struct SpaceSeparator;
-
-impl Separator for SpaceSeparator {
-    #[inline]
-    fn separator() -> &'static str {
-        " "
-    }
-}
-
-/// Predefined separator using a single comma
-pub struct CommaSeparator;
-
-impl Separator for CommaSeparator {
-    #[inline]
-    fn separator() -> &'static str {
-        ","
-    }
-}
 
 /// Adapter to convert from `serde_as` to the serde traits.
 ///
@@ -468,8 +441,6 @@ pub struct Same;
 /// If you control the type you want to de/serialize, you can instead use the two derive macros, [`SerializeDisplay`] and [`DeserializeFromStr`].
 /// They properly implement the traits [`Serialize`] and [`Deserialize`] such that user of the type no longer have to use the `serde_as` system.
 ///
-/// The same functionality is also available as [`serde_with::rust::display_fromstr`][crate::rust::display_fromstr] compatible with serde's with-annotation.
-///
 /// # Examples
 ///
 /// ```rust
@@ -510,8 +481,6 @@ pub struct DisplayFromStr;
 ///
 /// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`AsRef<str>`] implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
-///
-/// The same functionality is also available as [`serde_with::rust::string_empty_as_none`][crate::rust::string_empty_as_none] compatible with serde's with-annotation.
 ///
 /// # Examples
 ///
@@ -557,8 +526,6 @@ pub struct NoneAsEmptyString;
 /// During serialization this wrapper does nothing.
 /// The serialization behavior of the underlying type is preserved.
 /// The type must implement [`Default`] for this conversion to work.
-///
-/// The same functionality is also available as [`serde_with::rust::default_on_error`][crate::rust::default_on_error] compatible with serde's with-annotation.
 ///
 /// # Examples
 ///
@@ -646,8 +613,6 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 /// During serialization this wrapper does nothing.
 /// The serialization behavior of the underlying type is preserved.
 /// The type must implement [`Default`] for this conversion to work.
-///
-/// The same functionality is also available as [`serde_with::rust::default_on_null`][crate::rust::default_on_null] compatible with serde's with-annotation.
 ///
 /// # Examples
 ///
@@ -2010,3 +1975,52 @@ pub struct VecSkipError<T>(PhantomData<T>);
 /// # }
 /// ```
 pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>);
+
+/// De/Serialize a delimited collection using [`Display`] and [`FromStr`] implementation
+///
+/// `StringWithSeparator` takes a second type, which needs to implement [`Display`]+[`FromStr`] and constitutes the inner type of the collection.
+/// You can define an arbitrary separator, by specifying a type which implements [`Separator`].
+/// Some common ones, like space and comma are already predefined and you can find them [here][`Separator`].
+///
+/// An empty string deserializes as an empty collection.
+///
+/// # Examples
+///
+/// ```
+/// # use serde::{Deserialize, Serialize};
+/// #
+/// # use serde_with::{serde_as, StringWithSeparator};
+/// use serde_with::formats::{CommaSeparator, SpaceSeparator};
+/// use std::collections::BTreeSet;
+///
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "StringWithSeparator::<SpaceSeparator, String>")]
+///     tags: Vec<String>,
+///     #[serde_as(as = "StringWithSeparator::<CommaSeparator, String>")]
+///     more_tags: BTreeSet<String>,
+/// }
+///
+/// let v: A = serde_json::from_str(r##"{
+///     "tags": "#hello #world",
+///     "more_tags": "foo,bar,bar"
+/// }"##).unwrap();
+/// assert_eq!(vec!["#hello", "#world"], v.tags);
+/// assert_eq!(2, v.more_tags.len());
+///
+/// let x = A {
+///     tags: vec!["1".to_string(), "2".to_string(), "3".to_string()],
+///     more_tags: BTreeSet::new(),
+/// };
+/// assert_eq!(
+///     r#"{"tags":"1 2 3","more_tags":""}"#,
+///     serde_json::to_string(&x).unwrap()
+/// );
+/// ```
+///
+/// [`Display`]: core::fmt::Display
+/// [`FromStr`]: core::str::FromStr
+/// [`Separator`]: crate::formats::Separator
+/// [`serde_as`]: crate::guide::serde_as
+pub struct StringWithSeparator<Sep, T>(PhantomData<(Sep, T)>);
