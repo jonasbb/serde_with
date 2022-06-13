@@ -30,7 +30,7 @@ alloc = [
     "serde/alloc",
 
     "base64?/alloc",
-    "chrono?/alloc",
+    "chrono_0_4?/alloc",
     "hex?/alloc",
     "serde_json?/alloc",
     "time_0_3?/alloc",
@@ -40,15 +40,16 @@ std = [
     "serde/std",
 
     # Enables `Local` type
-    "chrono?/clock",
-    "chrono?/std",
+    "chrono_0_4?/clock",
+    "chrono_0_4?/std",
     "indexmap?/std",
     "time_0_3?/serde-well-known",
     "time_0_3?/std",
 ]
 
 base64 = ["dep:base64", "alloc"]
-chrono = ["dep:chrono"]
+chrono = ["chrono_0_4"]
+chrono_0_4 = ["dep:chrono_0_4"]
 guide = ["dep:doc-comment", "macros", "std"]
 hex = ["dep:hex", "alloc"]
 indexmap = ["dep:indexmap", "alloc"]
@@ -59,7 +60,7 @@ time_0_3 = ["dep:time_0_3"]
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
 base64 = {version = "0.13.0", optional = true, default-features = false}
-chrono = {version = "0.4.10", optional = true, default-features = false, features = ["serde"]}
+chrono_0_4 = {package = "chrono", version = "0.4.10", optional = true, default-features = false, features = ["serde"]}
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.3", optional = true, default-features = false}
 indexmap = {version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
@@ -90,9 +91,9 @@ path = "tests/base64.rs"
 required-features = ["base64", "macros"]
 
 [[test]]
-name = "chrono"
-path = "tests/chrono.rs"
-required-features = ["chrono", "macros"]
+name = "chrono_0_4"
+path = "tests/chrono_0_4.rs"
+required-features = ["chrono_0_4", "macros"]
 
 [[test]]
 name = "hex"

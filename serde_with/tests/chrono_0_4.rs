@@ -14,7 +14,7 @@ use crate::utils::{
     check_deserialization, check_error_deserialization, check_serialization, is_equal,
 };
 use alloc::collections::BTreeMap;
-use chrono::{DateTime, Duration, Local, NaiveDateTime, Utc};
+use chrono_0_4::{DateTime, Duration, Local, NaiveDateTime, Utc};
 use core::{iter::FromIterator, str::FromStr};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
@@ -33,7 +33,9 @@ fn new_datetime(secs: i64, nsecs: u32) -> DateTime<Utc> {
 #[test]
 fn json_datetime_from_any_to_string_deserialization() {
     #[derive(Debug, PartialEq, Deserialize)]
-    struct S(#[serde(with = "serde_with::chrono::datetime_utc_ts_seconds_from_any")] DateTime<Utc>);
+    struct S(
+        #[serde(with = "serde_with::chrono_0_4::datetime_utc_ts_seconds_from_any")] DateTime<Utc>,
+    );
 
     // just integers
     check_deserialization(

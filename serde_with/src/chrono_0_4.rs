@@ -1,6 +1,6 @@
-//! De/Serialization of [chrono][] types
+//! De/Serialization of [chrono] types
 //!
-//! This modules is only available if using the `chrono` feature of the crate.
+//! This modules is only available if using the `chrono_0_4` feature of the crate.
 //!
 //! [chrono]: https://docs.rs/chrono/
 
@@ -20,8 +20,8 @@ use alloc::string::String;
 #[cfg(feature = "std")]
 use alloc::vec::Vec;
 #[cfg(feature = "std")]
-use chrono::Local;
-use chrono::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
+use chrono_0_4::Local;
+use chrono_0_4::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
 #[cfg(feature = "std")]
 use core::fmt;
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
@@ -49,12 +49,12 @@ fn unix_epoch_naive() -> NaiveDateTime {
 /// # Examples
 ///
 /// ```
-/// # use chrono::{DateTime, Utc};
+/// # use chrono_0_4::{DateTime, Utc};
 /// # use serde::Deserialize;
 /// #
 /// #[derive(Debug, Deserialize)]
 /// struct S {
-///     #[serde(with = "serde_with::chrono::datetime_utc_ts_seconds_from_any")]
+///     #[serde(with = "serde_with::chrono_0_4::datetime_utc_ts_seconds_from_any")]
 ///     date: DateTime<Utc>,
 /// }
 ///
@@ -69,7 +69,7 @@ fn unix_epoch_naive() -> NaiveDateTime {
 #[cfg(feature = "std")]
 pub mod datetime_utc_ts_seconds_from_any {
     use super::*;
-    use chrono::{DateTime, NaiveDateTime, Utc};
+    use chrono_0_4::{DateTime, NaiveDateTime, Utc};
     use serde::de::{Deserializer, Error, Unexpected, Visitor};
 
     /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
@@ -213,7 +213,7 @@ impl<'de> DeserializeAs<'de, NaiveDateTime> for DateTime<Utc> {
     }
 }
 
-/// Convert a [`chrono::Duration`] into a [`DurationSigned`]
+/// Convert a [`chrono_0_4::Duration`] into a [`DurationSigned`]
 fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     match dur.to_std() {
         Ok(dur) => DurationSigned::with_duration(Sign::Positive, dur),
@@ -227,7 +227,7 @@ fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     }
 }
 
-/// Convert a [`DurationSigned`] into a [`chrono::Duration`]
+/// Convert a [`DurationSigned`] into a [`chrono_0_4::Duration`]
 fn duration_from_duration_signed<'de, D>(dur: DurationSigned) -> Result<Duration, D::Error>
 where
     D: Deserializer<'de>,
