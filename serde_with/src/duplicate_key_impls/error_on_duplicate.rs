@@ -1,8 +1,8 @@
 use alloc::collections::{BTreeMap, BTreeSet};
-#[cfg(any(feature = "std", feature = "indexmap"))]
+#[cfg(any(feature = "std", feature = "indexmap_1"))]
 use core::hash::{BuildHasher, Hash};
-#[cfg(feature = "indexmap")]
-use indexmap::{IndexMap, IndexSet};
+#[cfg(feature = "indexmap_1")]
+use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "std")]
 use std::collections::{HashMap, HashSet};
 
@@ -40,7 +40,7 @@ where
     }
 }
 
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 impl<T, S> PreventDuplicateInsertsSet<T> for IndexSet<T, S>
 where
     T: Eq + Hash,
@@ -95,7 +95,7 @@ where
     }
 }
 
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 impl<K, V, S> PreventDuplicateInsertsMap<K, V> for IndexMap<K, V, S>
 where
     K: Eq + Hash,

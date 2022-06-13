@@ -12,7 +12,7 @@ Using it in a `no_std` environment requires using `default-features = false`, si
 4. [`chrono_0_4`](#chrono_0_4)
 5. [`guide`](#guide)
 6. [`hex`](#hex)
-7. [`indexmap`](#indexmap)
+7. [`indexmap_1`](#indexmap_1)
 8. [`json`](#json)
 9. [`macros` (default)](#macros-default)
 10. [`time_0_3`](#time_0_3)
@@ -55,10 +55,11 @@ The `hex` feature enables serializing data in hex format.
 This pulls in `hex` as a dependency.
 It enables the `alloc` feature.
 
-## `indexmap`
+## `indexmap_1`
 
-The `indexmap` feature enables implementations of `indexmap` specific checks.
+The `indexmap_1` feature enables implementations of `indexmap_1` specific checks.
 This includes support for checking duplicate keys and duplicate values.
+The legacy feature name `indexmap` is still available for v1 compatability.
 
 This pulls in `indexmap` as a dependency.
 It enables the `alloc` feature.

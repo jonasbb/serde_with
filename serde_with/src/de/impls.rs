@@ -17,7 +17,7 @@ use alloc::{
     sync::{Arc, Weak as ArcWeak},
     vec::Vec,
 };
-#[cfg(any(feature = "std", feature = "indexmap"))]
+#[cfg(any(feature = "std", feature = "indexmap_1"))]
 use core::hash::{BuildHasher, Hash};
 #[cfg(feature = "std")]
 use core::time::Duration;
@@ -28,8 +28,8 @@ use core::{
     iter::FromIterator,
     str::FromStr,
 };
-#[cfg(feature = "indexmap")]
-use indexmap::{IndexMap, IndexSet};
+#[cfg(feature = "indexmap_1")]
+use indexmap_1::{IndexMap, IndexSet};
 use serde::de::*;
 #[cfg(feature = "std")]
 use std::{
@@ -389,7 +389,7 @@ seq_impl!(
     VecDeque::with_capacity(utils::size_hint_cautious(seq.size_hint())),
     push_back
 );
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 seq_impl!(
     IndexSet<T: Eq + Hash, S: BuildHasher + Default>,
     seq,
@@ -470,7 +470,7 @@ map_impl!(
     HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
     HashMap::with_capacity_and_hasher(utils::size_hint_cautious(map.size_hint()), S::default()));
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 map_impl!(
     IndexMap<K: Eq + Hash, V, S: BuildHasher + Default>,
     map,
@@ -599,7 +599,7 @@ macro_rules! map_as_tuple_seq {
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
 #[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K: Eq + Hash, V>);
-#[cfg(all(feature = "std", feature = "indexmap"))]
+#[cfg(all(feature = "std", feature = "indexmap_1"))]
 map_as_tuple_seq!(IndexMap<K: Eq + Hash, V>);
 
 #[cfg(feature = "alloc")]
@@ -678,7 +678,7 @@ tuple_seq_as_map_impl! {
 }
 #[cfg(feature = "std")]
 tuple_seq_as_map_impl!(HashSet<(K: Eq + Hash, V: Eq + Hash)>);
-#[cfg(all(feature = "std", feature = "indexmap"))]
+#[cfg(all(feature = "std", feature = "indexmap_1"))]
 tuple_seq_as_map_impl!(IndexSet<(K: Eq + Hash, V: Eq + Hash)>);
 
 #[cfg(feature = "alloc")]

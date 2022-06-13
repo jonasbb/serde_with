@@ -1,8 +1,8 @@
 use alloc::collections::BTreeMap;
-#[cfg(any(feature = "std", feature = "indexmap"))]
+#[cfg(any(feature = "std", feature = "indexmap_1"))]
 use core::hash::{BuildHasher, Hash};
-#[cfg(feature = "indexmap")]
-use indexmap::IndexMap;
+#[cfg(feature = "indexmap_1")]
+use indexmap_1::IndexMap;
 #[cfg(feature = "std")]
 use std::collections::HashMap;
 
@@ -41,7 +41,7 @@ where
     }
 }
 
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 impl<K, V, S> DuplicateInsertsFirstWinsMap<K, V> for IndexMap<K, V, S>
 where
     K: Eq + Hash,
@@ -57,7 +57,7 @@ where
 
     #[inline]
     fn insert(&mut self, key: K, value: V) {
-        use indexmap::map::Entry;
+        use indexmap_1::map::Entry;
 
         match self.entry(key) {
             // we want to keep the first value, so do nothing
