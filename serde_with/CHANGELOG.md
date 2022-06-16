@@ -60,6 +60,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * `string_empty_as_none` can be replaced with `#[serde_as(as = "NoneAsEmptyString")]`.
     * `StringWithSeparator` can now only be used in `serde_as`.
         The definition of the `Separator` trait and its implementations have been moved to the `formats` module.
+    * `json::nested` can be replaced with `#[serde_as(as = "json::JsonString")]`.
 
 * Remove previously deprecated modules.
 

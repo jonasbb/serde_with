@@ -14,7 +14,7 @@ use super::*;
 /// A **data structure** that can be deserialized from any data format supported by Serde, analogue to [`Deserialize`].
 ///
 /// The trait is analogue to the [`serde::Deserialize`][`Deserialize`] trait, with the same meaning of input and output arguments.
-/// It can and should the implemented using the same code structure as the [`Deserialize`] trait.
+/// It can and should be implemented using the same code structure as the [`Deserialize`] trait.
 /// As such, the same advice for [implementing `Deserialize`][impl-deserialize] applies here.
 ///
 /// # Differences to [`Deserialize`]

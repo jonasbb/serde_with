@@ -425,7 +425,7 @@ value: SystemTime,
 
 The same conversions are also implemented for [`chrono::DateTime<Utc>`], [`chrono::DateTime<Local>`], and [`chrono::NaiveDateTime`] with the `chrono` feature.
 
-The conversions are availble for [`time::OffsetDateTime`] and [`time::PrimitiveDateTime`] with the `time_0_3` feature enabled.
+The conversions are available for [`time::OffsetDateTime`] and [`time::PrimitiveDateTime`] with the `time_0_3` feature enabled.
 
 ## Value into JSON String
 
@@ -485,7 +485,7 @@ rfc_3339: OffsetDateTime,
 "rfc_3339": "1997-11-21T09:55:06-06:00",
 ```
 
-These conversions are availble with the `time_0_3` feature flag.
+These conversions are available with the `time_0_3` feature flag.
 
 [`Base64`]: crate::base64::Base64
 [`BoolFromInt<Flexible>`]: crate::BoolFromInt

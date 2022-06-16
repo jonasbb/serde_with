@@ -67,9 +67,18 @@ struct A {
 
 ### Deserializing Optional Fields
 
-During deserialization, serde treats fields of `Option<T>` as optional and does not require them to be present.
-This breaks when adding either the `serde_as` annotation or serde's `with` annotation.
-The default behavior can be restored by adding serde's `default` attribute.
+In many cases using `serde_as` on a field of type `Option` should behave as expected.
+This mean the field can still be missing during deserialization and will be filled with the value `None`.
+
+This "magic" can break in some cases. Then it becomes necessary to apply `#[serde(default)]` on the field in question.
+If the field is of type `Option<T>` and the conversion type is of `Option<S>`, the default attribute is automatically applied.
+These variants are detected as `Option`.
+* `Option`
+* `std::option::Option`, with or without leading `::`
+* `core::option::Option`, with or without leading `::`
+
+Any renaming will interfere with the detection, such as `use std::option::Option as StdOption;`.
+For more information you can inspect the documentation of the `serde_as` macro.
 
 ```rust
 # use serde::{Deserialize, Serialize};
@@ -79,8 +88,8 @@ The default behavior can be restored by adding serde's `default` attribute.
 #[derive(Serialize, Deserialize)]
 struct A {
     #[serde_as(as = "Option<DisplayFromStr>")]
-    // Allows deserialization without providing a value for `val`
-    #[serde(default)]
+    // In this situation boths `Option`s will be correctly identified and
+    // `#[serde(default)]` will be applied on this field.
     val: Option<u32>,
 }
 ```
