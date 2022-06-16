@@ -9,10 +9,10 @@ Using it in a `no_std` environment requires using `default-features = false`, si
 1. [`alloc`](#alloc)
 2. [`std` (default)](#std-default)
 3. [`base64`](#base64)
-4. [`chrono`](#chrono)
+4. [`chrono_0_4`](#chrono_0_4)
 5. [`guide`](#guide)
 6. [`hex`](#hex)
-7. [`indexmap`](#indexmap)
+7. [`indexmap_1`](#indexmap_1)
 8. [`json`](#json)
 9. [`macros` (default)](#macros-default)
 10. [`time_0_3`](#time_0_3)
@@ -34,13 +34,14 @@ The `base64` feature enables serializing data in base64 format.
 This pulls in `base64` as a dependency.
 It enables the `alloc` feature.
 
-## `chrono`
+## `chrono_0_4`
 
-The `chrono` feature enables integration of `chrono` specific conversions.
+The `chrono_0_4` feature enables integration of `chrono_0_4` specific conversions.
 This includes support for the timestamp and duration types.
 More features are available in combination with `alloc` or `std`.
+The legacy feature name `chrono` is still available for v1 compatability.
 
-This pulls in `chrono` as a dependency.
+This pulls in `chrono` v0.4 as a dependency.
 
 ## `guide`
 
@@ -54,10 +55,11 @@ The `hex` feature enables serializing data in hex format.
 This pulls in `hex` as a dependency.
 It enables the `alloc` feature.
 
-## `indexmap`
+## `indexmap_1`
 
-The `indexmap` feature enables implementations of `indexmap` specific checks.
+The `indexmap_1` feature enables implementations of `indexmap_1` specific checks.
 This includes support for checking duplicate keys and duplicate values.
+The legacy feature name `indexmap` is still available for v1 compatability.
 
 This pulls in `indexmap` as a dependency.
 It enables the `alloc` feature.

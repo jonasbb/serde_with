@@ -20,8 +20,8 @@ use core::{
     fmt::Display,
     time::Duration,
 };
-#[cfg(feature = "indexmap")]
-use indexmap::{IndexMap, IndexSet};
+#[cfg(feature = "indexmap_1")]
+use indexmap_1::{IndexMap, IndexSet};
 use serde::ser::Error;
 #[cfg(feature = "std")]
 use std::{
@@ -277,7 +277,7 @@ seq_impl!(Slice<T>);
 seq_impl!(Vec<T>);
 #[cfg(feature = "alloc")]
 seq_impl!(VecDeque<T>);
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 seq_impl!(IndexSet<T, H: Sized>);
 
 #[cfg(feature = "alloc")]
@@ -304,7 +304,7 @@ macro_rules! map_impl {
 map_impl!(BTreeMap<K, V>);
 #[cfg(feature = "std")]
 map_impl!(HashMap<K, V, H: Sized>);
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 map_impl!(IndexMap<K, V, H: Sized>);
 
 macro_rules! tuple_impl {
@@ -372,7 +372,7 @@ map_as_tuple_seq!(BTreeMap<K, V>);
 // TODO HashMap with a custom hasher support would be better, but results in "unconstrained type parameter"
 #[cfg(feature = "std")]
 map_as_tuple_seq!(HashMap<K, V>);
-#[cfg(all(feature = "std", feature = "indexmap"))]
+#[cfg(all(feature = "std", feature = "indexmap_1"))]
 map_as_tuple_seq!(IndexMap<K, V>);
 
 #[cfg(feature = "alloc")]
@@ -420,7 +420,7 @@ tuple_seq_as_map_impl! {
 }
 #[cfg(feature = "std")]
 tuple_seq_as_map_impl!(HashSet<(K, V)>);
-#[cfg(all(feature = "std", feature = "indexmap"))]
+#[cfg(all(feature = "std", feature = "indexmap_1"))]
 tuple_seq_as_map_impl!(IndexSet<(K, V)>);
 
 #[cfg(feature = "alloc")]

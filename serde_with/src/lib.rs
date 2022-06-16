@@ -267,9 +267,15 @@ extern crate std;
 #[cfg(feature = "base64")]
 #[cfg_attr(docsrs, doc(cfg(feature = "base64")))]
 pub mod base64;
+#[cfg(feature = "chrono_0_4")]
+#[cfg_attr(docsrs, doc(cfg(feature = "chrono_0_4")))]
+pub mod chrono_0_4;
+/// Legacy export of the [`chrono_0_4`] module.
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
-pub mod chrono;
+pub mod chrono {
+    pub use chrono_0_4::*;
+}
 #[cfg(feature = "alloc")]
 mod content;
 pub mod de;
@@ -722,7 +728,7 @@ pub struct BytesOrString;
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct duration and allows deserialization from any type.
 /// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports [`chrono::Duration`] with the `chrono`-[feature flag].
+/// This type also supports [`chrono::Duration`] with the `chrono_0_4`-[feature flag].
 /// This type also supports [`time::Duration`][::time_0_3::Duration] with the `time_0_3`-[feature flag].
 ///
 /// | Duration Type         | Converter                 | Available `FORMAT`s    |
@@ -788,15 +794,15 @@ pub struct BytesOrString;
 /// # }
 /// ```
 ///
-/// [`chrono::Duration`] is also supported when using the `chrono` feature.
+/// [`chrono::Duration`] is also supported when using the `chrono_0_4` feature.
 /// It is a signed duration, thus can be de/serialized as an `i64` instead of a `u64`.
 ///
 /// ```rust
-/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # #[cfg(all(feature = "macros", feature = "chrono_0_4"))] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSeconds};
-/// # use chrono::Duration;
+/// # use chrono_0_4::Duration;
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::Duration;
 /// # */
@@ -846,7 +852,7 @@ pub struct BytesOrString;
 /// # }
 /// ```
 ///
-/// [`chrono::Duration`]: ::chrono::Duration
+/// [`chrono::Duration`]: ::chrono_0_4::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
@@ -924,15 +930,15 @@ pub struct DurationSeconds<
 /// # }
 /// ```
 ///
-/// [`chrono::Duration`] is also supported when using the `chrono` feature.
+/// [`chrono::Duration`] is also supported when using the `chrono_0_4` feature.
 /// It is a signed duration, thus can be de/serialized as an `i64` instead of a `u64`.
 ///
 /// ```rust
-/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # #[cfg(all(feature = "macros", feature = "chrono_0_4"))] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, DurationSecondsWithFrac};
-/// # use chrono::Duration;
+/// # use chrono_0_4::Duration;
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::Duration;
 /// # */
@@ -974,7 +980,7 @@ pub struct DurationSeconds<
 /// # }
 /// ```
 ///
-/// [`chrono::Duration`]: ::chrono::Duration
+/// [`chrono::Duration`]: ::chrono_0_4::Duration
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1040,7 +1046,7 @@ pub struct DurationNanoSecondsWithFrac<
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct timestamp and allows deserialization from any type.
 /// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports [`chrono::DateTime`][DateTime] with the `chrono`-[feature flag].
+/// This type also supports [`chrono::DateTime`] with the `chrono_0_4`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
 /// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
@@ -1110,15 +1116,15 @@ pub struct DurationNanoSecondsWithFrac<
 /// # }
 /// ```
 ///
-/// [`chrono::DateTime<Utc>`][DateTime] and [`chrono::DateTime<Local>`][DateTime] are also supported when using the `chrono` feature.
+/// [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] are also supported when using the `chrono` feature.
 /// Like [`SystemTime`], it is a signed timestamp, thus can be de/serialized as an `i64`.
 ///
 /// ```rust
-/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # #[cfg(all(feature = "macros", feature = "chrono_0_4"))] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSeconds};
-/// # use chrono::{DateTime, Local, TimeZone, Utc};
+/// # use chrono_0_4::{DateTime, Local, TimeZone, Utc};
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::{DateTime, Local, TimeZone, Utc};
 /// # */
@@ -1169,7 +1175,8 @@ pub struct DurationNanoSecondsWithFrac<
 /// ```
 ///
 /// [`SystemTime`]: std::time::SystemTime
-/// [DateTime]: ::chrono::DateTime
+/// [`chrono::DateTime<Local>`]: ::chrono_0_4::DateTime
+/// [`chrono::DateTime<Utc>`]: ::chrono_0_4::DateTime
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
@@ -1187,7 +1194,7 @@ pub struct TimestampSeconds<
 /// [`formats::Flexible`] means that deserialization will perform a best effort to extract the correct timestamp and allows deserialization from any type.
 /// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
-/// This type also supports [`chrono::DateTime`][DateTime] and [`chrono::NaiveDateTime`][NaiveDateTime] with the `chrono`-[feature flag].
+/// This type also supports [`chrono::DateTime`] and [`chrono::NaiveDateTime`][NaiveDateTime] with the `chrono`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
 /// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
@@ -1253,15 +1260,15 @@ pub struct TimestampSeconds<
 /// # }
 /// ```
 ///
-/// [`chrono::DateTime<Utc>`][DateTime] and [`chrono::DateTime<Local>`][DateTime] are also supported when using the `chrono` feature.
+/// [`chrono::DateTime<Utc>`] and [`chrono::DateTime<Local>`] are also supported when using the `chrono_0_4` feature.
 /// Like [`SystemTime`], it is a signed timestamp, thus can be de/serialized as an `i64`.
 ///
 /// ```rust
-/// # #[cfg(all(feature = "macros", feature = "chrono"))] {
+/// # #[cfg(all(feature = "macros", feature = "chrono_0_4"))] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TimestampSecondsWithFrac};
-/// # use chrono::{DateTime, Local, TimeZone, Utc};
+/// # use chrono_0_4::{DateTime, Local, TimeZone, Utc};
 /// # /* Ugliness to make the docs look nicer since I want to hide the rename of the chrono crate
 /// use chrono::{DateTime, Local, TimeZone, Utc};
 /// # */
@@ -1304,8 +1311,10 @@ pub struct TimestampSeconds<
 /// ```
 ///
 /// [`SystemTime`]: std::time::SystemTime
-/// [DateTime]: ::chrono::DateTime
-/// [NaiveDateTime]: ::chrono::NaiveDateTime
+/// [`chrono::DateTime`]: ::chrono_0_4::DateTime
+/// [`chrono::DateTime<Local>`]: ::chrono_0_4::DateTime
+/// [`chrono::DateTime<Utc>`]: ::chrono_0_4::DateTime
+/// [NaiveDateTime]: ::chrono_0_4::NaiveDateTime
 /// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,

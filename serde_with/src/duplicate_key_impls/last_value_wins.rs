@@ -1,8 +1,8 @@
 use alloc::collections::BTreeSet;
-#[cfg(any(feature = "std", feature = "indexmap"))]
+#[cfg(any(feature = "std", feature = "indexmap_1"))]
 use core::hash::{BuildHasher, Hash};
-#[cfg(feature = "indexmap")]
-use indexmap::IndexSet;
+#[cfg(feature = "indexmap_1")]
+use indexmap_1::IndexSet;
 #[cfg(feature = "std")]
 use std::collections::HashSet;
 
@@ -34,7 +34,7 @@ where
     }
 }
 
-#[cfg(feature = "indexmap")]
+#[cfg(feature = "indexmap_1")]
 impl<T, S> DuplicateInsertsLastWinsSet<T> for IndexSet<T, S>
 where
     T: Eq + Hash,

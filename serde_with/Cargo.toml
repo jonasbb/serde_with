@@ -30,7 +30,7 @@ alloc = [
     "serde/alloc",
 
     "base64?/alloc",
-    "chrono?/alloc",
+    "chrono_0_4?/alloc",
     "hex?/alloc",
     "serde_json?/alloc",
     "time_0_3?/alloc",
@@ -40,18 +40,20 @@ std = [
     "serde/std",
 
     # Enables `Local` type
-    "chrono?/clock",
-    "chrono?/std",
-    "indexmap?/std",
+    "chrono_0_4?/clock",
+    "chrono_0_4?/std",
+    "indexmap_1?/std",
     "time_0_3?/serde-well-known",
     "time_0_3?/std",
 ]
 
 base64 = ["dep:base64", "alloc"]
-chrono = ["dep:chrono"]
+chrono = ["chrono_0_4"]
+chrono_0_4 = ["dep:chrono_0_4"]
 guide = ["dep:doc-comment", "macros", "std"]
 hex = ["dep:hex", "alloc"]
-indexmap = ["dep:indexmap", "alloc"]
+indexmap = ["indexmap_1"]
+indexmap_1 = ["dep:indexmap_1", "alloc"]
 json = ["dep:serde_json", "alloc"]
 macros = ["dep:serde_with_macros"]
 time_0_3 = ["dep:time_0_3"]
@@ -59,10 +61,10 @@ time_0_3 = ["dep:time_0_3"]
 # When adding new optional dependencies update the documentation in feature-flags.md
 [dependencies]
 base64 = {version = "0.13.0", optional = true, default-features = false}
-chrono = {version = "0.4.10", optional = true, default-features = false, features = ["serde"]}
+chrono_0_4 = {package = "chrono", version = "0.4.10", optional = true, default-features = false, features = ["serde"]}
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.3", optional = true, default-features = false}
-indexmap = {version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
+indexmap_1 = {package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
 serde = {version = "1.0.122", default-features = false, features = ["derive"]}
 serde_json = {version = "1.0.45", optional = true, default-features = false}
 serde_with_macros = {path = "../serde_with_macros", version = "1.5.2", optional = true}
@@ -90,9 +92,9 @@ path = "tests/base64.rs"
 required-features = ["base64", "macros"]
 
 [[test]]
-name = "chrono"
-path = "tests/chrono.rs"
-required-features = ["chrono", "macros"]
+name = "chrono_0_4"
+path = "tests/chrono_0_4.rs"
+required-features = ["chrono_0_4", "macros"]
 
 [[test]]
 name = "hex"
@@ -100,9 +102,9 @@ path = "tests/hex.rs"
 required-features = ["hex", "macros"]
 
 [[test]]
-name = "indexmap"
-path = "tests/indexmap.rs"
-required-features = ["indexmap", "macros"]
+name = "indexmap_1"
+path = "tests/indexmap_1.rs"
+required-features = ["indexmap_1", "macros"]
 
 [[test]]
 name = "json"
