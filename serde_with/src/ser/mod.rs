@@ -14,7 +14,7 @@ use super::*;
 /// A **data structure** that can be serialized into any data format supported by Serde, analogue to [`Serialize`].
 ///
 /// The trait is analogue to the [`serde::Serialize`][`Serialize`] trait, with the same meaning of input and output arguments.
-/// It can and should the implemented using the same code structure as the [`Serialize`] trait.
+/// It can and should be implemented using the same code structure as the [`Serialize`] trait.
 /// As such, the same advice for [implementing `Serialize`][impl-serialize] applies here.
 ///
 /// # Differences to [`Serialize`]

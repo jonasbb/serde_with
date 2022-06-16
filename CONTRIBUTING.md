@@ -45,13 +45,13 @@ be dual licensed as above, without any additional terms or conditions.
 
 ## Adding support for new crates
 
-`serde_with` takes a liberal approach to crate compatability and provides additional implementations for well-known crates, such as `chrono` or `indexmap`.
+`serde_with` takes a liberal approach to crate compatibility and provides additional implementations for well-known crates, such as `chrono` or `indexmap`.
 New crates should always be optional and only be enabled with an explicit feature.
 The feature name should include the major version of the crate.
 This allows adding support for new breaking releases of these crates.
 For example, `chrono` is currently at v0.4, so the feature name should be `chrono_0_4`.
 A new chrono v0.5 would get the feature name `chrono_0_5` and the v1 release `chrono_1`.
 
-`serde_with` depends also on further crates to implement the convertesrs, such as `base64` or `hex`.
+`serde_with` depends also on further crates to implement the converters, such as `base64` or `hex`.
 Here the feature name should not depend on the crate, but rather describe the added functionality enabled by it.
 For example, additional JSON functionality is behind the `json` feature and it depends on `serde_json` for the implementation.
