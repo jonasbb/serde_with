@@ -22,7 +22,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with/1.14.0")]
+#![doc(html_root_url = "https://docs.rs/serde_with/2.0.0-rc.0")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![allow(
     // clippy is broken and shows wrong warnings
@@ -69,7 +69,7 @@
 //!
 //! ```toml
 //! [dependencies.serde_with]
-//! version = "1.14.0"
+//! version = "2.0.0-rc.0"
 //! features = [ "..." ]
 //! ```
 //!
@@ -248,14 +248,14 @@
 //! # }
 //! ```
 //!
-//! [`DisplayFromStr`]: https://docs.rs/serde_with/1.14.0/serde_with/struct.DisplayFromStr.html
-//! [`with_prefix!`]: https://docs.rs/serde_with/1.14.0/serde_with/macro.with_prefix.html
-//! [feature flags]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
-//! [skip_serializing_none]: https://docs.rs/serde_with/1.14.0/serde_with/attr.skip_serializing_none.html
-//! [StringWithSeparator]: https://docs.rs/serde_with/1.14.0/serde_with/rust/struct.StringWithSeparator.html
-//! [user guide]: https://docs.rs/serde_with/1.14.0/serde_with/guide/index.html
+//! [`DisplayFromStr`]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/struct.DisplayFromStr.html
+//! [`with_prefix!`]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/macro.with_prefix.html
+//! [feature flags]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/feature_flags/index.html
+//! [skip_serializing_none]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/attr.skip_serializing_none.html
+//! [StringWithSeparator]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/rust/struct.StringWithSeparator.html
+//! [user guide]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
-//! [as-annotation]: https://docs.rs/serde_with/1.14.0/serde_with/guide/serde_as/index.html
+//! [as-annotation]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/serde_as/index.html
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -396,7 +396,7 @@ pub use serde_with_macros::*;
 /// # }
 /// ```
 ///
-/// [serde_as]: https://docs.rs/serde_with/1.14.0/serde_with/attr.serde_as.html
+/// [serde_as]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/attr.serde_as.html
 pub struct As<T: ?Sized>(PhantomData<T>);
 
 impl<T: ?Sized> As<T> {
@@ -853,7 +853,7 @@ pub struct BytesOrString;
 /// ```
 ///
 /// [`chrono::Duration`]: ::chrono_0_4::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/feature_flags/index.html
 pub struct DurationSeconds<
     FORMAT: formats::Format = u64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -981,7 +981,7 @@ pub struct DurationSeconds<
 /// ```
 ///
 /// [`chrono::Duration`]: ::chrono_0_4::Duration
-/// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/feature_flags/index.html
 pub struct DurationSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1177,7 +1177,7 @@ pub struct DurationNanoSecondsWithFrac<
 /// [`SystemTime`]: std::time::SystemTime
 /// [`chrono::DateTime<Local>`]: ::chrono_0_4::DateTime
 /// [`chrono::DateTime<Utc>`]: ::chrono_0_4::DateTime
-/// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/feature_flags/index.html
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
     STRICTNESS: formats::Strictness = formats::Strict,
@@ -1315,7 +1315,7 @@ pub struct TimestampSeconds<
 /// [`chrono::DateTime<Local>`]: ::chrono_0_4::DateTime
 /// [`chrono::DateTime<Utc>`]: ::chrono_0_4::DateTime
 /// [NaiveDateTime]: ::chrono_0_4::NaiveDateTime
-/// [feature flag]: https://docs.rs/serde_with/1.14.0/serde_with/guide/feature_flags/index.html
+/// [feature flag]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/feature_flags/index.html
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,
     STRICTNESS: formats::Strictness = formats::Strict,

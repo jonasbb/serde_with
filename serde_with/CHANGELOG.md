@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.0-rc.0] - 2022-06-29
+
 ### Changed
 
 * Make `#[serde_as]` behave more intuitive on `Option<T>` fields.
@@ -22,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * `core::option::Option`, with or without leading `::`
 
     If an existing `default` attribute is detected, the attribute is not applied again.
-    This behavior can be supressed by using `#[serde_as(no_default)]` or `#[serde_as(as = "Option<S>", no_default)]`.
+    This behavior can be suppressed by using `#[serde_as(no_default)]` or `#[serde_as(as = "Option<S>", no_default)]`.
 * `NoneAsEmptyString` and `string_empty_as_none` use a different serialization bound (#388).
 
     Both types used `AsRef<str>` as the serialization bound.
@@ -30,13 +32,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     The deserialization often was already more flexible, due to the `FromStr` bound.
 
     For most std types this should have little impact, as the types implementing `AsRef<str>` mostly implement `Display`, too, such as `String`, `Cow<str>`, or `Rc<str>`.
-* Bump MSRV to 1.60. This is required for the optional depedency feature syntax in cargo.
+* Bump MSRV to 1.60. This is required for the optional dependency feature syntax in cargo.
 
 ### Removed
 
 * Remove old module based conversions.
 
-    The newer `serde_as` based conversions are prefered.
+    The newer `serde_as` based conversions are preferred.
 
     * `seq_display_fromstr`: Use `DisplayFromStr` in combination with your container type:
 
