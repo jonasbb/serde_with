@@ -2,13 +2,17 @@
 //!
 //! This modules is only available when using the `json` feature of the crate.
 
-use crate::{de::DeserializeAs, ser::SerializeAs};
+use crate::{
+    de::{DeserializeAs, DeserializeAsWrap},
+    ser::{SerializeAs, SerializeAsWrap},
+    Same,
+};
 use core::{fmt, marker::PhantomData};
 use serde::{
     de,
-    de::{DeserializeOwned, Deserializer, Visitor},
+    de::{Deserializer, Visitor},
     ser,
-    ser::{Serialize, Serializer},
+    ser::Serializer,
 };
 
 /// Serialize value as string containing JSON
@@ -51,34 +55,61 @@ use serde::{
 /// );
 /// # }
 /// ```
-pub struct JsonString;
+///
+/// The `JsonString` converter takes a type argument, which allows altering the serialization behavior of the inner value, before it gets turned into a JSON string.
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_with::{serde_as, json::JsonString};
+/// # use std::collections::BTreeMap;
+/// #
+/// #[serde_as]
+/// #[derive(Debug, Serialize, Deserialize, PartialEq)]
+/// struct Struct {
+///     #[serde_as(as = "JsonString<Vec<(JsonString, _)>>")]
+///     value: BTreeMap<[u8; 2], u32>,
+/// }
+///
+/// let value = Struct {
+///     value: BTreeMap::from([([1, 2], 3), ([4, 5], 6)]),
+/// };
+/// assert_eq!(
+///     r#"{"value":"[[\"[1,2]\",3],[\"[4,5]\",6]]"}"#,
+///     serde_json::to_string(&value).unwrap()
+/// );
+/// # }
+/// ```
+pub struct JsonString<T = Same>(PhantomData<T>);
 
-impl<T> SerializeAs<T> for JsonString
+impl<T, TAs> SerializeAs<T> for JsonString<TAs>
 where
-    T: Serialize,
+    TAs: SerializeAs<T>,
 {
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let s = serde_json::to_string(source).map_err(ser::Error::custom)?;
-        serializer.serialize_str(&*s)
+        serializer.serialize_str(
+            &serde_json::to_string(&SerializeAsWrap::<T, TAs>::new(source))
+                .map_err(ser::Error::custom)?,
+        )
     }
 }
 
-impl<'de, T> DeserializeAs<'de, T> for JsonString
+impl<'de, T, TAs> DeserializeAs<'de, T> for JsonString<TAs>
 where
-    T: DeserializeOwned,
+    TAs: for<'a> DeserializeAs<'a, T>,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,
     {
-        struct Helper<S: DeserializeOwned>(PhantomData<S>);
+        struct Helper<S, SAs>(PhantomData<(S, SAs)>);
 
-        impl<'de, S> Visitor<'de> for Helper<S>
+        impl<'de, S, SAs> Visitor<'de> for Helper<S, SAs>
         where
-            S: DeserializeOwned,
+            SAs: for<'a> DeserializeAs<'a, S>,
         {
             type Value = S;
 
@@ -90,10 +121,12 @@ where
             where
                 E: de::Error,
             {
-                serde_json::from_str(value).map_err(de::Error::custom)
+                serde_json::from_str(value)
+                    .map(DeserializeAsWrap::<S, SAs>::into_inner)
+                    .map_err(de::Error::custom)
             }
         }
 
-        deserializer.deserialize_str(Helper(PhantomData))
+        deserializer.deserialize_str(Helper::<T, TAs>(PhantomData))
     }
 }

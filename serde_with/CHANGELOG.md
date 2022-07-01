@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Make `JsonString<T>` smarter by allowing nesting `serde_as` definitions.
+    This allows applying custom serialization logic, before the value gets converted into a JSON string.
+
+    ```rust
+    // Rust
+    #[serde_as(as = "JsonString<Vec<(JsonString, _)>>")]
+    value: BTreeMap<[u8; 2], u32>,
+
+    // JSON
+    {"value":"[[\"[1,2]\",3],[\"[4,5]\",6]]"}
+    ```
+
 ## [2.0.0-rc.0] - 2022-06-29
 
 ### Changed

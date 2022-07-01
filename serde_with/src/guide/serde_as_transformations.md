@@ -449,6 +449,14 @@ value: OtherStruct,
 "value": "{\"value\":5}",
 ```
 
+```ignore
+#[serde_as(as = "JsonString<Vec<(JsonString, _)>>")]
+value: BTreeMap<[u8; 2], u32>,
+
+// JSON
+{"value":"[[\"[1,2]\",3],[\"[4,5]\",6]]"}
+```
+
 ## `Vec` of tuples to `Maps`
 
 ```ignore
