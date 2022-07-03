@@ -19,7 +19,7 @@ Some common use cases are:
 * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
 * Apply a prefix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
 * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
-     Check the documentation for [`serde_with::rust::StringWithSeparator::<CommaSeparator>`][StringWithSeparator].
+     Check the documentation for [`serde_with::StringWithSeparator::<CommaSeparator, T>`][StringWithSeparator].
 
 ### Getting Help
 
@@ -162,7 +162,7 @@ Foo {
 [`with_prefix!`]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/macro.with_prefix.html
 [feature flags]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/feature_flags/index.html
 [skip_serializing_none]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/attr.skip_serializing_none.html
-[StringWithSeparator]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/rust/struct.StringWithSeparator.html
+[StringWithSeparator]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/struct.StringWithSeparator.html
 [user guide]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/index.html
 [with-annotation]: https://serde.rs/field-attrs.html#with
 [as-annotation]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/serde_as/index.html

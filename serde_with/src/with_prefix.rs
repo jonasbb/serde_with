@@ -141,7 +141,6 @@ macro_rules! with_prefix {
     };
 }
 
-#[allow(missing_debug_implementations)]
 pub struct WithPrefix<'a, T> {
     pub delegate: T,
     pub prefix: &'a str,
@@ -516,7 +515,6 @@ where
     }
 }
 
-#[allow(missing_debug_implementations)]
 pub struct WithPrefixOption<'a, T> {
     first_key: Option<String>,
     delegate: T,
