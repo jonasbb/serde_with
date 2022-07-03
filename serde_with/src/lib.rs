@@ -1,6 +1,6 @@
 #![warn(
     clippy::semicolon_if_nothing_returned,
-    // missing_crate_level_docs, not available in MSRV
+    missing_crate_level_docs,
     missing_docs,
     rust_2018_idioms,
     trivial_casts,
@@ -254,7 +254,7 @@
 //! [`with_prefix!`]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/macro.with_prefix.html
 //! [feature flags]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/feature_flags/index.html
 //! [skip_serializing_none]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/attr.skip_serializing_none.html
-//! [StringWithSeparator]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/rust/struct.StringWithSeparator.html
+//! [StringWithSeparator]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/struct.StringWithSeparator.html
 //! [user guide]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
 //! [as-annotation]: https://docs.rs/serde_with/2.0.0-rc.0/serde_with/guide/serde_as/index.html
