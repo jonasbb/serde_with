@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.0] - 2022-07-17
+
 ### Added
 
 * Make `JsonString<T>` smarter by allowing nesting `serde_as` definitions.
@@ -20,6 +22,68 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     // JSON
     {"value":"[[\"[1,2]\",3],[\"[4,5]\",6]]"}
     ```
+
+### Changed
+
+* Make `#[serde_as]` behave more intuitive on `Option<T>` fields.
+
+    The `#[serde_as]` macro now detects if a `#[serde_as(as = "Option<S>")]` is used on a field of type `Option<T>` and applies `#[serde(default)]` to the field.
+    This restores the ability to deserialize with missing fields and fixes a common annoyance (#183, #185, #311, #417).
+    This is a breaking change, since now deserialization will pass where it did not before and this might be undesired.
+
+    The `Option` field and transformation are detected by directly matching on the type name.
+    These variants are detected as `Option`.
+    * `Option`
+    * `std::option::Option`, with or without leading `::`
+    * `core::option::Option`, with or without leading `::`
+
+    If an existing `default` attribute is detected, the attribute is not applied again.
+    This behavior can be suppressed by using `#[serde_as(no_default)]` or `#[serde_as(as = "Option<S>", no_default)]`.
+* `NoneAsEmptyString` and `string_empty_as_none` use a different serialization bound (#388).
+
+    Both types used `AsRef<str>` as the serialization bound.
+    This is limiting for non-string types like `Option<i32>`.
+    The deserialization often was already more flexible, due to the `FromStr` bound.
+
+    For most std types this should have little impact, as the types implementing `AsRef<str>` mostly implement `Display`, too, such as `String`, `Cow<str>`, or `Rc<str>`.
+* Bump MSRV to 1.60. This is required for the optional dependency feature syntax in cargo.
+
+### Removed
+
+* Remove old module based conversions.
+
+    The newer `serde_as` based conversions are preferred.
+
+    * `seq_display_fromstr`: Use `DisplayFromStr` in combination with your container type:
+
+        ```rust
+        #[serde_as(as = "BTreeSet<DisplayFromStr>")]
+        addresses: BTreeSet<Ipv4Addr>,
+        #[serde_as(as = "Vec<DisplayFromStr>")]
+        bools: Vec<bool>,
+        ```
+
+    * `tuple_list_as_map`: Use `BTreeMap` on a `Vec` of tuples:
+
+        ```rust
+        #[serde_as(as = "BTreeMap<_, _>")] // HashMap will also work
+        s: Vec<(i32, String)>,
+        ```
+
+    * `map_as_tuple_list` can be replaced with `#[serde_as(as = "Vec<(_, _)>")]`.
+    * `display_fromstr` can be replaced with `#[serde_as(as = "DisplayFromStr")]`.
+    * `bytes_or_string` can be replaced with `#[serde_as(as = "BytesOrString")]`.
+    * `default_on_error` can be replaced with `#[serde_as(as = "DefaultOnError")]`.
+    * `default_on_null` can be replaced with `#[serde_as(as = "DefaultOnNull")]`.
+    * `string_empty_as_none` can be replaced with `#[serde_as(as = "NoneAsEmptyString")]`.
+    * `StringWithSeparator` can now only be used in `serde_as`.
+        The definition of the `Separator` trait and its implementations have been moved to the `formats` module.
+    * `json::nested` can be replaced with `#[serde_as(as = "json::JsonString")]`.
+
+* Remove previously deprecated modules.
+
+    * `sets_first_value_wins`
+    * `btreemap_as_tuple_list` and `hashmap_as_tuple_list` can be replaced with `#[serde_as(as = "Vec<(_, _)>")]`.
 
 ## [2.0.0-rc.0] - 2022-06-29
 
@@ -62,12 +126,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
         #[serde_as(as = "Vec<DisplayFromStr>")]
         bools: Vec<bool>,
         ```
+
     * `tuple_list_as_map`: Use `BTreeMap` on a `Vec` of tuples:
 
         ```rust
         #[serde_as(as = "BTreeMap<_, _>")] // HashMap will also work
         s: Vec<(i32, String)>,
         ```
+
     * `map_as_tuple_list` can be replaced with `#[serde_as(as = "Vec<(_, _)>")]`.
     * `display_fromstr` can be replaced with `#[serde_as(as = "DisplayFromStr")]`.
     * `bytes_or_string` can be replaced with `#[serde_as(as = "BytesOrString")]`.
