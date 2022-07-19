@@ -51,7 +51,7 @@ jobs:
           components: rustfmt
 
       - name: Rustfmt Check (${{ matrix.rust }})
-        run: cargo fmt --all -- --check
+        uses: actions-rust-lang/rustfmt@v1
 
   build_and_test:
     name: Build and Test
