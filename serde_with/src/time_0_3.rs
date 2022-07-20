@@ -24,7 +24,7 @@ use serde::{de, Deserializer, Serializer};
 #[cfg(feature = "std")]
 use serde::{ser::Error as _, Serialize as _};
 #[cfg(feature = "std")]
-use time_0_3::format_description::well_known::{Rfc2822, Rfc3339};
+use time_0_3::format_description::well_known::{iso8601::EncodedConfig, Iso8601, Rfc2822, Rfc3339};
 use time_0_3::{Duration, OffsetDateTime, PrimitiveDateTime};
 
 /// Create a [`PrimitiveDateTime`] for the Unix Epoch
@@ -599,5 +599,41 @@ impl<'de> DeserializeAs<'de, OffsetDateTime> for Rfc3339 {
         }
 
         deserializer.deserialize_str(Visitor)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<const CONFIG: EncodedConfig> SerializeAs<OffsetDateTime> for Iso8601<CONFIG> {
+    fn serialize_as<S>(datetime: &OffsetDateTime, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        datetime
+            .format(&Iso8601::<CONFIG>)
+            .map_err(S::Error::custom)?
+            .serialize(serializer)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<'de, const CONFIG: EncodedConfig> DeserializeAs<'de, OffsetDateTime> for Iso8601<CONFIG> {
+    fn deserialize_as<D>(deserializer: D) -> Result<OffsetDateTime, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct Visitor<const CONFIG: EncodedConfig>;
+        impl<'de, const CONFIG: EncodedConfig> de::Visitor<'de> for Visitor<CONFIG> {
+            type Value = OffsetDateTime;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a ISO8601-formatted `OffsetDateTime`")
+            }
+
+            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                Self::Value::parse(value, &Iso8601::<CONFIG>).map_err(E::custom)
+            }
+        }
+
+        deserializer.deserialize_str(Visitor::<CONFIG>)
     }
 }

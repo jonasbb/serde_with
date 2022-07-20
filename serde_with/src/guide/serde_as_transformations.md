@@ -479,7 +479,7 @@ The [inverse operation](#maps-to-vec-of-tuples) is also available.
 ## Well-known time formats for `OffsetDateTime`
 
 [`time::OffsetDateTime`] can be serialized in string format in different well-known formats.
-Two formats are supported, [`time::format_description::well_known::Rfc2822`] and [`time::format_description::well_known::Rfc3339`].
+Three formats are supported, [`time::format_description::well_known::Rfc2822`], [`time::format_description::well_known::Rfc3339`], and [`time::format_description::well_known::Iso8601`].
 
 ```ignore
 // Rust
@@ -487,10 +487,13 @@ Two formats are supported, [`time::format_description::well_known::Rfc2822`] and
 rfc_2822: OffsetDateTime,
 #[serde_as(as = "time::format_description::well_known::Rfc3339")]
 rfc_3339: OffsetDateTime,
+#[serde_as(as = "time::format_description::well_known::Iso8601<Config>")]
+iso_8601: OffsetDateTime,
 
 // JSON
 "rfc_2822": "Fri, 21 Nov 1997 09:55:06 -0600",
 "rfc_3339": "1997-11-21T09:55:06-06:00",
+"iso_8061": "1997-11-21T09:55:06-06:00",
 ```
 
 These conversions are available with the `time_0_3` feature flag.
@@ -516,6 +519,7 @@ These conversions are available with the `time_0_3` feature flag.
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
 [`time::Duration`]: time_0_3::Duration
+[`time::format_description::well_known::Iso8601`]: time_0_3::format_description::well_known::Iso8601
 [`time::format_description::well_known::Rfc2822`]: time_0_3::format_description::well_known::Rfc2822
 [`time::format_description::well_known::Rfc3339`]: time_0_3::format_description::well_known::Rfc3339
 [`time::OffsetDateTime`]: time_0_3::OffsetDateTime
