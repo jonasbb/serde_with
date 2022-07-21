@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* `time` added support for the well-known `Iso8601` format.
+    This extends the existing support of `Rfc2822` and `Rfc3339`.
+
 ## [2.0.0] - 2022-07-17
 
 ### Added
