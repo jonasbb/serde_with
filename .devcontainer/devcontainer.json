@@ -51,7 +51,6 @@
         "github.codespaces",
         "github.vscode-pull-request-github",
         "rust-lang.rust-analyzer",
-        "ms-vsliveshare.vsliveshare",
         "redhat.vscode-yaml",
         "tamasfe.even-better-toml",
         "vadimcn.vscode-lldb",
@@ -68,7 +67,8 @@
 
     // Features to add to the dev container.
     "features": {
-        "git": "os-provided",
+        "git": "latest",
         "github-cli": "latest",
+        "fish": "latest",
     }
 }
