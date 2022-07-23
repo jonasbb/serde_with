@@ -4,15 +4,7 @@
 //!
 //! Please check the documentation on the [`Base64`] type for details.
 
-use crate::{formats, DeserializeAs, SerializeAs};
-use alloc::vec::Vec;
-use base64::Config;
-use core::{
-    convert::{TryFrom, TryInto},
-    fmt,
-    marker::PhantomData,
-};
-use serde::{de::Error, Deserializer, Serialize, Serializer};
+use crate::prelude::*;
 
 /// Serialize bytes with base64
 ///
@@ -83,7 +75,7 @@ where
     where
         S: Serializer,
     {
-        base64::encode_config(source, base64::Config::new(CHARSET::charset(), true))
+        ::base64::encode_config(source, ::base64::Config::new(CHARSET::charset(), true))
             .serialize(serializer)
     }
 }
@@ -97,7 +89,7 @@ where
     where
         S: Serializer,
     {
-        base64::encode_config(source, base64::Config::new(CHARSET::charset(), false))
+        ::base64::encode_config(source, ::base64::Config::new(CHARSET::charset(), false))
             .serialize(serializer)
     }
 }
@@ -112,9 +104,9 @@ where
     where
         D: Deserializer<'de>,
     {
-        struct Visitor<T, CHARSET>(PhantomData<(T, CHARSET)>);
+        struct Helper<T, CHARSET>(PhantomData<(T, CHARSET)>);
 
-        impl<'de, T, CHARSET> serde::de::Visitor<'de> for Visitor<T, CHARSET>
+        impl<'de, T, CHARSET> Visitor<'de> for Helper<T, CHARSET>
         where
             T: TryFrom<Vec<u8>>,
             CHARSET: CharacterSet,
@@ -127,14 +119,17 @@ where
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
-                let bytes = base64::decode_config(value, Config::new(CHARSET::charset(), false))
-                    .map_err(Error::custom)?;
+                let bytes = ::base64::decode_config(
+                    value,
+                    ::base64::Config::new(CHARSET::charset(), false),
+                )
+                .map_err(DeError::custom)?;
 
                 let length = bytes.len();
                 bytes.try_into().map_err(|_e: T::Error| {
-                    Error::custom(format_args!(
+                    DeError::custom(format_args!(
                         "Can't convert a Byte Vector of length {} to the output type.",
                         length
                     ))
@@ -142,7 +137,7 @@ where
             }
         }
 
-        deserializer.deserialize_str(Visitor::<T, CHARSET>(PhantomData))
+        deserializer.deserialize_str(Helper::<T, CHARSET>(PhantomData))
     }
 }
 
@@ -151,7 +146,7 @@ pub trait CharacterSet {
     /// Return a specific character set.
     ///
     /// Return one enum variant of the [`base64::CharacterSet`](base64::CharacterSet) enum.
-    fn charset() -> base64::CharacterSet;
+    fn charset() -> ::base64::CharacterSet;
 }
 
 /// The standard character set (uses `+` and `/`).
@@ -159,8 +154,8 @@ pub trait CharacterSet {
 /// See [RFC 3548](https://tools.ietf.org/html/rfc3548#section-3).
 pub struct Standard;
 impl CharacterSet for Standard {
-    fn charset() -> base64::CharacterSet {
-        base64::CharacterSet::Standard
+    fn charset() -> ::base64::CharacterSet {
+        ::base64::CharacterSet::Standard
     }
 }
 
@@ -169,8 +164,8 @@ impl CharacterSet for Standard {
 /// See [RFC 3548](https://tools.ietf.org/html/rfc3548#section-3).
 pub struct UrlSafe;
 impl CharacterSet for UrlSafe {
-    fn charset() -> base64::CharacterSet {
-        base64::CharacterSet::UrlSafe
+    fn charset() -> ::base64::CharacterSet {
+        ::base64::CharacterSet::UrlSafe
     }
 }
 
@@ -179,16 +174,16 @@ impl CharacterSet for UrlSafe {
 /// Not standardized, but folk wisdom on the net asserts that this alphabet is what crypt uses.
 pub struct Crypt;
 impl CharacterSet for Crypt {
-    fn charset() -> base64::CharacterSet {
-        base64::CharacterSet::Crypt
+    fn charset() -> ::base64::CharacterSet {
+        ::base64::CharacterSet::Crypt
     }
 }
 
 /// The bcrypt character set (uses `./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`).
 pub struct Bcrypt;
 impl CharacterSet for Bcrypt {
-    fn charset() -> base64::CharacterSet {
-        base64::CharacterSet::Bcrypt
+    fn charset() -> ::base64::CharacterSet {
+        ::base64::CharacterSet::Bcrypt
     }
 }
 
@@ -197,8 +192,8 @@ impl CharacterSet for Bcrypt {
 /// See [RFC 3501](https://tools.ietf.org/html/rfc3501#section-5.1.3).
 pub struct ImapMutf7;
 impl CharacterSet for ImapMutf7 {
-    fn charset() -> base64::CharacterSet {
-        base64::CharacterSet::ImapMutf7
+    fn charset() -> ::base64::CharacterSet {
+        ::base64::CharacterSet::ImapMutf7
     }
 }
 
@@ -207,7 +202,7 @@ impl CharacterSet for ImapMutf7 {
 /// See [BinHex 4.0 Definition](http://files.stairways.com/other/binhex-40-specs-info.txt).
 pub struct BinHex;
 impl CharacterSet for BinHex {
-    fn charset() -> base64::CharacterSet {
-        base64::CharacterSet::BinHex
+    fn charset() -> ::base64::CharacterSet {
+        ::base64::CharacterSet::BinHex
     }
 }

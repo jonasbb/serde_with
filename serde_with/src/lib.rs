@@ -1,5 +1,9 @@
 #![warn(
     clippy::semicolon_if_nothing_returned,
+    // New clippy lints, not yet stable
+    // clippy::std_instead_of_core,
+    // clippy::std_instead_of_alloc,
+    // clippy::alloc_instead_of_core,
     missing_docs,
     rust_2018_idioms,
     rustdoc::missing_crate_level_docs,
@@ -362,13 +366,53 @@ generate_guide! {
     }
 }
 
+pub(crate) mod prelude {
+    #![allow(unused_imports)]
+
+    pub(crate) use crate::{
+        de::*,
+        ser::*,
+        utils::duration::{DurationSigned, Sign},
+        *,
+    };
+    #[cfg(feature = "alloc")]
+    pub(crate) use alloc::{
+        borrow::{Cow, ToOwned},
+        boxed::Box,
+        collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
+        rc::{Rc, Weak as RcWeak},
+        string::{String, ToString},
+        sync::{Arc, Weak as ArcWeak},
+        vec::Vec,
+    };
+    pub(crate) use core::{
+        cell::{Cell, RefCell},
+        convert::{TryFrom, TryInto},
+        fmt::{self, Display},
+        hash::{BuildHasher, Hash},
+        str::FromStr,
+        time::Duration,
+    };
+    pub(crate) use serde::{
+        de::{Error as DeError, *},
+        forward_to_deserialize_any,
+        ser::{Error as SerError, *},
+    };
+    #[cfg(feature = "std")]
+    pub(crate) use std::{
+        collections::{HashMap, HashSet},
+        sync::{Mutex, RwLock},
+        time::SystemTime,
+    };
+}
+
 #[cfg(feature = "alloc")]
 #[doc(inline)]
 pub use crate::enum_map::EnumMap;
+// use crate::prelude::*;
 #[doc(inline)]
 pub use crate::{de::DeserializeAs, ser::SerializeAs};
 use core::marker::PhantomData;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
@@ -416,35 +460,6 @@ pub use serde_with_macros::*;
 ///
 /// [serde_as]: https://docs.rs/serde_with/2.0.0/serde_with/attr.serde_as.html
 pub struct As<T: ?Sized>(PhantomData<T>);
-
-impl<T: ?Sized> As<T> {
-    /// Serialize type `T` using [`SerializeAs`][]
-    ///
-    /// The function signature is compatible with [serde's with-annotation][with-annotation].
-    ///
-    /// [with-annotation]: https://serde.rs/field-attrs.html#with
-    pub fn serialize<S, I>(value: &I, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-        T: SerializeAs<I>,
-        I: ?Sized,
-    {
-        T::serialize_as(value, serializer)
-    }
-
-    /// Deserialize type `T` using [`DeserializeAs`][]
-    ///
-    /// The function signature is compatible with [serde's with-annotation][with-annotation].
-    ///
-    /// [with-annotation]: https://serde.rs/field-attrs.html#with
-    pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>
-    where
-        T: DeserializeAs<'de, I>,
-        D: Deserializer<'de>,
-    {
-        T::deserialize_as(deserializer)
-    }
-}
 
 /// Adapter to convert from `serde_as` to the serde traits.
 ///

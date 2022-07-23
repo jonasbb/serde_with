@@ -5,26 +5,12 @@
 //! [chrono]: https://docs.rs/chrono/
 
 use crate::{
-    de::DeserializeAs,
     formats::{Flexible, Format, Strict, Strictness},
-    ser::SerializeAs,
-    utils::duration::{DurationSigned, Sign},
-    DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
-    DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
-    DurationSeconds, DurationSecondsWithFrac, TimestampMicroSeconds, TimestampMicroSecondsWithFrac,
-    TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
-    TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
+    prelude::*,
 };
-#[cfg(feature = "alloc")]
-use alloc::string::String;
 #[cfg(feature = "std")]
-use alloc::vec::Vec;
-#[cfg(feature = "std")]
-use chrono_0_4::Local;
-use chrono_0_4::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
-#[cfg(feature = "std")]
-use core::fmt;
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use ::chrono_0_4::Local;
+use ::chrono_0_4::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
 fn unix_epoch_utc() -> DateTime<Utc> {
@@ -69,8 +55,6 @@ fn unix_epoch_naive() -> NaiveDateTime {
 #[cfg(feature = "std")]
 pub mod datetime_utc_ts_seconds_from_any {
     use super::*;
-    use chrono_0_4::{DateTime, NaiveDateTime, Utc};
-    use serde::de::{Deserializer, Error, Unexpected, Visitor};
 
     /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
     pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
@@ -88,13 +72,13 @@ pub mod datetime_utc_ts_seconds_from_any {
 
             fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 let ndt = NaiveDateTime::from_timestamp_opt(value, 0);
                 if let Some(ndt) = ndt {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
-                    Err(Error::custom(format_args!(
+                    Err(DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{}'",
                         value
                     )))
@@ -103,13 +87,13 @@ pub mod datetime_utc_ts_seconds_from_any {
 
             fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 let ndt = NaiveDateTime::from_timestamp_opt(value as i64, 0);
                 if let Some(ndt) = ndt {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
-                    Err(Error::custom(format_args!(
+                    Err(DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{}'",
                         value
                     )))
@@ -118,7 +102,7 @@ pub mod datetime_utc_ts_seconds_from_any {
 
             fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 let seconds = value.trunc() as i64;
                 let nsecs = (value.fract() * 1_000_000_000_f64).abs() as u32;
@@ -126,7 +110,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                 if let Some(ndt) = ndt {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
-                    Err(Error::custom(format_args!(
+                    Err(DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{}'",
                         value
                     )))
@@ -135,7 +119,7 @@ pub mod datetime_utc_ts_seconds_from_any {
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 let parts: Vec<_> = value.split('.').collect();
 
@@ -146,20 +130,20 @@ pub mod datetime_utc_ts_seconds_from_any {
                             if let Some(ndt) = ndt {
                                 Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                             } else {
-                                Err(Error::custom(format_args!(
+                                Err(DeError::custom(format_args!(
                                     "a timestamp which can be represented in a DateTime but received '{}'",
                                     value
                                 )))
                             }
                         } else {
-                            Err(Error::invalid_value(Unexpected::Str(value), &self))
+                            Err(DeError::invalid_value(Unexpected::Str(value), &self))
                         }
                     }
                     [seconds, subseconds] => {
                         if let Ok(seconds) = seconds.parse() {
                             let subseclen = subseconds.chars().count() as u32;
                             if subseclen > 9 {
-                                return Err(Error::custom(format_args!(
+                                return Err(DeError::custom(format_args!(
                                     "DateTimes only support nanosecond precision but '{}' has more than 9 digits.",
                                     value
                                 )));
@@ -172,20 +156,20 @@ pub mod datetime_utc_ts_seconds_from_any {
                                 if let Some(ndt) = ndt {
                                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                                 } else {
-                                    Err(Error::custom(format_args!(
+                                    Err(DeError::custom(format_args!(
                                         "a timestamp which can be represented in a DateTime but received '{}'",
                                         value
                                     )))
                                 }
                             } else {
-                                Err(Error::invalid_value(Unexpected::Str(value), &self))
+                                Err(DeError::invalid_value(Unexpected::Str(value), &self))
                             }
                         } else {
-                            Err(Error::invalid_value(Unexpected::Str(value), &self))
+                            Err(DeError::invalid_value(Unexpected::Str(value), &self))
                         }
                     }
 
-                    _ => Err(Error::invalid_value(Unexpected::Str(value), &self)),
+                    _ => Err(DeError::invalid_value(Unexpected::Str(value), &self)),
                 }
             }
         }
@@ -235,7 +219,7 @@ where
     let mut chrono_dur = match Duration::from_std(dur.duration) {
         Ok(dur) => dur,
         Err(msg) => {
-            return Err(de::Error::custom(format_args!(
+            return Err(DeError::custom(format_args!(
                 "Duration is outside of the representable range: {}",
                 msg
             )))
