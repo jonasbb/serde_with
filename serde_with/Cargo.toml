@@ -82,7 +82,7 @@ ron = "0.7"
 rustversion = "1.0.0"
 serde_json = {version = "1.0.25", features = ["preserve_order"]}
 serde_test = "1.0.124"
-serde_yaml = "0.8.21"
+serde_yaml = "0.9.2"
 serde-xml-rs = "0.5.0"
 version-sync = "0.9.1"
 
