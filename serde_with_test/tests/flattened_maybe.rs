@@ -25,17 +25,17 @@ struct T {
 fn flattened_maybe() {
     // Supports both flattened
     let j = r#" {"i":1} "#;
-    ::std::assert!(::s_json::from_str::<S>(j).is_ok());
+    ::s_json::from_str::<S>(j).unwrap();
 
     // and non-flattened versions.
     let j = r#" {"t":{"i":1}} "#;
-    ::std::assert!(::s_json::from_str::<S>(j).is_ok());
+    ::s_json::from_str::<S>(j).unwrap();
 
     // Ensure that the value is given
     let j = r#" {} "#;
-    ::std::assert!(::s_json::from_str::<S>(j).is_err());
+    ::s_json::from_str::<S>(j).unwrap_err();
 
     // and only occurs once, not multiple times.
     let j = r#" {"i":1,"t":{"i":1}} "#;
-    ::std::assert!(::s_json::from_str::<S>(j).is_err());
+    ::s_json::from_str::<S>(j).unwrap_err();
 }
