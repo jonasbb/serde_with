@@ -175,16 +175,38 @@ where
         input.attrs.push(consume_serde_as_attribute);
         Ok(quote!(#input))
     } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
-        let errors: Vec<DarlingError> = input
+        // Prevent serde_as on enum variants
+        let mut errors: Vec<DarlingError> = input
             .variants
-            .iter_mut()
-            .map(|variant| apply_on_fields(&mut variant.fields, function))
-            // turn the Err variant into the Some, such that we only collect errors
-            .filter_map(|res| match res {
-                Err(e) => Some(e),
-                Ok(()) => None,
+            .iter()
+            .flat_map(|variant| {
+                variant.attrs.iter().filter_map(|attr| {
+                    if attr.path.is_ident("serde_as") {
+                        Some(
+                            DarlingError::custom(
+                                "serde_as attribute is not allowed on enum variants",
+                            )
+                            .with_span(&attr),
+                        )
+                    } else {
+                        None
+                    }
+                })
             })
             .collect();
+        // Process serde_as on all fields
+        errors.extend(
+            input
+                .variants
+                .iter_mut()
+                .map(|variant| apply_on_fields(&mut variant.fields, function))
+                // turn the Err variant into the Some, such that we only collect errors
+                .filter_map(|res| match res {
+                    Err(e) => Some(e),
+                    Ok(()) => None,
+                }),
+        );
+
         if errors.is_empty() {
             input.attrs.push(consume_serde_as_attribute);
             Ok(quote!(#input))
@@ -417,7 +439,10 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// Convenience macro to use the [`serde_as`] system.
 ///
 /// The [`serde_as`] system is designed as a more flexible alternative to serde's with-annotation.
-/// The `#[serde_as]` attribute must be placed *before* the `#[derive]` attribute
+/// The `#[serde_as]` attribute must be placed *before* the `#[derive]` attribute.
+/// Each field of a struct or enum can be annotated with `#[serde_as(...)]` to specify which transformations should be applied.
+/// `serde_as` is *not* supported on enum variants.
+/// This is in contrast to `#[serde(with = "...")]`.
 ///
 /// # Example
 ///

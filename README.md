@@ -121,39 +121,51 @@ Foo {a: None, b: None, c: None, d: Some(4), e: None, f: None, g: Some(7)}
 ### Advanced `serde_as` usage
 
 This example is mainly supposed to highlight the flexibility of the `serde_as`-annotation compared to [serde's with-annotation][with-annotation].
-More details about `serde_as` can be found in the [user guide][].
+More details about `serde_as` can be found in the [user guide].
 
 ```rust
 #[serde_as]
 #[derive(Deserialize, Serialize)]
-struct Foo {
-     // Serialize them into a list of number as seconds
-     #[serde_as(as = "Vec<DurationSeconds>")]
-     durations: Vec<Duration>,
-     // We can treat a Vec like a map with duplicates.
-     // JSON only allows string keys, so convert i32 to strings
-     // The bytes will be hex encoded
-     #[serde_as(as = "BTreeMap<DisplayFromStr, Hex>")]
-     bytes: Vec<(i32, Vec<u8>)>,
+enum Foo {
+    Durations(
+        // Serialize them into a list of number as seconds
+        #[serde_as(as = "Vec<DurationSeconds>")]
+        Vec<Duration>,
+    ),
+    Bytes {
+        // We can treat a Vec like a map with duplicates.
+        // JSON only allows string keys, so convert i32 to strings
+        // The bytes will be hex encoded
+        #[serde_as(as = "BTreeMap<DisplayFromStr, Hex>")]
+        bytes: Vec<(i32, Vec<u8>)>,
+    }
 }
 
 // This will serialize
-Foo {
-    durations: vec![Duration::new(5, 0), Duration::new(3600, 0), Duration::new(0, 0)],
+Foo::Durations(
+    vec![Duration::new(5, 0), Duration::new(3600, 0), Duration::new(0, 0)]
+)
+// into this JSON
+{
+    "Durations": [5, 3600, 0]
+}
+
+// and serializes
+Foo::Bytes {
     bytes: vec![
         (1, vec![0, 1, 2]),
         (-100, vec![100, 200, 255]),
         (1, vec![0, 111, 222]),
     ],
 }
-
 // into this JSON
 {
-    "durations": [5, 3600, 0],
-    "bytes": {
-        "1": "000102",
-        "-100": "64c8ff",
-        "1": "006fde"
+    "Bytes": {
+        "bytes": {
+            "1": "000102",
+            "-100": "64c8ff",
+            "1": "006fde"
+        }
     }
 }
 ```

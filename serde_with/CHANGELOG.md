@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * `time` added support for the well-known `Iso8601` format.
     This extends the existing support of `Rfc2822` and `Rfc3339`.
 
+### Changed
+
+* Warn if `serde_as` is used on an enum variant.
+    Attributes on enum variants were never supported.
+    But `#[serde(with = "...")]` can be added on variants, such that some confusion can occur when migration ([#499](https://github.com/jonasbb/serde_with/issues/499)).
+
 ## [2.0.0] - 2022-07-17
 
 ### Added
