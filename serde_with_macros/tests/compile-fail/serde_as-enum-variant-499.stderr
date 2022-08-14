@@ -1,0 +1,5 @@
+error: serde_as attribute is not allowed on enum variants
+  --> tests/compile-fail/serde_as-enum-variant-499.rs:12:5
+   |
+12 |     #[serde_as(as = "serde_with::json::JsonString")]
+   |     ^

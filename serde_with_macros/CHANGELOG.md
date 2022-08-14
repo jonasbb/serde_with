@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Warn if `serde_as` is used on an enum variant.
+    Attributes on enum variants were never supported.
+    But `#[serde(with = "...")]` can be added on variants, such that some confusion can occur when migration ([#499](https://github.com/jonasbb/serde_with/issues/499)).
+
 ## [2.0.0] - 2022-07-17
 
 No changes compared to v2.0.0-rc.0.
