@@ -1,5 +1,5 @@
 [package]
-edition = "2018"
+edition = "2021"
 name = "serde_with_test"
 publish = false
 version = "0.0.0"
