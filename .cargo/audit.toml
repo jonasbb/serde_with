@@ -1,6 +1,14 @@
 [advisories]
-#ignore = [
-#]
+ignore = [
+    # ansi_term is Unmaintained
+    # Inactionable, since this is a transitive dependency of pretty_assertions
+    # Only used in test code.
+    "RUSTSEC-2021-0139",
+    # xml-rs is Unmaintained
+    # Inactionable, since this is a transitive dependency of serde-xml-rs
+    # Only used in test code.
+    "RUSTSEC-2022-0048",
+]
 # warn for categories of informational advisories
 informational_warnings = [
     "unmaintained",
