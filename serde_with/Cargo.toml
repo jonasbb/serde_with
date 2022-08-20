@@ -78,7 +78,7 @@ mime = "0.3.16"
 pretty_assertions = "1.0.0"
 regex = {version = "1.5.6", default-features = false, features = ["std"]}
 rmp-serde = "1.1.0"
-ron = "0.7"
+ron = "0.8"
 rustversion = "1.0.0"
 serde_json = {version = "1.0.25", features = ["preserve_order"]}
 serde_test = "1.0.124"
