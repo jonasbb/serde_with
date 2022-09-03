@@ -139,17 +139,18 @@ use serde::{
 /// // into this XML document
 /// // Duplicate keys are emitted for identical enum variants.
 /// let expected = r#"
+/// <?xml version="1.0" encoding="UTF-8"?>
 /// <VecEnumValues>
 ///     <vec>
 ///         <Int>123</Int>
 ///         <String>FooBar</String>
 ///         <Int>456</Int>
 ///         <String>XXX</String>
-///         <Unit></Unit>
+///         <Unit />
 ///     </vec>
 /// </VecEnumValues>"#
 /// // Remove whitespace
-/// .replace(' ', "")
+/// .replace("    ", "")
 /// .replace('\n', "");
 ///
 /// // Both serialization and deserialization work flawlessly.
