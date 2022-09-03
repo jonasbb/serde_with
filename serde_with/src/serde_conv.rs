@@ -107,41 +107,43 @@ macro_rules! serde_conv {
         #[allow(non_camel_case_types)]
         $vis struct $m;
 
-        #[allow(clippy::ptr_arg)]
-        impl $m {
-            $vis fn serialize<S>(x: &$t, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
-            where
-                S: $crate::serde::Serializer,
-            {
-                let y = $ser(x);
-                $crate::serde::Serialize::serialize(&y, serializer)
+        const _:() = {
+            #[allow(clippy::ptr_arg)]
+            impl $m {
+                $vis fn serialize<S>(x: &$t, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
+                where
+                    S: $crate::serde::Serializer,
+                {
+                    let y = $ser(x);
+                    $crate::serde::Serialize::serialize(&y, serializer)
+                }
+
+                $vis fn deserialize<'de, D>(deserializer: D) -> $crate::__private__::Result<$t, D::Error>
+                where
+                    D: $crate::serde::Deserializer<'de>,
+                {
+                    let y = $crate::serde::Deserialize::deserialize(deserializer)?;
+                    $de(y).map_err($crate::serde::de::Error::custom)
+                }
             }
 
-            $vis fn deserialize<'de, D>(deserializer: D) -> ::std::result::Result<$t, D::Error>
-            where
-                D: $crate::serde::Deserializer<'de>,
-            {
-                let y = $crate::serde::Deserialize::deserialize(deserializer)?;
-                $de(y).map_err($crate::serde::de::Error::custom)
+            impl $crate::SerializeAs<$t> for $m {
+                fn serialize_as<S>(x: &$t, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
+                where
+                    S: $crate::serde::Serializer,
+                {
+                    Self::serialize(x, serializer)
+                }
             }
-        }
 
-        impl $crate::SerializeAs<$t> for $m {
-            fn serialize_as<S>(x: &$t, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
-            where
-                S: $crate::serde::Serializer,
-            {
-                Self::serialize(x, serializer)
+            impl<'de> $crate::DeserializeAs<'de, $t> for $m {
+                fn deserialize_as<D>(deserializer: D) -> $crate::__private__::Result<$t, D::Error>
+                where
+                    D: $crate::serde::Deserializer<'de>,
+                {
+                    Self::deserialize(deserializer)
+                }
             }
-        }
-
-        impl<'de> $crate::DeserializeAs<'de, $t> for $m {
-            fn deserialize_as<D>(deserializer: D) -> ::std::result::Result<$t, D::Error>
-            where
-                D: $crate::serde::Deserializer<'de>,
-            {
-                Self::deserialize(deserializer)
-            }
-        }
+        };
     };
 }

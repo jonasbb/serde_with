@@ -109,7 +109,7 @@ macro_rules! with_prefix {
             use $crate::with_prefix::WithPrefix;
 
             #[allow(dead_code)]
-            pub fn serialize<T, S>(object: &T, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+            pub fn serialize<T, S>(object: &T, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
             where
                 T: Serialize,
                 S: Serializer,
@@ -121,7 +121,7 @@ macro_rules! with_prefix {
             }
 
             #[allow(dead_code)]
-            pub fn deserialize<'de, T, D>(deserializer: D) -> ::std::result::Result<T, D::Error>
+            pub fn deserialize<'de, T, D>(deserializer: D) -> $crate::__private__::Result<T, D::Error>
             where
                 T: Deserialize<'de>,
                 D: Deserializer<'de>,
