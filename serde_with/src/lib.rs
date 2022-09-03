@@ -369,14 +369,10 @@ generate_guide! {
 pub(crate) mod prelude {
     #![allow(unused_imports)]
 
-    pub(crate) use crate::{
-        de::*,
-        ser::*,
-        utils::duration::{DurationSigned, Sign},
-        *,
-    };
+    pub(crate) use crate::utils::duration::{DurationSigned, Sign};
+    pub use crate::{de::*, ser::*, *};
     #[cfg(feature = "alloc")]
-    pub(crate) use alloc::{
+    pub use alloc::{
         borrow::{Cow, ToOwned},
         boxed::Box,
         collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
@@ -385,25 +381,34 @@ pub(crate) mod prelude {
         sync::{Arc, Weak as ArcWeak},
         vec::Vec,
     };
-    pub(crate) use core::{
+    pub use core::{
         cell::{Cell, RefCell},
         convert::{TryFrom, TryInto},
         fmt::{self, Display},
         hash::{BuildHasher, Hash},
+        option::Option,
+        result::Result,
         str::FromStr,
         time::Duration,
     };
-    pub(crate) use serde::{
+    pub use serde::{
         de::{Error as DeError, *},
         forward_to_deserialize_any,
         ser::{Error as SerError, *},
     };
     #[cfg(feature = "std")]
-    pub(crate) use std::{
+    pub use std::{
         collections::{HashMap, HashSet},
         sync::{Mutex, RwLock},
         time::SystemTime,
     };
+}
+/// This module is not part of the public API
+///
+/// Do not rely on any exports.
+#[doc(hidden)]
+pub mod __private__ {
+    pub use crate::prelude::*;
 }
 
 #[cfg(feature = "alloc")]

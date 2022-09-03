@@ -993,7 +993,7 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
 impl<'de, SEPARATOR, I, T> DeserializeAs<'de, I> for StringWithSeparator<SEPARATOR, T>
 where
     SEPARATOR: Separator,
-    I: core::iter::FromIterator<T>,
+    I: FromIterator<T>,
     T: FromStr,
     T::Err: Display,
 {
@@ -1006,7 +1006,7 @@ where
         impl<'de, SEPARATOR, I, T> Visitor<'de> for Helper<SEPARATOR, I, T>
         where
             SEPARATOR: Separator,
-            I: core::iter::FromIterator<T>,
+            I: FromIterator<T>,
             T: FromStr,
             T::Err: Display,
         {
