@@ -30,12 +30,8 @@ For bugs, please open a [new issue](https://github.com/jonasbb/serde_with/issues
 
 ## Use `serde_with` in your Project
 
-Add this to your `Cargo.toml`:
-
-```toml
-[dependencies.serde_with]
-version = "2.0.0"
-features = [ "..." ]
+```bash
+cargo add serde_with
 ```
 
 The crate contains different features for integration with other common crates.
