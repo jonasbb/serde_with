@@ -67,12 +67,9 @@
 //!
 //! # Use `serde_with` in your Project
 //!
-//! Add this to your `Cargo.toml`:
-//!
-//! ```toml
-//! [dependencies.serde_with]
-//! version = "2.0.0"
-//! features = [ "..." ]
+//! ```bash
+//! # Add the current version to your Cargo.toml
+//! cargo add serde_with
 //! ```
 //!
 //! The crate contains different features for integration with other common crates.
