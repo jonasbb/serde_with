@@ -960,48 +960,48 @@ pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
 fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
     let ident = input.ident;
     let where_clause = &mut input.generics.make_where_clause().predicates;
-    where_clause.push(parse_quote!(Self: ::std::str::FromStr));
+    where_clause.push(parse_quote!(Self: #serde_with_crate_path::__private__::FromStr));
     where_clause.push(parse_quote!(
-        <Self as ::std::str::FromStr>::Err: ::std::fmt::Display
+        <Self as #serde_with_crate_path::__private__::FromStr>::Err: #serde_with_crate_path::__private__::Display
     ));
     let (de_impl_generics, ty_generics, where_clause) = split_with_de_lifetime(&input.generics);
     quote! {
         #[automatically_derived]
         impl #de_impl_generics #serde_with_crate_path::serde::Deserialize<'de> for #ident #ty_generics #where_clause {
-            fn deserialize<D>(deserializer: D) -> ::std::result::Result<Self, D::Error>
+            fn deserialize<D>(deserializer: D) -> #serde_with_crate_path::__private__::Result<Self, D::Error>
             where
                 D: #serde_with_crate_path::serde::Deserializer<'de>,
             {
-                struct Helper<S>(::std::marker::PhantomData<S>);
+                struct Helper<S>(#serde_with_crate_path::__private__::PhantomData<S>);
 
                 impl<'de, S> #serde_with_crate_path::serde::de::Visitor<'de> for Helper<S>
                 where
-                    S: ::std::str::FromStr,
-                    <S as ::std::str::FromStr>::Err: ::std::fmt::Display,
+                    S: #serde_with_crate_path::__private__::FromStr,
+                    <S as #serde_with_crate_path::__private__::FromStr>::Err: #serde_with_crate_path::__private__::Display,
                 {
                     type Value = S;
 
-                    fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                        ::std::write!(formatter, "string")
+                    fn expecting(&self, formatter: &mut #serde_with_crate_path::core::fmt::Formatter<'_>) -> #serde_with_crate_path::core::fmt::Result {
+                        #serde_with_crate_path::__private__::Display::fmt("a string", formatter)
                     }
 
-                    fn visit_str<E>(self, value: &str) -> ::std::result::Result<Self::Value, E>
+                    fn visit_str<E>(self, value: &str) -> #serde_with_crate_path::__private__::Result<Self::Value, E>
                     where
                         E: #serde_with_crate_path::serde::de::Error,
                     {
                         value.parse::<Self::Value>().map_err(#serde_with_crate_path::serde::de::Error::custom)
                     }
 
-                    fn visit_bytes<E>(self, value: &[u8]) -> ::std::result::Result<Self::Value, E>
+                    fn visit_bytes<E>(self, value: &[u8]) -> #serde_with_crate_path::__private__::Result<Self::Value, E>
                     where
                         E: #serde_with_crate_path::serde::de::Error,
                     {
-                        let utf8 = ::std::str::from_utf8(value).map_err(#serde_with_crate_path::serde::de::Error::custom)?;
+                        let utf8 = #serde_with_crate_path::core::str::from_utf8(value).map_err(#serde_with_crate_path::serde::de::Error::custom)?;
                         self.visit_str(utf8)
                     }
                 }
 
-                deserializer.deserialize_str(Helper(::std::marker::PhantomData))
+                deserializer.deserialize_str(Helper(#serde_with_crate_path::__private__::PhantomData))
             }
         }
     }
@@ -1075,12 +1075,12 @@ fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> Tok
         .generics
         .make_where_clause()
         .predicates
-        .push(parse_quote!(Self: ::std::fmt::Display));
+        .push(parse_quote!(Self: #serde_with_crate_path::__private__::Display));
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     quote! {
         #[automatically_derived]
         impl #impl_generics #serde_with_crate_path::serde::Serialize for #ident #ty_generics #where_clause {
-            fn serialize<S>(&self, serializer: S) -> ::std::result::Result<S::Ok, S::Error>
+            fn serialize<S>(&self, serializer: S) -> #serde_with_crate_path::__private__::Result<S::Ok, S::Error>
             where
                 S: #serde_with_crate_path::serde::Serializer,
             {

@@ -282,6 +282,8 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 #[doc(hidden)]
+pub extern crate core;
+#[doc(hidden)]
 pub extern crate serde;
 #[cfg(feature = "std")]
 extern crate std;
@@ -386,6 +388,7 @@ pub(crate) mod prelude {
         convert::{TryFrom, TryInto},
         fmt::{self, Display},
         hash::{BuildHasher, Hash},
+        marker::PhantomData,
         option::Option,
         result::Result,
         str::FromStr,
@@ -403,6 +406,7 @@ pub(crate) mod prelude {
         time::SystemTime,
     };
 }
+
 /// This module is not part of the public API
 ///
 /// Do not rely on any exports.
