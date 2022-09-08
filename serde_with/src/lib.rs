@@ -84,8 +84,9 @@
 //! Annotate your struct or enum to enable the custom de/serializer.
 //! The `#[serde_as]` attribute must be placed *before* the `#[derive]`.
 //!
-//! ## `DisplayFromStr` [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/py7ida)
+//! ## `DisplayFromStr`
 //!
+//! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/py7ida)
 //! ```rust
 //! # #[cfg(feature = "macros")]
 //! # use serde::{Deserialize, Serialize};
@@ -116,11 +117,12 @@
 //! # }
 //! ```
 //!
-//! ## Large and const-generic arrays [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/um0xyi)
+//! ## Large and const-generic arrays
 //!
 //! serde does not support arrays with more than 32 elements or using const-generics.
 //! The `serde_as` attribute allows circumventing this restriction, even for nested types and nested arrays.
 //!
+//! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/um0xyi)
 //! ```rust
 //! # #[cfg(feature = "macros")]
 //! # use serde::{Deserialize, Serialize};
@@ -152,12 +154,13 @@
 //! # }
 //! ```
 //!
-//! ## `skip_serializing_none` [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/xr1tm0)
+//! ## `skip_serializing_none`
 //!
 //! This situation often occurs with JSON, but other formats also support optional fields.
 //! If many fields are optional, putting the annotations on the structs can become tedious.
 //! The `#[skip_serializing_none]` attribute must be placed *before* the `#[derive]`.
 //!
+//! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/xr1tm0)
 //! ```rust
 //! # #[cfg(feature = "macros")]
 //! # use serde::{Deserialize, Serialize};

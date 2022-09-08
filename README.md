@@ -31,6 +31,7 @@ For bugs, please open a [new issue](https://github.com/jonasbb/serde_with/issues
 ## Use `serde_with` in your Project
 
 ```bash
+# Add the current version to your Cargo.toml
 cargo add serde_with
 ```
 
@@ -42,8 +43,9 @@ Check the [feature flags][] section for information about all available features
 Annotate your struct or enum to enable the custom de/serializer.
 The `#[serde_as]` attribute must be placed *before* the `#[derive]`.
 
-### `DisplayFromStr` [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/py7ida)
+### `DisplayFromStr`
 
+[![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/py7ida)
 ```rust
 #[serde_as]
 #[derive(Deserialize, Serialize)]
@@ -60,11 +62,12 @@ Foo {bar: 12}
 {"bar": "12"}
 ```
 
-### Large and const-generic arrays [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/um0xyi)
+### Large and const-generic arrays
 
 serde does not support arrays with more than 32 elements or using const-generics.
 The `serde_as` attribute allows circumventing this restriction, even for nested types and nested arrays.
 
+[![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/um0xyi)
 ```rust
 #[serde_as]
 #[derive(Deserialize, Serialize)]
@@ -88,12 +91,13 @@ let arrays: Arrays<100, 128> = Arrays {
 assert!(serde_json::to_string(&arrays).is_ok());
 ```
 
-### `skip_serializing_none` [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/xr1tm0)
+### `skip_serializing_none`
 
 This situation often occurs with JSON, but other formats also support optional fields.
 If many fields are optional, putting the annotations on the structs can become tedious.
 The `#[skip_serializing_none]` attribute must be placed *before* the `#[derive]`.
 
+[![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/xr1tm0)
 ```rust
 #[skip_serializing_none]
 #[derive(Deserialize, Serialize)]
