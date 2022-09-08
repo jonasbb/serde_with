@@ -1,5 +1,6 @@
 //! Specify the format and how lenient the deserialization is
 
+#[allow(unused_imports)]
 use crate::prelude::*;
 
 /// Specify how to serialize/deserialize a type
