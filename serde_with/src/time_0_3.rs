@@ -5,39 +5,26 @@
 //! [time]: https://docs.rs/time/0.3/
 
 use crate::{
-    de::DeserializeAs,
     formats::{Flexible, Format, Strict, Strictness},
-    ser::SerializeAs,
-    utils::duration::{DurationSigned, Sign},
-    DurationMicroSeconds, DurationMicroSecondsWithFrac, DurationMilliSeconds,
-    DurationMilliSecondsWithFrac, DurationNanoSeconds, DurationNanoSecondsWithFrac,
-    DurationSeconds, DurationSecondsWithFrac, TimestampMicroSeconds, TimestampMicroSecondsWithFrac,
-    TimestampMilliSeconds, TimestampMilliSecondsWithFrac, TimestampNanoSeconds,
-    TimestampNanoSecondsWithFrac, TimestampSeconds, TimestampSecondsWithFrac,
+    prelude::*,
 };
-#[cfg(feature = "alloc")]
-use alloc::string::String;
 #[cfg(feature = "std")]
-use core::fmt;
-use core::{convert::TryInto, time::Duration as StdDuration};
-use serde::{de, Deserializer, Serializer};
-#[cfg(feature = "std")]
-use serde::{ser::Error as _, Serialize as _};
-#[cfg(feature = "std")]
-use time_0_3::format_description::well_known::{iso8601::EncodedConfig, Iso8601, Rfc2822, Rfc3339};
-use time_0_3::{Duration, OffsetDateTime, PrimitiveDateTime};
+use ::time_0_3::format_description::well_known::{
+    iso8601::EncodedConfig, Iso8601, Rfc2822, Rfc3339,
+};
+use ::time_0_3::{Duration as Time03Duration, OffsetDateTime, PrimitiveDateTime};
 
 /// Create a [`PrimitiveDateTime`] for the Unix Epoch
 fn unix_epoch_primitive() -> PrimitiveDateTime {
     PrimitiveDateTime::new(
-        time_0_3::Date::from_ordinal_date(1970, 1).unwrap(),
-        time_0_3::Time::from_hms_nano(0, 0, 0, 0).unwrap(),
+        ::time_0_3::Date::from_ordinal_date(1970, 1).unwrap(),
+        ::time_0_3::Time::from_hms_nano(0, 0, 0, 0).unwrap(),
     )
 }
 
 /// Convert a [`time::Duration`][time_0_3::Duration] into a [`DurationSigned`]
-fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
-    let std_dur = StdDuration::new(
+fn duration_into_duration_signed(dur: &Time03Duration) -> DurationSigned {
+    let std_dur = Duration::new(
         dur.whole_seconds().unsigned_abs(),
         dur.subsec_nanoseconds().unsigned_abs(),
     );
@@ -54,14 +41,14 @@ fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
 }
 
 /// Convert a [`DurationSigned`] into a [`time_0_3::Duration`]
-fn duration_from_duration_signed<'de, D>(sdur: DurationSigned) -> Result<Duration, D::Error>
+fn duration_from_duration_signed<'de, D>(sdur: DurationSigned) -> Result<Time03Duration, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let mut dur: Duration = match sdur.duration.try_into() {
+    let mut dur: Time03Duration = match sdur.duration.try_into() {
         Ok(dur) => dur,
         Err(msg) => {
-            return Err(de::Error::custom(format_args!(
+            return Err(DeError::custom(format_args!(
                 "Duration is outside of the representable range: {}",
                 msg
             )))
@@ -123,7 +110,7 @@ use_duration_signed_ser!(
     DurationMicroSeconds DurationMicroSeconds,
     DurationNanoSeconds DurationNanoSeconds,
     => {
-        Duration; duration_into_duration_signed =>
+        Time03Duration; duration_into_duration_signed =>
         {i64, STRICTNESS => STRICTNESS: Strictness}
     }
 );
@@ -134,7 +121,7 @@ use_duration_signed_ser!(
     DurationMicroSeconds DurationMicroSeconds,
     DurationNanoSeconds DurationNanoSeconds,
     => {
-        Duration; duration_into_duration_signed =>
+        Time03Duration; duration_into_duration_signed =>
         {String, STRICTNESS => STRICTNESS: Strictness}
     }
 );
@@ -145,7 +132,7 @@ use_duration_signed_ser!(
     DurationMicroSeconds DurationMicroSeconds,
     DurationNanoSeconds DurationNanoSeconds,
     => {
-        Duration; duration_into_duration_signed =>
+        Time03Duration; duration_into_duration_signed =>
         {f64, STRICTNESS => STRICTNESS: Strictness}
     }
 );
@@ -222,7 +209,7 @@ use_duration_signed_ser!(
     DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
     DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
-        Duration; duration_into_duration_signed =>
+        Time03Duration; duration_into_duration_signed =>
         {String, STRICTNESS => STRICTNESS: Strictness}
     }
 );
@@ -233,7 +220,7 @@ use_duration_signed_ser!(
     DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
     DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
-        Duration; duration_into_duration_signed =>
+        Time03Duration; duration_into_duration_signed =>
         {f64, STRICTNESS => STRICTNESS: Strictness}
     }
 );
@@ -338,7 +325,7 @@ use_duration_signed_de!(
     DurationMicroSeconds DurationMicroSeconds,
     DurationNanoSeconds DurationNanoSeconds,
     => {
-        Duration; duration_from_duration_signed =>
+        Time03Duration; duration_from_duration_signed =>
         {i64, Strict =>}
         {FORMAT, Flexible => FORMAT: Format}
     }
@@ -350,7 +337,7 @@ use_duration_signed_de!(
     DurationMicroSeconds DurationMicroSeconds,
     DurationNanoSeconds DurationNanoSeconds,
     => {
-        Duration; duration_from_duration_signed =>
+        Time03Duration; duration_from_duration_signed =>
         {String, Strict =>}
     }
 );
@@ -361,7 +348,7 @@ use_duration_signed_de!(
     DurationMicroSeconds DurationMicroSeconds,
     DurationNanoSeconds DurationNanoSeconds,
     => {
-        Duration; duration_from_duration_signed =>
+        Time03Duration; duration_from_duration_signed =>
         {f64, Strict =>}
     }
 );
@@ -439,7 +426,7 @@ use_duration_signed_de!(
     DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
     DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
-        Duration; duration_from_duration_signed =>
+        Time03Duration; duration_from_duration_signed =>
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
@@ -450,7 +437,7 @@ use_duration_signed_de!(
     DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
     DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
-        Duration; duration_from_duration_signed =>
+        Time03Duration; duration_from_duration_signed =>
         {String, Strict =>}
     }
 );
@@ -461,7 +448,7 @@ use_duration_signed_de!(
     DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
     DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
-        Duration; duration_from_duration_signed =>
+        Time03Duration; duration_from_duration_signed =>
         {f64, Strict =>}
     }
 );
@@ -549,20 +536,20 @@ impl<'de> DeserializeAs<'de, OffsetDateTime> for Rfc2822 {
     where
         D: Deserializer<'de>,
     {
-        struct Visitor;
-        impl<'de> de::Visitor<'de> for Visitor {
+        struct Helper;
+        impl<'de> Visitor<'de> for Helper {
             type Value = OffsetDateTime;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a RFC2822-formatted `OffsetDateTime`")
             }
 
-            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+            fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
                 Self::Value::parse(value, &Rfc2822).map_err(E::custom)
             }
         }
 
-        deserializer.deserialize_str(Visitor)
+        deserializer.deserialize_str(Helper)
     }
 }
 
@@ -585,20 +572,20 @@ impl<'de> DeserializeAs<'de, OffsetDateTime> for Rfc3339 {
     where
         D: Deserializer<'de>,
     {
-        struct Visitor;
-        impl<'de> de::Visitor<'de> for Visitor {
+        struct Helper;
+        impl<'de> Visitor<'de> for Helper {
             type Value = OffsetDateTime;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a RFC3339-formatted `OffsetDateTime`")
             }
 
-            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+            fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
                 Self::Value::parse(value, &Rfc3339).map_err(E::custom)
             }
         }
 
-        deserializer.deserialize_str(Visitor)
+        deserializer.deserialize_str(Helper)
     }
 }
 
@@ -621,19 +608,19 @@ impl<'de, const CONFIG: EncodedConfig> DeserializeAs<'de, OffsetDateTime> for Is
     where
         D: Deserializer<'de>,
     {
-        struct Visitor<const CONFIG: EncodedConfig>;
-        impl<'de, const CONFIG: EncodedConfig> de::Visitor<'de> for Visitor<CONFIG> {
+        struct Helper<const CONFIG: EncodedConfig>;
+        impl<'de, const CONFIG: EncodedConfig> Visitor<'de> for Helper<CONFIG> {
             type Value = OffsetDateTime;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a ISO8601-formatted `OffsetDateTime`")
             }
 
-            fn visit_str<E: de::Error>(self, value: &str) -> Result<Self::Value, E> {
+            fn visit_str<E: DeError>(self, value: &str) -> Result<Self::Value, E> {
                 Self::Value::parse(value, &Iso8601::<CONFIG>).map_err(E::custom)
             }
         }
 
-        deserializer.deserialize_str(Visitor::<CONFIG>)
+        deserializer.deserialize_str(Helper::<CONFIG>)
     }
 }

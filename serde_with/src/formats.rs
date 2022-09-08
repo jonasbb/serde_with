@@ -1,7 +1,7 @@
 //! Specify the format and how lenient the deserialization is
 
-#[cfg(feature = "alloc")]
-use alloc::string::String;
+#[allow(unused_imports)]
+use crate::prelude::*;
 
 /// Specify how to serialize/deserialize a type
 ///

@@ -9,7 +9,7 @@
 
 mod impls;
 
-use super::*;
+use crate::prelude::*;
 
 /// A **data structure** that can be deserialized from any data format supported by Serde, analogue to [`Deserialize`].
 ///
@@ -137,5 +137,20 @@ where
             value,
             marker: PhantomData,
         })
+    }
+}
+
+impl<T: ?Sized> As<T> {
+    /// Deserialize type `T` using [`DeserializeAs`][]
+    ///
+    /// The function signature is compatible with [serde's with-annotation][with-annotation].
+    ///
+    /// [with-annotation]: https://serde.rs/field-attrs.html#with
+    pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>
+    where
+        T: DeserializeAs<'de, I>,
+        D: Deserializer<'de>,
+    {
+        T::deserialize_as(deserializer)
     }
 }

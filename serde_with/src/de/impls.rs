@@ -1,42 +1,6 @@
-use super::*;
-#[cfg(feature = "alloc")]
-use crate::formats::Format;
-#[cfg(feature = "std")]
-use crate::utils::duration::DurationSigned;
-use crate::{
-    formats::{Flexible, Separator, Strict},
-    utils, StringWithSeparator,
-};
-#[cfg(feature = "alloc")]
-use alloc::{
-    borrow::{Cow, ToOwned},
-    boxed::Box,
-    collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
-    rc::{Rc, Weak as RcWeak},
-    string::String,
-    sync::{Arc, Weak as ArcWeak},
-    vec::Vec,
-};
-#[cfg(any(feature = "std", feature = "indexmap_1"))]
-use core::hash::{BuildHasher, Hash};
-#[cfg(feature = "std")]
-use core::time::Duration;
-use core::{
-    cell::{Cell, RefCell},
-    convert::TryInto,
-    fmt::{self, Display},
-    iter::FromIterator,
-    str::FromStr,
-};
+use crate::{formats::*, prelude::*};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
-use serde::de::*;
-#[cfg(feature = "std")]
-use std::{
-    collections::{HashMap, HashSet},
-    sync::{Mutex, RwLock},
-    time::SystemTime,
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
@@ -79,7 +43,7 @@ where
             #[inline]
             fn visit_unit<E>(self) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(None)
             }
@@ -87,7 +51,7 @@ where
             #[inline]
             fn visit_none<E>(self) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(None)
             }
@@ -507,7 +471,7 @@ macro_rules! tuple_impl {
                         $(
                             let $t: DeserializeAsWrap<$t, $tas> = match seq.next_element()? {
                                 Some(value) => value,
-                                None => return Err(Error::invalid_length($n, &self)),
+                                None => return Err(DeError::invalid_length($n, &self)),
                             };
                         )+
 
@@ -829,9 +793,9 @@ where
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
-                value.parse::<Self::Value>().map_err(Error::custom)
+                value.parse::<Self::Value>().map_err(DeError::custom)
             }
         }
 
@@ -927,18 +891,18 @@ where
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 match value {
                     "" => Ok(None),
-                    v => S::from_str(v).map(Some).map_err(Error::custom),
+                    v => S::from_str(v).map(Some).map_err(DeError::custom),
                 }
             }
 
             // handles the `null` case
             fn visit_unit<E>(self) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(None)
             }
@@ -1054,7 +1018,7 @@ where
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 if value.is_empty() {
                     Ok(None.into_iter().collect())
@@ -1063,7 +1027,7 @@ where
                         .split(SEPARATOR::separator())
                         .map(FromStr::from_str)
                         .collect::<Result<_, _>>()
-                        .map_err(Error::custom)
+                        .map_err(DeError::custom)
                 }
             }
         }
@@ -1217,28 +1181,28 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
 
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v.to_vec())
             }
 
             fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v)
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v.as_bytes().to_vec())
             }
 
             fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v.into_bytes())
             }
@@ -1287,42 +1251,42 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
 
             fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Borrowed(v))
             }
 
             fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Borrowed(v.as_bytes()))
             }
 
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(v.to_vec()))
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(v.as_bytes().to_vec()))
             }
 
             fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(v))
             }
 
             fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(v.into_bytes()))
             }
@@ -1364,19 +1328,19 @@ impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
 
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 v.try_into()
-                    .map_err(|_| Error::invalid_length(v.len(), &self))
+                    .map_err(|_| DeError::invalid_length(v.len(), &self))
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 v.as_bytes()
                     .try_into()
-                    .map_err(|_| Error::invalid_length(v.len(), &self))
+                    .map_err(|_| DeError::invalid_length(v.len(), &self))
             }
         }
 
@@ -1400,19 +1364,19 @@ impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
 
             fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 v.try_into()
-                    .map_err(|_| Error::invalid_length(v.len(), &self))
+                    .map_err(|_| DeError::invalid_length(v.len(), &self))
             }
 
             fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 v.as_bytes()
                     .try_into()
-                    .map_err(|_| Error::invalid_length(v.len(), &self))
+                    .map_err(|_| DeError::invalid_length(v.len(), &self))
             }
         }
 
@@ -1437,68 +1401,68 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
 
             fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Borrowed(
                     v.try_into()
-                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                        .map_err(|_| DeError::invalid_length(v.len(), &self))?,
                 ))
             }
 
             fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Borrowed(
                     v.as_bytes()
                         .try_into()
-                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                        .map_err(|_| DeError::invalid_length(v.len(), &self))?,
                 ))
             }
 
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(
                     v.to_vec()
                         .try_into()
-                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                        .map_err(|_| DeError::invalid_length(v.len(), &self))?,
                 ))
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(
                     v.as_bytes()
                         .to_vec()
                         .try_into()
-                        .map_err(|_| Error::invalid_length(v.len(), &self))?,
+                        .map_err(|_| DeError::invalid_length(v.len(), &self))?,
                 ))
             }
 
             fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 let len = v.len();
                 Ok(Cow::Owned(
                     v.try_into()
-                        .map_err(|_| Error::invalid_length(len, &self))?,
+                        .map_err(|_| DeError::invalid_length(len, &self))?,
                 ))
             }
 
             fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 let len = v.len();
                 Ok(Cow::Owned(
                     v.into_bytes()
                         .try_into()
-                        .map_err(|_| Error::invalid_length(len, &self))?,
+                        .map_err(|_| DeError::invalid_length(len, &self))?,
                 ))
             }
 
@@ -1733,7 +1697,7 @@ where
     {
         U::deserialize(deserializer)?
             .try_into()
-            .map_err(Error::custom)
+            .map_err(DeError::custom)
     }
 }
 
@@ -1754,21 +1718,21 @@ impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
 
             fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Borrowed(v))
             }
 
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(v.to_owned()))
             }
 
             fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(Cow::Owned(v))
             }
@@ -1813,12 +1777,12 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
 
             fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(Error::invalid_value(
+                    unexp => Err(DeError::invalid_value(
                         Unexpected::Unsigned(unexp as u64),
                         &"0 or 1",
                     )),
@@ -1827,12 +1791,12 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
 
             fn visit_i8<E>(self, v: i8) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(Error::invalid_value(
+                    unexp => Err(DeError::invalid_value(
                         Unexpected::Signed(unexp as i64),
                         &"0 or 1",
                     )),
@@ -1841,34 +1805,37 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
 
             fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(Error::invalid_value(Unexpected::Unsigned(unexp), &"0 or 1")),
+                    unexp => Err(DeError::invalid_value(
+                        Unexpected::Unsigned(unexp),
+                        &"0 or 1",
+                    )),
                 }
             }
 
             fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(Error::invalid_value(Unexpected::Signed(unexp), &"0 or 1")),
+                    unexp => Err(DeError::invalid_value(Unexpected::Signed(unexp), &"0 or 1")),
                 }
             }
 
             fn visit_u128<E>(self, v: u128) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(Error::invalid_value(
+                    unexp => Err(DeError::invalid_value(
                         Unexpected::Unsigned(unexp as u64),
                         &"0 or 1",
                     )),
@@ -1877,12 +1844,12 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
 
             fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(Error::invalid_value(
+                    unexp => Err(DeError::invalid_value(
                         Unexpected::Unsigned(unexp as u64),
                         &"0 or 1",
                     )),
@@ -1909,42 +1876,42 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Flexible> {
 
             fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v != 0)
             }
 
             fn visit_i8<E>(self, v: i8) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v != 0)
             }
 
             fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v != 0)
             }
 
             fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v != 0)
             }
 
             fn visit_u128<E>(self, v: u128) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v != 0)
             }
 
             fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
             where
-                E: Error,
+                E: DeError,
             {
                 Ok(v != 0)
             }

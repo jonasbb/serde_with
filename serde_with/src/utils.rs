@@ -1,7 +1,6 @@
 pub(crate) mod duration;
 
-use core::{marker::PhantomData, mem::MaybeUninit};
-use serde::de::{Deserialize, Error, Expected, MapAccess, SeqAccess};
+use crate::prelude::*;
 
 /// Re-Implementation of `serde::private::de::size_hint::cautious`
 #[cfg(feature = "alloc")]
@@ -90,13 +89,11 @@ where
     }
 }
 
-pub(crate) fn duration_as_secs_f64(dur: &core::time::Duration) -> f64 {
+pub(crate) fn duration_as_secs_f64(dur: &Duration) -> f64 {
     (dur.as_secs() as f64) + (dur.subsec_nanos() as f64) / (NANOS_PER_SEC as f64)
 }
 
-pub(crate) fn duration_signed_from_secs_f64(
-    secs: f64,
-) -> Result<self::duration::DurationSigned, &'static str> {
+pub(crate) fn duration_signed_from_secs_f64(secs: f64) -> Result<DurationSigned, &'static str> {
     const MAX_NANOS_F64: f64 = ((u64::max_value() as u128 + 1) * (NANOS_PER_SEC as u128)) as f64;
     // TODO why are the seconds converted to nanoseconds first?
     // Does it make sense to just truncate the value?
@@ -131,8 +128,10 @@ pub(crate) fn array_from_iterator<I, T, E, const N: usize>(
 ) -> Result<[T; N], E>
 where
     I: Iterator<Item = Result<T, E>>,
-    E: Error,
+    E: DeError,
 {
+    use core::mem::MaybeUninit;
+
     fn drop_array_elems<T, const N: usize>(num: usize, mut arr: [MaybeUninit<T>; N]) {
         arr[..num].iter_mut().for_each(|elem| {
             // TODO This would be better with assume_init_drop nightly function
@@ -163,7 +162,7 @@ where
             }
             None => {
                 drop_array_elems(idx, arr);
-                return Err(Error::invalid_length(idx, expected));
+                return Err(DeError::invalid_length(idx, expected));
             }
         };
     }

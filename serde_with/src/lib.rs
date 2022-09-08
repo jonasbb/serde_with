@@ -1,5 +1,9 @@
 #![warn(
     clippy::semicolon_if_nothing_returned,
+    // New clippy lints, not yet stable
+    // clippy::std_instead_of_core,
+    // clippy::std_instead_of_alloc,
+    // clippy::alloc_instead_of_core,
     missing_docs,
     rust_2018_idioms,
     rustdoc::missing_crate_level_docs,
@@ -275,6 +279,8 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 #[doc(hidden)]
+pub extern crate core;
+#[doc(hidden)]
 pub extern crate serde;
 #[cfg(feature = "std")]
 extern crate std;
@@ -359,13 +365,60 @@ generate_guide! {
     }
 }
 
+pub(crate) mod prelude {
+    #![allow(unused_imports)]
+
+    pub(crate) use crate::utils::duration::{DurationSigned, Sign};
+    pub use crate::{de::*, ser::*, *};
+    #[cfg(feature = "alloc")]
+    pub use alloc::{
+        borrow::{Cow, ToOwned},
+        boxed::Box,
+        collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
+        rc::{Rc, Weak as RcWeak},
+        string::{String, ToString},
+        sync::{Arc, Weak as ArcWeak},
+        vec::Vec,
+    };
+    pub use core::{
+        cell::{Cell, RefCell},
+        convert::{TryFrom, TryInto},
+        fmt::{self, Display},
+        hash::{BuildHasher, Hash},
+        marker::PhantomData,
+        option::Option,
+        result::Result,
+        str::FromStr,
+        time::Duration,
+    };
+    pub use serde::{
+        de::{Error as DeError, *},
+        forward_to_deserialize_any,
+        ser::{Error as SerError, *},
+    };
+    #[cfg(feature = "std")]
+    pub use std::{
+        collections::{HashMap, HashSet},
+        sync::{Mutex, RwLock},
+        time::SystemTime,
+    };
+}
+
+/// This module is not part of the public API
+///
+/// Do not rely on any exports.
+#[doc(hidden)]
+pub mod __private__ {
+    pub use crate::prelude::*;
+}
+
 #[cfg(feature = "alloc")]
 #[doc(inline)]
 pub use crate::enum_map::EnumMap;
+// use crate::prelude::*;
 #[doc(inline)]
 pub use crate::{de::DeserializeAs, ser::SerializeAs};
 use core::marker::PhantomData;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 // Re-Export all proc_macros, as these should be seen as part of the serde_with crate
 #[cfg(feature = "macros")]
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
@@ -385,6 +438,7 @@ pub use serde_with_macros::*;
 /// If the use of the use of the proc-macro is not acceptable, then `As` can be used directly with serde.
 ///
 /// ```rust
+/// # #[cfg(feature = "alloc")] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{As, DisplayFromStr};
 /// #
@@ -394,11 +448,13 @@ pub use serde_with_macros::*;
 /// #[serde(with = "As::<Vec<DisplayFromStr>>")]
 /// field: Vec<u8>,
 /// # }
+/// # }
 /// ```
 /// If the normal `Deserialize`/`Serialize` traits should be used, the placeholder type [`Same`] can be used.
 /// It implements [`DeserializeAs`][]/[`SerializeAs`][], when the underlying type implements `Deserialize`/`Serialize`.
 ///
 /// ```rust
+/// # #[cfg(feature = "alloc")] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{As, DisplayFromStr, Same};
 /// # use std::collections::BTreeMap;
@@ -409,39 +465,11 @@ pub use serde_with_macros::*;
 /// #[serde(with = "As::<BTreeMap<DisplayFromStr, Same>>")]
 /// field: BTreeMap<u8, i32>,
 /// # }
+/// # }
 /// ```
 ///
 /// [serde_as]: https://docs.rs/serde_with/2.0.0/serde_with/attr.serde_as.html
 pub struct As<T: ?Sized>(PhantomData<T>);
-
-impl<T: ?Sized> As<T> {
-    /// Serialize type `T` using [`SerializeAs`][]
-    ///
-    /// The function signature is compatible with [serde's with-annotation][with-annotation].
-    ///
-    /// [with-annotation]: https://serde.rs/field-attrs.html#with
-    pub fn serialize<S, I>(value: &I, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-        T: SerializeAs<I>,
-        I: ?Sized,
-    {
-        T::serialize_as(value, serializer)
-    }
-
-    /// Deserialize type `T` using [`DeserializeAs`][]
-    ///
-    /// The function signature is compatible with [serde's with-annotation][with-annotation].
-    ///
-    /// [with-annotation]: https://serde.rs/field-attrs.html#with
-    pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>
-    where
-        T: DeserializeAs<'de, I>,
-        D: Deserializer<'de>,
-    {
-        T::deserialize_as(deserializer)
-    }
-}
 
 /// Adapter to convert from `serde_as` to the serde traits.
 ///
@@ -2011,6 +2039,7 @@ pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>)
 /// # Examples
 ///
 /// ```
+/// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// # use serde_with::{serde_as, StringWithSeparator};
@@ -2041,6 +2070,7 @@ pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>)
 ///     r#"{"tags":"1 2 3","more_tags":""}"#,
 ///     serde_json::to_string(&x).unwrap()
 /// );
+/// # }
 /// ```
 ///
 /// [`Display`]: core::fmt::Display

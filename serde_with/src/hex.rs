@@ -4,17 +4,7 @@
 //!
 //! Please check the documentation on the [`Hex`] type for details.
 
-use crate::{
-    de::DeserializeAs,
-    formats::{Format, Lowercase, Uppercase},
-    ser::SerializeAs,
-};
-use alloc::{borrow::Cow, vec::Vec};
-use core::{
-    convert::{TryFrom, TryInto},
-    marker::PhantomData,
-};
-use serde::{de::Error, Deserialize, Deserializer, Serializer};
+use crate::prelude::*;
 
 /// Serialize bytes as a hex string
 ///
@@ -104,9 +94,9 @@ use serde::{de::Error, Deserialize, Deserializer, Serializer};
 /// error_result.unwrap_err();
 /// # }
 /// ```
-pub struct Hex<FORMAT: Format = Lowercase>(PhantomData<FORMAT>);
+pub struct Hex<FORMAT: formats::Format = formats::Lowercase>(PhantomData<FORMAT>);
 
-impl<T> SerializeAs<T> for Hex<Lowercase>
+impl<T> SerializeAs<T> for Hex<formats::Lowercase>
 where
     T: AsRef<[u8]>,
 {
@@ -114,11 +104,11 @@ where
     where
         S: Serializer,
     {
-        serializer.serialize_str(&hex::encode(source))
+        serializer.serialize_str(&::hex::encode(source))
     }
 }
 
-impl<T> SerializeAs<T> for Hex<Uppercase>
+impl<T> SerializeAs<T> for Hex<formats::Uppercase>
 where
     T: AsRef<[u8]>,
 {
@@ -126,25 +116,25 @@ where
     where
         S: Serializer,
     {
-        serializer.serialize_str(&hex::encode_upper(source))
+        serializer.serialize_str(&::hex::encode_upper(source))
     }
 }
 
 impl<'de, T, FORMAT> DeserializeAs<'de, T> for Hex<FORMAT>
 where
     T: TryFrom<Vec<u8>>,
-    FORMAT: Format,
+    FORMAT: formats::Format,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,
     {
         <Cow<'de, str> as Deserialize<'de>>::deserialize(deserializer)
-            .and_then(|s| hex::decode(&*s).map_err(Error::custom))
+            .and_then(|s| ::hex::decode(&*s).map_err(DeError::custom))
             .and_then(|vec: Vec<u8>| {
                 let length = vec.len();
                 vec.try_into().map_err(|_e: T::Error| {
-                    Error::custom(format_args!(
+                    DeError::custom(format_args!(
                         "Can't convert a Byte Vector of length {} to the output type.",
                         length
                     ))

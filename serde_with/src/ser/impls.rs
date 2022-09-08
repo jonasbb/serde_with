@@ -1,34 +1,6 @@
-use super::*;
-use crate::{
-    formats::{Separator, Strictness},
-    utils::duration::DurationSigned,
-    StringWithSeparator,
-};
-#[cfg(feature = "alloc")]
-use alloc::{
-    borrow::Cow,
-    boxed::Box,
-    collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
-    rc::{Rc, Weak as RcWeak},
-    string::String,
-    sync::{Arc, Weak as ArcWeak},
-    vec::Vec,
-};
-use core::{
-    cell::{Cell, RefCell},
-    convert::TryInto,
-    fmt::Display,
-    time::Duration,
-};
+use crate::{formats, formats::Strictness, prelude::*};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
-use serde::ser::Error;
-#[cfg(feature = "std")]
-use std::{
-    collections::{HashMap, HashSet},
-    sync::{Mutex, RwLock},
-    time::SystemTime,
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
@@ -228,7 +200,6 @@ where
     where
         S: Serializer,
     {
-        use serde::ser::SerializeTuple;
         let mut arr = serializer.serialize_tuple(N)?;
         for elem in array {
             arr.serialize_element(&SerializeAsWrap::<T, As>::new(elem))?;
@@ -533,7 +504,7 @@ impl SerializeAs<Vec<u8>> for BytesOrString {
 
 impl<SEPARATOR, I, T> SerializeAs<I> for StringWithSeparator<SEPARATOR, T>
 where
-    SEPARATOR: Separator,
+    SEPARATOR: formats::Separator,
     for<'x> &'x I: IntoIterator<Item = &'x T>,
     T: Display,
     // This set of bounds is enough to make the function compile but has inference issues
@@ -546,7 +517,6 @@ where
     where
         S: Serializer,
     {
-        use core::fmt;
         pub(crate) struct DisplayWithSeparator<'a, I, SEPARATOR>(&'a I, PhantomData<SEPARATOR>);
 
         impl<'a, I, SEPARATOR> DisplayWithSeparator<'a, I, SEPARATOR> {
@@ -557,7 +527,7 @@ where
 
         impl<'a, I, SEPARATOR> Display for DisplayWithSeparator<'a, I, SEPARATOR>
         where
-            SEPARATOR: Separator,
+            SEPARATOR: formats::Separator,
             &'a I: IntoIterator,
             <&'a I as IntoIterator>::Item: Display,
         {

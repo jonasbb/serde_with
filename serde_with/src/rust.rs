@@ -1,17 +1,6 @@
 //! De/Serialization for Rust's builtin and std types
 
-#[cfg(doc)]
-use alloc::collections::BTreeMap;
-#[cfg(feature = "alloc")]
-use core::{fmt, marker::PhantomData};
-#[cfg(feature = "alloc")]
-use serde::de::{Error, MapAccess, SeqAccess, Visitor};
-use serde::{
-    de::{Deserialize, DeserializeOwned, Deserializer},
-    ser::{Serialize, Serializer},
-};
-#[cfg(doc)]
-use std::collections::HashMap;
+use crate::prelude::*;
 
 /// Makes a distinction between a missing, unset, or existing value
 ///
@@ -241,7 +230,7 @@ pub mod sets_duplicate_value_is_error {
 
                 while let Some(value) = access.next_element()? {
                     if !values.insert(value) {
-                        return Err(Error::custom("invalid entry: found duplicate value"));
+                        return Err(DeError::custom("invalid entry: found duplicate value"));
                     };
                 }
 
@@ -347,7 +336,7 @@ pub mod maps_duplicate_key_is_error {
 
                 while let Some((key, value)) = access.next_entry()? {
                     if !values.insert(key, value) {
-                        return Err(Error::custom("invalid entry: found duplicate key"));
+                        return Err(DeError::custom("invalid entry: found duplicate key"));
                     };
                 }
 

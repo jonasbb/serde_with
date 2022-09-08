@@ -2,18 +2,7 @@
 //!
 //! This modules is only available when using the `json` feature of the crate.
 
-use crate::{
-    de::{DeserializeAs, DeserializeAsWrap},
-    ser::{SerializeAs, SerializeAsWrap},
-    Same,
-};
-use core::{fmt, marker::PhantomData};
-use serde::{
-    de,
-    de::{Deserializer, Visitor},
-    ser,
-    ser::Serializer,
-};
+use crate::prelude::*;
 
 /// Serialize value as string containing JSON
 ///
@@ -92,7 +81,7 @@ where
     {
         serializer.serialize_str(
             &serde_json::to_string(&SerializeAsWrap::<T, TAs>::new(source))
-                .map_err(ser::Error::custom)?,
+                .map_err(SerError::custom)?,
         )
     }
 }
@@ -119,11 +108,11 @@ where
 
             fn visit_str<E>(self, value: &str) -> Result<S, E>
             where
-                E: de::Error,
+                E: DeError,
             {
                 serde_json::from_str(value)
                     .map(DeserializeAsWrap::<S, SAs>::into_inner)
-                    .map_err(de::Error::custom)
+                    .map_err(DeError::custom)
             }
         }
 
