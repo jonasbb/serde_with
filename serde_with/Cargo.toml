@@ -126,6 +126,16 @@ name = "derives"
 path = "tests/derives/lib.rs"
 required-features = ["macros"]
 
+[[test]]
+name = "with_prefix"
+path = "tests/with_prefix.rs"
+required-features = ["macros"]
+
+[[test]]
+name = "rust"
+path = "tests/rust.rs"
+required-features = ["alloc"]
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = [

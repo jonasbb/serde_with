@@ -441,6 +441,7 @@ pub use serde_with_macros::*;
 /// If the use of the use of the proc-macro is not acceptable, then `As` can be used directly with serde.
 ///
 /// ```rust
+/// # #[cfg(feature = "alloc")] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{As, DisplayFromStr};
 /// #
@@ -450,11 +451,13 @@ pub use serde_with_macros::*;
 /// #[serde(with = "As::<Vec<DisplayFromStr>>")]
 /// field: Vec<u8>,
 /// # }
+/// # }
 /// ```
 /// If the normal `Deserialize`/`Serialize` traits should be used, the placeholder type [`Same`] can be used.
 /// It implements [`DeserializeAs`][]/[`SerializeAs`][], when the underlying type implements `Deserialize`/`Serialize`.
 ///
 /// ```rust
+/// # #[cfg(feature = "alloc")] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{As, DisplayFromStr, Same};
 /// # use std::collections::BTreeMap;
@@ -464,6 +467,7 @@ pub use serde_with_macros::*;
 /// // Serialize map, turn keys into strings but keep type of value
 /// #[serde(with = "As::<BTreeMap<DisplayFromStr, Same>>")]
 /// field: BTreeMap<u8, i32>,
+/// # }
 /// # }
 /// ```
 ///
@@ -2038,6 +2042,7 @@ pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>)
 /// # Examples
 ///
 /// ```
+/// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
 /// #
 /// # use serde_with::{serde_as, StringWithSeparator};
@@ -2068,6 +2073,7 @@ pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>)
 ///     r#"{"tags":"1 2 3","more_tags":""}"#,
 ///     serde_json::to_string(&x).unwrap()
 /// );
+/// # }
 /// ```
 ///
 /// [`Display`]: core::fmt::Display
