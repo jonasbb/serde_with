@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.1] - 2022-09-09
+
 ### Added
 
 * `time` added support for the well-known `Iso8601` format.
@@ -17,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Warn if `serde_as` is used on an enum variant.
     Attributes on enum variants were never supported.
     But `#[serde(with = "...")]` can be added on variants, such that some confusion can occur when migration ([#499](https://github.com/jonasbb/serde_with/issues/499)).
+
+### Note
+
+A cargo bug ([cargo#10801](https://github.com/rust-lang/cargo/issues/10801)) means that upgrading from v1 to v2 may add unnecessary crates to the `Cargo.lock` file.
+A diff of the lock-file makes it seem that `serde_with` depends on new crates, even though these crates are unused and will not get compiled or linked.
+However, tools consuming `Cargo.lock` or `cargo metadata` might give wrong results.
 
 ## [2.0.0] - 2022-07-17
 
@@ -95,6 +103,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     * `sets_first_value_wins`
     * `btreemap_as_tuple_list` and `hashmap_as_tuple_list` can be replaced with `#[serde_as(as = "Vec<(_, _)>")]`.
+
+### Note
+
+A cargo bug ([cargo#10801](https://github.com/rust-lang/cargo/issues/10801)) means that upgrading from v1 to v2 may add unnecessary crates to the `Cargo.lock` file.
+A diff of the lock-file makes it seem that `serde_with` depends on new crates, even though these crates are unused and will not get compiled or linked.
 
 ## [2.0.0-rc.0] - 2022-06-29
 

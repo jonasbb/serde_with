@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.0.1] - 2022-09-09
+
 ### Changed
 
 * Warn if `serde_as` is used on an enum variant.

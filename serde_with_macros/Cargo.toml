@@ -2,7 +2,7 @@
 authors = ["Jonas Bushart"]
 name = "serde_with_macros"
 rust-version = "1.60"
-version = "2.0.0"
+version = "2.0.1"
 
 categories = ["encoding"]
 description = "proc-macro library for serde_with"
