@@ -1883,7 +1883,7 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// serde supports this, by annotating the fields with `#[serde(borrow)]`. but does not support borrowing on nested types.
 /// This gap is filled by this `BorrowCow` adapter.
 ///
-/// Using this adapter with `Cow<'a, [u8]>`/Cow<'a, [u8; N]>` will serialize the value as a sequence of `u8` values.
+/// Using this adapter with `Cow<'a, [u8]>`/`Cow<'a, [u8; N]>` will serialize the value as a sequence of `u8` values.
 /// This *might* not allow to borrow the data during deserialization.
 /// For a different format, which is also more efficient, use the [`Bytes`] adapter, which is also implemented for `Cow`.
 ///

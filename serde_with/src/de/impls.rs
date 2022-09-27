@@ -1738,7 +1738,7 @@ impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
             }
         }
 
-        deserializer.deserialize_str(CowVisitor)
+        deserializer.deserialize_string(CowVisitor)
     }
 }
 
