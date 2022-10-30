@@ -12,7 +12,7 @@ use crate::prelude::*;
 /// It works on any type implementing `AsRef<[u8]>` for serialization and `TryFrom<Vec<u8>>` for deserialization.
 ///
 /// The format type parameter specifies if the hex string should use lower- or uppercase characters.
-/// Valid options are the types [`Lowercase`] and [`Uppercase`].
+/// Valid options are the types [`formats::Lowercase`] and [`formats::Uppercase`].
 /// Deserialization always supports lower- and uppercase characters, even mixed in one string.
 ///
 /// # Example

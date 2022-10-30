@@ -393,7 +393,7 @@ where
 
 /// Serialize a single element but turn the sequence into a map logic.
 ///
-/// It uses [`SerializeEnumAsMapElement`] for the map element serialization.
+/// It uses [`EnumAsMapElementSerializer`] for the map element serialization.
 ///
 /// The [`Serializer`] implementation handles all the `serialize_*_variant` functions and defers to [`SerializeVariant`] for the more complicated tuple and struct variants.
 struct SerializeSeqElement<M> {

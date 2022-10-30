@@ -491,7 +491,7 @@ pub struct Same;
 /// support, which can be found in some crates.
 ///
 /// If you control the type you want to de/serialize, you can instead use the two derive macros, [`SerializeDisplay`] and [`DeserializeFromStr`].
-/// They properly implement the traits [`Serialize`] and [`Deserialize`] such that user of the type no longer have to use the `serde_as` system.
+/// They properly implement the traits [`serde::Serialize`] and [`serde::Deserialize`] such that user of the type no longer have to use the `serde_as` system.
 ///
 /// # Examples
 ///
