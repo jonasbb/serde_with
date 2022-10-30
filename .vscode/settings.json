@@ -1,4 +1,17 @@
 {
+    // The path structure for newly inserted paths to use.
+    //
+    // self: Insert import paths relative to the current module, using up to one `super` prefix
+    // if the parent module contains the requested item. Prefixes `self` in front of the path if it starts with a module.
+    "rust-analyzer.imports.prefix": "self",
+    // How imports should be grouped into use statements.
+    // module: Merge imports from the same module into a single use statement. Conversely, imports from different modules are split into separate statements.
+    "rust-analyzer.imports.granularity.group": "crate",
+    // Group inserted imports by the following order. Groups are separated by newlines.
+    "rust-analyzer.imports.group.enable": false,
+    // Prefer to unconditionally use imports of the core and alloc crate, over the std crate.
+    "rust-analyzer.imports.prefer.no.std": true,
+
     "cSpell.words": [
         "accu",
         "binhex",
