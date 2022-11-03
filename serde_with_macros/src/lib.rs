@@ -632,7 +632,7 @@ fn skip_serializing_if_add_attr_to_field(
     field: &mut Field,
     token: &TokenStream,
 ) -> Result<(), String> {
-    let token_string = token.to_string().replace("\"", "");
+    let token_string = token.to_string().replace('"', "");
     let expected_type = match token_string.rsplit_once("::") {
         Some((expected_type, _method)) => expected_type,
         None => {
@@ -640,7 +640,7 @@ fn skip_serializing_if_add_attr_to_field(
         }
     };
 
-    if is_of_expected_type(&field.ty, &expected_type) {
+    if is_of_expected_type(&field.ty, expected_type) {
         let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
 
         // Remove the `serialize_always` attribute
