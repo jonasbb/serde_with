@@ -221,6 +221,57 @@ where
     }
 }
 
+/// Apply function on every field of structs or enums
+fn apply_function_with_params_to_struct_and_enum_fields<F, T>(
+    input: TokenStream,
+    function: F,
+    params: T,
+) -> Result<TokenStream2, Error>
+where
+    F: Copy,
+    F: Fn(&mut Field, &T) -> Result<(), String>,
+{
+    /// Handle a single struct or a single enum variant
+    fn apply_on_fields<F, T>(fields: &mut Fields, function: F, params: &T) -> Result<(), Error>
+    where
+        F: Fn(&mut Field, &T) -> Result<(), String>,
+    {
+        match fields {
+            // simple, no fields, do nothing
+            Fields::Unit => Ok(()),
+            Fields::Named(ref mut fields) => fields
+                .named
+                .iter_mut()
+                .map(|field| function(field, params).map_err(|err| Error::new(field.span(), err)))
+                .collect_error(),
+            Fields::Unnamed(ref mut fields) => fields
+                .unnamed
+                .iter_mut()
+                .map(|field| function(field, params).map_err(|err| Error::new(field.span(), err)))
+                .collect_error(),
+        }
+    }
+
+    // For each field in the struct given by `input`, add the `skip_serializing_if` attribute,
+    // if and only if, it is of expected type
+    if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
+        apply_on_fields(&mut input.fields, function, &params)?;
+        Ok(quote!(#input))
+    } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
+        input
+            .variants
+            .iter_mut()
+            .map(|variant| apply_on_fields(&mut variant.fields, function, &params))
+            .collect_error()?;
+        Ok(quote!(#input))
+    } else {
+        Err(Error::new(
+            Span::call_site(),
+            "The attribute can only be applied to struct or enum definitions.",
+        ))
+    }
+}
+
 /// Add `skip_serializing_if` annotations to [`Option`] fields.
 ///
 /// The attribute can be added to structs and enums.
@@ -434,6 +485,243 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
         }
     }
     false
+}
+
+/// Similar to `skip_serializing_none`, but takes an `argument` which is then used with
+/// `serde(skip_serializing_if = "argument")`
+///
+/// The attribute can be added to structs and enums.
+/// The `#[skip_serializing_if]` attribute must be placed *before* the `#[derive]` attribute.
+///
+/// # Example
+///
+/// Let's say that we have an untagged enum, and we want to skip serialization for the variant that
+/// is `empty`
+///
+/// ```rust
+/// use serde::Serialize;
+///
+/// #[derive(Serialize)]
+/// #[serde(untagged)]
+/// enum Wrapper {
+///     Nothing,
+///     String(String),
+///     Int32(i32),
+/// }
+///
+/// impl Wrapper {
+///     fn is_nothing(&self) -> bool {
+///         match self {
+///             Self::Nothing => true,
+///             _ => false,
+///         }
+///     }
+/// }
+///
+/// #[derive(Serialize)]
+/// struct Data {
+///     #[serde(skip_serializing_if = "Wrapper::is_nothing")]
+///     a: Wrapper,
+///     #[serde(skip_serializing_if = "Wrapper::is_nothing")]
+///     b: Wrapper,
+///     #[serde(skip_serializing_if = "Wrapper::is_nothing")]
+///     c: Wrapper,
+///     #[serde(skip_serializing_if = "Wrapper::is_nothing")]
+///     d: Wrapper,
+/// }
+/// ```
+///
+/// The `skip_serializing_if` annotation is repetitive and harms readability.
+/// Instead, the same struct can be written as:
+///
+/// ```rust
+/// use serde::Serialize;
+/// use serde_with_macros::skip_serializing_if;
+///
+/// #[derive(Serialize)]
+/// #[serde(untagged)]
+/// enum Wrapper {
+///     Nothing,
+///     String(String),
+///     Int32(i32),
+/// }
+///
+/// impl Wrapper {
+///     pub fn is_nothing(&self) -> bool {
+///         match self {
+///             Self::Nothing => true,
+///             _ => false,
+///         }
+///     }
+/// }
+///
+/// #[skip_serializing_if("Wrapper::is_nothing")]
+/// #[derive(Serialize)]
+/// struct Data {
+///     a: Wrapper,
+///     b: Wrapper,
+///     c: Wrapper,
+///     // Always serialize field, even if Nothing
+///     #[serialize_always]
+///     d: Wrapper,
+/// }
+/// ```
+///
+/// Existing `skip_serializing_if` annotations will not be altered.
+///
+/// If some values should always be serialized, then `serialize_always` can be used.
+///
+/// # Limitations
+///
+/// The `skip_serializing_if` attribute is not checking if the provided argument is a valid type.
+///
+/// # Example
+///
+/// ```rust
+/// use serde::Serialize;
+/// use serde_with_macros::skip_serializing_if;
+/// #[derive(Serialize)]
+/// enum Wrapper {
+///     Nothing,
+///     Something(i32),
+/// }
+///
+/// // Notice the typo - there will be no error / warning in this case.
+/// #[skip_serializing_if("Wapper::is_nothing")]
+/// #[derive(Serialize)]
+/// struct Data {
+///     a: Wrapper,
+///     b: Wrapper,
+///     c: Wrapper,
+///     d: Wrapper,
+/// }
+///
+/// // Notice the lack of typo - there will be error indicating lack of `is_nothing` method on the
+/// // `Wrapper`
+/// // #[skip_serializing_if("Wrapper::is_nothing")]
+/// // #[derive(Serialize)]
+/// // struct Data {
+/// //     a: Wrapper,
+/// //     b: Wrapper,
+/// //     c: Wrapper,
+/// //     d: Wrapper,                               
+/// // }                                                                   
+///
+/// ```
+#[proc_macro_attribute]
+pub fn skip_serializing_if(args: TokenStream, input: TokenStream) -> TokenStream {
+    if args.is_empty() {
+        Error::new(
+            Span::call_site(),
+            r#"The attribute `skip_serializing_if` can only be used with an argument: `#[skip_serializing_if("Option::is_none")]`"#
+        ).to_compile_error();
+    }
+    let res = match apply_function_with_params_to_struct_and_enum_fields(
+        input,
+        skip_serializing_if_add_attr_to_field,
+        args,
+    ) {
+        Ok(res) => res,
+        Err(err) => err.to_compile_error(),
+    };
+    TokenStream::from(res)
+}
+
+/// Add the skip_serializing_if annotation to each field of the struct
+fn skip_serializing_if_add_attr_to_field(
+    field: &mut Field,
+    token: &TokenStream,
+) -> Result<(), String> {
+    let token_string = token.to_string().replace("\"", "");
+    let expected_type = match token_string.rsplit_once("::") {
+        Some((expected_type, _method)) => expected_type,
+        None => {
+            return Err(r#"The attribute `skip_serializing_if` expects argument in the format of: "some::module::Type::method""#.into());
+        }
+    };
+
+    if is_of_expected_type(&field.ty, &expected_type) {
+        let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
+
+        // Remove the `serialize_always` attribute
+        let mut has_always_attr = false;
+        field.attrs.retain(|attr| {
+            let has_attr = attr.path.is_ident("serialize_always");
+            has_always_attr |= has_attr;
+            !has_attr
+        });
+
+        // Error on conflicting attributes
+        if has_always_attr && has_skip_serializing_if {
+            let mut msg = r#"The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field"#.to_string();
+            if let Some(ident) = &field.ident {
+                msg += ": `";
+                msg += &ident.to_string();
+                msg += "`";
+            }
+            msg += ".";
+            return Err(msg);
+        }
+
+        // Do nothing if `skip_serializing_if` or `serialize_always` is already present
+        if has_skip_serializing_if || has_always_attr {
+            return Ok(());
+        }
+
+        let token2 = TokenStream2::from(token.clone());
+        // Add the `skip_serializing_if` attribute
+        let attr = parse_quote!(
+            #[serde(skip_serializing_if = #token2)]
+        );
+        field.attrs.push(attr);
+    } else {
+        // Warn on use of `serialize_always` on non-Option fields
+        let has_attr = field
+            .attrs
+            .iter()
+            .any(|attr| attr.path.is_ident("serialize_always"));
+        if has_attr {
+            return Err(format!(
+                "`serialize_always` may only be used on fields of type `{}`.",
+                expected_type
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn is_of_expected_type(type_: &Type, expected: &str) -> bool {
+    match type_ {
+        Type::Array(_)
+        | Type::BareFn(_)
+        | Type::ImplTrait(_)
+        | Type::Infer(_)
+        | Type::Macro(_)
+        | Type::Never(_)
+        | Type::Ptr(_)
+        | Type::Reference(_)
+        | Type::Slice(_)
+        | Type::TraitObject(_)
+        | Type::Tuple(_)
+        | Type::Verbatim(_) => false,
+
+        Type::Group(syn::TypeGroup { elem, .. })
+        | Type::Paren(syn::TypeParen { elem, .. })
+        | Type::Path(syn::TypePath {
+            qself: Some(syn::QSelf { ty: elem, .. }),
+            ..
+        }) => is_of_expected_type(elem, expected),
+
+        Type::Path(syn::TypePath { qself: None, path }) => {
+            path.leading_colon.is_none()
+                && path
+                    .segments
+                    .iter()
+                    .zip(expected.split("::"))
+                    .all(|(lhs, rhs)| lhs.ident == rhs)
+        }
+        _ => false,
+    }
 }
 
 /// Convenience macro to use the [`serde_as`] system.
