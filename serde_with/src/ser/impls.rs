@@ -896,4 +896,39 @@ impl<STRICTNESS: Strictness> SerializeAs<bool> for BoolFromInt<STRICTNESS> {
     }
 }
 
+impl<T, U> SerializeAs<Option<T>> for ExplicitOption<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source {
+            None => serializer.serialize_unit_variant("Option", 0, "None"),
+            Some(value) => serializer.serialize_newtype_variant(
+                "Option",
+                1,
+                "Some",
+                &SerializeAsWrap::<T, U>::new(value),
+            ),
+        }
+    }
+}
+
+impl<T, U> SerializeAs<Option<T>> for UntaggedOption<U>
+where
+    U: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &Option<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source {
+            None => serializer.serialize_unit(),
+            Some(value) => U::serialize_as(value, serializer),
+        }
+    }
+}
+
 // endregion

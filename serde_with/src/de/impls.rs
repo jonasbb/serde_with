@@ -1921,4 +1921,49 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Flexible> {
     }
 }
 
+impl<'de, T, U> DeserializeAs<'de, Option<T>> for ExplicitOption<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Option<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        enum Option<T> {
+            None,
+            Some(T),
+        }
+
+        let eo: Option<DeserializeAsWrap<T, U>> = Deserialize::deserialize(deserializer)?;
+        Ok(match eo {
+            Option::None => None,
+            Option::Some(value) => Some(value.into_inner()),
+        })
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, Option<T>> for UntaggedOption<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Option<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(serde::Deserialize)]
+        #[serde(untagged)]
+        enum Option<T> {
+            None,
+            Some(T),
+        }
+
+        let eo: Option<DeserializeAsWrap<T, U>> = Deserialize::deserialize(deserializer)?;
+        Ok(match eo {
+            Option::None => None,
+            Option::Some(value) => Some(value.into_inner()),
+        })
+    }
+}
+
 // endregion

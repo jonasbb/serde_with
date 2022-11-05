@@ -31,8 +31,8 @@ use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
     formats::{CommaSeparator, Flexible, Strict},
-    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, NoneAsEmptyString, OneOrMany, Same,
-    StringWithSeparator,
+    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, ExplicitOption, NoneAsEmptyString,
+    OneOrMany, Same, StringWithSeparator, UntaggedOption,
 };
 use std::{
     collections::HashMap,
@@ -1128,5 +1128,91 @@ fn test_boolfromint() {
     check_error_deserialization::<SFlexible>(
         r#""""#,
         expect![[r#"invalid type: string "", expected an integer at line 1 column 2"#]],
+    );
+}
+
+#[test]
+fn test_explicit_option() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    #[serde(transparent)]
+    struct S1(#[serde_as(as = "ExplicitOption")] Option<i32>);
+
+    is_equal(S1(None), expect![[r#""None""#]]);
+    is_equal(
+        S1(Some(123)),
+        expect![[r#"
+        {
+          "Some": 123
+        }"#]],
+    );
+    check_error_deserialization::<S1>("true", expect!["expected value at line 1 column 1"]);
+    check_error_deserialization::<S1>(
+        r#""foobar""#,
+        expect!["unknown variant `foobar`, expected `None` or `Some` at line 1 column 8"],
+    );
+    check_error_deserialization::<S1>(r#"{}"#, expect!["expected value at line 1 column 2"]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    #[serde(transparent)]
+    struct S2(#[serde_as(as = "ExplicitOption<DisplayFromStr>")] Option<i32>);
+
+    is_equal(S2(None), expect![[r#""None""#]]);
+    is_equal(
+        S2(Some(123)),
+        expect![[r#"
+        {
+          "Some": "123"
+        }"#]],
+    );
+    check_error_deserialization::<S2>("true", expect!["expected value at line 1 column 1"]);
+    check_error_deserialization::<S2>(
+        r#""foobar""#,
+        expect!["unknown variant `foobar`, expected `None` or `Some` at line 1 column 8"],
+    );
+    check_error_deserialization::<S2>(r#"{}"#, expect!["expected value at line 1 column 2"]);
+}
+
+#[test]
+fn test_untagged_option() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    #[serde(transparent)]
+    struct S1(#[serde_as(as = "UntaggedOption")] Option<i32>);
+
+    is_equal(S1(None), expect!["null"]);
+    is_equal(S1(Some(123)), expect!["123"]);
+    check_error_deserialization::<S1>(
+        "true",
+        expect!["data did not match any variant of untagged enum Option"],
+    );
+    check_error_deserialization::<S1>(
+        r#""foobar""#,
+        expect!["data did not match any variant of untagged enum Option"],
+    );
+    check_error_deserialization::<S1>(
+        r#"{}"#,
+        expect!["data did not match any variant of untagged enum Option"],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    #[serde(transparent)]
+    struct S2(#[serde_as(as = "UntaggedOption<DisplayFromStr>")] Option<i32>);
+
+    is_equal(S2(None), expect!["null"]);
+    is_equal(S2(Some(123)), expect![[r#""123""#]]);
+    check_error_deserialization::<S2>(
+        "true",
+        expect!["data did not match any variant of untagged enum Option"],
+    );
+    check_error_deserialization::<S2>(
+        r#""foobar""#,
+        expect!["data did not match any variant of untagged enum Option"],
+    );
+    check_error_deserialization::<S2>(
+        r#"{}"#,
+        expect!["data did not match any variant of untagged enum Option"],
     );
 }

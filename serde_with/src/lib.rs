@@ -2081,3 +2081,7 @@ pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>)
 /// [`Separator`]: crate::formats::Separator
 /// [`serde_as`]: crate::guide::serde_as
 pub struct StringWithSeparator<Sep, T>(PhantomData<(Sep, T)>);
+
+pub struct ExplicitOption<T = Same>(PhantomData<T>);
+
+pub struct UntaggedOption<T = Same>(PhantomData<T>);
