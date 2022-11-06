@@ -42,6 +42,7 @@
 #[allow(unused_extern_crates)]
 extern crate proc_macro;
 
+mod apply;
 mod utils;
 
 use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _};
@@ -422,12 +423,22 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
             // Ignore non parsable attributes, as these are not important for us
             if let Ok(Meta::List(expr)) = attr.parse_meta() {
                 for expr in expr.nested {
-                    if let NestedMeta::Meta(Meta::NameValue(expr)) = expr {
-                        if let Some(ident) = expr.path.get_ident() {
-                            if *ident == name {
-                                return true;
+                    match expr {
+                        NestedMeta::Meta(Meta::NameValue(expr)) => {
+                            if let Some(ident) = expr.path.get_ident() {
+                                if *ident == name {
+                                    return true;
+                                }
                             }
                         }
+                        NestedMeta::Meta(Meta::Path(expr)) => {
+                            if let Some(ident) = expr.get_ident() {
+                                if *ident == name {
+                                    return true;
+                                }
+                            }
+                        }
+                        _ => (),
                     }
                 }
             }
@@ -558,7 +569,7 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
     #[derive(FromMeta)]
     struct SerdeContainerOptions {
         #[darling(rename = "crate")]
-        alt_crate_path: Option<String>,
+        alt_crate_path: Option<Path>,
     }
 
     let args: AttributeArgs = parse_macro_input!(args);
@@ -571,12 +582,7 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let serde_with_crate_path = container_options
         .alt_crate_path
-        .as_deref()
-        .unwrap_or("::serde_with");
-    let serde_with_crate_path = match syn::parse_str(serde_with_crate_path) {
-        Ok(path) => path,
-        Err(err) => return TokenStream::from(DarlingError::from(err).write_errors()),
-    };
+        .unwrap_or_else(|| syn::parse_quote!(::serde_with));
 
     // Convert any error message into a nice compiler error
     let res = match apply_function_to_struct_and_enum_fields_darling(
@@ -1099,7 +1105,16 @@ fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> Tok
 /// Otherwise, downstream proc-macros would need to be placed *in front of* the main `#[serde_as]` attribute, since otherwise the field attributes would already be stripped off.
 ///
 /// More details about the use-cases in the GitHub discussion: <https://github.com/jonasbb/serde_with/discussions/260>.
-#[proc_macro_derive(__private_consume_serde_as_attributes, attributes(serde_as))]
+#[proc_macro_derive(
+    __private_consume_serde_as_attributes,
+    attributes(serde_as, serde_with)
+)]
 pub fn __private_consume_serde_as_attributes(_: TokenStream) -> TokenStream {
     TokenStream::new()
+}
+
+/// TODO
+#[proc_macro_attribute]
+pub fn apply(args: TokenStream, input: TokenStream) -> TokenStream {
+    apply::apply(args, input)
 }
