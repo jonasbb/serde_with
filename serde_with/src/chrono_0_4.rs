@@ -14,18 +14,18 @@ use ::chrono_0_4::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
 fn unix_epoch_utc() -> DateTime<Utc> {
-    DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc)
+    DateTime::<Utc>::from_utc(unix_epoch_naive(), Utc)
 }
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Local`] timezone
 #[cfg(feature = "std")]
 fn unix_epoch_local() -> DateTime<Local> {
-    DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(0, 0), Utc).with_timezone(&Local)
+    unix_epoch_utc().with_timezone(&Local)
 }
 
 /// Create a [`NaiveDateTime`] for the Unix Epoch
 fn unix_epoch_naive() -> NaiveDateTime {
-    NaiveDateTime::from_timestamp(0, 0)
+    NaiveDateTime::from_timestamp_opt(0, 0).unwrap()
 }
 
 /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
