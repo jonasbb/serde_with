@@ -43,6 +43,7 @@ features = [
 version = "1.0.3"
 
 [dev-dependencies]
+expect-test = "1.4.0"
 pretty_assertions = "1.0.0"
 rustversion = "1.0.0"
 serde = {version = "1.0.75", features = ["derive"]}
