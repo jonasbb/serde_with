@@ -1113,7 +1113,126 @@ pub fn __private_consume_serde_as_attributes(_: TokenStream) -> TokenStream {
     TokenStream::new()
 }
 
-/// TODO
+/// Apply attributes to all fields with matching types
+///
+/// Whenever you experience the need to apply the same attributes to multiple fields, you can use this macro.
+/// It allows you to specify a list of types and a list of attributes.
+/// Each field with a "matching" type will then get the attributes applied.
+/// The `apply` attribute must be place *before* any consuming attributes, such as `derive`, because Rust expands all attributes in order.
+///
+/// For example, if your struct or enum contains many `Option<T>` fields, but you do not want to serialize `None` values, you can use this macro to apply the `#[serde(skip_serializing_if = "Option::is_none")]` attribute to all fields of type `Option<T>`.
+///
+/// ```rust
+/// # use serde_with_macros as serde_with;
+/// #[serde_with::apply(
+/// #   crate="serde_with",
+///     Option => #[serde(skip_serializing_if = "Option::is_none")],
+/// )]
+/// #[derive(serde::Serialize)]
+/// # #[derive(Default)]
+/// struct Data {
+///     a: Option<String>,
+///     b: Option<u64>,
+///     c: Option<String>,
+///     d: Option<bool>,
+/// }
+/// #
+/// # assert_eq!("{}", serde_json::to_string(&Data::default()).unwrap());
+/// ```
+///
+/// Each rule starts with a type pattern, specifying which fields to match and a list of attributes to apply.
+/// Multiple rules can be provided in a single `apply` attribute.
+///
+/// ```rust
+/// # use serde_with_macros as serde_with;
+/// #[serde_with::apply(
+/// #   crate="serde_with",
+///     Option => #[serde(default)] #[serde(skip_serializing_if = "Option::is_none")],
+///     Option<bool> => #[serde(rename = "bool")],
+/// )]
+/// # #[derive(serde::Serialize)]
+/// # #[derive(Default)]
+/// # struct Data {
+/// #     a: Option<String>,
+/// #     b: Option<u64>,
+/// #     c: Option<String>,
+/// #     d: Option<bool>,
+/// # }
+/// #
+/// # assert_eq!("{}", serde_json::to_string(&Data::default()).unwrap());
+/// ```
+///
+/// ## Type Patterns
+///
+/// The type pattern left of the `=>` specifies which fields to match.
+///
+/// | Type Pattern            |                                       Matching Types | Notes                                                                           |
+/// | :---------------------- | ---------------------------------------------------: | :------------------------------------------------------------------------------ |
+/// | `_`                     | `Option<bool>`<br>`BTreeMap<&'static str, Vec<u32>>` | `_` matches all fields.                                                         |
+/// | `Option`                |                   `Option<bool>`<br>`Option<String>` | A missing generic is compatible with any generic arguments.                     |
+/// | `Option<bool>`          |                                       `Option<bool>` | A fully specified type only matches exactly.                                    |
+/// | `BTreeMap<String, u32>` |                              `BTreeMap<String, u32>` | A fully specified type only matches exactly.                                    |
+/// | `BTreeMap<String, _>`   |  `BTreeMap<String, u32>`<br>`BTreeMap<String, bool>` | Any `String` key `BTreeMap` matches, as the value is using the `_` placeholder. |
+/// | `[u8; _]`               |                               `[u8; 1]`<br>`[u8; N]` | `_` also works as a placeholder for any array length.                           |
+///
+/// ## Opt-out for Individual Fields
+///
+/// The `apply` attribute will find all fields with a compatible type.
+/// This can be overly eager and a different set of attributes might be required for a specific field.
+/// You can opt-out of the `apply` attribute by adding the `#[serde_with(skip_apply)]` attribute to the field.
+/// This will prevent any `apply` to apply to this field.
+/// If two rules apply to the same field, it is impossible to opt-out of only a single one.
+/// In this case the attributes must be applied to the field manually.
+///
+/// ```rust
+/// # use serde_json::json;
+/// # use serde_with_macros as serde_with;
+/// #[serde_with::apply(
+/// #   crate="serde_with",
+///     Option => #[serde(skip_serializing_if = "Option::is_none")],
+/// )]
+/// #[derive(serde::Serialize)]
+/// struct Data {
+///     a: Option<String>,
+///     #[serde_with(skip_apply)]
+///     always_serialize_this_field: Option<u64>,
+///     c: Option<String>,
+///     d: Option<bool>,
+/// }
+///
+/// let data = Data {
+///     a: None,
+///     always_serialize_this_field: None,
+///     c: None,
+///     d: None,
+/// };
+///
+/// // serializes into this JSON:
+/// # assert_eq!(json!(
+/// {
+///     "always_serialize_this_field": null
+/// }
+/// # ), serde_json::to_value(&data).unwrap());
+/// ```
+///
+/// # Alternative path to `serde_with` crate
+///
+/// If `serde_with` is not available at the default path, its path should be specified with the
+/// `crate` argument. See [re-exporting `serde_as`] for more use case information.
+///
+/// ```rust,ignore
+/// #[serde_with::apply(
+///     crate = "::some_other_lib::serde_with"
+///     Option => #[serde(skip_serializing_if = "Option::is_none")],
+/// )]
+/// #[derive(serde::Serialize)]
+/// struct Data {
+///     a: Option<String>,
+///     b: Option<u64>,
+///     c: Option<String>,
+///     d: Option<bool>,
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn apply(args: TokenStream, input: TokenStream) -> TokenStream {
     apply::apply(args, input)

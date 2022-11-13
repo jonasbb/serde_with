@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add new `apply` attribute to simplify repetitive attributes over many fields.
+    Multiple rules and multiple attributes can be provided each.
+
+    ```rust
+    #[serde_with::apply(
+        Option => #[serde(default)] #[serde(skip_serializing_if = "Option::is_none")],
+        Option<bool> => #[serde(rename = "bool")],
+    )]
+    #[derive(serde::Serialize)]
+    struct Data {
+        a: Option<String>,
+        b: Option<u64>,
+        c: Option<String>,
+        d: Option<bool>,
+    }
+    ```
+
+    The `apply` attribute will expand into this, applying the attributs to the matching fields:
+
+    ```rust
+    #[derive(serde::Serialize)]
+    struct Data {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        a: Option<String>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        b: Option<u64>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        c: Option<String>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "bool")]
+        d: Option<bool>,
+    }
+    ```
+
+    The attribute supports field matching using many rules, such as `_` to apply to all fields and partial generics like `Option` to match any `Option` be it `Option<String>`, `Option<bool>`, or `Option<T>`.
+
 ## [2.0.1] - 2022-09-09
 
 ### Added

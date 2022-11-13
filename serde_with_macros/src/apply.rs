@@ -88,9 +88,9 @@ pub fn apply(args: TokenStream, input: TokenStream) -> TokenStream {
     TokenStream::from(res)
 }
 
-/// Create a function compatible with [`super::apply_function_to_struct_and_enum_fields`] based on [`Input`].
+/// Create a function compatible with [`super::apply_function_to_struct_and_enum_fields`] based on [`ApplyInput`].
 ///
-/// A single [`Input`] can apply to multiple field types.
+/// A single [`ApplyInput`] can apply to multiple field types.
 /// To account for this a new function must be created to stay compatible with the function signature or [`super::apply_function_to_struct_and_enum_fields`].
 fn prepare_apply_attribute_to_field(
     input: ApplyInput,
@@ -281,6 +281,7 @@ mod test {
         assert!(matches("[u8; 1]", "[u8; 1]"));
         assert!(matches("[_; 1]", "[u8; 1]"));
         assert!(matches("[u8; _]", "[u8; 1]"));
+        assert!(matches("[u8; _]", "[u8; N]"));
 
         assert!(!matches("[u8; 1]", "[u8; 2]"));
         assert!(!matches("[u8; 1]", "[u8; _]"));
