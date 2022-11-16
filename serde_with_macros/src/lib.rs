@@ -515,24 +515,31 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///
 /// 1. All the placeholder type `_` will be replaced with `::serde_with::Same`.
 ///     The placeholder type `_` marks all the places where the type's `Serialize` implementation
-/// should be used.     In the example, it means that the `u32` values will serialize with the
-/// `Serialize` implementation of `u32`.     The `Same` type implements `SerializeAs` whenever the
-/// underlying type implements `Serialize` and is used to make the two traits compatible.
+///     should be used. In the example, it means that the `u32` values will serialize with the
+///     `Serialize` implementation of `u32`. The `Same` type implements `SerializeAs` whenever the
+///     underlying type implements `Serialize` and is used to make the two traits compatible.
 ///
 ///     If you specify a custom path for `serde_with` via the `crate` attribute, the path to the
-/// `Same` type will be altered accordingly. 2. Wrap the type from the annotation inside a
-/// `::serde_with::As`.     In the above example we now have something like
-/// `::serde_with::As::<Vec<::serde_with::Same>>`.     The `As` type acts as the opposite of the
-/// `Same` type.     It allows using a `SerializeAs` type whenever a `Serialize` is required.
+///     `Same` type will be altered accordingly.
+///
+/// 2. Wrap the type from the annotation inside a `::serde_with::As`.
+///      In the above example we now have something like `::serde_with::As::<Vec<::serde_with::Same>>`.
+///      The `As` type acts as the opposite of the `Same` type.
+///      It allows using a `SerializeAs` type whenever a `Serialize` is required.
+///
 /// 3. Translate the `*as` attributes into the serde equivalent ones.
 ///     `#[serde_as(as = ...)]` will become `#[serde(with = ...)]`.
 ///     Similarly, `serialize_as` is translated to `serialize_with`.
 ///
 ///     The field attributes will be kept on the struct/enum such that other macros can use them
-/// too. 4. It searches `#[serde_as(as = ...)]` if there is a type named `BorrowCow` under any path.
+///     too.
+///
+/// 4. It searches `#[serde_as(as = ...)]` if there is a type named `BorrowCow` under any path.
 ///     If `BorrowCow` is found, the attribute `#[serde(borrow)]` is added to the field.
 ///     If `#[serde(borrow)]` or `#[serde(borrow = "...")]` is already present, this step will be
-/// skipped. 5. Restore the ability of accepting missing fields if both the field and the
+///     skipped.
+///
+/// 5. Restore the ability of accepting missing fields if both the field and the
 /// transformation are `Option`.
 ///
 ///     An `Option` is detected by an exact text match.
