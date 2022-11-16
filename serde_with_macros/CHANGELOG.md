@@ -49,6 +49,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     The attribute supports field matching using many rules, such as `_` to apply to all fields and partial generics like `Option` to match any `Option` be it `Option<String>`, `Option<bool>`, or `Option<T>`.
 
+### Fixed
+
+* The derive macros `SerializeDisplay` and `DeserializeFromStr` now take better care not to use conflicting names for generic values. (#526)
+    All used generics now start with `__` to make conflicts with manually written code unlikely.
+
+    Thanks to @Elrendio for submitting a PR fixing the issue.
+
 ## [2.0.1] - 2022-09-09
 
 ### Changed

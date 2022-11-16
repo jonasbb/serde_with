@@ -40,6 +40,29 @@ impl<T> ::std::fmt::Display for G<T> {
     }
 }
 
+// Ensure the common 1-letter generics are not used by the derive macros
+// The macros use:
+// D: Deserializer
+// S: Serializer
+// E: Error
+// https://github.com/jonasbb/serde_with/pull/526
+#[derive(DeserializeFromStr, SerializeDisplay)]
+#[serde_with(crate = "::s_with")]
+struct MoreG<D, E, S>(D, E, S);
+
+impl<D, E, S> ::std::str::FromStr for MoreG<D, E, S> {
+    type Err = ::std::string::String;
+    fn from_str(_: &str) -> ::std::result::Result<Self, Self::Err> {
+        ::std::unimplemented!()
+    }
+}
+
+impl<D, E, S> ::std::fmt::Display for MoreG<D, E, S> {
+    fn fmt(&self, _: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        ::std::unimplemented!()
+    }
+}
+
 #[derive(DeserializeFromStr, SerializeDisplay)]
 #[serde_with(crate = "::s_with")]
 struct LT<'a>(&'a ());
