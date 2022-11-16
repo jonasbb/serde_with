@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.1.0] - 2022-11-16
+
 ### Added
 
 * Add new `apply` attribute to simplify repetitive attributes over many fields.
