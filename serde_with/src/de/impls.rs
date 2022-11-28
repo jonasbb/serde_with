@@ -506,15 +506,15 @@ tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
 #[cfg(feature = "alloc")]
-macro_rules! map_as_tuple_seq {
-    ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V>) => {
-        impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $ty<K, V>> for Vec<(KAs, VAs)>
+macro_rules! map_as_tuple_seq_intern {
+    ($tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)* , V>, $ty:ident <(KAs, VAs)>) => {
+        impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $tyorig<K, V>> for $ty<(KAs, VAs)>
         where
             KAs: DeserializeAs<'de, K>,
             VAs: DeserializeAs<'de, V>,
             $(K: $kbound1 $(+ $kbound2)*,)*
         {
-            fn deserialize_as<D>(deserializer: D) -> Result<$ty<K, V>, D::Error>
+            fn deserialize_as<D>(deserializer: D) -> Result<$tyorig<K, V>, D::Error>
             where
                 D: Deserializer<'de>,
             {
@@ -528,7 +528,7 @@ macro_rules! map_as_tuple_seq {
                     VAs: DeserializeAs<'de, V>,
                     $(K: $kbound1 $(+ $kbound2)*,)*
                 {
-                    type Value = $ty<K, V>;
+                    type Value = $tyorig<K, V>;
 
                     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str("a sequence")
@@ -559,6 +559,15 @@ macro_rules! map_as_tuple_seq {
         }
     };
 }
+#[cfg(feature = "alloc")]
+macro_rules! map_as_tuple_seq {
+    ($($tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)* , V $(: $($vbound:ident $(+)?)+)?> $(,)?)+) => {$(
+        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(: $($vbound +)+)?> , Seq<(KAs, VAs)>);
+        #[cfg(feature = "alloc")]
+        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(: $($vbound +)+)? >, Vec<(KAs, VAs)>);
+    )+}
+}
+
 #[cfg(feature = "alloc")]
 map_as_tuple_seq!(BTreeMap<K: Ord, V>);
 #[cfg(feature = "std")]
@@ -626,6 +635,8 @@ macro_rules! tuple_seq_as_map_impl_intern {
 #[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_impl {
     ($($tyorig:ident < (K $(: $($kbound:ident $(+)?)+)?, V $(: $($vbound:ident $(+)?)+)?)> $(,)?)+) => {$(
+        tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, Map<KAs, VAs>);
+        #[cfg(feature = "alloc")]
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, BTreeMap<KAs, VAs>);
         #[cfg(feature = "std")]
         tuple_seq_as_map_impl_intern!($tyorig < (K $(: $($kbound +)+)?, V $(: $($vbound +)+)?) >, HashMap<KAs, VAs>);

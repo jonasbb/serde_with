@@ -317,14 +317,14 @@ tuple_impl!(15 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 T7 As7 8 T8 As8 9 T9 As9 10 T10 As10 11 T11 As11 12 T12 As12 13 T13 As13 14 T14 As14 15 T15 As15);
 
 #[cfg(feature = "alloc")]
-macro_rules! map_as_tuple_seq {
-    ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V >) => {
-        impl<K, KAs, V, VAs> SerializeAs<$ty<K, V>> for Vec<(KAs, VAs)>
+macro_rules! map_as_tuple_seq_intern {
+    ($tyorig:ty, $ty:ident <(K, V)>) => {
+        impl<K, KAs, V, VAs> SerializeAs<$tyorig> for $ty<(KAs, VAs)>
         where
             KAs: SerializeAs<K>,
             VAs: SerializeAs<V>,
         {
-            fn serialize_as<S>(source: &$ty<K, V>, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize_as<S>(source: &$tyorig, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: Serializer,
             {
@@ -339,6 +339,14 @@ macro_rules! map_as_tuple_seq {
     };
 }
 #[cfg(feature = "alloc")]
+macro_rules! map_as_tuple_seq {
+    ($($ty:ty $(,)?)+) => {$(
+        map_as_tuple_seq_intern!($ty, Seq<(K, V)>);
+        #[cfg(feature = "alloc")]
+        map_as_tuple_seq_intern!($ty, Vec<(K, V)>);
+    )+}
+}
+#[cfg(feature = "alloc")]
 map_as_tuple_seq!(BTreeMap<K, V>);
 // TODO HashMap with a custom hasher support would be better, but results in "unconstrained type parameter"
 #[cfg(feature = "std")]
@@ -346,7 +354,6 @@ map_as_tuple_seq!(HashMap<K, V>);
 #[cfg(all(feature = "std", feature = "indexmap_1"))]
 map_as_tuple_seq!(IndexMap<K, V>);
 
-#[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_impl_intern {
     ($tyorig:ty, $ty:ident <K, V>) => {
         #[allow(clippy::implicit_hasher)]
@@ -371,6 +378,7 @@ macro_rules! tuple_seq_as_map_impl_intern {
 }
 macro_rules! tuple_seq_as_map_impl {
     ($($ty:ty $(,)?)+) => {$(
+        tuple_seq_as_map_impl_intern!($ty, Map<K, V>);
         #[cfg(feature = "alloc")]
         tuple_seq_as_map_impl_intern!($ty, BTreeMap<K, V>);
         #[cfg(feature = "std")]
