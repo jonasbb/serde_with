@@ -8,6 +8,30 @@ fn test_map_as_tuple_list() {
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SM(#[serde_as(as = "Seq<(DisplayFromStr, DisplayFromStr)>")] BTreeMap<u32, IpAddr>);
+
+    let map: BTreeMap<_, _> = vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect();
+    is_equal(
+        SM(map),
+        expect![[r#"
+            [
+              [
+                "1",
+                "1.2.3.4"
+              ],
+              [
+                "10",
+                "1.2.3.4"
+              ],
+              [
+                "200",
+                "255.255.255.255"
+              ]
+            ]"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct SB(#[serde_as(as = "Vec<(DisplayFromStr, DisplayFromStr)>")] BTreeMap<u32, IpAddr>);
 
     let map: BTreeMap<_, _> = vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect();
@@ -110,6 +134,20 @@ fn test_tuple_list_as_map() {
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SM(#[serde_as(as = "Map<DisplayFromStr, DisplayFromStr>")] Vec<(u32, IpAddr)>);
+
+    is_equal(
+        SM(vec![(1, ip), (10, ip), (200, ip2)]),
+        expect![[r#"
+            {
+              "1": "1.2.3.4",
+              "10": "1.2.3.4",
+              "200": "255.255.255.255"
+            }"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct SH(#[serde_as(as = "HashMap<DisplayFromStr, DisplayFromStr>")] Vec<(u32, IpAddr)>);
 
     is_equal(
@@ -184,13 +222,24 @@ fn test_tuple_list_as_map() {
 fn test_tuple_array_as_map() {
     #[serde_as]
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct S0(#[serde_as(as = "Map<_, _>")] [(u8, u8); 1]);
+    is_equal(
+        S1([(1, 2)]),
+        expect![[r#"
+          {
+            "1": 2
+          }"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct S1(#[serde_as(as = "BTreeMap<_, _>")] [(u8, u8); 1]);
     is_equal(
         S1([(1, 2)]),
         expect![[r#"
-            {
-              "1": 2
-            }"#]],
+          {
+            "1": 2
+          }"#]],
     );
 
     #[serde_as]
