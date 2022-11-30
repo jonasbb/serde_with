@@ -402,7 +402,6 @@ tuple_seq_as_map_impl!(HashSet<(K, V)>);
 #[cfg(all(feature = "std", feature = "indexmap_1"))]
 tuple_seq_as_map_impl!(IndexSet<(K, V)>);
 
-#[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_arr {
     ($tyorig:ty, $ty:ident <K, V>) => {
         #[allow(clippy::implicit_hasher)]
@@ -425,6 +424,7 @@ macro_rules! tuple_seq_as_map_arr {
         }
     };
 }
+tuple_seq_as_map_arr!([(K, V); N], Map<K, V>);
 #[cfg(feature = "alloc")]
 tuple_seq_as_map_arr!([(K, V); N], BTreeMap<K, V>);
 #[cfg(feature = "std")]

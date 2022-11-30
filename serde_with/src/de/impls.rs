@@ -715,7 +715,6 @@ tuple_seq_as_map_option_impl!(BTreeMap);
 #[cfg(feature = "std")]
 tuple_seq_as_map_option_impl!(HashMap);
 
-#[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_arr {
     ($tyorig:ty, $ty:ident <KAs, VAs>) => {
         #[allow(clippy::implicit_hasher)]
@@ -763,6 +762,7 @@ macro_rules! tuple_seq_as_map_arr {
         }
     }
 }
+tuple_seq_as_map_arr!([(K, V); N], Map<KAs, VAs>);
 #[cfg(feature = "alloc")]
 tuple_seq_as_map_arr!([(K, V); N], BTreeMap<KAs, VAs>);
 #[cfg(feature = "std")]
