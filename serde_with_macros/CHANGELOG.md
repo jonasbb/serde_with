@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add new `Map` and `Seq` types for converting between maps and tuple lists. (#527)
+
+    The behavior is not new, but already present using `BTreeMap`/`HashMap` or `Vec`.
+    However, the new types `Map` and `Seq` are also available on `no_std`, even without the `alloc` feature.
+
 ## [2.1.0] - 2022-11-16
 
 ### Added

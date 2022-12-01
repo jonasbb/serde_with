@@ -315,8 +315,8 @@ VecEnumValues(vec![
 
 ```ignore
 // Rust
-#[serde_as(as = "Vec<(_, _)>")]
-value: HashMap<String, u32>, // also works with BTreeMap
+#[serde_as(as = "Seq<(_, _)>")] // also works with Vec
+value: HashMap<String, u32>, // also works with other maps like BTreeMap or IndexMap
 
 // JSON
 "value": [
@@ -461,7 +461,7 @@ value: BTreeMap<[u8; 2], u32>,
 
 ```ignore
 // Rust
-#[serde_as(as = "HashMap<_, _>")] // also works with BTreeMap
+#[serde_as(as = "Map<_, _>")] // also works with BTreeMap and HashMap
 value: Vec<(String, u32)>,
 
 // JSON

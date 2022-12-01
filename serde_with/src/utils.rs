@@ -21,7 +21,6 @@ pub(crate) struct MapIter<'de, A, K, V> {
 }
 
 impl<'de, A, K, V> MapIter<'de, A, K, V> {
-    #[cfg(feature = "alloc")]
     pub(crate) fn new(access: A) -> Self
     where
         A: MapAccess<'de>,

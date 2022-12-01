@@ -2081,3 +2081,107 @@ pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>)
 /// [`Separator`]: crate::formats::Separator
 /// [`serde_as`]: crate::guide::serde_as
 pub struct StringWithSeparator<Sep, T>(PhantomData<(Sep, T)>);
+
+/// This serializes a list of tuples into a map
+///
+/// Normally, you want to use a [`HashMap`] or a [`BTreeMap`] when deserializing a map.
+/// However, sometimes this is not possible due to type constraints, e.g., if the type implements neither [`Hash`] nor [`Ord`].
+/// Another use case is deserializing a map with duplicate keys.
+///
+/// The implementation is generic using the [`FromIterator`] and [`IntoIterator`] traits.
+/// Therefore, all of [`Vec`], [`VecDeque`](std::collections::VecDeque), and [`LinkedList`](std::collections::LinkedList) and anything which implements those are supported.
+///
+/// # Examples
+///
+/// `Wrapper` does not implement [`Hash`] nor [`Ord`], thus prohibiting the use [`HashMap`] or [`BTreeMap`].
+/// The JSON also contains a duplicate key.
+///
+/// [`BTreeMap`]: std::collections::BTreeMap
+/// [`HashMap`]: std::collections::HashMap
+/// [`Vec`]: std::vec::Vec
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, Map};
+/// #
+/// #[serde_as]
+/// #[derive(Debug, Deserialize, Serialize, Default)]
+/// struct S {
+///     #[serde_as(as = "Map<_, _>")]
+///     s: Vec<(Wrapper<i32>, String)>,
+/// }
+///
+/// #[derive(Clone, Debug, Serialize, Deserialize)]
+/// #[serde(transparent)]
+/// struct Wrapper<T>(T);
+///
+/// let data = S {
+///     s: vec![
+///         (Wrapper(1), "a".to_string()),
+///         (Wrapper(2), "b".to_string()),
+///         (Wrapper(3), "c".to_string()),
+///         (Wrapper(2), "d".to_string()),
+///     ],
+/// };
+///
+/// let json = r#"{
+///   "s": {
+///     "1": "a",
+///     "2": "b",
+///     "3": "c",
+///     "2": "d"
+///   }
+/// }"#;
+/// assert_eq!(json, serde_json::to_string_pretty(&data).unwrap());
+/// # }
+/// ```
+pub struct Map<K, V>(PhantomData<(K, V)>);
+
+/// De/Serialize a Map into a list of tuples
+///
+/// Some formats, like JSON, have limitations on the types of keys for maps.
+/// In case of JSON, keys are restricted to strings.
+/// Rust features more powerful keys, for example tuples, which can not be serialized to JSON.
+///
+/// This helper serializes the Map into a list of tuples, which do not have the same type restrictions.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, Seq};
+/// # use std::collections::BTreeMap;
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "Seq<(_, _)>")]
+///     s: BTreeMap<(String, u32), u32>,
+/// }
+///
+/// // This converts the Rust type
+/// let data = A {
+///     s: BTreeMap::from([
+///         (("Hello".to_string(), 123), 0),
+///         (("World".to_string(), 456), 1),
+///     ]),
+/// };
+///
+/// // into this JSON
+/// let value = json!({
+///     "s": [
+///         [["Hello", 123], 0],
+///         [["World", 456], 1]
+///     ]
+/// });
+///
+/// assert_eq!(value, serde_json::to_value(&data).unwrap());
+/// assert_eq!(data, serde_json::from_value(value).unwrap());
+/// # }
+/// ```
+pub struct Seq<V>(PhantomData<V>);
