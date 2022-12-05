@@ -222,7 +222,7 @@ where
             type Value = [T; M];
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_fmt(format_args!("an array of size {}", M))
+                formatter.write_fmt(format_args!("an array of size {M}"))
             }
 
             fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
@@ -1327,7 +1327,7 @@ impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
             type Value = [u8; M];
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_fmt(format_args!("an byte array of size {}", M))
+                formatter.write_fmt(format_args!("an byte array of size {M}"))
             }
 
             fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
@@ -1370,7 +1370,7 @@ impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
             type Value = &'de [u8; M];
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                formatter.write_fmt(format_args!("a borrowed byte array of size {}", M))
+                formatter.write_fmt(format_args!("a borrowed byte array of size {M}"))
             }
 
             fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>

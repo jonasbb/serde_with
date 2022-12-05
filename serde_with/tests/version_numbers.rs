@@ -28,8 +28,7 @@ fn test_docs_rs_url_point_to_current_version() -> Result<(), Box<dyn std::error:
     let pkg_version = env!("CARGO_PKG_VERSION");
 
     let re = regex::Regex::new(&format!(
-        "https?://docs.rs/{}/((\\d[^/]+|\\*|latest))/",
-        pkg_name
+        "https?://docs.rs/{pkg_name}/((\\d[^/]+|\\*|latest))/"
     ))?;
     let mut error = false;
 

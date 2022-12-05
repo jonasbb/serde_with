@@ -509,8 +509,7 @@ fn parse_float_into_time_parts(mut value: &str) -> Result<(Sign, u64, u32), Pars
                 if subseclen > 9 {
                     #[cfg(feature = "alloc")]
                     return Err(ParseFloatError::Custom(alloc::format!(
-                        "Duration and Timestamps with no more than 9 digits precision, but '{}' has more",
-                        value
+                        "Duration and Timestamps with no more than 9 digits precision, but '{value}' has more"
                     )));
                     #[cfg(not(feature = "alloc"))]
                     return Err(ParseFloatError::Custom(
