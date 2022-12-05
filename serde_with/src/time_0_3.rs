@@ -49,8 +49,7 @@ where
         Ok(dur) => dur,
         Err(msg) => {
             return Err(DeError::custom(format_args!(
-                "Duration is outside of the representable range: {}",
-                msg
+                "Duration is outside of the representable range: {msg}"
             )))
         }
     };
