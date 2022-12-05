@@ -79,8 +79,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
                     Err(DeError::custom(format_args!(
-                        "a timestamp which can be represented in a DateTime but received '{}'",
-                        value
+                        "a timestamp which can be represented in a DateTime but received '{value}'"
                     )))
                 }
             }
@@ -94,8 +93,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
                     Err(DeError::custom(format_args!(
-                        "a timestamp which can be represented in a DateTime but received '{}'",
-                        value
+                        "a timestamp which can be represented in a DateTime but received '{value}'"
                     )))
                 }
             }
@@ -111,8 +109,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                 } else {
                     Err(DeError::custom(format_args!(
-                        "a timestamp which can be represented in a DateTime but received '{}'",
-                        value
+                        "a timestamp which can be represented in a DateTime but received '{value}'"
                     )))
                 }
             }
@@ -131,8 +128,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                                 Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                             } else {
                                 Err(DeError::custom(format_args!(
-                                    "a timestamp which can be represented in a DateTime but received '{}'",
-                                    value
+                                    "a timestamp which can be represented in a DateTime but received '{value}'"
                                 )))
                             }
                         } else {
@@ -144,8 +140,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                             let subseclen = subseconds.chars().count() as u32;
                             if subseclen > 9 {
                                 return Err(DeError::custom(format_args!(
-                                    "DateTimes only support nanosecond precision but '{}' has more than 9 digits.",
-                                    value
+                                    "DateTimes only support nanosecond precision but '{value}' has more than 9 digits."
                                 )));
                             }
 
@@ -157,8 +152,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                                     Ok(DateTime::<Utc>::from_utc(ndt, Utc))
                                 } else {
                                     Err(DeError::custom(format_args!(
-                                        "a timestamp which can be represented in a DateTime but received '{}'",
-                                        value
+                                        "a timestamp which can be represented in a DateTime but received '{value}'"
                                     )))
                                 }
                             } else {
@@ -220,8 +214,7 @@ where
         Ok(dur) => dur,
         Err(msg) => {
             return Err(DeError::custom(format_args!(
-                "Duration is outside of the representable range: {}",
-                msg
+                "Duration is outside of the representable range: {msg}"
             )))
         }
     };

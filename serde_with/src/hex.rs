@@ -135,8 +135,7 @@ where
                 let length = vec.len();
                 vec.try_into().map_err(|_e: T::Error| {
                     DeError::custom(format_args!(
-                        "Can't convert a Byte Vector of length {} to the output type.",
-                        length
+                        "Can't convert a Byte Vector of length {length} to the output type."
                     ))
                 })
             })
