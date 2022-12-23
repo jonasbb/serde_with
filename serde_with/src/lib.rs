@@ -129,7 +129,7 @@
 //! # #[cfg(feature = "macros")]
 //! # use serde::{Deserialize, Serialize};
 //! # #[cfg(feature = "macros")]
-//! # use serde_with::serde_as;
+//! # use serde_with::{serde_as, Bytes};
 //! # #[cfg(feature = "macros")]
 //! #[serde_as]
 //! # #[derive(Debug, Eq, PartialEq)]
