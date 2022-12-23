@@ -93,7 +93,6 @@ let arrays: Arrays<100, 128> = Arrays {
     nested: Box::new([[111; 64]; 100]),
     optional: Some([222; 128]),
     bytes: [0x42; 128],
-
 };
 assert!(serde_json::to_string(&arrays).is_ok());
 ```
