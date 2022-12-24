@@ -122,12 +122,14 @@
 //! serde does not support arrays with more than 32 elements or using const-generics.
 //! The `serde_as` attribute allows circumventing this restriction, even for nested types and nested arrays.
 //!
+//! On top of it, `[u8; N]` (aka, bytes) can use the specialized `"Bytes"` for efficiency much like the `serde_bytes` crate.
+//!
 //! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/um0xyi)
 //! ```rust
 //! # #[cfg(feature = "macros")]
 //! # use serde::{Deserialize, Serialize};
 //! # #[cfg(feature = "macros")]
-//! # use serde_with::serde_as;
+//! # use serde_with::{serde_as, Bytes};
 //! # #[cfg(feature = "macros")]
 //! #[serde_as]
 //! # #[derive(Debug, Eq, PartialEq)]
@@ -141,6 +143,9 @@
 //!
 //!     #[serde_as(as = "Option<[_; M]>")]
 //!     optional: Option<[u8; M]>,
+//!
+//!     #[serde_as(as = "Bytes")]
+//!     bytes: [u8; M],
 //! }
 //!
 //! # #[cfg(all(feature = "macros", feature = "json"))] {
@@ -148,7 +153,8 @@
 //! let arrays: Arrays<100, 128> = Arrays {
 //!     constgeneric: [true; 100],
 //!     nested: Box::new([[111; 64]; 100]),
-//!     optional: Some([222; 128])
+//!     optional: Some([222; 128]),
+//!     bytes: [0x42; 128],
 //! };
 //! assert!(serde_json::to_string(&arrays).is_ok());
 //! # }
