@@ -14,6 +14,18 @@ fn test_html_root_url() {
     assert_html_root_url_updated!("src/lib.rs");
 }
 
+#[test]
+fn test_serde_with_macros_dependency() {
+    version_sync::assert_contains_regex!(
+        "../serde_with/Cargo.toml",
+        r#"^serde_with_macros = .*? version = "=?{version}""#
+    );
+    version_sync::assert_contains_regex!(
+        "../serde_with_macros/Cargo.toml",
+        r#"^version = "{version}""#
+    );
+}
+
 /// Check that all docs.rs links point to the current version
 ///
 /// Parse all docs.rs links in `*.rs` and `*.md` files and check that they point to the current version.

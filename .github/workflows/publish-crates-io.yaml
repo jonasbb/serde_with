@@ -3,7 +3,6 @@ on:
   push:
     tags:
       - "v*"
-      - "macros-v*"
 permissions: read-all
 
 jobs:
@@ -48,47 +47,6 @@ jobs:
       - run: cargo login ${CRATES_IO_TOKEN}
         env:
           CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-      - run: cd serde_with && cargo publish
-
-  publish_serde_with_macros:
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/macros-v')
-    permissions:
-      # Needed to publish releases
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: "Install/Update the Rust version"
-        run: |
-          rustup toolchain install stable --profile minimal
-          rustup default stable
-          cargo --version
-          rustc --version
-      - name: Get version from tag
-        id: tag_name
-        run: |
-          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/macros-v}
-        shell: bash
-      - name: Get Changelog Entry
-        id: changelog_reader
-        uses: mindsers/changelog-reader-action@v2
-        with:
-          version: ${{ steps.tag_name.outputs.current_version }}
-          path: ./serde_with_macros/CHANGELOG.md
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # This pulls from the "Get Changelog Entry" step above, referencing it's ID to get its outputs object.
-          # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          tag_name: "macros-v${{ steps.changelog_reader.outputs.version }}"
-          name: "serde_with_macros v${{ steps.changelog_reader.outputs.version }}"
-          body: ${{ steps.changelog_reader.outputs.changes }}
-          prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
-          draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
-      - run: cargo login ${CRATES_IO_TOKEN}
-        env:
-          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-      - run: cd serde_with_macros && cargo publish
+      # The programs wait until the package is in the index.
+      - run: cargo publish --package serde_with_macros
+      - run: cargo publish --package serde_with

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Pin the `serde_with_macros` dependency to the same version as the main crate.
+    This simplifies publishing and ensures that always a compatible version is picked.
+
 ## [2.1.0] - 2022-11-16
 
 ### Added
