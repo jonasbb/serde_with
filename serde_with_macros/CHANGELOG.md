@@ -7,12 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Added
+### Fixed
 
-* Add new `Map` and `Seq` types for converting between maps and tuple lists. (#527)
-
-    The behavior is not new, but already present using `BTreeMap`/`HashMap` or `Vec`.
-    However, the new types `Map` and `Seq` are also available on `no_std`, even without the `alloc` feature.
+* `serde_with::apply` had an issue matching types when invisible token groups where in use (#538)
+    The token groups can stem from macro_rules expansion, but should be treated mostly transparent.
+    The old code required a group to match a group, while now groups are silently removed when checking for type patterns.
 
 ## [2.1.0] - 2022-11-16
 

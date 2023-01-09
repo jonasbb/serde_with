@@ -112,6 +112,20 @@ fn prepare_apply_attribute_to_field(
 
 fn ty_pattern_matches_ty(ty_pattern: &Type, ty: &Type) -> bool {
     match (ty_pattern, ty) {
+        // Groups are invisible groupings which can for example come from macro_rules expansion.
+        // This can lead to a mismatch where the `ty` is "Group { Option<String> }" and the `ty_pattern` is "Option<String>".
+        // To account for this we unwrap the group and compare the inner types.
+        (
+            Type::Group(TypeGroup {
+                elem: ty_pattern, ..
+            }),
+            ty,
+        ) => ty_pattern_matches_ty(ty_pattern, ty),
+        (ty_pattern, Type::Group(TypeGroup { elem: ty, .. })) => {
+            ty_pattern_matches_ty(ty_pattern, ty)
+        }
+
+        // Processing of the other types
         (
             Type::Array(TypeArray {
                 elem: ty_pattern,
@@ -126,12 +140,6 @@ fn ty_pattern_matches_ty(ty_pattern: &Type, ty: &Type) -> bool {
             ty_match && len_match
         }
         (Type::BareFn(ty_pattern), Type::BareFn(ty)) => ty_pattern == ty,
-        (
-            Type::Group(TypeGroup {
-                elem: ty_pattern, ..
-            }),
-            Type::Group(TypeGroup { elem: ty, .. }),
-        ) => ty_pattern_matches_ty(ty_pattern, ty),
         (Type::ImplTrait(ty_pattern), Type::ImplTrait(ty)) => ty_pattern == ty,
         (Type::Infer(_), _) => true,
         (Type::Macro(ty_pattern), Type::Macro(ty)) => ty_pattern == ty,
