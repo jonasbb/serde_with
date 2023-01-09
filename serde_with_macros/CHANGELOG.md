@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.2.0] - 2023-01-09
+
 ### Fixed
 
 * `serde_with::apply` had an issue matching types when invisible token groups where in use (#538)

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.2.0] - 2023-01-09
+
 ### Added
 
 * Add new `Map` and `Seq` types for converting between maps and tuple lists. (#527)
