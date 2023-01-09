@@ -18,7 +18,7 @@ fn test_html_root_url() {
 fn test_serde_with_macros_dependency() {
     version_sync::assert_contains_regex!(
         "../serde_with/Cargo.toml",
-        r#"^serde_with_macros = .*? version = "=?{version}""#
+        r#"^serde_with_macros = .*? version = "={version}""#
     );
     version_sync::assert_contains_regex!(
         "../serde_with_macros/Cargo.toml",
