@@ -11,3 +11,6 @@ rust-version = "1.60"
 s = {package = "serde", version = "1.0.75", features = ["derive"]}
 s_json = {package = "serde_json", version = "1.0.59"}
 s_with = {package = "serde_with", path = "../serde_with"}
+
+[package.metadata.release]
+release = false
