@@ -26,7 +26,7 @@
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
-#![doc(html_root_url = "https://docs.rs/serde_with/2.2.0")]
+#![doc(html_root_url = "https://docs.rs/serde_with/2.2.0/")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![allow(
     // clippy is broken and shows wrong warnings

@@ -5,3 +5,11 @@ members = [
     "serde_with_test",
 ]
 resolver = "2"
+
+[workspace.metadata.release]
+consolidate-commits = true
+publish = false
+push = false
+shared-version = true
+sign-tag = true
+tag = false
