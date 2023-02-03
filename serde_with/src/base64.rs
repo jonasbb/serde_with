@@ -12,7 +12,7 @@ use crate::prelude::*;
 /// It works on any type implementing `AsRef<[u8]>` for serialization and `TryFrom<Vec<u8>>` for deserialization.
 ///
 /// The type allows customizing the character set and the padding behavior.
-/// The `CHARSET` is a type implementing [`CharacterSet`].
+/// The `ALPHABET` is a type implementing [`Alphabet`].
 /// `PADDING` specifies if serializing should emit padding.
 /// Deserialization always supports padded and unpadded formats.
 /// [`formats::Padded`] emits padding and [`formats::Unpadded`] leaves it off.
@@ -62,54 +62,71 @@ use crate::prelude::*;
 
 // The padding might be better as `const PADDING: bool = true`
 // https://blog.rust-lang.org/inside-rust/2021/09/06/Splitting-const-generics.html#featureconst_generics_default/
-pub struct Base64<CHARSET: CharacterSet = Standard, PADDING: formats::Format = formats::Padded>(
-    PhantomData<(CHARSET, PADDING)>,
+pub struct Base64<ALPHABET: Alphabet = Standard, PADDING: formats::Format = formats::Padded>(
+    PhantomData<(ALPHABET, PADDING)>,
 );
 
-impl<T, CHARSET> SerializeAs<T> for Base64<CHARSET, formats::Padded>
+impl<T, ALPHABET> SerializeAs<T> for Base64<ALPHABET, formats::Padded>
 where
     T: AsRef<[u8]>,
-    CHARSET: CharacterSet,
+    ALPHABET: Alphabet,
 {
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        ::base64::encode_config(source, ::base64::Config::new(CHARSET::charset(), true))
-            .serialize(serializer)
+        use ::base64::Engine as _;
+
+        ::base64::engine::GeneralPurpose::new(
+            &ALPHABET::charset(),
+            ::base64::engine::general_purpose::PAD,
+        )
+        .encode(source)
+        .serialize(serializer)
     }
 }
 
-impl<T, CHARSET> SerializeAs<T> for Base64<CHARSET, formats::Unpadded>
+impl<T, ALPHABET> SerializeAs<T> for Base64<ALPHABET, formats::Unpadded>
 where
     T: AsRef<[u8]>,
-    CHARSET: CharacterSet,
+    ALPHABET: Alphabet,
 {
     fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        ::base64::encode_config(source, ::base64::Config::new(CHARSET::charset(), false))
-            .serialize(serializer)
+        use ::base64::Engine as _;
+
+        ::base64::engine::GeneralPurpose::new(
+            &ALPHABET::charset(),
+            ::base64::engine::general_purpose::NO_PAD,
+        )
+        .encode(source)
+        .serialize(serializer)
     }
 }
 
-impl<'de, T, CHARSET, FORMAT> DeserializeAs<'de, T> for Base64<CHARSET, FORMAT>
+// Our decoders uniformly do not care about padding.
+const PAD_INDIFFERENT: ::base64::engine::GeneralPurposeConfig =
+    ::base64::engine::GeneralPurposeConfig::new()
+        .with_decode_padding_mode(::base64::engine::DecodePaddingMode::Indifferent);
+
+impl<'de, T, ALPHABET, FORMAT> DeserializeAs<'de, T> for Base64<ALPHABET, FORMAT>
 where
     T: TryFrom<Vec<u8>>,
-    CHARSET: CharacterSet,
+    ALPHABET: Alphabet,
     FORMAT: formats::Format,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,
     {
-        struct Helper<T, CHARSET>(PhantomData<(T, CHARSET)>);
+        struct Helper<T, ALPHABET>(PhantomData<(T, ALPHABET)>);
 
-        impl<'de, T, CHARSET> Visitor<'de> for Helper<T, CHARSET>
+        impl<'de, T, ALPHABET> Visitor<'de> for Helper<T, ALPHABET>
         where
             T: TryFrom<Vec<u8>>,
-            CHARSET: CharacterSet,
+            ALPHABET: Alphabet,
         {
             type Value = T;
 
@@ -121,11 +138,12 @@ where
             where
                 E: DeError,
             {
-                let bytes = ::base64::decode_config(
-                    value,
-                    ::base64::Config::new(CHARSET::charset(), false),
-                )
-                .map_err(DeError::custom)?;
+                use ::base64::Engine as _;
+
+                let bytes =
+                    ::base64::engine::GeneralPurpose::new(&ALPHABET::charset(), PAD_INDIFFERENT)
+                        .decode(value)
+                        .map_err(DeError::custom)?;
 
                 let length = bytes.len();
                 bytes.try_into().map_err(|_e: T::Error| {
@@ -136,25 +154,25 @@ where
             }
         }
 
-        deserializer.deserialize_str(Helper::<T, CHARSET>(PhantomData))
+        deserializer.deserialize_str(Helper::<T, ALPHABET>(PhantomData))
     }
 }
 
-/// A base64 character set from [this list](base64::CharacterSet).
-pub trait CharacterSet {
+/// A base64 character set from [this list](base64::Alphabet).
+pub trait Alphabet {
     /// Return a specific character set.
     ///
-    /// Return one enum variant of the [`base64::CharacterSet`](base64::CharacterSet) enum.
-    fn charset() -> ::base64::CharacterSet;
+    /// Return one enum variant of the [`base64::Alphabet`](base64::Alphabet) enum.
+    fn charset() -> ::base64::alphabet::Alphabet;
 }
 
 /// The standard character set (uses `+` and `/`).
 ///
 /// See [RFC 3548](https://tools.ietf.org/html/rfc3548#section-3).
 pub struct Standard;
-impl CharacterSet for Standard {
-    fn charset() -> ::base64::CharacterSet {
-        ::base64::CharacterSet::Standard
+impl Alphabet for Standard {
+    fn charset() -> ::base64::alphabet::Alphabet {
+        ::base64::alphabet::STANDARD
     }
 }
 
@@ -162,9 +180,9 @@ impl CharacterSet for Standard {
 ///
 /// See [RFC 3548](https://tools.ietf.org/html/rfc3548#section-3).
 pub struct UrlSafe;
-impl CharacterSet for UrlSafe {
-    fn charset() -> ::base64::CharacterSet {
-        ::base64::CharacterSet::UrlSafe
+impl Alphabet for UrlSafe {
+    fn charset() -> ::base64::alphabet::Alphabet {
+        ::base64::alphabet::URL_SAFE
     }
 }
 
@@ -172,17 +190,17 @@ impl CharacterSet for UrlSafe {
 ///
 /// Not standardized, but folk wisdom on the net asserts that this alphabet is what crypt uses.
 pub struct Crypt;
-impl CharacterSet for Crypt {
-    fn charset() -> ::base64::CharacterSet {
-        ::base64::CharacterSet::Crypt
+impl Alphabet for Crypt {
+    fn charset() -> ::base64::alphabet::Alphabet {
+        ::base64::alphabet::CRYPT
     }
 }
 
 /// The bcrypt character set (uses `./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`).
 pub struct Bcrypt;
-impl CharacterSet for Bcrypt {
-    fn charset() -> ::base64::CharacterSet {
-        ::base64::CharacterSet::Bcrypt
+impl Alphabet for Bcrypt {
+    fn charset() -> ::base64::alphabet::Alphabet {
+        ::base64::alphabet::BCRYPT
     }
 }
 
@@ -190,9 +208,9 @@ impl CharacterSet for Bcrypt {
 ///
 /// See [RFC 3501](https://tools.ietf.org/html/rfc3501#section-5.1.3).
 pub struct ImapMutf7;
-impl CharacterSet for ImapMutf7 {
-    fn charset() -> ::base64::CharacterSet {
-        ::base64::CharacterSet::ImapMutf7
+impl Alphabet for ImapMutf7 {
+    fn charset() -> ::base64::alphabet::Alphabet {
+        ::base64::alphabet::IMAP_MUTF7
     }
 }
 
@@ -200,8 +218,8 @@ impl CharacterSet for ImapMutf7 {
 ///
 /// See [BinHex 4.0 Definition](http://files.stairways.com/other/binhex-40-specs-info.txt).
 pub struct BinHex;
-impl CharacterSet for BinHex {
-    fn charset() -> ::base64::CharacterSet {
-        ::base64::CharacterSet::BinHex
+impl Alphabet for BinHex {
+    fn charset() -> ::base64::alphabet::Alphabet {
+        ::base64::alphabet::BIN_HEX
     }
 }
