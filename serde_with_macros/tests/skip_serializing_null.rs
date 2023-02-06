@@ -137,13 +137,13 @@ fn test_enum() {
         "Tuple": []
     });
     let data = DataEnum::Tuple(None, None);
-    let res = serde_json::to_value(&data).unwrap();
+    let res = serde_json::to_value(data).unwrap();
     assert_eq!(expected, res);
 
     let expected = json!({
         "Struct": {}
     });
     let data = DataEnum::Struct { a: None, b: None };
-    let res = serde_json::to_value(&data).unwrap();
+    let res = serde_json::to_value(data).unwrap();
     assert_eq!(expected, res);
 }
