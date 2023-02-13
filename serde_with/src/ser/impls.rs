@@ -15,7 +15,7 @@ macro_rules! foreach_map {
         $m!(BTreeMap<K, V>);
         #[cfg(feature = "std")]
         $m!(HashMap<K, V, H: Sized>);
-        #[cfg(all(feature = "std", feature = "indexmap_1"))]
+        #[cfg(all(feature = "indexmap_1"))]
         $m!(IndexMap<K, V, H: Sized>);
     };
 }
@@ -27,7 +27,7 @@ macro_rules! foreach_set {
         $m!(BTreeSet<$T>);
         #[cfg(feature = "std")]
         $m!(HashSet<$T, H: Sized>);
-        #[cfg(all(feature = "std", feature = "indexmap_1"))]
+        #[cfg(all(feature = "indexmap_1"))]
         $m!(IndexSet<$T, H: Sized>);
     };
     ($m:ident) => {
