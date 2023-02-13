@@ -18,8 +18,12 @@ use crate::prelude::*;
 /// This cannot work, since there is no way to tell the `Vec` to skip the inner `DoubleOption` if it is `None`.
 ///
 /// ```rust
+/// # #[cfg(FALSE)] {
+/// # struct Foobar {
 /// #[serde_as(as = "Vec<DoubleOption<_>>")]
 /// data: Vec<Option<Option<i32>>>,
+/// # }
+/// # }
 /// ```
 ///
 /// # Examples
