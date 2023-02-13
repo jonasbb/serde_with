@@ -3,6 +3,63 @@ use crate::{formats, formats::Strictness, prelude::*};
 use indexmap_1::{IndexMap, IndexSet};
 
 ///////////////////////////////////////////////////////////////////////////////
+// Helper macro used internally
+
+#[cfg(feature = "alloc")]
+type BoxedSlice<T> = Box<[T]>;
+type Slice<T> = [T];
+
+macro_rules! foreach_map {
+    ($m:ident) => {
+        #[cfg(feature = "alloc")]
+        $m!(BTreeMap<K, V>);
+        #[cfg(feature = "std")]
+        $m!(HashMap<K, V, H: Sized>);
+        #[cfg(all(feature = "std", feature = "indexmap_1"))]
+        $m!(IndexMap<K, V, H: Sized>);
+    };
+}
+pub(crate) use foreach_map;
+
+macro_rules! foreach_set {
+    ($m:ident, $T:tt) => {
+        #[cfg(feature = "alloc")]
+        $m!(BTreeSet<$T>);
+        #[cfg(feature = "std")]
+        $m!(HashSet<$T, H: Sized>);
+        #[cfg(all(feature = "std", feature = "indexmap_1"))]
+        $m!(IndexSet<$T, H: Sized>);
+    };
+    ($m:ident) => {
+        foreach_set!($m, T);
+    };
+}
+pub(crate) use foreach_set;
+
+macro_rules! foreach_seq {
+    ($m:ident, $T:tt) => {
+        foreach_set!($m, $T);
+
+        $m!(Slice<$T>);
+
+        #[cfg(feature = "alloc")]
+        $m!(BinaryHeap<$T>);
+        #[cfg(feature = "alloc")]
+        $m!(BoxedSlice<$T>);
+        #[cfg(feature = "alloc")]
+        $m!(LinkedList<$T>);
+        #[cfg(feature = "alloc")]
+        $m!(Vec<$T>);
+        #[cfg(feature = "alloc")]
+        $m!(VecDeque<$T>);
+    };
+    ($m:ident) => {
+        foreach_seq!($m, T);
+    };
+}
+pub(crate) use foreach_seq;
+
+///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
 
 impl<'a, T, U> SerializeAs<&'a T> for &'a U
@@ -229,36 +286,15 @@ macro_rules! seq_impl {
         }
     }
 }
-
-#[cfg(feature = "alloc")]
-type BoxedSlice<T> = Box<[T]>;
-type Slice<T> = [T];
-#[cfg(feature = "alloc")]
-seq_impl!(BinaryHeap<T>);
-#[cfg(feature = "alloc")]
-seq_impl!(BoxedSlice<T>);
-#[cfg(feature = "alloc")]
-seq_impl!(BTreeSet<T>);
-#[cfg(feature = "std")]
-seq_impl!(HashSet<T, H: Sized>);
-#[cfg(feature = "alloc")]
-seq_impl!(LinkedList<T>);
-seq_impl!(Slice<T>);
-#[cfg(feature = "alloc")]
-seq_impl!(Vec<T>);
-#[cfg(feature = "alloc")]
-seq_impl!(VecDeque<T>);
-#[cfg(feature = "indexmap_1")]
-seq_impl!(IndexSet<T, H: Sized>);
+foreach_seq!(seq_impl);
 
 #[cfg(feature = "alloc")]
 macro_rules! map_impl {
-    ($ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound:ident)* >) => {
+    ($ty:ident < K, V $(, $typaram:ident : $bound:ident)* >) => {
         impl<K, KU, V, VU $(, $typaram)*> SerializeAs<$ty<K, V $(, $typaram)*>> for $ty<KU, VU $(, $typaram)*>
         where
             KU: SerializeAs<K>,
             VU: SerializeAs<V>,
-            $(K: ?Sized + $kbound1 $(+ $kbound2)*,)*
             $($typaram: ?Sized + $bound,)*
         {
             fn serialize_as<S>(source: &$ty<K, V $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
@@ -270,13 +306,7 @@ macro_rules! map_impl {
         }
     }
 }
-
-#[cfg(feature = "alloc")]
-map_impl!(BTreeMap<K, V>);
-#[cfg(feature = "std")]
-map_impl!(HashMap<K, V, H: Sized>);
-#[cfg(feature = "indexmap_1")]
-map_impl!(IndexMap<K, V, H: Sized>);
+foreach_map!(map_impl);
 
 macro_rules! tuple_impl {
     ($len:literal $($n:tt $t:ident $tas:ident)+) => {
@@ -318,13 +348,14 @@ tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq_intern {
-    ($tyorig:ty, $ty:ident <(K, V)>) => {
-        impl<K, KAs, V, VAs> SerializeAs<$tyorig> for $ty<(KAs, VAs)>
+    ($tyorig:ident < K, V $(, $typaram:ident : $bound:ident)* >, $ty:ident <(K, V)>) => {
+        impl<K, KAs, V, VAs $(, $typaram)*> SerializeAs<$tyorig<K, V $(, $typaram)*>> for $ty<(KAs, VAs)>
         where
             KAs: SerializeAs<K>,
             VAs: SerializeAs<V>,
+            $($typaram: ?Sized + $bound,)*
         {
-            fn serialize_as<S>(source: &$tyorig, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize_as<S>(source: &$tyorig<K, V $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: Serializer,
             {
@@ -340,29 +371,24 @@ macro_rules! map_as_tuple_seq_intern {
 }
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq {
-    ($($ty:ty $(,)?)+) => {$(
-        map_as_tuple_seq_intern!($ty, Seq<(K, V)>);
+    ($tyorig:ident < K, V $(, $typaram:ident : $bound:ident)* >) => {
+        map_as_tuple_seq_intern!($tyorig<K, V $(, $typaram: $bound)* >, Seq<(K, V)>);
         #[cfg(feature = "alloc")]
-        map_as_tuple_seq_intern!($ty, Vec<(K, V)>);
-    )+}
+        map_as_tuple_seq_intern!($tyorig<K, V $(, $typaram: $bound)* >, Vec<(K, V)>);
+    }
 }
-#[cfg(feature = "alloc")]
-map_as_tuple_seq!(BTreeMap<K, V>);
-// TODO HashMap with a custom hasher support would be better, but results in "unconstrained type parameter"
-#[cfg(feature = "std")]
-map_as_tuple_seq!(HashMap<K, V>);
-#[cfg(all(feature = "std", feature = "indexmap_1"))]
-map_as_tuple_seq!(IndexMap<K, V>);
+foreach_map!(map_as_tuple_seq);
 
 macro_rules! tuple_seq_as_map_impl_intern {
-    ($tyorig:ty, $ty:ident <K, V>) => {
+    ($tyorig:ident < (K, V) $(, $typaram:ident : $bound:ident)* >, $ty:ident <K, V>) => {
         #[allow(clippy::implicit_hasher)]
-        impl<K, KAs, V, VAs> SerializeAs<$tyorig> for $ty<KAs, VAs>
+        impl<K, KAs, V, VAs $(, $typaram)*> SerializeAs<$tyorig<(K, V) $(, $typaram)*>> for $ty<KAs, VAs>
         where
             KAs: SerializeAs<K>,
             VAs: SerializeAs<V>,
+            $($typaram: ?Sized + $bound,)*
         {
-            fn serialize_as<S>(source: &$tyorig, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize_as<S>(source: &$tyorig<(K, V) $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: Serializer,
             {
@@ -377,30 +403,16 @@ macro_rules! tuple_seq_as_map_impl_intern {
     };
 }
 macro_rules! tuple_seq_as_map_impl {
-    ($($ty:ty $(,)?)+) => {$(
-        tuple_seq_as_map_impl_intern!($ty, Map<K, V>);
+    ($tyorig:ident < (K, V) $(, $typaram:ident : $bound:ident)* >) => {
+        tuple_seq_as_map_impl_intern!($tyorig<(K, V) $(, $typaram: $bound)* >, Map<K, V>);
         #[cfg(feature = "alloc")]
-        tuple_seq_as_map_impl_intern!($ty, BTreeMap<K, V>);
+        tuple_seq_as_map_impl_intern!($tyorig<(K, V) $(, $typaram: $bound)* >, BTreeMap<K, V>);
         #[cfg(feature = "std")]
-        tuple_seq_as_map_impl_intern!($ty, HashMap<K, V>);
-    )+}
+        tuple_seq_as_map_impl_intern!($tyorig<(K, V) $(, $typaram: $bound)* >, HashMap<K, V>);
+    }
 }
-
-tuple_seq_as_map_impl! {
-    Option<(K, V)>,
-}
-#[cfg(feature = "alloc")]
-tuple_seq_as_map_impl! {
-    BinaryHeap<(K, V)>,
-    BTreeSet<(K, V)>,
-    LinkedList<(K, V)>,
-    Vec<(K, V)>,
-    VecDeque<(K, V)>,
-}
-#[cfg(feature = "std")]
-tuple_seq_as_map_impl!(HashSet<(K, V)>);
-#[cfg(all(feature = "std", feature = "indexmap_1"))]
-tuple_seq_as_map_impl!(IndexSet<(K, V)>);
+foreach_seq!(tuple_seq_as_map_impl, (K, V));
+tuple_seq_as_map_impl!(Option<(K, V)>);
 
 macro_rules! tuple_seq_as_map_arr {
     ($tyorig:ty, $ty:ident <K, V>) => {
