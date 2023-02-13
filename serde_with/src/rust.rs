@@ -13,6 +13,19 @@ use crate::prelude::*;
 /// * `Some(None)`: Represents a `null` value.
 /// * `Some(Some(value))`: Represents an existing value.
 ///
+/// Note: This cannot be made compatible to `serde_as`, since skipping of values is only available on the field level.
+/// A hypothetical `DoubleOption<T>` with a `SerializeAs` implementation would allow writing something like this.
+/// This cannot work, since there is no way to tell the `Vec` to skip the inner `DoubleOption` if it is `None`.
+///
+/// ```rust
+/// # #[cfg(FALSE)] {
+/// # struct Foobar {
+/// #[serde_as(as = "Vec<DoubleOption<_>>")]
+/// data: Vec<Option<Option<i32>>>,
+/// # }
+/// # }
+/// ```
+///
 /// # Examples
 ///
 /// ```rust
