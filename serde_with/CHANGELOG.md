@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* `EnumMap` passes the `human_readable` status of the `Serializer` to more places.
+
 ## [2.2.0] - 2023-01-09
 
 ### Added
