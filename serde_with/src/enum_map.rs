@@ -174,7 +174,10 @@ where
     where
         D: Deserializer<'de>,
     {
-        struct EnumMapVisitor<T>(PhantomData<T>);
+        struct EnumMapVisitor<T> {
+            is_human_readable: bool,
+            phantom: PhantomData<T>,
+        }
 
         impl<'de, T> Visitor<'de> for EnumMapVisitor<T>
         where
@@ -183,15 +186,22 @@ where
             type Value = Vec<T>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(formatter, "a map or enum values")
+                write!(formatter, "a map of enum values")
             }
 
             fn visit_map<A: MapAccess<'de>>(self, map: A) -> Result<Self::Value, A::Error> {
-                Vec::deserialize(SeqDeserializer(map))
+                Vec::deserialize(SeqDeserializer {
+                    delegate: map,
+                    is_human_readable: self.is_human_readable,
+                })
             }
         }
 
-        deserializer.deserialize_map(EnumMapVisitor(PhantomData))
+        let is_human_readable = deserializer.is_human_readable();
+        deserializer.deserialize_map(EnumMapVisitor {
+            is_human_readable,
+            phantom: PhantomData,
+        })
     }
 }
 
@@ -219,6 +229,10 @@ where
     type SerializeMap = Impossible<S::Ok, S::Error>;
     type SerializeStruct = Impossible<S::Ok, S::Error>;
     type SerializeStructVariant = Impossible<S::Ok, S::Error>;
+
+    fn is_human_readable(&self) -> bool {
+        self.0.is_human_readable()
+    }
 
     fn serialize_bool(self, _v: bool) -> Result<Self::Ok, Self::Error> {
         Err(SerError::custom("wrong type for EnumMap"))
@@ -443,6 +457,10 @@ where
     type SerializeMap = Impossible<Self::Ok, Self::Error>;
     type SerializeStruct = Impossible<Self::Ok, Self::Error>;
     type SerializeStructVariant = SerializeVariant<'a, M>;
+
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
+    }
 
     fn serialize_bool(self, _v: bool) -> Result<Self::Ok, Self::Error> {
         Err(SerError::custom("wrong type for EnumMap"))
@@ -690,13 +708,20 @@ where
 /// Deserialize the sequence of enum instances.
 ///
 /// The main [`Deserializer`] implementation handles the outer sequence (e.g., `Vec`), while the [`SeqAccess`] implementation is responsible for the inner elements.
-struct SeqDeserializer<M>(M);
+struct SeqDeserializer<M> {
+    delegate: M,
+    is_human_readable: bool,
+}
 
 impl<'de, M> Deserializer<'de> for SeqDeserializer<M>
 where
     M: MapAccess<'de>,
 {
     type Error = M::Error;
+
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
+    }
 
     fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
@@ -729,7 +754,10 @@ where
     where
         T: DeserializeSeed<'de>,
     {
-        match seed.deserialize(EnumDeserializer(&mut self.0)) {
+        match seed.deserialize(EnumDeserializer {
+            delegate: &mut self.delegate,
+            is_human_readable: self.is_human_readable,
+        }) {
             Ok(value) => Ok(Some(value)),
             Err(err) => {
                 // Unfortunately we loose the optional aspect of MapAccess, so we need to special case an error value to mark the end of the map.
@@ -743,7 +771,7 @@ where
     }
 
     fn size_hint(&self) -> Option<usize> {
-        self.0.size_hint()
+        self.delegate.size_hint()
     }
 }
 
@@ -752,13 +780,20 @@ where
 /// The [`Deserializer`] implementation is the starting point, which first calls the [`EnumAccess`] methods.
 /// The [`EnumAccess`] is used to deserialize the enum variant type of the enum.
 /// The [`VariantAccess`] is used to deserialize the value part of the enum.
-struct EnumDeserializer<M>(M);
+struct EnumDeserializer<M> {
+    delegate: M,
+    is_human_readable: bool,
+}
 
 impl<'de, M> Deserializer<'de> for EnumDeserializer<M>
 where
     M: MapAccess<'de>,
 {
     type Error = M::Error;
+
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
+    }
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
@@ -797,7 +832,7 @@ where
     where
         T: DeserializeSeed<'de>,
     {
-        match self.0.next_key_seed(seed)? {
+        match self.delegate.next_key_seed(seed)? {
             Some(key) => Ok((key, self)),
 
             // Unfortunately we loose the optional aspect of MapAccess, so we need to special case an error value to mark the end of the map.
@@ -813,21 +848,22 @@ where
     type Error = M::Error;
 
     fn unit_variant(mut self) -> Result<(), Self::Error> {
-        self.0.next_value()
+        self.delegate.next_value()
     }
 
     fn newtype_variant_seed<T>(mut self, seed: T) -> Result<T::Value, Self::Error>
     where
         T: DeserializeSeed<'de>,
     {
-        self.0.next_value_seed(seed)
+        self.delegate.next_value_seed(seed)
     }
 
     fn tuple_variant<V>(mut self, len: usize, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        self.0.next_value_seed(SeedTupleVariant { len, visitor })
+        self.delegate
+            .next_value_seed(SeedTupleVariant { len, visitor })
     }
 
     fn struct_variant<V>(
@@ -838,7 +874,7 @@ where
     where
         V: Visitor<'de>,
     {
-        self.0.next_value_seed(SeedStructVariant { visitor })
+        self.delegate.next_value_seed(SeedStructVariant { visitor })
     }
 }
 
