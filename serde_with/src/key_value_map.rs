@@ -6,6 +6,154 @@ use crate::{
     prelude::*,
 };
 
+/// Convert `Vec` elements into key-value map entries
+///
+/// This maps a single struct/tuple/etc. to a map entry.
+/// A struct field will be mapped to the map key.
+/// The other values will be mapped to the map value.
+///
+/// The conversion supports structs, tuple structs, tuples, maps, and sequences.
+/// Structs need a field that is named `$key$` to be used as the map key.
+/// This can be done with the `#[serde(rename = "$key$")]` attribute.
+/// Maps similarly need a map-key that is named `$key$`.
+/// For tuples, tuple structs, and sequences the first element is used as the map key.
+///
+/// # Examples
+///
+/// ## Struct with String key in JSON
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// use serde_with::KeyValueMap;
+///
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct SimpleStruct {
+///     b: bool,
+///     // The field named `$key$` will become the map key
+///     #[serde(rename = "$key$")]
+///     id: String,
+///     i: i32,
+/// }
+///
+/// #[serde_with::serde_as]
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct KVMap(
+///     #[serde_as(as = "KeyValueMap<_>")]
+///     Vec<SimpleStruct>,
+/// );
+///
+/// // ---
+///
+/// // This will serialize this list of values
+/// let values = KVMap(vec![
+///     SimpleStruct {
+///         b: false,
+///         id: "id-0000".to_string(),
+///         i: 123,
+///     },
+///     SimpleStruct {
+///         b: true,
+///         id: "id-0001".to_string(),
+///         i: 555,
+///     },
+///     SimpleStruct {
+///         b: false,
+///         id: "id-0002".to_string(),
+///         i: 987,
+///     },
+/// ]);
+///
+/// // into this JSON map
+/// let expected =
+/// r#"{
+///   "id-0000": {
+///     "b": false,
+///     "i": 123
+///   },
+///   "id-0001": {
+///     "b": true,
+///     "i": 555
+///   },
+///   "id-0002": {
+///     "b": false,
+///     "i": 987
+///   }
+/// }"#;
+///
+/// // Both serialization and deserialization work flawlessly.
+/// let serialized = serde_json::to_string_pretty(&values).unwrap();
+/// assert_eq!(expected, serialized);
+/// let deserialized: KVMap = serde_json::from_str(&serialized).unwrap();
+/// assert_eq!(values, deserialized);
+/// # }
+/// ```
+///
+/// ## Tuple struct with complex key in YAML
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// use serde_with::KeyValueMap;
+/// use std::net::IpAddr;
+/// # use std::str::FromStr;
+///
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct TupleStruct (
+///     // The first element in a tuple struct, tuple, or sequence becomes the map key
+///     (IpAddr, u8),
+///     bool,
+/// );
+///
+/// #[serde_with::serde_as]
+/// # #[derive(Debug, Clone, PartialEq, Eq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct KVMap(
+///     #[serde_as(as = "KeyValueMap<_>")]
+///     Vec<TupleStruct>,
+/// );
+///
+/// // ---
+///
+/// // This will serialize this list of values
+/// let values = KVMap(vec![
+///     TupleStruct(
+///         (IpAddr::from_str("127.0.0.1").unwrap(), 8),
+///         true
+///     ),
+///     TupleStruct(
+///         (IpAddr::from_str("::1").unwrap(), 128),
+///         true
+///     ),
+///     TupleStruct(
+///         (IpAddr::from_str("198.51.100.0").unwrap(), 24),
+///         true
+///     ),
+/// ]);
+///
+/// // into this YAML
+/// let expected =
+/// r#"? - 127.0.0.1
+///   - 8
+/// : - true
+/// ? - ::1
+///   - 128
+/// : - true
+/// ? - 198.51.100.0
+///   - 24
+/// : - true
+/// "#;
+///
+/// // Both serialization and deserialization work flawlessly.
+/// let serialized = serde_yaml::to_string(&values).unwrap();
+/// assert_eq!(expected, serialized);
+/// let deserialized: KVMap = serde_yaml::from_str(&serialized).unwrap();
+/// assert_eq!(values, deserialized);
+/// # }
+/// ```
 pub struct KeyValueMap<T>(PhantomData<T>);
 
 impl<T, TAs> SerializeAs<Vec<T>> for KeyValueMap<TAs>
