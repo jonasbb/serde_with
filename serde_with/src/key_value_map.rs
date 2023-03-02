@@ -9,7 +9,7 @@ use crate::{
 /// Convert `Vec` elements into key-value map entries
 ///
 /// This maps a single struct/tuple/etc. to a map entry.
-/// A struct field will be mapped to the map key.
+/// The map key is converted to a struct field.
 /// The other values will be mapped to the map value.
 ///
 /// The conversion supports structs, tuple structs, tuples, maps, and sequences.
