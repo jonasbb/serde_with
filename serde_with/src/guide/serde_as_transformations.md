@@ -428,7 +428,7 @@ Tuples, tuple structs, and sequences are supported by turning the first value in
 
 Each of the `SimpleStruct`s
 
-```rust
+```ignore
 // Somewhere there is a collection:
 // #[serde_as(as = "KeyValueMap<_>")]
 // Vec<SimpleStruct>,
