@@ -208,7 +208,6 @@ where
 }
 
 static MAP_KEY_IDENTIFIER: &str = "$key$";
-static END_OF_MAP_IDENTIFIER: &str = "__PRIVATE_END_OF_MAP_MARKER__";
 
 /// Convert a sequence to a map during serialization.
 ///
@@ -941,19 +940,16 @@ where
     where
         T: DeserializeSeed<'de>,
     {
-        match seed.deserialize(MapKeyDeserializer {
-            delegate: &mut self.delegate,
-            is_human_readable: self.is_human_readable,
-        }) {
-            Ok(value) => Ok(Some(value)),
-            Err(err) => {
-                // Unfortunately we loose the optional aspect of MapAccess, so we need to special case an error value to mark the end of the map.
-                if err.to_string().contains(END_OF_MAP_IDENTIFIER) {
-                    Ok(None)
-                } else {
-                    Err(err)
-                }
-            }
+        let key_value: Option<DeContent<'de>> = self.delegate.next_key()?;
+        if let Some(key_value) = key_value {
+            seed.deserialize(MapKeyDeserializer {
+                delegate: &mut self.delegate,
+                is_human_readable: self.is_human_readable,
+                key_value,
+            })
+            .map(Some)
+        } else {
+            Ok(None)
         }
     }
 
@@ -962,12 +958,13 @@ where
     }
 }
 
-struct MapKeyDeserializer<M> {
+struct MapKeyDeserializer<'de, M> {
     delegate: M,
     is_human_readable: bool,
+    key_value: DeContent<'de>,
 }
 
-impl<'de, M> Deserializer<'de> for MapKeyDeserializer<M>
+impl<'de, M> Deserializer<'de> for MapKeyDeserializer<'de, M>
 where
     M: MapAccess<'de>,
 {
@@ -988,31 +985,21 @@ where
     where
         V: Visitor<'de>,
     {
-        let s: Option<DeContent<'_>> = self.delegate.next_key()?;
-        if let Some(s) = s {
-            self.delegate.next_value_seed(KeyValueSeqDeserialize {
-                delegate: visitor,
-                first: Some(s),
-            })
-        } else {
-            Err(DeError::custom(END_OF_MAP_IDENTIFIER))
-        }
+        self.delegate.next_value_seed(KeyValueSeqDeserialize {
+            delegate: visitor,
+            first: Some(self.key_value),
+        })
     }
 
     fn deserialize_tuple<V>(mut self, len: usize, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        let s: Option<DeContent<'_>> = self.delegate.next_key()?;
-        if let Some(s) = s {
-            self.delegate.next_value_seed(KeyValueTupleDeserialize {
-                delegate: visitor,
-                len,
-                first: Some(s),
-            })
-        } else {
-            Err(DeError::custom(END_OF_MAP_IDENTIFIER))
-        }
+        self.delegate.next_value_seed(KeyValueTupleDeserialize {
+            delegate: visitor,
+            len,
+            first: Some(self.key_value),
+        })
     }
 
     fn deserialize_tuple_struct<V>(
@@ -1024,33 +1011,23 @@ where
     where
         V: Visitor<'de>,
     {
-        let s: Option<DeContent<'_>> = self.delegate.next_key()?;
-        if let Some(s) = s {
-            self.delegate
-                .next_value_seed(KeyValueTupleStructDeserialize {
-                    delegate: visitor,
-                    name,
-                    len,
-                    first: Some(s),
-                })
-        } else {
-            Err(DeError::custom(END_OF_MAP_IDENTIFIER))
-        }
+        self.delegate
+            .next_value_seed(KeyValueTupleStructDeserialize {
+                delegate: visitor,
+                name,
+                len,
+                first: Some(self.key_value),
+            })
     }
 
     fn deserialize_map<V>(mut self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        let s: Option<DeContent<'_>> = self.delegate.next_key()?;
-        if let Some(s) = s {
-            self.delegate.next_value_seed(KeyValueMapDeserialize {
-                delegate: visitor,
-                first: Some(s),
-            })
-        } else {
-            Err(DeError::custom(END_OF_MAP_IDENTIFIER))
-        }
+        self.delegate.next_value_seed(KeyValueMapDeserialize {
+            delegate: visitor,
+            first: Some(self.key_value),
+        })
     }
 
     fn deserialize_struct<V>(
@@ -1062,17 +1039,12 @@ where
     where
         V: Visitor<'de>,
     {
-        let s: Option<DeContent<'_>> = self.delegate.next_key()?;
-        if let Some(s) = s {
-            self.delegate.next_value_seed(KeyValueStructDeserialize {
-                delegate: visitor,
-                name,
-                fields,
-                first: Some(s),
-            })
-        } else {
-            Err(DeError::custom(END_OF_MAP_IDENTIFIER))
-        }
+        self.delegate.next_value_seed(KeyValueStructDeserialize {
+            delegate: visitor,
+            name,
+            fields,
+            first: Some(self.key_value),
+        })
     }
 
     serde::forward_to_deserialize_any! {
