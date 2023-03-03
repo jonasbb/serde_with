@@ -98,7 +98,7 @@ where
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
 impl<'de, T, U> DeserializeAs<'de, Arc<T>> for Arc<U>
 where
     U: DeserializeAs<'de, T>,
@@ -113,7 +113,7 @@ where
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
 impl<'de, T, U> DeserializeAs<'de, ArcWeak<T>> for ArcWeak<U>
 where
     U: DeserializeAs<'de, T>,
