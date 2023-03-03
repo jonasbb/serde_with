@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 * `EnumMap` passes the `human_readable` status of the `Serializer` to more places.
+* Support `alloc` on targets without `target_has_atomic = "ptr"`. (#560)
+    Thanks to @vembacher for reporting and fixing the issue.
 
 ## [2.2.0] - 2023-01-09
 
