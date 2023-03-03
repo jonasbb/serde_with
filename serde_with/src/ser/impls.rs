@@ -145,7 +145,7 @@ where
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
 impl<T, U> SerializeAs<Arc<T>> for Arc<U>
 where
     U: SerializeAs<T>,
@@ -158,7 +158,7 @@ where
     }
 }
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
 impl<T, U> SerializeAs<ArcWeak<T>> for ArcWeak<U>
 where
     U: SerializeAs<T>,

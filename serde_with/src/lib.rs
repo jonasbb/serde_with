@@ -379,6 +379,8 @@ pub(crate) mod prelude {
 
     pub(crate) use crate::utils::duration::{DurationSigned, Sign};
     pub use crate::{de::*, ser::*, *};
+    #[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
+    pub use alloc::sync::{Arc, Weak as ArcWeak};
     #[cfg(feature = "alloc")]
     pub use alloc::{
         borrow::{Cow, ToOwned},
@@ -386,7 +388,6 @@ pub(crate) mod prelude {
         collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
         rc::{Rc, Weak as RcWeak},
         string::{String, ToString},
-        sync::{Arc, Weak as ArcWeak},
         vec::Vec,
     };
     pub use core::{
