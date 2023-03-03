@@ -754,6 +754,11 @@ where
     where
         T: DeserializeSeed<'de>,
     {
+        // We need to check if the map is done, or if there are still remaining elements.
+        // But we cannot ask the MapAccess directly.
+        // The only way is trying to deserialize, but we don't know the type yet.
+        // So we assume there is a value and try to deserialize it.
+        // If we later on find out that there is no value, we return a special error value, which we turn into `None`.
         match seed.deserialize(EnumDeserializer {
             delegate: &mut self.delegate,
             is_human_readable: self.is_human_readable,
