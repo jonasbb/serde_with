@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add `serde_as` compatible versions for the existing duplicate key and value handling. (#534)
+    The new types `MapPreventDuplicates`, `MapFirstKeyWins`, `SetPreventDuplicates`, and `SetLastValueWins` can replace the existing modules `maps_duplicate_key_is_error`, `maps_first_key_wins`, `sets_duplicate_value_is_error`, and `sets_last_value_wins`.
+
 ### Fixed
 
 * `EnumMap` passes the `human_readable` status of the `Serializer` to more places.
