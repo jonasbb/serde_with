@@ -2238,6 +2238,7 @@ pub struct Seq<V>(PhantomData<V>);
 /// assert!(res.is_err());
 /// # }
 /// ```
+#[cfg(feature = "alloc")]
 pub struct MapPreventDuplicates<K, V>(PhantomData<(K, V)>);
 
 /// Ensure that the last value is taken, if duplicate values exist
@@ -2249,6 +2250,7 @@ pub struct MapPreventDuplicates<K, V>(PhantomData<(K, V)>);
 ///
 /// [`HashSet`]: std::collections::HashSet
 /// [`BTreeSet`]: std::collections::HashSet
+#[cfg(feature = "alloc")]
 pub struct MapFirstKeyWins<K, V>(PhantomData<(K, V)>);
 
 /// Ensure no duplicate values exist in a set.
@@ -2293,6 +2295,7 @@ pub struct MapFirstKeyWins<K, V>(PhantomData<(K, V)>);
 /// assert!(res.is_err());
 /// # }
 /// ```
+#[cfg(feature = "alloc")]
 pub struct SetPreventDuplicates<T>(PhantomData<T>);
 
 /// Ensure that the last value is taken, if duplicate values exist
@@ -2304,4 +2307,5 @@ pub struct SetPreventDuplicates<T>(PhantomData<T>);
 ///
 /// [`HashSet`]: std::collections::HashSet
 /// [`BTreeSet`]: std::collections::HashSet
+#[cfg(feature = "alloc")]
 pub struct SetLastValueWins<T>(PhantomData<T>);

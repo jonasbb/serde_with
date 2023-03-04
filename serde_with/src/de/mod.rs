@@ -7,6 +7,7 @@
 //!
 //! [user guide]: crate::guide
 
+#[cfg(feature = "alloc")]
 mod duplicates;
 mod impls;
 
