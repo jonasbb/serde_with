@@ -178,13 +178,29 @@ pub mod unwrap_or_skip {
 ///
 /// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
 ///
+/// # Converting to serde_as
+///
+/// The same functionality can be more clearly expressed using the `serde_as` macro and [`SetPreventDuplicates`].
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
+///
+/// ```rust
+/// # #[cfg(FALSE)] {
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "SetPreventDuplicates<_, _>")]
+///     s: HashSet<usize>,
+/// }
+/// # }
+/// ```
+///
 /// [`HashSet`]: std::collections::HashSet
 /// [`BTreeSet`]: std::collections::HashSet
 ///
 /// # Example
 ///
 /// ```rust
-/// # use std::{collections::HashSet, iter::FromIterator};
+/// # use std::collections::HashSet;
 /// # use serde::Deserialize;
 /// #
 /// # #[derive(Debug, Eq, PartialEq)]
@@ -277,6 +293,22 @@ pub mod sets_duplicate_value_is_error {
 /// This helper returns an error if two identical keys exist in a map.
 ///
 /// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
+///
+/// # Converting to serde_as
+///
+/// The same functionality can be more clearly expressed using the `serde_as` macro and [`MapPreventDuplicates`].
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
+///
+/// ```rust
+/// # #[cfg(FALSE)] {
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "MapPreventDuplicates<_, _>")]
+///     s: HashMap<usize, usize>,
+/// }
+/// # }
+/// ```
 ///
 /// [`HashMap`]: std::collections::HashMap
 /// [`BTreeMap`]: std::collections::HashMap
@@ -382,6 +414,22 @@ pub mod maps_duplicate_key_is_error {
 ///
 /// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
 ///
+/// # Converting to serde_as
+///
+/// The same functionality can be more clearly expressed using the `serde_as` macro and [`SetLastValueWins`].
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
+///
+/// ```rust
+/// # #[cfg(FALSE)] {
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "SetLastValueWins<_, _>")]
+///     s: HashSet<usize>,
+/// }
+/// # }
+/// ```
+///
 /// [`HashSet`]: std::collections::HashSet
 /// [`BTreeSet`]: std::collections::HashSet
 #[cfg(feature = "alloc")]
@@ -453,6 +501,22 @@ pub mod sets_last_value_wins {
 ///
 /// [`HashMap`]: std::collections::HashMap
 /// [`BTreeMap`]: std::collections::HashMap
+///
+/// # Converting to serde_as
+///
+/// The same functionality can be more clearly expressed using the `serde_as` macro and [`MapFirstKeyWins`].
+/// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
+///
+/// ```rust
+/// # #[cfg(FALSE)] {
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "MapFirstKeyWins<_, _>")]
+///     s: HashMap<usize, usize>,
+/// }
+/// # }
+/// ```
 ///
 /// # Example
 ///
