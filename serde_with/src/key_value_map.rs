@@ -207,6 +207,11 @@ where
     }
 }
 
+// TODO Replace this with a const generic string once adt_const_params is stable.
+// This will allow something like this.
+// The `"id"` part is the field name, which gets converted to/from the map key.
+// #[serde_as(as = r#"KeyValueMap<"id", _>"#)]
+// Vec<SimpleStruct>,
 static MAP_KEY_IDENTIFIER: &str = "$key$";
 
 /// Convert a sequence to a map during serialization.
