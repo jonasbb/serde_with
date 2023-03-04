@@ -2192,3 +2192,116 @@ pub struct Map<K, V>(PhantomData<(K, V)>);
 /// # }
 /// ```
 pub struct Seq<V>(PhantomData<V>);
+
+/// Ensure no duplicate keys exist in a map.
+///
+/// By default serde has a last-value-wins implementation, if duplicate keys for a map exist.
+/// Sometimes it is desirable to know when such an event happens, as the first value is overwritten
+/// and it can indicate an error in the serialized data.
+///
+/// This helper returns an error if two identical keys exist in a map.
+///
+/// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
+///
+/// [`HashMap`]: std::collections::HashMap
+/// [`BTreeMap`]: std::collections::HashMap
+///
+/// # Example
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::Deserialize;
+/// # use std::collections::HashMap;
+/// # use serde_with::MapPreventDuplicates;
+/// #
+/// #[serde_with::serde_as]
+/// # #[derive(Debug, Eq, PartialEq)]
+/// #[derive(Deserialize)]
+/// struct Doc {
+///     #[serde_as(as = "MapPreventDuplicates<_, _>")]
+///     map: HashMap<usize, usize>,
+/// }
+///
+/// // Maps are serialized normally,
+/// let s = r#"{"map": {"1": 1, "2": 2, "3": 3}}"#;
+/// let mut v = Doc {
+///     map: HashMap::new(),
+/// };
+/// v.map.insert(1, 1);
+/// v.map.insert(2, 2);
+/// v.map.insert(3, 3);
+/// assert_eq!(v, serde_json::from_str(s).unwrap());
+///
+/// // but create an error if duplicate keys, like the `1`, exist.
+/// let s = r#"{"map": {"1": 1, "2": 2, "1": 3}}"#;
+/// let res: Result<Doc, _> = serde_json::from_str(s);
+/// assert!(res.is_err());
+/// # }
+/// ```
+pub struct MapPreventDuplicates<K, V>(PhantomData<(K, V)>);
+
+/// Ensure that the last value is taken, if duplicate values exist
+///
+/// By default serde has a first-value-wins implementation, if duplicate keys for a set exist.
+/// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
+///
+/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
+///
+/// [`HashSet`]: std::collections::HashSet
+/// [`BTreeSet`]: std::collections::HashSet
+pub struct MapFirstKeyWins<K, V>(PhantomData<(K, V)>);
+
+/// Ensure no duplicate values exist in a set.
+///
+/// By default serde has a last-value-wins implementation, if duplicate values for a set exist.
+/// Sometimes it is desirable to know when such an event happens, as the first value is overwritten
+/// and it can indicate an error in the serialized data.
+///
+/// This helper returns an error if two identical values exist in a set.
+///
+/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
+///
+/// [`HashSet`]: std::collections::HashSet
+/// [`BTreeSet`]: std::collections::HashSet
+///
+/// # Example
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use std::collections::HashSet;
+/// # use serde::Deserialize;
+/// # use serde_with::SetPreventDuplicates;
+/// #
+/// #[serde_with::serde_as]
+/// # #[derive(Debug, Eq, PartialEq)]
+/// #[derive(Deserialize)]
+/// struct Doc {
+///     #[serde_as(as = "SetPreventDuplicates<_>")]
+///     set: HashSet<usize>,
+/// }
+///
+/// // Sets are serialized normally,
+/// let s = r#"{"set": [1, 2, 3, 4]}"#;
+/// let v = Doc {
+///     set: HashSet::from_iter(vec![1, 2, 3, 4]),
+/// };
+/// assert_eq!(v, serde_json::from_str(s).unwrap());
+///
+/// // but create an error if duplicate values, like the `1`, exist.
+/// let s = r#"{"set": [1, 2, 3, 4, 1]}"#;
+/// let res: Result<Doc, _> = serde_json::from_str(s);
+/// assert!(res.is_err());
+/// # }
+/// ```
+pub struct SetPreventDuplicates<T>(PhantomData<T>);
+
+/// Ensure that the last value is taken, if duplicate values exist
+///
+/// By default serde has a first-value-wins implementation, if duplicate keys for a set exist.
+/// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
+///
+/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
+///
+/// [`HashSet`]: std::collections::HashSet
+/// [`BTreeSet`]: std::collections::HashSet
+pub struct SetLastValueWins<T>(PhantomData<T>);

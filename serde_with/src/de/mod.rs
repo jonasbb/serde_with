@@ -7,6 +7,7 @@
 //!
 //! [user guide]: crate::guide
 
+mod duplicates;
 mod impls;
 
 use crate::prelude::*;
