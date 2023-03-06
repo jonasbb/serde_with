@@ -58,6 +58,16 @@ pub(crate) enum Content {
     ),
 }
 
+impl Content {
+    pub(crate) fn as_str(&self) -> Option<&str> {
+        match self {
+            Self::String(ref x) => Some(x),
+            Self::Bytes(x) => core::str::from_utf8(x).ok(),
+            _ => None,
+        }
+    }
+}
+
 impl Serialize for Content {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

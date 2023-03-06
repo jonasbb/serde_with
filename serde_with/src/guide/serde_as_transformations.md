@@ -25,10 +25,11 @@ This page lists the transformations implemented in this crate and supported by `
 21. [Prefer the first map key when duplicates exist](#prefer-the-first-map-key-when-duplicates-exist)
 22. [Prevent duplicate map keys](#prevent-duplicate-map-keys)
 23. [Prevent duplicate set values](#prevent-duplicate-set-values)
-24. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
-25. [Value into JSON String](#value-into-json-string)
-26. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
-27. [Well-known time formats for `OffsetDateTime`](#well-known-time-formats-for-offsetdatetime)
+24. [Struct fields as map keys](#struct-fields-as-map-keys)
+25. [Timestamps as seconds since UNIX epoch](#timestamps-as-seconds-since-unix-epoch)
+26. [Value into JSON String](#value-into-json-string)
+27. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
+28. [Well-known time formats for `OffsetDateTime`](#well-known-time-formats-for-offsetdatetime)
 
 ## Base64 encode bytes
 
@@ -418,6 +419,39 @@ Error during deserialization, when duplicate map keys are detected.
 
 Error during deserialization, when duplicate set values are detected.
 
+## Struct fields as map keys
+
+[`KeyValueMap`]
+
+This conversion is possible for structs and maps, using the `$key$` field.
+Tuples, tuple structs, and sequences are supported by turning the first value into the map key.
+
+Each of the `SimpleStruct`s
+
+```ignore
+// Somewhere there is a collection:
+// #[serde_as(as = "KeyValueMap<_>")]
+// Vec<SimpleStruct>,
+
+#[derive(Serialize, Deserialize)]
+struct SimpleStruct {
+    b: bool,
+    // The field named `$key$` will become the map key
+    #[serde(rename = "$key$")]
+    id: String,
+    i: i32,
+}
+```
+
+will turn into a JSON snippet like this.
+
+```json
+"id-0000": {
+  "b": false,
+  "i": 123
+},
+```
+
 ## Timestamps as seconds since UNIX epoch
 
 [`TimestampSeconds`]
@@ -545,6 +579,7 @@ These conversions are available with the `time_0_3` feature flag.
 [`FromInto`]: crate::FromInto
 [`Hex`]: crate::hex::Hex
 [`JsonString`]: crate::json::JsonString
+[`KeyValueMap`]: crate::KeyValueMap
 [`MapFirstKeyWins`]: crate::MapFirstKeyWins
 [`MapPreventDuplicates`]: crate::MapPreventDuplicates
 [`NoneAsEmptyString`]: crate::NoneAsEmptyString

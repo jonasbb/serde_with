@@ -322,6 +322,8 @@ pub mod hex;
 #[cfg(feature = "json")]
 #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
 pub mod json;
+#[cfg(feature = "alloc")]
+mod key_value_map;
 pub mod rust;
 pub mod ser;
 #[cfg(feature = "std")]
@@ -425,7 +427,9 @@ pub mod __private__ {
 #[cfg(feature = "alloc")]
 #[doc(inline)]
 pub use crate::enum_map::EnumMap;
-// use crate::prelude::*;
+#[cfg(feature = "alloc")]
+#[doc(inline)]
+pub use crate::key_value_map::KeyValueMap;
 #[doc(inline)]
 pub use crate::{de::DeserializeAs, ser::SerializeAs};
 use core::marker::PhantomData;

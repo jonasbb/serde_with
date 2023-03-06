@@ -11,6 +11,38 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Add `serde_as` compatible versions for the existing duplicate key and value handling. (#534)
     The new types `MapPreventDuplicates`, `MapFirstKeyWins`, `SetPreventDuplicates`, and `SetLastValueWins` can replace the existing modules `maps_duplicate_key_is_error`, `maps_first_key_wins`, `sets_duplicate_value_is_error`, and `sets_last_value_wins`.
+* Added a new `KeyValueMap` type using the map key as a struct field. (#341)
+    This conversion is useful for maps, where an ID value is the map key, but the ID should become part of a single struct.
+    The conversion allows this, by using a special field named `$key$`.
+
+    This conversion is possible for structs and maps, using the `$key$` field.
+    Tuples, tuple structs, and sequences are supported by turning the first value into the map key.
+
+    Each of the `SimpleStruct`s
+
+    ```rust
+    // Somewhere there is a collection:
+    // #[serde_as(as = "KeyValueMap<_>")]
+    // Vec<SimpleStruct>,
+
+    #[derive(Serialize, Deserialize)]
+    struct SimpleStruct {
+        b: bool,
+        // The field named `$key$` will become the map key
+        #[serde(rename = "$key$")]
+        id: String,
+        i: i32,
+    }
+    ```
+
+    will turn into a JSON snippet like this.
+
+    ```json
+    "id-0000": {
+      "b": false,
+      "i": 123
+    },
+    ```
 
 ### Fixed
 

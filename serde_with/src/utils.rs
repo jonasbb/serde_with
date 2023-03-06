@@ -9,6 +9,22 @@ pub(crate) fn size_hint_cautious(hint: Option<usize>) -> usize {
     core::cmp::min(hint.unwrap_or(0), 4096)
 }
 
+/// Re-Implementation of `serde::private::de::size_hint::from_bounds`
+#[cfg(feature = "alloc")]
+#[inline]
+pub fn size_hint_from_bounds<I>(iter: &I) -> Option<usize>
+where
+    I: Iterator,
+{
+    fn _size_hint_from_bounds(bounds: (usize, Option<usize>)) -> Option<usize> {
+        match bounds {
+            (lower, Some(upper)) if lower == upper => Some(upper),
+            _ => None,
+        }
+    }
+    _size_hint_from_bounds(iter.size_hint())
+}
+
 pub(crate) const NANOS_PER_SEC: u32 = 1_000_000_000;
 // pub(crate) const NANOS_PER_MILLI: u32 = 1_000_000;
 // pub(crate) const NANOS_PER_MICRO: u32 = 1_000;
