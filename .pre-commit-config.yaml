@@ -15,3 +15,9 @@ repos:
             entry: cargo +nightly fmt --all -- --check --color always
             language: system
             pass_filenames: false
+          - id: use-serde-as-with-import
+            name: Use serde_as with import
+            description: 'Prevent attributes of the form #[serde_with::serde_as]'
+            language: pygrep
+            entry: '#\[serde_with::serde_as\]'
+            types: ["rust"]

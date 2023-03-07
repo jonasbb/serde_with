@@ -19,7 +19,7 @@ use crate::{
 /// ```rust
 /// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
-/// use serde_with::EnumMap;
+/// use serde_with::{serde_as, EnumMap};
 ///
 /// # #[derive(Debug, Clone, PartialEq, Eq)]
 /// #[derive(Serialize, Deserialize)]
@@ -35,7 +35,7 @@ use crate::{
 ///     },
 /// }
 ///
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Clone, PartialEq, Eq)]
 /// #[derive(Serialize, Deserialize)]
 /// struct VecEnumValues (
@@ -97,7 +97,7 @@ use crate::{
 /// ```
 /// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
-/// use serde_with::EnumMap;
+/// use serde_with::{serde_as, EnumMap};
 ///
 /// # #[derive(Debug, Clone, PartialEq, Eq)]
 /// #[derive(Serialize, Deserialize)]
@@ -107,7 +107,7 @@ use crate::{
 ///     Unit,
 /// }
 ///
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Clone, PartialEq, Eq)]
 /// #[derive(Serialize, Deserialize)]
 /// struct VecEnumValues {

@@ -1,10 +1,10 @@
 use super::*;
 use core::str::FromStr;
 use serde_test::Configure;
-use serde_with::KeyValueMap;
+use serde_with::{serde_as, KeyValueMap};
 use std::net::IpAddr;
 
-#[serde_with::serde_as]
+#[serde_as]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 struct KVMap<E> {

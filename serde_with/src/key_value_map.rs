@@ -25,7 +25,7 @@ use crate::{
 /// ```rust
 /// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
-/// use serde_with::KeyValueMap;
+/// use serde_with::{serde_as, KeyValueMap};
 ///
 /// # #[derive(Debug, Clone, PartialEq, Eq)]
 /// #[derive(Serialize, Deserialize)]
@@ -37,7 +37,7 @@ use crate::{
 ///     i: i32,
 /// }
 ///
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Clone, PartialEq, Eq)]
 /// #[derive(Serialize, Deserialize)]
 /// struct KVMap(
@@ -96,7 +96,7 @@ use crate::{
 /// ```rust
 /// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
-/// use serde_with::KeyValueMap;
+/// use serde_with::{serde_as, KeyValueMap};
 /// use std::net::IpAddr;
 /// # use std::str::FromStr;
 ///
@@ -108,7 +108,7 @@ use crate::{
 ///     bool,
 /// );
 ///
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Clone, PartialEq, Eq)]
 /// #[derive(Serialize, Deserialize)]
 /// struct KVMap(

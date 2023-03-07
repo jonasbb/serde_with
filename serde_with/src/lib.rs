@@ -2215,9 +2215,9 @@ pub struct Seq<V>(PhantomData<V>);
 /// # #[cfg(feature = "macros")] {
 /// # use serde::Deserialize;
 /// # use std::collections::HashMap;
-/// # use serde_with::MapPreventDuplicates;
+/// # use serde_with::{serde_as, MapPreventDuplicates};
 /// #
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
 /// struct Doc {
@@ -2275,9 +2275,9 @@ pub struct MapFirstKeyWins<K, V>(PhantomData<(K, V)>);
 /// # #[cfg(feature = "macros")] {
 /// # use std::collections::HashSet;
 /// # use serde::Deserialize;
-/// # use serde_with::SetPreventDuplicates;
+/// # use serde_with::{serde_as, SetPreventDuplicates};
 /// #
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
 /// struct Doc {
