@@ -210,9 +210,8 @@
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! # use {
 //! #     serde::{Deserialize, Serialize},
-//! #     serde_with::{serde_as, DisplayFromStr, DurationSeconds, hex::Hex},
+//! #     serde_with::{serde_as, DisplayFromStr, DurationSeconds, hex::Hex, Map},
 //! #     std::time::Duration,
-//! #     std::collections::BTreeMap,
 //! # };
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! #[serde_as]
@@ -228,7 +227,7 @@
 //!         // We can treat a Vec like a map with duplicates.
 //!         // JSON only allows string keys, so convert i32 to strings
 //!         // The bytes will be hex encoded
-//!         #[serde_as(as = "BTreeMap<DisplayFromStr, Hex>")]
+//!         #[serde_as(as = "Map<DisplayFromStr, Hex>")]
 //!         bytes: Vec<(i32, Vec<u8>)>,
 //!     }
 //! }
@@ -2216,9 +2215,9 @@ pub struct Seq<V>(PhantomData<V>);
 /// # #[cfg(feature = "macros")] {
 /// # use serde::Deserialize;
 /// # use std::collections::HashMap;
-/// # use serde_with::MapPreventDuplicates;
+/// # use serde_with::{serde_as, MapPreventDuplicates};
 /// #
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
 /// struct Doc {
@@ -2276,9 +2275,9 @@ pub struct MapFirstKeyWins<K, V>(PhantomData<(K, V)>);
 /// # #[cfg(feature = "macros")] {
 /// # use std::collections::HashSet;
 /// # use serde::Deserialize;
-/// # use serde_with::SetPreventDuplicates;
+/// # use serde_with::{serde_as, SetPreventDuplicates};
 /// #
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// # #[derive(Debug, Eq, PartialEq)]
 /// #[derive(Deserialize)]
 /// struct Doc {

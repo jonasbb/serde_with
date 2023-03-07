@@ -74,7 +74,7 @@ use crate::prelude::*;
 ///
 /// ```rust
 /// # #[cfg(all(feature = "macros"))] {
-/// # use serde_with::SerializeAs;
+/// # use serde_with::{serde_as, SerializeAs};
 /// # use std::fmt::Display;
 /// struct DisplayFromStr;
 ///
@@ -90,7 +90,7 @@ use crate::prelude::*;
 ///     }
 /// }
 /// #
-/// # #[serde_with::serde_as]
+/// # #[serde_as]
 /// # #[derive(serde::Serialize)]
 /// # struct S (#[serde_as(as = "DisplayFromStr")] bool);
 /// #

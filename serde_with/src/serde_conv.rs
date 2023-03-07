@@ -22,6 +22,7 @@
 /// ```rust
 /// # #[cfg(feature = "macros")] {
 /// # use serde::{Serialize, Deserialize};
+/// # use serde_with::serde_as;
 ///
 /// #[derive(Clone, Copy, Debug, PartialEq)]
 /// struct Rgb {
@@ -55,7 +56,7 @@
 ///
 /// // We can now use the `RgbAsArray` adapter with `serde_as`.
 ///
-/// #[serde_with::serde_as]
+/// #[serde_as]
 /// #[derive(Debug, PartialEq, Serialize, Deserialize)]
 /// struct Colors {
 ///     #[serde_as(as = "RgbAsArray")]

@@ -75,7 +75,7 @@ use crate::prelude::*;
 /// # #[cfg(all(feature = "macros"))] {
 /// # use serde::Deserialize;
 /// # use serde::de::Error;
-/// # use serde_with::DeserializeAs;
+/// # use serde_with::{serde_as, DeserializeAs};
 /// # use std::str::FromStr;
 /// # use std::fmt::Display;
 /// struct DisplayFromStr;
@@ -94,7 +94,7 @@ use crate::prelude::*;
 ///     }
 /// }
 /// #
-/// # #[serde_with::serde_as]
+/// # #[serde_as]
 /// # #[derive(serde::Deserialize)]
 /// # struct S (#[serde_as(as = "DisplayFromStr")] bool);
 /// #
