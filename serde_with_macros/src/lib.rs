@@ -461,8 +461,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// # Example
 ///
 /// ```rust,ignore
-/// use serde_with::{serde_as, DisplayFromStr};
-/// use std::collections::HashMap;
+/// use serde_with::{serde_as, DisplayFromStr, Map};
 ///
 /// #[serde_as]
 /// #[derive(Serialize, Deserialize)]
@@ -476,7 +475,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     b: u32,
 ///
 ///     /// Serialize into a map from String to String
-///     #[serde_as(as = "HashMap<DisplayFromStr, _>")]
+///     #[serde_as(as = "Map<DisplayFromStr, _>")]
 ///     c: Vec<(u32, String)>,
 /// }
 /// ```

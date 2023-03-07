@@ -210,9 +210,8 @@
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! # use {
 //! #     serde::{Deserialize, Serialize},
-//! #     serde_with::{serde_as, DisplayFromStr, DurationSeconds, hex::Hex},
+//! #     serde_with::{serde_as, DisplayFromStr, DurationSeconds, hex::Hex, Map},
 //! #     std::time::Duration,
-//! #     std::collections::BTreeMap,
 //! # };
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! #[serde_as]
@@ -228,7 +227,7 @@
 //!         // We can treat a Vec like a map with duplicates.
 //!         // JSON only allows string keys, so convert i32 to strings
 //!         // The bytes will be hex encoded
-//!         #[serde_as(as = "BTreeMap<DisplayFromStr, Hex>")]
+//!         #[serde_as(as = "Map<DisplayFromStr, Hex>")]
 //!         bytes: Vec<(i32, Vec<u8>)>,
 //!     }
 //! }

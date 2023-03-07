@@ -21,8 +21,7 @@ The `serde_as` scheme is based on two new traits: [`SerializeAs`] and [`Deserial
 
 ```rust
 # use serde::{Deserialize, Serialize};
-# use serde_with::{serde_as, DisplayFromStr};
-# use std::collections::HashMap;
+# use serde_with::{serde_as, DisplayFromStr, Map};
 # use std::net::Ipv4Addr;
 #
 #[serde_as]
@@ -34,7 +33,7 @@ struct Data {
     address: Ipv4Addr,
     // Treat the Vec like a map with duplicates
     // Convert u32 into a String and keep the String the same type
-    #[serde_as(as = "HashMap<DisplayFromStr, _>")]
+    #[serde_as(as = "Map<DisplayFromStr, _>")]
     vec_as_map: Vec<(u32, String)>,
 }
 
