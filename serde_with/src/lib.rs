@@ -2099,9 +2099,6 @@ pub struct StringWithSeparator<Sep, T>(PhantomData<(Sep, T)>);
 /// However, sometimes this is not possible due to type constraints, e.g., if the type implements neither [`Hash`] nor [`Ord`].
 /// Another use case is deserializing a map with duplicate keys.
 ///
-/// The implementation is generic using the [`FromIterator`] and [`IntoIterator`] traits.
-/// Therefore, all of [`Vec`], [`VecDeque`](std::collections::VecDeque), and [`LinkedList`](std::collections::LinkedList) and anything which implements those are supported.
-///
 /// # Examples
 ///
 /// `Wrapper` does not implement [`Hash`] nor [`Ord`], thus prohibiting the use [`HashMap`] or [`BTreeMap`].
@@ -2150,13 +2147,14 @@ pub struct StringWithSeparator<Sep, T>(PhantomData<(Sep, T)>);
 /// ```
 pub struct Map<K, V>(PhantomData<(K, V)>);
 
-/// De/Serialize a Map into a list of tuples
+/// De/Serialize a Map into a list of tuples or custom type
 ///
 /// Some formats, like JSON, have limitations on the types of keys for maps.
 /// In case of JSON, keys are restricted to strings.
 /// Rust features more powerful keys, for example tuples, which can not be serialized to JSON.
 ///
 /// This helper serializes the Map into a list of tuples, which do not have the same type restrictions.
+/// Other types can be used to, if they implement `SerializeAs<(K, V)>`.
 ///
 /// # Examples
 ///
@@ -2190,6 +2188,89 @@ pub struct Map<K, V>(PhantomData<(K, V)>);
 ///         [["World", 456], 1]
 ///     ]
 /// });
+///
+/// assert_eq!(value, serde_json::to_value(&data).unwrap());
+/// assert_eq!(data, serde_json::from_value(value).unwrap());
+/// # }
+/// ```
+///
+/// ## Use a custom representation
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, Seq};
+/// # use std::{collections::BTreeMap, net::IpAddr};
+/// #
+/// use serde_with::{de::DeserializeAsWrap, ser::SerializeAsWrap, DeserializeAs, SerializeAs};
+///
+/// #[derive(Serialize, Deserialize)]
+/// struct Custom<K, V> {
+///     custom_key: K,
+///     v: V,
+/// }
+///
+/// impl<K, KAs, V, VAs> SerializeAs<(K, V)> for Custom<KAs, VAs>
+/// where
+///     KAs: SerializeAs<K>,
+///     VAs: SerializeAs<V>,
+/// {
+///     fn serialize_as<S>((k, v): &(K, V), serializer: S) -> Result<S::Ok, S::Error>
+///     where
+///         S: serde::Serializer,
+///     {
+///         (Custom {
+///             custom_key: SerializeAsWrap::<K, KAs>::new(k),
+///             v: SerializeAsWrap::<V, VAs>::new(v),
+///         })
+///         .serialize(serializer)
+///     }
+/// }
+///
+/// impl<'de, K, KAs, V, VAs> DeserializeAs<'de, (K, V)> for Custom<KAs, VAs>
+/// where
+///     KAs: DeserializeAs<'de, K>,
+///     VAs: DeserializeAs<'de, V>,
+/// {
+///     fn deserialize_as<D>(deserializer: D) -> Result<(K, V), D::Error>
+///     where
+///         D: serde::Deserializer<'de>,
+///     {
+///         let c = <Custom<DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>>>::deserialize(
+///             deserializer,
+///         )?;
+///         Ok((c.custom_key.into_inner(), c.v.into_inner()))
+///     }
+/// }
+///
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Serialize, Deserialize)]
+/// struct SM(#[serde_as(as = "Seq<Custom<_, _>>")] BTreeMap<u32, IpAddr>);
+///
+/// // This converts the Rust type
+/// let ip = "1.2.3.4".parse().unwrap();
+/// let ip2 = "255.255.255.255".parse().unwrap();
+/// let data = SM(vec![(1, ip), (10, ip), (200, ip2)].into_iter().collect());
+///
+/// // into this JSON
+/// let value = serde_json::json!(
+///     [
+///         {
+///             "custom_key": 1,
+///             "v": "1.2.3.4"
+///         },
+///         {
+///             "custom_key": 10,
+///             "v": "1.2.3.4"
+///         },
+///         {
+///             "custom_key": 200,
+///             "v": "255.255.255.255"
+///         }
+///     ]
+/// );
 ///
 /// assert_eq!(value, serde_json::to_value(&data).unwrap());
 /// assert_eq!(data, serde_json::from_value(value).unwrap());
