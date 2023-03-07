@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     },
     ```
 
+### Changed
+
+* Relax the trait bounds of `Seq` to allow for more custom types. (#565)
+    This extends the support beyond tuples.
+
 ### Fixed
 
 * `EnumMap` passes the `human_readable` status of the `Serializer` to more places.

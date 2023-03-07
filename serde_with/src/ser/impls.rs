@@ -348,23 +348,21 @@ tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq_intern {
-    ($tyorig:ident < K, V $(, $typaram:ident : $bound:ident)* >, $ty:ident <(K, V)>) => {
-        impl<K, KAs, V, VAs $(, $typaram)*> SerializeAs<$tyorig<K, V $(, $typaram)*>> for $ty<(KAs, VAs)>
+    ($tyorig:ident < K, V $(, $typaram:ident : $bound:ident)* >, $ty:ident <TAs>) => {
+        impl<K, V, TAs $(, $typaram)*> SerializeAs<$tyorig<K, V $(, $typaram)*>> for $ty<TAs>
         where
-            KAs: SerializeAs<K>,
-            VAs: SerializeAs<V>,
+            for<'a> TAs: SerializeAs<(&'a K, &'a V)>,
             $($typaram: ?Sized + $bound,)*
         {
             fn serialize_as<S>(source: &$tyorig<K, V $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: Serializer,
             {
-                serializer.collect_seq(source.iter().map(|(k, v)| {
-                    (
-                        SerializeAsWrap::<K, KAs>::new(k),
-                        SerializeAsWrap::<V, VAs>::new(v),
-                    )
-                }))
+                let mut seq = serializer.serialize_seq(None)?;
+                for (k, v) in source {
+                    seq.serialize_element(&SerializeAsWrap::<(&K, &V), TAs>::new(&(k, v)))?;
+                }
+                seq.end()
             }
         }
     };
@@ -372,9 +370,9 @@ macro_rules! map_as_tuple_seq_intern {
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq {
     ($tyorig:ident < K, V $(, $typaram:ident : $bound:ident)* >) => {
-        map_as_tuple_seq_intern!($tyorig<K, V $(, $typaram: $bound)* >, Seq<(K, V)>);
+        map_as_tuple_seq_intern!($tyorig<K, V $(, $typaram: $bound)* >, Seq<TAs>);
         #[cfg(feature = "alloc")]
-        map_as_tuple_seq_intern!($tyorig<K, V $(, $typaram: $bound)* >, Vec<(K, V)>);
+        map_as_tuple_seq_intern!($tyorig<K, V $(, $typaram: $bound)* >, Vec<TAs>);
     }
 }
 foreach_map!(map_as_tuple_seq);

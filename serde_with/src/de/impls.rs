@@ -545,25 +545,23 @@ tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq_intern {
-    ($tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >, $ty:ident <(KAs, VAs)>) => {
-        impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $tyorig<K, V>> for $ty<(KAs, VAs)>
+    ($tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >, $ty:ident <TAs>) => {
+        impl<'de, K, V, TAs> DeserializeAs<'de, $tyorig<K, V>> for $ty<TAs>
         where
-            KAs: DeserializeAs<'de, K>,
-            VAs: DeserializeAs<'de, V>,
+            TAs: DeserializeAs<'de, (K, V)>,
             $(K: $kbound1 $(+ $kbound2)*,)*
         {
             fn deserialize_as<D>(deserializer: D) -> Result<$tyorig<K, V>, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct SeqVisitor<K, KAs, V, VAs> {
-                    marker: PhantomData<(K, KAs, V, VAs)>,
+                struct SeqVisitor<K, V, TAs> {
+                    marker: PhantomData<(K, V, TAs)>,
                 }
 
-                impl<'de, K, KAs, V, VAs> Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
+                impl<'de, K, V, TAs> Visitor<'de> for SeqVisitor<K, V, TAs>
                 where
-                    KAs: DeserializeAs<'de, K>,
-                    VAs: DeserializeAs<'de, V>,
+                TAs: DeserializeAs<'de, (K, V)>,
                     $(K: $kbound1 $(+ $kbound2)*,)*
                 {
                     type Value = $tyorig<K, V>;
@@ -579,17 +577,13 @@ macro_rules! map_as_tuple_seq_intern {
                     {
                         let iter = utils::SeqIter::new(access);
                         iter.map(|res| {
-                            res.map(
-                                |(k, v): (DeserializeAsWrap<K, KAs>, DeserializeAsWrap<V, VAs>)| {
-                                    (k.into_inner(), v.into_inner())
-                                },
-                            )
+                            res.map(<DeserializeAsWrap<(K, V), TAs>>::into_inner)
                         })
                         .collect()
                     }
                 }
 
-                let visitor = SeqVisitor::<K, KAs, V, VAs> {
+                let visitor = SeqVisitor::<K, V, TAs> {
                     marker: PhantomData,
                 };
                 deserializer.deserialize_seq(visitor)
@@ -600,9 +594,9 @@ macro_rules! map_as_tuple_seq_intern {
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq {
     ($tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >) => {
-        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(, $typaram : $bound1 $(+ $bound2)*)* > , Seq<(KAs, VAs)>);
+        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(, $typaram : $bound1 $(+ $bound2)*)* > , Seq<TAs>);
         #[cfg(feature = "alloc")]
-        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(, $typaram : $bound1 $(+ $bound2)*)* >, Vec<(KAs, VAs)>);
+        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(, $typaram : $bound1 $(+ $bound2)*)* >, Vec<TAs>);
     }
 }
 foreach_map!(map_as_tuple_seq);
