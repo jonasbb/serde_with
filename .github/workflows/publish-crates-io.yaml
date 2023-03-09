@@ -23,8 +23,7 @@ jobs:
           rustc --version
       - name: Get version from tag
         id: tag_name
-        run: |
-          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+        run: echo "current_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
         shell: bash
       - name: Get Changelog Entry
         id: changelog_reader
