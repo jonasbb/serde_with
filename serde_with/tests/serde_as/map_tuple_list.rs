@@ -319,3 +319,36 @@ fn test_tuple_array_as_map() {
             }"#]],
     );
 }
+
+// Test that the `Seq` conversion works when the inner type is explicity specified.
+#[test]
+fn test_map_as_tuple_with_nested_complex_type() {
+    #[serde_as]
+    #[derive(Debug, PartialEq, Serialize, Deserialize)]
+    struct S0(#[serde_as(as = "Seq<(_, Vec<_>)>")] BTreeMap<usize, Vec<usize>>);
+
+    let value = S0(BTreeMap::from([
+        (1, Vec::from([1, 2])),
+        (2, Vec::from([3, 4])),
+    ]));
+    is_equal(
+        value,
+        expect![[r#"
+            [
+              [
+                1,
+                [
+                  1,
+                  2
+                ]
+              ],
+              [
+                2,
+                [
+                  3,
+                  4
+                ]
+              ]
+            ]"#]],
+    );
+}
