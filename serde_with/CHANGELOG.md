@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Undo the changes to the trait bound for `Seq`. (#570, #571)
+    The new implementation caused issues with serialization formats that require the sequence length beforehand.
+    It also caused problems, that certain attributes which worked before no longer worked, due to mismatching number of references.
+
+    Thanks to  @stefunctional for reporting and for @stephaneyfx for providing a test case.
+
 ## [2.3.0] - 2023-03-09
 
 ### Added
