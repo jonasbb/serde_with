@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.3.1] - 2023-03-10
+
 ### Fixed
 
 * Undo the changes to the trait bound for `Seq`. (#570, #571)
