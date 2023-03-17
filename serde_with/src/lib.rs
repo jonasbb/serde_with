@@ -211,8 +211,9 @@
 //! # use {
 //! #     serde::{Deserialize, Serialize},
 //! #     serde_with::{serde_as, DisplayFromStr, DurationSeconds, hex::Hex, Map},
-//! #     std::time::Duration,
 //! # };
+//! use std::time::Duration;
+//!
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! #[serde_as]
 //! # #[derive(Debug, Eq, PartialEq)]
@@ -787,14 +788,17 @@ pub struct BytesOrString;
 /// This type also supports [`chrono::Duration`] with the `chrono_0_4`-[feature flag].
 /// This type also supports [`time::Duration`][::time_0_3::Duration] with the `time_0_3`-[feature flag].
 ///
-/// | Duration Type         | Converter                 | Available `FORMAT`s    |
-/// | --------------------- | ------------------------- | ---------------------- |
-/// | `std::time::Duration` | `DurationSeconds`         | `u64`, `f64`, `String` |
-/// | `std::time::Duration` | `DurationSecondsWithFrac` | `f64`, `String`        |
-/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String` |
-/// | `chrono::Duration`    | `DurationSecondsWithFrac` | `f64`, `String`        |
-/// | `time::Duration`      | `DurationSeconds`         | `i64`, `f64`, `String` |
-/// | `time::Duration`      | `DurationSecondsWithFrac` | `f64`, `String`        |
+/// This table lists the available `FORMAT`s for the different duration types.
+/// The `FORMAT` specifier defaults to `u64`/`f64`.
+///
+/// | Duration Type         | Converter                 | Available `FORMAT`s      |
+/// | --------------------- | ------------------------- | ------------------------ |
+/// | `std::time::Duration` | `DurationSeconds`         | *`u64`*, `f64`, `String` |
+/// | `std::time::Duration` | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `chrono::Duration`    | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::Duration`      | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `time::Duration`      | `DurationSecondsWithFrac` | *`f64`*, `String`        |
 ///
 /// # Examples
 ///
@@ -929,14 +933,17 @@ pub struct DurationSeconds<
 /// This type also supports [`chrono::Duration`] with the `chrono`-[feature flag].
 /// This type also supports [`time::Duration`][::time_0_3::Duration] with the `time_0_3`-[feature flag].
 ///
-/// | Duration Type         | Converter                 | Available `FORMAT`s    |
-/// | --------------------- | ------------------------- | ---------------------- |
-/// | `std::time::Duration` | `DurationSeconds`         | `u64`, `f64`, `String` |
-/// | `std::time::Duration` | `DurationSecondsWithFrac` | `f64`, `String`        |
-/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String` |
-/// | `chrono::Duration`    | `DurationSecondsWithFrac` | `f64`, `String`        |
-/// | `time::Duration`      | `DurationSeconds`         | `i64`, `f64`, `String` |
-/// | `time::Duration`      | `DurationSecondsWithFrac` | `f64`, `String`        |
+/// This table lists the available `FORMAT`s for the different duration types.
+/// The `FORMAT` specifier defaults to `u64`/`f64`.
+///
+/// | Duration Type         | Converter                 | Available `FORMAT`s      |
+/// | --------------------- | ------------------------- | ------------------------ |
+/// | `std::time::Duration` | `DurationSeconds`         | *`u64`*, `f64`, `String` |
+/// | `std::time::Duration` | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `chrono::Duration`    | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::Duration`      | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `time::Duration`      | `DurationSecondsWithFrac` | *`f64`*, `String`        |
 ///
 /// # Examples
 ///
@@ -1105,18 +1112,23 @@ pub struct DurationNanoSecondsWithFrac<
 /// This type also supports [`chrono::DateTime`] with the `chrono_0_4`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
-/// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
-/// | ------------------------- | -------------------------- | ---------------------- |
-/// | `std::time::SystemTime`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `std::time::SystemTime`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `chrono::DateTime<Utc>`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `chrono::DateTime<Utc>`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `chrono::DateTime<Local>` | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `time::OffsetDateTime`    | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `time::OffsetDateTime`    | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `time::PrimitiveDateTime` | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `time::PrimitiveDateTime` | `TimestampSecondsWithFrac` | `f64`, `String`        |
+/// This table lists the available `FORMAT`s for the different timestamp types.
+/// The `FORMAT` specifier defaults to `i64` or `f64`.
+///
+/// | Timestamp Type            | Converter                  | Available `FORMAT`s      |
+/// | ------------------------- | -------------------------- | ------------------------ |
+/// | `std::time::SystemTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `std::time::SystemTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::DateTime<Utc>`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `chrono::DateTime<Utc>`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::DateTime<Local>` | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::NaiveDateTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `chrono::NaiveDateTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::OffsetDateTime`    | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `time::OffsetDateTime`    | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::PrimitiveDateTime` | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `time::PrimitiveDateTime` | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 ///
 /// # Examples
 ///
@@ -1253,20 +1265,23 @@ pub struct TimestampSeconds<
 /// This type also supports [`chrono::DateTime`] and [`chrono::NaiveDateTime`][NaiveDateTime] with the `chrono`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
-/// | Timestamp Type            | Converter                  | Available `FORMAT`s    |
-/// | ------------------------- | -------------------------- | ---------------------- |
-/// | `std::time::SystemTime`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `std::time::SystemTime`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `chrono::DateTime<Utc>`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `chrono::DateTime<Utc>`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `chrono::DateTime<Local>` | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `chrono::NaiveDateTime`   | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `chrono::NaiveDateTime`   | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `time::OffsetDateTime`    | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `time::OffsetDateTime`    | `TimestampSecondsWithFrac` | `f64`, `String`        |
-/// | `time::PrimitiveDateTime` | `TimestampSeconds`         | `i64`, `f64`, `String` |
-/// | `time::PrimitiveDateTime` | `TimestampSecondsWithFrac` | `f64`, `String`        |
+/// This table lists the available `FORMAT`s for the different timestamp types.
+/// The `FORMAT` specifier defaults to `i64` or `f64`.
+///
+/// | Timestamp Type            | Converter                  | Available `FORMAT`s      |
+/// | ------------------------- | -------------------------- | ------------------------ |
+/// | `std::time::SystemTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `std::time::SystemTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::DateTime<Utc>`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `chrono::DateTime<Utc>`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::DateTime<Local>` | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::NaiveDateTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `chrono::NaiveDateTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::OffsetDateTime`    | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `time::OffsetDateTime`    | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::PrimitiveDateTime` | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `time::PrimitiveDateTime` | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 ///
 /// # Examples
 ///
