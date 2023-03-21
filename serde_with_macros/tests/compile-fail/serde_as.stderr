@@ -1,107 +1,107 @@
 error: Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.
- --> $DIR/serde_as.rs:8:5
+ --> tests/compile-fail/serde_as.rs:8:5
   |
 8 |     #[serde_as(as = "_", deserialize_as = "_")]
   |     ^
 
 error: Cannot combine `as` with `serialize_as`. Use `deserialize_as` to specify different deserialization code.
-  --> $DIR/serde_as.rs:10:5
+  --> tests/compile-fail/serde_as.rs:10:5
    |
 10 |     #[serde_as(as = "_", serialize_as = "_")]
    |     ^
 
 error: Cannot combine `as` with `deserialize_as`. Use `serialize_as` to specify different serialization code.
-  --> $DIR/serde_as.rs:12:5
+  --> tests/compile-fail/serde_as.rs:12:5
    |
 12 |     #[serde_as(as = "_", deserialize_as = "_", serialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:20:5
+  --> tests/compile-fail/serde_as.rs:20:5
    |
 20 |     #[serde_as(as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:23:5
+  --> tests/compile-fail/serde_as.rs:23:5
    |
 23 |     #[serde_as(as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:26:5
+  --> tests/compile-fail/serde_as.rs:26:5
    |
 26 |     #[serde_as(as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:30:5
+  --> tests/compile-fail/serde_as.rs:30:5
    |
 30 |     #[serde_as(deserialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:33:5
+  --> tests/compile-fail/serde_as.rs:33:5
    |
 33 |     #[serde_as(deserialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:36:5
+  --> tests/compile-fail/serde_as.rs:36:5
    |
 36 |     #[serde_as(deserialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:40:5
+  --> tests/compile-fail/serde_as.rs:40:5
    |
 40 |     #[serde_as(serialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:43:5
+  --> tests/compile-fail/serde_as.rs:43:5
    |
 43 |     #[serde_as(serialize_as = "_")]
    |     ^
 
 error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `serialize_with`.
-  --> $DIR/serde_as.rs:46:5
+  --> tests/compile-fail/serde_as.rs:46:5
    |
 46 |     #[serde_as(serialize_as = "_")]
    |     ^
 
 error: Unknown field: `does_not_exist`
-  --> $DIR/serde_as.rs:57:16
+  --> tests/compile-fail/serde_as.rs:57:16
    |
 57 |     #[serde_as(does_not_exist = "123")]
    |                ^^^^^^^^^^^^^^
 
 error: Unknown field: `unknwn1`
-  --> $DIR/serde_as.rs:59:16
+  --> tests/compile-fail/serde_as.rs:59:16
    |
 59 |     #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
    |                ^^^^^^^
 
 error: Unknown field: `unknw2`
-  --> $DIR/serde_as.rs:59:35
+  --> tests/compile-fail/serde_as.rs:59:35
    |
 59 |     #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
    |                                   ^^^^^^
 
 error: Unable to parse attribute: expected literal
-  --> $DIR/serde_as.rs:67:55
+  --> tests/compile-fail/serde_as.rs:67:55
    |
 67 |     #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
    |                                                       ^^^^^^^^^^^^^^
 
 error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
-  --> $DIR/serde_as.rs:69:5
+  --> tests/compile-fail/serde_as.rs:69:5
    |
 69 |     #[serde_as]
    |     ^
 
 error: An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter.
-  --> $DIR/serde_as.rs:71:5
+  --> tests/compile-fail/serde_as.rs:71:5
    |
 71 |     #[serde_as()]
    |     ^
