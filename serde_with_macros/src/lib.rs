@@ -636,7 +636,6 @@ fn serde_as_add_attr_to_field(
     #[derive(FromField)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
-        #[darling(rename = "as")]
         r#as: Option<Type>,
         deserialize_as: Option<Type>,
         serialize_as: Option<Type>,
@@ -693,12 +692,36 @@ fn serde_as_add_attr_to_field(
         }
     }
 
-    // Check if there even is any `serde_as` attribute and exit early if not.
-    if !field
-        .attrs
-        .iter()
-        .any(|attr| attr.path().is_ident("serde_as"))
-    {
+    // syn v2 no longer supports keywords in the path position of an attribute.
+    // That breaks #[serde_as(as = "FooBar")], since `as` is a keyword.
+    // For each attribute, that is named `serde_as`, we replace the `as` keyword with `r#as`.
+    let mut has_serde_as = false;
+    field.attrs.iter_mut().for_each(|attr| {
+        if attr.path().is_ident("serde_as") {
+            // We found a `serde_as` attribute.
+            // Remember that such that we can quick exit otherwise
+            has_serde_as = true;
+
+            if let Meta::List(metalist) = &mut attr.meta {
+                metalist.tokens = std::mem::take(&mut metalist.tokens)
+                    .into_iter()
+                    .map(|token| {
+                        use proc_macro2::{Ident, TokenTree};
+
+                        // Replace `as` with `r#as`.
+                        match token {
+                            TokenTree::Ident(ident) if ident == "as" => {
+                                TokenTree::Ident(Ident::new_raw("as", ident.span()))
+                            }
+                            _ => token,
+                        }
+                    })
+                    .collect();
+            }
+        }
+    });
+    // If there is no `serde_as` attribute, we can exit early.
+    if !has_serde_as {
         return Ok(());
     }
     let serde_as_options = SerdeAsOptions::from_field(field)?;
