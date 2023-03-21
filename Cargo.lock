@@ -148,7 +148,7 @@ dependencies = [
 [[package]]
 name = "darling"
 version = "0.14.4"
-source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#3e783a4de9e044aeb0e088ade3b18ef18a3c5a90"
+source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#cb6629a738e00b65aff38950df4fcf842d50fbad"
 dependencies = [
  "darling_core",
  "darling_macro",
@@ -157,7 +157,7 @@ dependencies = [
 [[package]]
 name = "darling_core"
 version = "0.14.4"
-source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#3e783a4de9e044aeb0e088ade3b18ef18a3c5a90"
+source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#cb6629a738e00b65aff38950df4fcf842d50fbad"
 dependencies = [
  "fnv",
  "ident_case",
@@ -170,7 +170,7 @@ dependencies = [
 [[package]]
 name = "darling_macro"
 version = "0.14.4"
-source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#3e783a4de9e044aeb0e088ade3b18ef18a3c5a90"
+source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#cb6629a738e00b65aff38950df4fcf842d50fbad"
 dependencies = [
  "darling_core",
  "quote",
