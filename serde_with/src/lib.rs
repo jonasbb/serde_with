@@ -404,9 +404,17 @@ pub(crate) mod prelude {
         time::Duration,
     };
     pub use serde::{
-        de::{Error as DeError, *},
+        de::{
+            Deserialize, DeserializeOwned, DeserializeSeed, Deserializer, EnumAccess,
+            Error as DeError, Expected, IgnoredAny, IntoDeserializer, MapAccess, SeqAccess,
+            Unexpected, VariantAccess, Visitor,
+        },
         forward_to_deserialize_any,
-        ser::{Error as SerError, *},
+        ser::{
+            Error as SerError, Impossible, Serialize, SerializeMap, SerializeSeq, SerializeStruct,
+            SerializeStructVariant, SerializeTuple, SerializeTupleStruct, SerializeTupleVariant,
+            Serializer,
+        },
     };
     #[cfg(feature = "std")]
     pub use std::{
