@@ -1251,7 +1251,7 @@ where
         K: DeserializeSeed<'de>,
     {
         if self.first.is_some() {
-            seed.deserialize(value::StringDeserializer::new(
+            seed.deserialize(serde::de::value::StringDeserializer::new(
                 MAP_KEY_IDENTIFIER.to_string(),
             ))
             .map(Some)
