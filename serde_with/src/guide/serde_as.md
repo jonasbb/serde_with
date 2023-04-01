@@ -34,6 +34,9 @@ you now have to write
 
 and place the `#[serde_as]` attribute *before* the `#[derive]` attribute.
 You still need the `#[derive(Serialize, Deserialize)]` on the struct/enum.
+You mirror the type structure of the field you want to de/serialize.
+You can specify converters for the inner types of a field, e.g., `Vec<DisplayFromStr>`.
+The default de/serialization behavior can be restored by using `_` as a placeholder, e.g., `BTreeMap<_, DisplayFromStr>`.
 
 All together, this looks like:
 
