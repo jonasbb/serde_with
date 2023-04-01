@@ -8,9 +8,9 @@ on:
       - master
       - staging
       - trying
-  # Test once per week: Monday at 00:00
+  # Test once per week: Saturday at 00:00
   schedule:
-    - cron: "0 0 * * 1"
+    - cron: "0 0 * * 6"
 permissions: read-all
 
 jobs:
