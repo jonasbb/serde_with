@@ -842,22 +842,32 @@ where
     where
         D: Deserializer<'de>,
     {
-        #[derive(serde::Deserialize)]
-        #[serde(
-            untagged,
-            bound(deserialize = "DeserializeAsWrap<T, TAs>: Deserialize<'de>")
-        )]
-        enum GoodOrError<'a, T, TAs>
+        enum GoodOrError<T, TAs> {
+            Good(T),
+            // Only here to consume the TAs generic
+            Error(PhantomData<TAs>),
+        }
+
+        impl<'de, T, TAs> Deserialize<'de> for GoodOrError<T, TAs>
         where
-            TAs: DeserializeAs<'a, T>,
+            TAs: DeserializeAs<'de, T>,
         {
-            Good(DeserializeAsWrap<T, TAs>),
-            // This consumes one "item" when `T` errors while deserializing.
-            // This is necessary to make this work, when instead of having a direct value
-            // like integer or string, the deserializer sees a list or map.
-            Error(IgnoredAny),
-            #[serde(skip)]
-            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                let is_hr = deserializer.is_human_readable();
+                let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
+
+                Ok(
+                    match <DeserializeAsWrap<T, TAs>>::deserialize(
+                        content::de::ContentDeserializer::<D::Error>::new(content, is_hr),
+                    ) {
+                        Ok(elem) => GoodOrError::Good(elem.into_inner()),
+                        Err(_) => GoodOrError::Error(PhantomData),
+                    },
+                )
+            }
         }
 
         struct SeqVisitor<T, U> {
@@ -865,9 +875,9 @@ where
             marker2: PhantomData<U>,
         }
 
-        impl<'de, T, U> Visitor<'de> for SeqVisitor<T, U>
+        impl<'de, T, TAs> Visitor<'de> for SeqVisitor<T, TAs>
         where
-            U: DeserializeAs<'de, T>,
+            TAs: DeserializeAs<'de, T>,
         {
             type Value = Vec<T>;
 
@@ -875,18 +885,17 @@ where
                 formatter.write_str("a sequence")
             }
 
-            fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
             where
                 A: SeqAccess<'de>,
             {
-                let mut values = Vec::with_capacity(seq.size_hint().unwrap_or_default());
-
-                while let Some(value) = seq.next_element()? {
-                    if let GoodOrError::<T, U>::Good(value) = value {
-                        values.push(value.into_inner());
-                    }
-                }
-                Ok(values)
+                utils::SeqIter::new(seq)
+                    .filter_map(|res: Result<GoodOrError<T, TAs>, A::Error>| match res {
+                        Ok(GoodOrError::Good(value)) => Some(Ok(value)),
+                        Ok(GoodOrError::Error(_)) => None,
+                        Err(err) => Some(Err(err)),
+                    })
+                    .collect()
             }
         }
 
@@ -952,28 +961,21 @@ where
     where
         D: Deserializer<'de>,
     {
-        #[derive(serde::Deserialize)]
-        #[serde(
-            untagged,
-            bound(deserialize = "DeserializeAsWrap<T, TAs>: Deserialize<'de>")
-        )]
-        enum GoodOrError<'a, T, TAs>
-        where
-            TAs: DeserializeAs<'a, T>,
-        {
-            Good(DeserializeAsWrap<T, TAs>),
-            // This consumes one "item" when `T` errors while deserializing.
-            // This is necessary to make this work, when instead of having a direct value
-            // like integer or string, the deserializer sees a list or map.
-            Error(IgnoredAny),
-            #[serde(skip)]
-            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
-        }
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = match Deserialize::deserialize(deserializer) {
+            Ok(content) => content,
+            Err(_) => return Ok(Default::default()),
+        };
 
-        Ok(match Deserialize::deserialize(deserializer) {
-            Ok(GoodOrError::<T, TAs>::Good(res)) => res.into_inner(),
-            _ => Default::default(),
-        })
+        Ok(
+            match <DeserializeAsWrap<T, TAs>>::deserialize(content::de::ContentDeserializer::<
+                D::Error,
+            >::new(content, is_hr))
+            {
+                Ok(elem) => elem.into_inner(),
+                Err(_) => Default::default(),
+            },
+        )
     }
 }
 
@@ -1522,38 +1524,34 @@ impl<'de, const N: usize> DeserializeAs<'de, Box<[u8; N]>> for Bytes {
 }
 
 #[cfg(feature = "alloc")]
-impl<'de, T, U, FORMAT> DeserializeAs<'de, Vec<T>> for OneOrMany<U, FORMAT>
+impl<'de, T, TAs, FORMAT> DeserializeAs<'de, Vec<T>> for OneOrMany<TAs, FORMAT>
 where
-    U: DeserializeAs<'de, T>,
+    TAs: DeserializeAs<'de, T>,
     FORMAT: Format,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
     where
         D: Deserializer<'de>,
     {
-        #[derive(serde::Deserialize)]
-        #[serde(
-            untagged,
-            bound(deserialize = r#"DeserializeAsWrap<T, U>: Deserialize<'de>,
-                DeserializeAsWrap<Vec<T>, Vec<U>>: Deserialize<'de>"#),
-            expecting = "a list or single element"
-        )]
-        enum Helper<'a, T, U>
-        where
-            U: DeserializeAs<'a, T>,
-        {
-            One(DeserializeAsWrap<T, U>),
-            Many(DeserializeAsWrap<Vec<T>, Vec<U>>),
-            #[serde(skip)]
-            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
-        }
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
 
-        let h: Helper<'de, T, U> = Deserialize::deserialize(deserializer)?;
-        match h {
-            Helper::One(one) => Ok(alloc::vec![one.into_inner()]),
-            Helper::Many(many) => Ok(many.into_inner()),
-            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
-        }
+        let one_err: D::Error = match <DeserializeAsWrap<T, TAs>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(one) => return Ok(alloc::vec![one.into_inner()]),
+            Err(err) => err,
+        };
+        let many_err: D::Error = match <DeserializeAsWrap<Vec<T>, Vec<TAs>>>::deserialize(
+            content::de::ContentDeserializer::new(content, is_hr),
+        ) {
+            Ok(many) => return Ok(many.into_inner()),
+            Err(err) => err,
+        };
+        Err(DeError::custom(format_args!(
+            "OneOrMany could not deserialize any variant:\n  One: {}\n  Many: {}",
+            one_err, many_err
+        )))
     }
 }
 
@@ -1580,32 +1578,25 @@ where
     where
         D: Deserializer<'de>,
     {
-        #[derive(serde::Deserialize)]
-        #[serde(
-            untagged,
-            bound(deserialize = r#"
-                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
-                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
-            "#),
-            expecting = "PickFirst could not deserialize data"
-        )]
-        enum Helper<'a, T, TAs1, TAs2>
-        where
-            TAs1: DeserializeAs<'a, T>,
-            TAs2: DeserializeAs<'a, T>,
-        {
-            First(DeserializeAsWrap<T, TAs1>),
-            Second(DeserializeAsWrap<T, TAs2>),
-            #[serde(skip)]
-            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
-        }
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
 
-        let h: Helper<'de, T, TAs1, TAs2> = Deserialize::deserialize(deserializer)?;
-        match h {
-            Helper::First(first) => Ok(first.into_inner()),
-            Helper::Second(second) => Ok(second.into_inner()),
-            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
-        }
+        let first_err: D::Error = match <DeserializeAsWrap<T, TAs1>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(first) => return Ok(first.into_inner()),
+            Err(err) => err,
+        };
+        let second_err: D::Error = match <DeserializeAsWrap<T, TAs2>>::deserialize(
+            content::de::ContentDeserializer::new(content, is_hr),
+        ) {
+            Ok(second) => return Ok(second.into_inner()),
+            Err(err) => err,
+        };
+        Err(DeError::custom(format_args!(
+            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}",
+            first_err, second_err
+        )))
     }
 }
 
@@ -1620,36 +1611,31 @@ where
     where
         D: Deserializer<'de>,
     {
-        #[derive(serde::Deserialize)]
-        #[serde(
-            untagged,
-            bound(deserialize = r#"
-                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
-                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
-                DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
-            "#),
-            expecting = "PickFirst could not deserialize data"
-        )]
-        enum Helper<'a, T, TAs1, TAs2, TAs3>
-        where
-            TAs1: DeserializeAs<'a, T>,
-            TAs2: DeserializeAs<'a, T>,
-            TAs3: DeserializeAs<'a, T>,
-        {
-            First(DeserializeAsWrap<T, TAs1>),
-            Second(DeserializeAsWrap<T, TAs2>),
-            Third(DeserializeAsWrap<T, TAs3>),
-            #[serde(skip)]
-            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
-        }
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
 
-        let h: Helper<'de, T, TAs1, TAs2, TAs3> = Deserialize::deserialize(deserializer)?;
-        match h {
-            Helper::First(first) => Ok(first.into_inner()),
-            Helper::Second(second) => Ok(second.into_inner()),
-            Helper::Third(third) => Ok(third.into_inner()),
-            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
-        }
+        let first_err: D::Error = match <DeserializeAsWrap<T, TAs1>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(first) => return Ok(first.into_inner()),
+            Err(err) => err,
+        };
+        let second_err: D::Error = match <DeserializeAsWrap<T, TAs2>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(second) => return Ok(second.into_inner()),
+            Err(err) => err,
+        };
+        let third_err: D::Error = match <DeserializeAsWrap<T, TAs3>>::deserialize(
+            content::de::ContentDeserializer::new(content, is_hr),
+        ) {
+            Ok(third) => return Ok(third.into_inner()),
+            Err(err) => err,
+        };
+        Err(DeError::custom(format_args!(
+            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}\n  Third: {}",
+            first_err, second_err, third_err,
+        )))
     }
 }
 
@@ -1665,40 +1651,37 @@ where
     where
         D: Deserializer<'de>,
     {
-        #[derive(serde::Deserialize)]
-        #[serde(
-            untagged,
-            bound(deserialize = r#"
-                DeserializeAsWrap<T, TAs1>: Deserialize<'de>,
-                DeserializeAsWrap<T, TAs2>: Deserialize<'de>,
-                DeserializeAsWrap<T, TAs3>: Deserialize<'de>,
-                DeserializeAsWrap<T, TAs4>: Deserialize<'de>,
-            "#),
-            expecting = "PickFirst could not deserialize data"
-        )]
-        enum Helper<'a, T, TAs1, TAs2, TAs3, TAs4>
-        where
-            TAs1: DeserializeAs<'a, T>,
-            TAs2: DeserializeAs<'a, T>,
-            TAs3: DeserializeAs<'a, T>,
-            TAs4: DeserializeAs<'a, T>,
-        {
-            First(DeserializeAsWrap<T, TAs1>),
-            Second(DeserializeAsWrap<T, TAs2>),
-            Third(DeserializeAsWrap<T, TAs3>),
-            Forth(DeserializeAsWrap<T, TAs4>),
-            #[serde(skip)]
-            _JustAMarkerForTheLifetime(PhantomData<&'a u32>),
-        }
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
 
-        let h: Helper<'de, T, TAs1, TAs2, TAs3, TAs4> = Deserialize::deserialize(deserializer)?;
-        match h {
-            Helper::First(first) => Ok(first.into_inner()),
-            Helper::Second(second) => Ok(second.into_inner()),
-            Helper::Third(third) => Ok(third.into_inner()),
-            Helper::Forth(forth) => Ok(forth.into_inner()),
-            Helper::_JustAMarkerForTheLifetime(_) => unreachable!(),
-        }
+        let first_err: D::Error = match <DeserializeAsWrap<T, TAs1>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(first) => return Ok(first.into_inner()),
+            Err(err) => err,
+        };
+        let second_err: D::Error = match <DeserializeAsWrap<T, TAs2>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(second) => return Ok(second.into_inner()),
+            Err(err) => err,
+        };
+        let third_err: D::Error = match <DeserializeAsWrap<T, TAs3>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(third) => return Ok(third.into_inner()),
+            Err(err) => err,
+        };
+        let fourth_err: D::Error = match <DeserializeAsWrap<T, TAs4>>::deserialize(
+            content::de::ContentDeserializer::new(content, is_hr),
+        ) {
+            Ok(fourth) => return Ok(fourth.into_inner()),
+            Err(err) => err,
+        };
+        Err(DeError::custom(format_args!(
+            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}\n  Third: {}\n  Fourth: {}",
+            first_err, second_err, third_err, fourth_err,
+        )))
     }
 }
 

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Improve the error message when deserializing `OneOrMany` or `PickFirst` fails.
+    It now includes the original error message for each of the individual variants.
+    This is possible by dropping untagged enums as the internal implementations, since they will likely never support this, as these old PRs show [serde#2376](https://github.com/serde-rs/serde/pull/2376) and [serde#1544](https://github.com/serde-rs/serde/pull/1544).
+
+    The new errors look like:
+
+    ```text
+    OneOrMany could not deserialize any variant:
+      One: invalid type: map, expected u32
+      Many: invalid type: map, expected a sequence
+    ```
+
+    ```text
+    PickFirst could not deserialize any variant:
+      First: invalid type: string "Abc", expected u32
+      Second: invalid digit found in string
+    ```
+
 ## [2.3.1] - 2023-03-10
 
 ### Fixed

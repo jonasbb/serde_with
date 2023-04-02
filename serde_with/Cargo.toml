@@ -65,6 +65,8 @@ chrono_0_4 = {package = "chrono", version = "0.4.20", optional = true, default-f
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.3", optional = true, default-features = false}
 indexmap_1 = {package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
+# The derive feature is needed for the flattened_maybe macro.
+# https://github.com/jonasbb/serde_with/blob/eb1965a74a3be073ecd13ec05f02a01bc1c44309/serde_with/src/flatten_maybe.rs#L67
 serde = {version = "1.0.122", default-features = false, features = ["derive"]}
 serde_json = {version = "1.0.45", optional = true, default-features = false}
 serde_with_macros = {path = "../serde_with_macros", version = "=2.3.1", optional = true}
