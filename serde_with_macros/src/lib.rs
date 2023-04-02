@@ -31,6 +31,8 @@
 #![allow(renamed_and_removed_lints)]
 // Necessary for nightly clippy lints
 #![allow(clippy::unknown_clippy_lints)]
+// Tarpaulin does not work well with proc macros and marks most of the lines as uncovered.
+#![cfg(not(tarpaulin_include))]
 
 //! proc-macro extensions for [`serde_with`].
 //!
