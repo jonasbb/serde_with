@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.3.2] - 2023-04-05
+
 ### Changed
 
 * Improve the error message when deserializing `OneOrMany` or `PickFirst` fails.
@@ -26,6 +28,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
       First: invalid type: string "Abc", expected u32
       Second: invalid digit found in string
     ```
+
+### Fixed
+
+* Specify the correct minimum serde version as dependency. (#588)
+    Thanks to @nox for submitting a PR.
 
 ## [2.3.1] - 2023-03-10
 
