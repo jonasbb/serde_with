@@ -148,7 +148,7 @@ dependencies = [
 [[package]]
 name = "darling"
 version = "0.14.4"
-source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#cb6629a738e00b65aff38950df4fcf842d50fbad"
+source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#c8eb001889cea66b6d8e67a9128cb2387b5c8c63"
 dependencies = [
  "darling_core",
  "darling_macro",
@@ -157,24 +157,24 @@ dependencies = [
 [[package]]
 name = "darling_core"
 version = "0.14.4"
-source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#cb6629a738e00b65aff38950df4fcf842d50fbad"
+source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#c8eb001889cea66b6d8e67a9128cb2387b5c8c63"
 dependencies = [
  "fnv",
  "ident_case",
  "proc-macro2",
  "quote",
  "strsim",
- "syn 2.0.0",
+ "syn 2.0.15",
 ]
 
 [[package]]
 name = "darling_macro"
 version = "0.14.4"
-source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#cb6629a738e00b65aff38950df4fcf842d50fbad"
+source = "git+https://github.com/jonasbb/darling?branch=prepare-syn-2#c8eb001889cea66b6d8e67a9128cb2387b5c8c63"
 dependencies = [
  "darling_core",
  "quote",
- "syn 2.0.0",
+ "syn 2.0.15",
 ]
 
 [[package]]
@@ -400,9 +400,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.52"
+version = "1.0.56"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d0e1ae9e836cc3beddd63db0df682593d7e2d3d891ae8c9083d2113e1744224"
+checksum = "2b63bdb0cd06f1f4dedf69b254734f9b45af66e4a031e42a7480257d9898b435"
 dependencies = [
  "unicode-ident",
 ]
@@ -592,7 +592,7 @@ dependencies = [
  "rustversion",
  "serde",
  "serde_json",
- "syn 2.0.0",
+ "syn 2.0.15",
  "trybuild",
  "version-sync",
 ]
@@ -638,9 +638,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.0"
+version = "2.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cff13bb1732bccfe3b246f3fdb09edfd51c01d6f5299b7ccd9457c2e4e37774"
+checksum = "a34fcf3e8b60f57e6a14301a2e916d323af98b0ea63c599441eec8558660c822"
 dependencies = [
  "proc-macro2",
  "quote",
