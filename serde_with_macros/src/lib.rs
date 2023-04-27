@@ -49,6 +49,7 @@ mod utils;
 
 use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _};
 use darling::{
+    ast::NestedMeta,
     util::{Flag, Override},
     Error as DarlingError, FromField, FromMeta,
 };
@@ -56,9 +57,12 @@ use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use syn::{
-    parse_macro_input, parse_quote, punctuated::Pair, spanned::Spanned, AttributeArgs, DeriveInput,
-    Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, NestedMeta, Path,
-    PathArguments, ReturnType, Type,
+    parse::Parser,
+    parse_macro_input, parse_quote,
+    punctuated::{Pair, Punctuated},
+    spanned::Spanned,
+    DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, Path,
+    PathArguments, ReturnType, Token, Type,
 };
 
 /// Apply function on every field of structs or enums
@@ -184,7 +188,7 @@ where
             .iter()
             .flat_map(|variant| {
                 variant.attrs.iter().filter_map(|attr| {
-                    if attr.path.is_ident("serde_as") {
+                    if attr.path().is_ident("serde_as") {
                         Some(
                             DarlingError::custom(
                                 "serde_as attribute is not allowed on enum variants",
@@ -331,7 +335,7 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
         // Remove the `serialize_always` attribute
         let mut has_always_attr = false;
         field.attrs.retain(|attr| {
-            let has_attr = attr.path.is_ident("serialize_always");
+            let has_attr = attr.path().is_ident("serialize_always");
             has_always_attr |= has_attr;
             !has_attr
         });
@@ -363,7 +367,7 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
         let has_attr = field
             .attrs
             .iter()
-            .any(|attr| attr.path.is_ident("serialize_always"));
+            .any(|attr| attr.path().is_ident("serialize_always"));
         if has_attr {
             return Err("`serialize_always` may only be used on fields of type `Option`.".into());
         }
@@ -424,19 +428,25 @@ fn is_std_option(type_: &Type) -> bool {
 /// * with the name being `skip_serializing_if`
 fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
     for attr in &field.attrs {
-        if attr.path.is_ident(namespace) {
+        if attr.path().is_ident(namespace) {
             // Ignore non parsable attributes, as these are not important for us
-            if let Ok(Meta::List(expr)) = attr.parse_meta() {
-                for expr in expr.nested {
+            if let Meta::List(expr) = &attr.meta {
+                let nested = match Punctuated::<Meta, Token![,]>::parse_terminated
+                    .parse2(expr.tokens.clone())
+                {
+                    Ok(nested) => nested,
+                    Err(_) => continue,
+                };
+                for expr in nested {
                     match expr {
-                        NestedMeta::Meta(Meta::NameValue(expr)) => {
+                        Meta::NameValue(expr) => {
                             if let Some(ident) = expr.path.get_ident() {
                                 if *ident == name {
                                     return true;
                                 }
                             }
                         }
-                        NestedMeta::Meta(Meta::Path(expr)) => {
+                        Meta::Path(expr) => {
                             if let Some(ident) = expr.get_ident() {
                                 if *ident == name {
                                     return true;
@@ -590,28 +600,32 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
         alt_crate_path: Option<Path>,
     }
 
-    let args: AttributeArgs = parse_macro_input!(args);
-    let container_options = match SerdeContainerOptions::from_list(&args) {
-        Ok(v) => v,
-        Err(e) => {
-            return TokenStream::from(e.write_errors());
+    match NestedMeta::parse_meta_list(args.into()) {
+        Ok(list) => {
+            let container_options = match SerdeContainerOptions::from_list(&list) {
+                Ok(v) => v,
+                Err(e) => {
+                    return TokenStream::from(e.write_errors());
+                }
+            };
+
+            let serde_with_crate_path = container_options
+                .alt_crate_path
+                .unwrap_or_else(|| syn::parse_quote!(::serde_with));
+
+            // Convert any error message into a nice compiler error
+            let res = match apply_function_to_struct_and_enum_fields_darling(
+                input,
+                &serde_with_crate_path,
+                |field| serde_as_add_attr_to_field(field, &serde_with_crate_path),
+            ) {
+                Ok(res) => res,
+                Err(err) => err.write_errors(),
+            };
+            TokenStream::from(res)
         }
-    };
-
-    let serde_with_crate_path = container_options
-        .alt_crate_path
-        .unwrap_or_else(|| syn::parse_quote!(::serde_with));
-
-    // Convert any error message into a nice compiler error
-    let res = match apply_function_to_struct_and_enum_fields_darling(
-        input,
-        &serde_with_crate_path,
-        |field| serde_as_add_attr_to_field(field, &serde_with_crate_path),
-    ) {
-        Ok(res) => res,
-        Err(err) => err.write_errors(),
-    };
-    TokenStream::from(res)
+        Err(e) => TokenStream::from(DarlingError::from(e).write_errors()),
+    }
 }
 
 /// Inspect the field and convert the `serde_as` attribute into the classical `serde`
@@ -622,7 +636,6 @@ fn serde_as_add_attr_to_field(
     #[derive(FromField)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
-        #[darling(rename = "as")]
         r#as: Option<Type>,
         deserialize_as: Option<Type>,
         serialize_as: Option<Type>,
@@ -679,12 +692,36 @@ fn serde_as_add_attr_to_field(
         }
     }
 
-    // Check if there even is any `serde_as` attribute and exit early if not.
-    if !field
-        .attrs
-        .iter()
-        .any(|attr| attr.path.is_ident("serde_as"))
-    {
+    // syn v2 no longer supports keywords in the path position of an attribute.
+    // That breaks #[serde_as(as = "FooBar")], since `as` is a keyword.
+    // For each attribute, that is named `serde_as`, we replace the `as` keyword with `r#as`.
+    let mut has_serde_as = false;
+    field.attrs.iter_mut().for_each(|attr| {
+        if attr.path().is_ident("serde_as") {
+            // We found a `serde_as` attribute.
+            // Remember that such that we can quick exit otherwise
+            has_serde_as = true;
+
+            if let Meta::List(metalist) = &mut attr.meta {
+                metalist.tokens = std::mem::take(&mut metalist.tokens)
+                    .into_iter()
+                    .map(|token| {
+                        use proc_macro2::{Ident, TokenTree};
+
+                        // Replace `as` with `r#as`.
+                        match token {
+                            TokenTree::Ident(ident) if ident == "as" => {
+                                TokenTree::Ident(Ident::new_raw("as", ident.span()))
+                            }
+                            _ => token,
+                        }
+                    })
+                    .collect();
+            }
+        }
+    });
+    // If there is no `serde_as` attribute, we can exit early.
+    if !has_serde_as {
         return Ok(());
     }
     let serde_as_options = SerdeAsOptions::from_field(field)?;

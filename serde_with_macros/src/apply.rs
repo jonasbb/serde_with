@@ -1,11 +1,11 @@
-use darling::{Error as DarlingError, FromMeta};
+use darling::{ast::NestedMeta, Error as DarlingError, FromMeta};
 use proc_macro::TokenStream;
 use quote::ToTokens as _;
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Attribute, Error, Field, NestedMeta, Path, Token, Type, TypeArray, TypeGroup, TypeParen,
-    TypePath, TypePtr, TypeReference, TypeSlice, TypeTuple,
+    Attribute, Error, Field, Path, Token, Type, TypeArray, TypeGroup, TypeParen, TypePath, TypePtr,
+    TypeReference, TypeSlice, TypeTuple,
 };
 
 /// Parsed form of a single rule in the `#[apply(...)]` attribute.
@@ -53,7 +53,7 @@ impl Parse for ApplyInput {
         }
 
         let rules: Punctuated<AddAttributesRule, Token![,]> =
-            input.parse_terminated(AddAttributesRule::parse)?;
+            input.parse_terminated(AddAttributesRule::parse, Token![,])?;
         Ok(Self { metas, rules })
     }
 }
