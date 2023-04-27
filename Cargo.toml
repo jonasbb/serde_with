@@ -13,7 +13,3 @@ push = false
 shared-version = true
 sign-tag = true
 tag = false
-
-[patch.crates-io]
-darling = { git = "https://github.com/jonasbb/darling", branch = "prepare-syn-2" }
-# darling = { path = "../darling" }

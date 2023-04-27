@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Update `syn` to v2 and `darling` to v0.20 (#578)
+    Update proc-macro dependencies.
+    This change should have no impact on users, but now uses the same dependency as `serde_derive`.
+
 ## [2.3.2] - 2023-04-05
 
 No changes.

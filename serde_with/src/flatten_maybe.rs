@@ -50,7 +50,7 @@
 /// ```
 #[macro_export]
 macro_rules! flattened_maybe {
-    ($fn:ident, $field:literal) => {
+    ($fn:ident, $field:tt) => {
         fn $fn<'de, T, D>(deserializer: D) -> $crate::__private__::Result<T, D::Error>
         where
             T: $crate::serde::Deserialize<'de>,
