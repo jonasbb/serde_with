@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+This breaking release should not impact most users.
+It only affects custom character sets used for base64 of which there are no instances on GitHub.
+
+### Changed
+
+* Upgrade base64 to v0.21 (#543)
+    Thanks to @jeff-hiner for submitting the PR.
+
+    Remove support for custom character sets.
+    This is technically a breaking change.
+    A code search on GitHub revealed no instances of anyone using that, and `serde_with` ships with many predefined character sets.
+    The removal means that future base64 upgrade will no longer be breaking changes.
+
 ## [2.3.3] - 2023-04-27
 
 ### Changed
