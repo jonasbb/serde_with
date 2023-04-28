@@ -158,14 +158,21 @@ where
     }
 }
 
-/// A base64 character set from [this list](base64::Alphabet).
-pub trait Alphabet {
-    /// Return a specific character set.
-    ///
-    /// Return one enum variant of the [`base64::Alphabet`](base64::Alphabet) enum.
-    fn charset() -> ::base64::alphabet::Alphabet;
+mod sealed {
+    pub trait Sealed {}
+    impl Sealed for super::Standard {}
+    impl Sealed for super::UrlSafe {}
+    impl Sealed for super::Crypt {}
+    impl Sealed for super::Bcrypt {}
+    impl Sealed for super::ImapMutf7 {}
+    impl Sealed for super::BinHex {}
 }
 
+/// A base64 alphabet
+pub trait Alphabet: sealed::Sealed {
+    /// Return a specific alphabet.
+    fn charset() -> ::base64::alphabet::Alphabet;
+}
 /// The standard character set (uses `+` and `/`).
 ///
 /// See [RFC 3548](https://tools.ietf.org/html/rfc3548#section-3).
