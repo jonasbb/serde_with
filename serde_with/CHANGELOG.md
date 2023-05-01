@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.0] - 2023-05-01
+
 This breaking release should not impact most users.
-It only affects custom character sets used for base64 of which there are no instances on GitHub.
+It only affects custom character sets used for base64 of which there are no instances of on GitHub.
 
 ### Changed
 
