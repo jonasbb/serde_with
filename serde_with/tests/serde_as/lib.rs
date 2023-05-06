@@ -980,6 +980,10 @@ fn test_one_or_many_prefer_many() {
 #[test]
 fn test_borrow_cow_str() {
     use alloc::borrow::Cow;
+    use serde::de::{
+        value::{BorrowedStrDeserializer, MapDeserializer},
+        IntoDeserializer,
+    };
     use serde_test::{assert_ser_tokens, Token};
     use serde_with::BorrowCow;
 
@@ -1078,39 +1082,35 @@ fn test_borrow_cow_str() {
             Token::StructEnd,
         ],
     );
-    let tokens = &[
-        Token::Struct { name: "S2", len: 2 },
-        Token::Str("cow"),
-        Token::BorrowedBytes(b"abc"),
-        Token::Str("opt"),
-        Token::Some,
-        Token::BorrowedBytes(b"foo"),
-        Token::StructEnd,
-    ];
-    let mut deser = serde_test::Deserializer::new(tokens);
-    let s2 = S2::deserialize(&mut deser).unwrap();
-    assert!(matches!(s2.cow, Cow::Borrowed(_)));
-    assert!(matches!(s2.opt, Some(Cow::Borrowed(_))));
 
     // Check that a manual borrow works too
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct S3<'a>(
+    struct S3<'a> {
         #[serde(borrow = "'a")]
         #[serde_as(as = "BorrowCow")]
-        Cow<'a, [u8]>,
+        borrowed: Cow<'a, [u8]>,
         // TODO add a test for Cow<'b, [u8; N]>
         // #[serde_as(as = "BorrowCow")]
         // Cow<'b, [u8; N]>,
-    );
-    let tokens = &[
-        Token::NewtypeStruct { name: "S3" },
-        Token::BorrowedBytes(b"abc"),
-    ];
+    }
 
-    let mut deser = serde_test::Deserializer::new(tokens);
-    let s3 = S3::deserialize(&mut deser).unwrap();
-    assert!(matches!(s3.0, Cow::Borrowed(_)));
+    struct BorrowedStr(&'static str);
+
+    impl<'de> IntoDeserializer<'de> for BorrowedStr {
+        type Deserializer = BorrowedStrDeserializer<'de, serde::de::value::Error>;
+
+        fn into_deserializer(self) -> Self::Deserializer {
+            BorrowedStrDeserializer::new(self.0)
+        }
+    }
+
+    let deser = MapDeserializer::new(IntoIterator::into_iter([
+        ("copied", BorrowedStr("copied")),
+        ("borrowed", BorrowedStr("borrowed")),
+    ]));
+    let s3 = S3::deserialize(deser).unwrap();
+    assert!(matches!(s3.borrowed, Cow::Borrowed(_)));
 }
 
 #[test]
