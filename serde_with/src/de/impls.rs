@@ -23,15 +23,18 @@ pub(crate) use foreach_map;
 macro_rules! foreach_map_create {
     ($m:ident) => {
         #[cfg(feature = "alloc")]
-        $m!(BTreeMap<K: Ord, V>,
-            (|_size| BTreeMap::new()));
+        $m!(BTreeMap<K: Ord, V>, (|_size| BTreeMap::new()));
         #[cfg(feature = "std")]
-        $m!(HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
-            (|size| HashMap::with_capacity_and_hasher(size, Default::default())));
+        $m!(
+            HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
+            (|size| HashMap::with_capacity_and_hasher(size, Default::default()))
+        );
         #[cfg(feature = "indexmap_1")]
-        $m!(IndexMap<K: Eq + Hash, V, S: BuildHasher + Default>,
-            (|size| IndexMap::with_capacity_and_hasher(size, Default::default())));
-    }
+        $m!(
+            IndexMap<K: Eq + Hash, V, S: BuildHasher + Default>,
+            (|size| IndexMap::with_capacity_and_hasher(size, Default::default()))
+        );
+    };
 }
 pub(crate) use foreach_map_create;
 
@@ -63,7 +66,7 @@ macro_rules! foreach_set_create {
             (|size| IndexSet::with_capacity_and_hasher(size, S::default())),
             insert
         );
-    }
+    };
 }
 pub(crate) use foreach_set_create;
 
