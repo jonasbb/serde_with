@@ -587,6 +587,7 @@ dependencies = [
  "serde_yaml",
  "time",
  "version-sync",
+ "xml-rs",
 ]
 
 [[package]]

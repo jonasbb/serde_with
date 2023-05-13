@@ -88,6 +88,11 @@ serde_yaml = "0.9.2"
 serde-xml-rs = "0.6.0"
 version-sync = "0.9.1"
 
+# There is a change that breaks some tests, starting with 0.8.9.
+# Newer xml-rs versions are not compatible with the current MSRV.
+# https://github.com/netvl/xml-rs/issues/223
+xml-rs = "=0.8.4"
+
 [[test]]
 name = "base64"
 path = "tests/base64.rs"
