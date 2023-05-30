@@ -135,7 +135,6 @@ fn ty_pattern_matches_ty(ty_pattern: &Type, ty: &Type) -> bool {
             Type::Array(TypeArray { elem: ty, len, .. }),
         ) => {
             let ty_match = ty_pattern_matches_ty(ty_pattern, ty);
-            dbg!(len_pattern);
             let len_match = len_pattern == len || len_pattern.to_token_stream().to_string() == "_";
             ty_match && len_match
         }

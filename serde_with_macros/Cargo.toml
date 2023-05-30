@@ -36,7 +36,7 @@ quote = "1.0.0"
 
 [dependencies.syn]
 features = [
-    # "extra-traits", # Only for debugging
+    "extra-traits",
     "full",
     "parsing",
 ]
