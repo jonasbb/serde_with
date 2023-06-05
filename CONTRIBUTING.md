@@ -22,7 +22,8 @@ Make sure to include the three major parts of information:
 2. Explain what the expected result and/or expected serialized data is.
 3. If possible prepare a minimal running example.
 
-Security vulnerabilities should be reported like normal bugs in the issue tracker.
+Security vulnerabilities should be reported privately as [security advisory](https://github.com/jonasbb/serde_with/security).
+Check [./SECURITY.md] for details.
 
 ## Submitting a PR
 
