@@ -91,7 +91,7 @@ version-sync = "0.9.1"
 # There is a change that breaks some tests, starting with 0.8.9.
 # Newer xml-rs versions are not compatible with the current MSRV.
 # https://github.com/netvl/xml-rs/issues/223
-xml-rs = "=0.8.4"
+xml-rs = "=0.8.14"
 
 [[test]]
 name = "base64"
