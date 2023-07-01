@@ -555,7 +555,7 @@ pub struct DisplayFromStr;
 
 /// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
 ///
-/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`AsRef<str>`] implementations.
+/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`] implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
 /// # Examples
