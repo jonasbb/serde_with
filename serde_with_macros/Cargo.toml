@@ -1,7 +1,7 @@
 [package]
 authors = ["Jonas Bushart"]
 name = "serde_with_macros"
-rust-version = "1.60"
+rust-version = "1.61"
 version = "3.0.0"
 
 categories = ["encoding"]

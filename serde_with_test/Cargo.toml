@@ -3,11 +3,12 @@ edition = "2021"
 name = "serde_with_test"
 publish = false
 version = "0.0.0"
-rust-version = "1.60"
+rust-version = "1.61"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+cfg_eval = "0.1.2"
 s = {package = "serde", version = "1.0.75", features = ["derive"]}
 s_json = {package = "serde_json", version = "1.0.59"}
 s_with = {package = "serde_with", path = "../serde_with"}

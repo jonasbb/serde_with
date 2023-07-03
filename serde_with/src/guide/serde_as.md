@@ -38,7 +38,7 @@ You mirror the type structure of the field you want to de/serialize.
 You can specify converters for the inner types of a field, e.g., `Vec<DisplayFromStr>`.
 The default de/serialization behavior can be restored by using `_` as a placeholder, e.g., `BTreeMap<_, DisplayFromStr>`.
 
-All together, this looks like:
+Combined, this looks like:
 
 ```rust
 use serde::{Deserialize, Serialize};
@@ -70,8 +70,8 @@ struct A {
 
 ### Deserializing Optional Fields
 
-In many cases using `serde_as` on a field of type `Option` should behave as expected.
-This mean the field can still be missing during deserialization and will be filled with the value `None`.
+In many cases, using `serde_as` on a field of type `Option` should behave as expected.
+This means the field can still be missing during deserialization and will be filled with the value `None`.
 
 This "magic" can break in some cases. Then it becomes necessary to apply `#[serde(default)]` on the field in question.
 If the field is of type `Option<T>` and the conversion type is of `Option<S>`, the default attribute is automatically applied.
@@ -81,7 +81,7 @@ These variants are detected as `Option`.
 * `core::option::Option`, with or without leading `::`
 
 Any renaming will interfere with the detection, such as `use std::option::Option as StdOption;`.
-For more information you can inspect the documentation of the `serde_as` macro.
+For more information, you can inspect the documentation of the `serde_as` macro.
 
 ```rust
 # use serde::{Deserialize, Serialize};
@@ -102,36 +102,20 @@ You can add your feedback at [serde_with#185].
 
 ### Gating `serde_as` on Features
 
-Gating `serde_as` behind optional features is currently not supported.
-More details can be found in the corresponding issue [serde_with#355].
+Gating `serde_as` behind optional features is possible using the `cfg_eval` attribute.
+The attribute is available via the [`cfg_eval`-crate](https://docs.rs/cfg_eval) on stable or using the [Rust attribute](https://doc.rust-lang.org/1.70.0/core/prelude/v1/attr.cfg_eval.html) on unstable nightly.
+
+The `cfg_eval` attribute must be placed **before** the struct-level `serde_as` attribute.
+You can combine them together in a single `cfg_attr`, as long as the order is preserved.
 
 ```rust,ignore
-#[cfg_attr(feature="serde" ,serde_as)]
+#[cfg_attr(feature="serde", cfg_eval::cfg_eval, serde_as)]
 #[cfg_attr(feature="serde", derive(Serialize, Deserialize))]
-struct StructC {
-    #[cfg_attr(feature="serde" ,serde_as(as = "Vec<(_, _)>"))]
+struct Struct {
+    #[cfg_attr(feature="serde", serde_as(as = "Vec<(_, _)>"))]
     map: HashMap<(i32,i32), i32>,
 }
 ```
-
-The `serde_as` proc-macro attribute will not recognize the `serde_as` attribute on the field and will not perform the necessary translation steps.
-The problem can be avoided by forcing Rust to evaluate all cfg-expressions before running `serde_as`.
-This is possible with the `#[cfg_eval]` attribute, which is considered for stabilization ([rust#82679], [rust#87221]).
-
-As a workaround, it is possible to remove the `serde_as` proc-macro attribute and perform the transformation manually.
-The transformation steps are listed in the [`serde_as`] documentations.
-For the example above, this means to replace the field attribute with:
-
-```rust,ignore
-use serde_with::{As, Same};
-
-#[cfg_attr(feature="serde", serde(with = "As::<Vec<(Same, Same)>>"))]
-map: HashMap<(i32,i32), i32>,
-```
-
-[rust#82679]: https://github.com/rust-lang/rust/issues/82679
-[rust#87221]: https://github.com/rust-lang/rust/pull/87221
-[serde_with#355]: https://github.com/jonasbb/serde_with/issues/355
 
 ## Implementing `SerializeAs` / `DeserializeAs`
 
@@ -140,7 +124,7 @@ Most "leaf" types do not need to implement these traits, since they are supporte
 "Leaf" type refers to types which directly serialize like plain data types.
 [`SerializeAs`] / [`DeserializeAs`] is very important for collection types, like `Vec` or `BTreeMap`, since they need special handling for the key/value de/serialization such that the conversions can be done on the key/values.
 You also find them implemented on the conversion types, such as the [`DisplayFromStr`] type.
-These make up the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
+These comprise the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
 
 In many cases, conversion is only required from one serializable type to another one, without requiring the full power of the `Serialize` or `Deserialize` traits.
 In these cases, the [`serde_conv!`] macro conveniently allows defining conversion types without the boilerplate.
@@ -152,12 +136,12 @@ The trait documentations for [`SerializeAs`] and [`DeserializeAs`] describe in d
 
 The `SerializeAs` and `DeserializeAs` traits can easily be used together with types from other crates without running into orphan rule problems.
 This is a distinct advantage of the `serde_as` system.
-For this example we assume we have a type `RemoteType` from a dependency which does not implement `Serialize` nor `SerializeAs`.
+For this example, we assume we have a type `RemoteType` from a dependency which does not implement `Serialize` nor `SerializeAs`.
 We assume we have a module containing a `serialize` and a `deserialize` function, which can be used in the `#[serde(with = "MODULE")]` annotation.
 You find an example in the [official serde documentation](https://serde.rs/custom-date-format.html).
 
 Our goal is to serialize this `Data` struct.
-Right now, we do not have anything we can use to replace `???` with, since `_` only works if `RemoteType` would implement `Serialize`, which it does not.
+Currently, we do not have anything we can use to replace `???` with, since `_` only works if `RemoteType` would implement `Serialize`, which it does not.
 
 ```rust
 # #[cfg(FALSE)] {

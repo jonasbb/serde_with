@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Improve documentation about cfg-gating `serde_as` (#607)
+* Bump MSRV to 1.61 because that is required by the crate `cfg_eval`.
+
 ## [3.0.0] - 2023-05-01
 
 This breaking release should not impact most users.
