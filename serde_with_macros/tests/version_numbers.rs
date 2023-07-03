@@ -9,7 +9,7 @@ fn test_html_root_url() {
 
 #[test]
 fn test_changelog() {
-    version_sync::assert_contains_regex!("CHANGELOG.md", r#"## \[{version}\]"#);
+    version_sync::assert_contains_regex!("CHANGELOG.md", r"## \[{version}\]");
 }
 
 #[test]
