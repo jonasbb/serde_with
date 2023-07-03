@@ -8,7 +8,7 @@ name = "serde_with"
 rust-version = "1.60"
 version = "3.0.0"
 
-categories = ["encoding", "no-std"]
+categories = ["encoding", "no-std", "no-std::no-alloc"]
 description = "Custom de/serialization functions for Rust's serde"
 documentation = "https://docs.rs/serde_with/"
 edition = "2021"
