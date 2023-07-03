@@ -6,7 +6,7 @@ use version_sync::{assert_contains_regex, assert_html_root_url_updated};
 
 #[test]
 fn test_changelog() {
-    assert_contains_regex!("CHANGELOG.md", r#"## \[{version}\]"#);
+    assert_contains_regex!("CHANGELOG.md", r"## \[{version}\]");
 }
 
 #[test]
