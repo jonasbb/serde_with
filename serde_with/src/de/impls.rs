@@ -399,6 +399,7 @@ macro_rules! seq_impl {
                     where
                         A: SeqAccess<'de>,
                     {
+                        #[allow(clippy::redundant_closure_call)]
                         let mut values = ($with_capacity)(utils::size_hint_cautious(seq.size_hint()));
 
                         while let Some(value) = seq
@@ -463,6 +464,7 @@ macro_rules! map_impl {
                     where
                         A: MapAccess<'de>,
                     {
+                        #[allow(clippy::redundant_closure_call)]
                         let mut values = ($with_capacity)(utils::size_hint_cautious(map.size_hint()));
 
                         while let Some((key, value)) = (map.next_entry())?.map(|(k, v): (DeserializeAsWrap::<K, KU>, DeserializeAsWrap::<V, VU>)| (k.into_inner(), v.into_inner())) {
