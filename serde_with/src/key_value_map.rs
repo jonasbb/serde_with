@@ -698,7 +698,7 @@ where
             self.delegate
                 .serialize_entry(&key, &SerContent::Seq(self.content))
         } else {
-            Err(SerError::custom("TODO, missing value for `$key$` field"))
+            Err(SerError::custom("missing value for `$key$` field"))
         }
     }
 }
@@ -739,7 +739,7 @@ where
             self.delegate
                 .serialize_entry(&key, &SerContent::Tuple(self.content))
         } else {
-            Err(SerError::custom("TODO, missing value for `$key$` field"))
+            Err(SerError::custom("missing value for `$key$` field"))
         }
     }
 }
@@ -780,7 +780,7 @@ where
             self.delegate
                 .serialize_entry(&key, &SerContent::TupleStruct(self.name, self.content))
         } else {
-            Err(SerError::custom("TODO, missing value for `$key$` field"))
+            Err(SerError::custom("missing value for `$key$` field"))
         }
     }
 }
@@ -842,7 +842,7 @@ where
             self.delegate
                 .serialize_entry(&key, &SerContent::Map(self.content))
         } else {
-            Err(SerError::custom("TODO, missing value for `$key$` field"))
+            Err(SerError::custom("missing value for `$key$` field"))
         }
     }
 }
@@ -889,7 +889,7 @@ where
             self.delegate
                 .serialize_entry(&key, &SerContent::Struct(self.name, self.content))
         } else {
-            Err(SerError::custom("TODO, missing value for `key` field"))
+            Err(SerError::custom("missing value for `$key$` field"))
         }
     }
 }
