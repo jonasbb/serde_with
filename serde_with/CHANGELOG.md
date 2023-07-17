@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.1.0] - 2023-07-17
+
+### Added
+
+* Add `FromIntoRef` and `TryFromIntoRef` (#618)
+    Thanks to @oblique for submitting the PR.
+
+    The new types are similar to the existing `FromInto` and `TryFromInto` types.
+    They behave different during serialization, allowing the removal of the `Clone` bound on their `SerializeAs` trait implementation
+
 ### Changed
 
 * Improve documentation about cfg-gating `serde_as` (#607)
