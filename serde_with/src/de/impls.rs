@@ -1719,6 +1719,35 @@ where
     }
 }
 
+impl<'de, T, U> DeserializeAs<'de, T> for FromIntoRef<U>
+where
+    U: Into<T>,
+    U: Deserialize<'de>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(U::deserialize(deserializer)?.into())
+    }
+}
+
+impl<'de, T, U> DeserializeAs<'de, T> for TryFromIntoRef<U>
+where
+    U: TryInto<T>,
+    <U as TryInto<T>>::Error: Display,
+    U: Deserialize<'de>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        U::deserialize(deserializer)?
+            .try_into()
+            .map_err(DeError::custom)
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, str>, D::Error>

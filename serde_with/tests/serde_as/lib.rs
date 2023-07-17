@@ -12,6 +12,7 @@ mod collections;
 mod default_on;
 mod enum_map;
 mod frominto;
+mod fromintoref;
 mod key_value_map;
 mod map_tuple_list;
 mod pickfirst;
