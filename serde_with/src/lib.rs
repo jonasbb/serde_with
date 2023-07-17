@@ -341,6 +341,11 @@ mod utils;
 #[doc(hidden)]
 pub mod with_prefix;
 
+/// TODO: Document
+#[cfg(feature = "schemars_0_8")]
+#[cfg_attr(docsrs, doc(cfg(feature = "schemars_0_8")))]
+pub mod schemars_0_8;
+
 // Taken from shepmaster/snafu
 // Originally licensed as MIT+Apache 2
 // https://github.com/shepmaster/snafu/blob/fd37d79d4531ed1d3eebffad0d658928eb860cfe/src/lib.rs#L121-L165
@@ -2507,3 +2512,7 @@ pub struct SetPreventDuplicates<T>(PhantomData<T>);
 /// [`BTreeSet`]: std::collections::HashSet
 #[cfg(feature = "alloc")]
 pub struct SetLastValueWins<T>(PhantomData<T>);
+
+/// TODO: document
+#[cfg(feature = "schemars_0_8")]
+pub struct Schema<T: ?Sized, TAs>(PhantomData<T>, PhantomData<TAs>);

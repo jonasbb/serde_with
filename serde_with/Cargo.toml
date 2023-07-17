@@ -5,7 +5,7 @@ authors = [
     "Marcin Kaźmierczak",
 ]
 name = "serde_with"
-rust-version = "1.61"
+rust-version = "1.63"
 version = "3.1.0"
 
 categories = ["encoding", "no-std", "no-std::no-alloc"]
@@ -56,6 +56,7 @@ indexmap = ["indexmap_1"]
 indexmap_1 = ["dep:indexmap_1", "alloc"]
 json = ["dep:serde_json", "alloc"]
 macros = ["dep:serde_with_macros"]
+schemars_0_8 = ["dep:schemars_0_8", "serde_with_macros?/schemars_0_8"]
 time_0_3 = ["dep:time_0_3"]
 
 # When adding new optional dependencies update the documentation in feature-flags.md
@@ -65,6 +66,7 @@ chrono_0_4 = {package = "chrono", version = "0.4.20", optional = true, default-f
 doc-comment = {version = "0.3.3", optional = true}
 hex = {version = "0.4.3", optional = true, default-features = false}
 indexmap_1 = {package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
+schemars_0_8 = {package = "schemars", version = "0.8.12", optional = true, default-features = false, features = ["derive"]}
 # The derive feature is needed for the flattened_maybe macro.
 # https://github.com/jonasbb/serde_with/blob/eb1965a74a3be073ecd13ec05f02a01bc1c44309/serde_with/src/flatten_maybe.rs#L67
 serde = {version = "1.0.157", default-features = false, features = ["derive"] }
@@ -76,6 +78,7 @@ time_0_3 = {package = "time", version = "~0.3.11", optional = true, default-feat
 expect-test = "1.3.0"
 fnv = "1.0.6"
 glob = "0.3.0"
+jsonschema = {version = "0.17.0", default-features = false}
 mime = "0.3.16"
 pretty_assertions = "1.4.0"
 regex = {version = "1.9.1", default-features = false, features = ["std"]}
@@ -122,6 +125,11 @@ required-features = ["json", "macros"]
 name = "serde_as"
 path = "tests/serde_as/lib.rs"
 required-features = ["macros"]
+
+[[test]]
+name = "schemars_0_8"
+path = "tests/schemars_0_8.rs"
+required-features = ["macros", "schemars_0_8"]
 
 [[test]]
 name = "time_0_3"

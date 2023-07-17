@@ -598,6 +598,8 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
     struct SerdeContainerOptions {
         #[darling(rename = "crate")]
         alt_crate_path: Option<Path>,
+        #[darling(rename = "schemars", default)]
+        enable_schemars_support: bool,
     }
 
     match NestedMeta::parse_meta_list(args.into()) {
@@ -617,7 +619,13 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
             let res = match apply_function_to_struct_and_enum_fields_darling(
                 input,
                 &serde_with_crate_path,
-                |field| serde_as_add_attr_to_field(field, &serde_with_crate_path),
+                |field| {
+                    serde_as_add_attr_to_field(
+                        field,
+                        &serde_with_crate_path,
+                        container_options.enable_schemars_support,
+                    )
+                },
             ) {
                 Ok(res) => res,
                 Err(err) => err.write_errors(),
@@ -632,10 +640,14 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
 fn serde_as_add_attr_to_field(
     field: &mut Field,
     serde_with_crate_path: &Path,
+    enable_schemars_support: bool,
 ) -> Result<(), DarlingError> {
     #[derive(FromField)]
     #[darling(attributes(serde_as))]
     struct SerdeAsOptions {
+        /// The original type of the field
+        ty: Type,
+
         r#as: Option<Type>,
         deserialize_as: Option<Type>,
         serialize_as: Option<Type>,
@@ -747,6 +759,7 @@ fn serde_as_add_attr_to_field(
         return Err(DarlingError::multiple(errors));
     }
 
+    let type_original = &serde_as_options.ty;
     let type_same = &syn::parse_quote!(#serde_with_crate_path::Same);
     if let Some(type_) = &serde_as_options.r#as {
         emit_borrow_annotation(&serde_options, type_, field);
@@ -756,6 +769,13 @@ fn serde_as_add_attr_to_field(
         let attr_inner_tokens = quote!(#serde_with_crate_path::As::<#replacement_type>).to_string();
         let attr = parse_quote!(#[serde(with = #attr_inner_tokens)]);
         field.attrs.push(attr);
+        if enable_schemars_support {
+            let attr_inner_tokens =
+                quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>)
+                    .to_string();
+            let attr = parse_quote!(#[schemars(with = #attr_inner_tokens)]);
+            field.attrs.push(attr);
+        }
     }
     if let Some(type_) = &serde_as_options.deserialize_as {
         emit_borrow_annotation(&serde_options, type_, field);
@@ -766,13 +786,27 @@ fn serde_as_add_attr_to_field(
             quote!(#serde_with_crate_path::As::<#replacement_type>::deserialize).to_string();
         let attr = parse_quote!(#[serde(deserialize_with = #attr_inner_tokens)]);
         field.attrs.push(attr);
+        if enable_schemars_support {
+            let attr_inner_tokens =
+                quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>::deserialize)
+                    .to_string();
+            let attr = parse_quote!(#[schemars(deserialize_with = #attr_inner_tokens)]);
+            field.attrs.push(attr);
+        }
     }
     if let Some(type_) = serde_as_options.serialize_as {
-        let replacement_type = replace_infer_type_with_type(type_, type_same);
+        let replacement_type = replace_infer_type_with_type(type_.clone(), type_same);
         let attr_inner_tokens =
             quote!(#serde_with_crate_path::As::<#replacement_type>::serialize).to_string();
         let attr = parse_quote!(#[serde(serialize_with = #attr_inner_tokens)]);
         field.attrs.push(attr);
+        if enable_schemars_support {
+            let attr_inner_tokens =
+                quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>::serialize)
+                    .to_string();
+            let attr = parse_quote!(#[schemars(serialize_with = #attr_inner_tokens)]);
+            field.attrs.push(attr);
+        }
     }
 
     Ok(())
