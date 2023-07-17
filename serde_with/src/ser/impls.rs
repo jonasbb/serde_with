@@ -877,6 +877,36 @@ where
     }
 }
 
+impl<T, U> SerializeAs<T> for FromIntoRef<U>
+where
+    for<'a> &'a T: Into<U>,
+    U: Serialize,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source.into().serialize(serializer)
+    }
+}
+
+impl<T, U> SerializeAs<T> for TryFromIntoRef<U>
+where
+    for<'a> &'a T: TryInto<U>,
+    for<'a> <&'a T as TryInto<U>>::Error: Display,
+    U: Serialize,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        source
+            .try_into()
+            .map_err(S::Error::custom)?
+            .serialize(serializer)
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<'a> SerializeAs<Cow<'a, str>> for BorrowCow {
     fn serialize_as<S>(source: &Cow<'a, str>, serializer: S) -> Result<S::Ok, S::Error>
