@@ -1,6 +1,8 @@
 use crate::{formats::*, prelude::*};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
+#[cfg(feature = "indexmap_2")]
+use indexmap_2::{IndexMap as IndexMap2, IndexSet as IndexSet2};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper macro used internally
@@ -16,6 +18,8 @@ macro_rules! foreach_map {
         $m!(HashMap<K: Eq + Hash, V, H: Sized>);
         #[cfg(all(feature = "std", feature = "indexmap_1"))]
         $m!(IndexMap<K: Eq + Hash, V, H: Sized>);
+        #[cfg(all(feature = "std", feature = "indexmap_2"))]
+        $m!(IndexMap2<K: Eq + Hash, V, H: Sized>);
     };
 }
 pub(crate) use foreach_map;
@@ -34,6 +38,11 @@ macro_rules! foreach_map_create {
             IndexMap<K: Eq + Hash, V, S: BuildHasher + Default>,
             (|size| IndexMap::with_capacity_and_hasher(size, Default::default()))
         );
+        #[cfg(feature = "indexmap_2")]
+        $m!(
+            IndexMap2<K: Eq + Hash, V, S: BuildHasher + Default>,
+            (|size| IndexMap2::with_capacity_and_hasher(size, Default::default()))
+        );
     };
 }
 pub(crate) use foreach_map_create;
@@ -46,6 +55,8 @@ macro_rules! foreach_set {
         $m!(HashSet<(K, V): Eq + Hash>);
         #[cfg(all(feature = "std", feature = "indexmap_1"))]
         $m!(IndexSet<(K, V): Eq + Hash>);
+        #[cfg(all(feature = "std", feature = "indexmap_2"))]
+        $m!(IndexSet2<(K, V): Eq + Hash>);
     }
 }
 pub(crate) use foreach_set;
@@ -64,6 +75,12 @@ macro_rules! foreach_set_create {
         $m!(
             IndexSet<T: Eq + Hash, S: BuildHasher + Default>,
             (|size| IndexSet::with_capacity_and_hasher(size, S::default())),
+            insert
+        );
+        #[cfg(feature = "indexmap_2")]
+        $m!(
+            IndexSet2<T: Eq + Hash, S: BuildHasher + Default>,
+            (|size| IndexSet2::with_capacity_and_hasher(size, S::default())),
             insert
         );
     };

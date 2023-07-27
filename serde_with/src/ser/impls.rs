@@ -1,6 +1,8 @@
 use crate::{formats, formats::Strictness, prelude::*};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
+#[cfg(feature = "indexmap_2")]
+use indexmap_2::{IndexMap as IndexMap2, IndexSet as IndexSet2};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper macro used internally
@@ -17,6 +19,8 @@ macro_rules! foreach_map {
         $m!(HashMap<K, V, H: Sized>);
         #[cfg(all(feature = "indexmap_1"))]
         $m!(IndexMap<K, V, H: Sized>);
+        #[cfg(all(feature = "indexmap_2"))]
+        $m!(IndexMap2<K, V, H: Sized>);
     };
 }
 pub(crate) use foreach_map;
@@ -29,6 +33,8 @@ macro_rules! foreach_set {
         $m!(HashSet<$T, H: Sized>);
         #[cfg(all(feature = "indexmap_1"))]
         $m!(IndexSet<$T, H: Sized>);
+        #[cfg(all(feature = "indexmap_2"))]
+        $m!(IndexSet2<$T, H: Sized>);
     };
     ($m:ident) => {
         foreach_set!($m, T);
