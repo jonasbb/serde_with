@@ -27,6 +27,11 @@
     "remoteUser": "root",
     "containerUser": "root",
 
+    // Host hardware requirements.
+    "hostRequirements": {
+        "cpus": 4
+    },
+
     // Features to add to the dev container.
     // https://containers.dev/features
     "features": {
