@@ -5,8 +5,17 @@ use crate::prelude::*;
 /// Re-Implementation of `serde::private::de::size_hint::cautious`
 #[cfg(feature = "alloc")]
 #[inline]
-pub(crate) fn size_hint_cautious(hint: Option<usize>) -> usize {
-    core::cmp::min(hint.unwrap_or(0), 4096)
+pub(crate) fn size_hint_cautious<Element>(hint: Option<usize>) -> usize {
+    const MAX_PREALLOC_BYTES: usize = 1024 * 1024;
+
+    if core::mem::size_of::<Element>() == 0 {
+        0
+    } else {
+        core::cmp::min(
+            hint.unwrap_or(0),
+            MAX_PREALLOC_BYTES / core::mem::size_of::<Element>(),
+        )
+    }
 }
 
 /// Re-Implementation of `serde::private::de::size_hint::from_bounds`
