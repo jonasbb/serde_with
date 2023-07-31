@@ -283,7 +283,7 @@ impl<'de> Visitor<'de> for ContentVisitor<'de> {
     where
         V: SeqAccess<'de>,
     {
-        let mut vec = Vec::with_capacity(size_hint_cautious(visitor.size_hint()));
+        let mut vec = Vec::with_capacity(size_hint_cautious::<Content<'_>>(visitor.size_hint()));
         while let Some(e) = visitor.next_element()? {
             vec.push(e);
         }
@@ -294,7 +294,9 @@ impl<'de> Visitor<'de> for ContentVisitor<'de> {
     where
         V: MapAccess<'de>,
     {
-        let mut vec = Vec::with_capacity(size_hint_cautious(visitor.size_hint()));
+        let mut vec = Vec::with_capacity(size_hint_cautious::<(Content<'_>, Content<'_>)>(
+            visitor.size_hint(),
+        ));
         while let Some(kv) = visitor.next_entry()? {
             vec.push(kv);
         }
