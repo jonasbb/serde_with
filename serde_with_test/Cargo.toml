@@ -3,7 +3,7 @@ edition = "2021"
 name = "serde_with_test"
 publish = false
 version = "0.0.0"
-rust-version = "1.61"
+rust-version = "1.64"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

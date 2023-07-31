@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add optional support for indexmap v2 (#621)
+    Support for v1 is already available using the `indexmap_1` feature.
+    This adds identical support for v2 of indexmap using the `indexmap_2` feature.
+
+### Changed
+
+* Bump MSRV to 1.64, since that is required for the indexmap v2 dependency.
+
 ## [3.1.0] - 2023-07-17
 
 ### Added

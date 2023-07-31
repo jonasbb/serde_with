@@ -13,9 +13,10 @@ Using it in a `no_std` environment requires using `default-features = false`, si
 5. [`guide`](#guide)
 6. [`hex`](#hex)
 7. [`indexmap_1`](#indexmap_1)
-8. [`json`](#json)
-9. [`macros` (default)](#macros-default)
-10. [`time_0_3`](#time_0_3)
+8. [`indexmap_2`](#indexmap_2)
+9. [`json`](#json)
+10. [`macros` (default)](#macros-default)
+11. [`time_0_3`](#time_0_3)
 
 ## `alloc`
 
@@ -57,11 +58,20 @@ It enables the `alloc` feature.
 
 ## `indexmap_1`
 
-The `indexmap_1` feature enables implementations of `indexmap_1` specific checks.
+The `indexmap_1` feature enables implementations of `indexmap` v1 specific checks.
 This includes support for checking duplicate keys and duplicate values.
 The legacy feature name `indexmap` is still available for v1 compatability.
 
-This pulls in `indexmap` as a dependency.
+This pulls in `indexmap` v1 as a dependency.
+It enables the `alloc` feature.
+Some functionality is only available when `std` is enabled too.
+
+## `indexmap_2`
+
+The `indexmap_2` feature enables implementations of `indexmap` v2 specific checks.
+This includes support for checking duplicate keys and duplicate values.
+
+This pulls in `indexmap` v2 as a dependency.
 It enables the `alloc` feature.
 Some functionality is only available when `std` is enabled too.
 

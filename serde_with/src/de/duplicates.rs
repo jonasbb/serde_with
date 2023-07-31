@@ -9,6 +9,8 @@ use crate::{
 };
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
+#[cfg(feature = "indexmap_2")]
+use indexmap_2::{IndexMap as IndexMap2, IndexSet as IndexSet2};
 
 struct SetPreventDuplicatesVisitor<SET, T, TAs>(PhantomData<(SET, T, TAs)>);
 
