@@ -356,13 +356,12 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<i64, Strict> {
     where
         D: Deserializer<'de>,
     {
-        i64::deserialize(deserializer).map(|mut secs: i64| {
-            let mut sign = Sign::Positive;
-            if secs.is_negative() {
-                secs = -secs;
-                sign = Sign::Negative;
-            }
-            DurationSigned::new(sign, secs as u64, 0)
+        i64::deserialize(deserializer).map(|secs: i64| {
+            let sign = match secs.is_negative() {
+                true => Sign::Negative,
+                false => Sign::Positive,
+            };
+            DurationSigned::new(sign, secs.abs_diff(0), 0)
         })
     }
 }
@@ -398,13 +397,12 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<String, Strict>
             where
                 E: DeError,
             {
-                let mut secs: i64 = value.parse().map_err(DeError::custom)?;
-                let mut sign = Sign::Positive;
-                if secs.is_negative() {
-                    secs = -secs;
-                    sign = Sign::Negative;
-                }
-                Ok(DurationSigned::new(sign, secs as u64, 0))
+                let secs: i64 = value.parse().map_err(DeError::custom)?;
+                let sign = match secs.is_negative() {
+                    true => Sign::Negative,
+                    false => Sign::Positive,
+                };
+                Ok(DurationSigned::new(sign, secs.abs_diff(0), 0))
             }
         }
 
