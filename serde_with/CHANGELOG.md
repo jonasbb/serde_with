@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.2.0] - 2023-08-04
+
 ### Added
 
 * Add optional support for indexmap v2 (#621)
@@ -16,6 +18,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 * Bump MSRV to 1.64, since that is required for the indexmap v2 dependency.
+
+### Fixed
+
+* Prevent panics when deserializing `i64::MIN` using `TimestampSeconds<i64>` (#632, #633)
+    Thanks to @hollmmax for reporting and fixing the issue.
 
 ## [3.1.0] - 2023-07-17
 

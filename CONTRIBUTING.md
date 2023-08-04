@@ -9,8 +9,8 @@
 
 Check out the [user guide][user guide] to find out more tips and tricks about this crate.
 
-For further help using this crate you can [open a new discussion](https://github.com/jonasbb/serde_with/discussions/new) or ask on [users.rust-lang.org](https://users.rust-lang.org/).
-For bugs please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on GitHub.
+For further help using this crate, you can [open a new discussion](https://github.com/jonasbb/serde_with/discussions/new) or ask on [users.rust-lang.org](https://users.rust-lang.org/).
+For bugs, please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on GitHub.
 
 ## Reporting Bugs
 
@@ -23,7 +23,7 @@ Make sure to include the three major parts of information:
 3. If possible prepare a minimal running example.
 
 Security vulnerabilities should be reported privately as [security advisory](https://github.com/jonasbb/serde_with/security).
-Check [./SECURITY.md] for details.
+Check [SECURITY.md](./SECURITY.md) for details.
 
 ## Submitting a PR
 
