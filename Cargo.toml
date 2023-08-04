@@ -8,6 +8,7 @@ resolver = "2"
 
 [workspace.metadata.release]
 consolidate-commits = true
+pre-release-commit-message = "Bump version to v{{version}}"
 publish = false
 push = false
 shared-version = true
