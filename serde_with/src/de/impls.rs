@@ -1,4 +1,6 @@
 use crate::{formats::*, prelude::*};
+#[cfg(feature = "hashbrown")]
+use hashbrown::{HashMap as HashbrownMap, HashSet as HashbrownSet};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]
@@ -16,6 +18,8 @@ macro_rules! foreach_map {
         $m!(BTreeMap<K: Ord, V>);
         #[cfg(feature = "std")]
         $m!(HashMap<K: Eq + Hash, V, H: Sized>);
+        #[cfg(all(feature = "std", feature = "hashbrown"))]
+        $m!(HashbrownMap<K: Eq + Hash, V, H: Sized>);
         #[cfg(all(feature = "std", feature = "indexmap_1"))]
         $m!(IndexMap<K: Eq + Hash, V, H: Sized>);
         #[cfg(all(feature = "std", feature = "indexmap_2"))]
@@ -32,6 +36,11 @@ macro_rules! foreach_map_create {
         $m!(
             HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
             (|size| HashMap::with_capacity_and_hasher(size, Default::default()))
+        );
+        #[cfg(feature = "hashbrown")]
+        $m!(
+            HashbrownMap<K: Eq + Hash, V, S: BuildHasher + Default>,
+            (|size| HashbrownMap::with_capacity_and_hasher(size, Default::default()))
         );
         #[cfg(feature = "indexmap_1")]
         $m!(
@@ -53,6 +62,8 @@ macro_rules! foreach_set {
         $m!(BTreeSet<(K, V): Ord>);
         #[cfg(feature = "std")]
         $m!(HashSet<(K, V): Eq + Hash>);
+        #[cfg(all(feature = "std", feature = "hashbrown"))]
+        $m!(HashbrownSet<(K, V): Eq + Hash>);
         #[cfg(all(feature = "std", feature = "indexmap_1"))]
         $m!(IndexSet<(K, V): Eq + Hash>);
         #[cfg(all(feature = "std", feature = "indexmap_2"))]
@@ -69,6 +80,12 @@ macro_rules! foreach_set_create {
         $m!(
             HashSet<T: Eq + Hash, S: BuildHasher + Default>,
             (|size| HashSet::with_capacity_and_hasher(size, S::default())),
+            insert
+        );
+        #[cfg(feature = "hashbrown")]
+        $m!(
+            HashbrownSet<T: Eq + Hash, S: BuildHasher + Default>,
+            (|size| HashbrownSet::with_capacity_and_hasher(size, S::default())),
             insert
         );
         #[cfg(feature = "indexmap_1")]

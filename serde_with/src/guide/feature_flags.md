@@ -6,17 +6,19 @@ Each entry will explain the feature in more detail.
 `serde_with` is fully `no_std` compatible.
 Using it in a `no_std` environment requires using `default-features = false`, since `std` is enabled by default.
 
-1. [`alloc`](#alloc)
-2. [`std` (default)](#std-default)
-3. [`base64`](#base64)
-4. [`chrono_0_4`](#chrono_0_4)
-5. [`guide`](#guide)
-6. [`hex`](#hex)
-7. [`indexmap_1`](#indexmap_1)
-8. [`indexmap_2`](#indexmap_2)
-9. [`json`](#json)
-10. [`macros` (default)](#macros-default)
-11. [`time_0_3`](#time_0_3)
+- [Available Feature Flags](#available-feature-flags)
+  - [`alloc`](#alloc)
+  - [`std` (default)](#std-default)
+  - [`base64`](#base64)
+  - [`chrono_0_4`](#chrono_0_4)
+  - [`guide`](#guide)
+  - [`hashbrown`](#hashbrown)
+  - [`hex`](#hex)
+  - [`indexmap_1`](#indexmap_1)
+  - [`indexmap_2`](#indexmap_2)
+  - [`json`](#json)
+  - [`macros` (default)](#macros-default)
+  - [`time_0_3`](#time_0_3)
 
 ## `alloc`
 
@@ -48,6 +50,14 @@ This pulls in `chrono` v0.4 as a dependency.
 
 The `guide` feature enables inclusion of this user guide.
 The feature only changes the rustdoc output and enables no other effects.
+
+## `hashbrown`
+
+The `hashbrown` feature enables `hashbown::{HashMap, HashSet}` as supported containers.
+
+This pulls in `hashbrown` as a dependency.
+It enables the `alloc` feature.
+Some functionality is only available when `std` is enabled too.
 
 ## `hex`
 
