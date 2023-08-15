@@ -89,7 +89,7 @@ jobs:
       - name: "Check no_std+alloc (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo check --package serde_with --no-default-features --features=alloc --target thumbv7em-none-eabihf
       - name: "Check no_std+alloc+optional (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
-        run: cargo check --package serde_with --no-default-features --features=alloc,base64,chrono_0_4,hex,indexmap_1,indexmap_2,json,time_0_3 --target thumbv7em-none-eabihf
+        run: cargo check --package serde_with --no-default-features --features=alloc,base64,chrono_0_4,hashbrown_0_14,hex,indexmap_1,indexmap_2,json,time_0_3 --target thumbv7em-none-eabihf
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests

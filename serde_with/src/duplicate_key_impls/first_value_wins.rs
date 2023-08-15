@@ -35,8 +35,8 @@ where
     }
 }
 
-#[cfg(feature = "hashbrown")]
-impl<K, V, S> DuplicateInsertsFirstWinsMap<K, V> for hashbrown::HashMap<K, V, S>
+#[cfg(feature = "hashbrown_0_14")]
+impl<K, V, S> DuplicateInsertsFirstWinsMap<K, V> for hashbrown_0_14::HashMap<K, V, S>
 where
     K: Eq + Hash,
     S: BuildHasher + Default,
@@ -51,7 +51,7 @@ where
 
     #[inline]
     fn insert(&mut self, key: K, value: V) {
-        use hashbrown::hash_map::Entry;
+        use hashbrown_0_14::hash_map::Entry;
 
         match self.entry(key) {
             // we want to keep the first value, so do nothing

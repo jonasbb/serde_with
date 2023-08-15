@@ -7,8 +7,8 @@ use crate::{
     prelude::*,
     MapFirstKeyWins, MapPreventDuplicates, SetLastValueWins, SetPreventDuplicates,
 };
-#[cfg(feature = "hashbrown")]
-use hashbrown::{HashMap as HashbrownMap, HashSet as HashbrownSet};
+#[cfg(feature = "hashbrown_0_14")]
+use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]

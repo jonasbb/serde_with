@@ -11,7 +11,7 @@ mod utils;
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
 use core::iter::FromIterator;
 use expect_test::expect;
-use hashbrown::{HashMap, HashSet};
+use hashbrown_0_14::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr, Same};
 use std::net::IpAddr;

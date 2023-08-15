@@ -1,6 +1,6 @@
 use crate::{formats, formats::Strictness, prelude::*};
-#[cfg(feature = "hashbrown")]
-use hashbrown::{HashMap as HashbrownMap, HashSet as HashbrownSet};
+#[cfg(feature = "hashbrown_0_14")]
+use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]
@@ -19,8 +19,8 @@ macro_rules! foreach_map {
         $m!(BTreeMap<K, V>);
         #[cfg(feature = "std")]
         $m!(HashMap<K, V, H: Sized>);
-        #[cfg(feature = "hashbrown")]
-        $m!(HashbrownMap<K, V, H: Sized>);
+        #[cfg(feature = "hashbrown_0_14")]
+        $m!(HashbrownMap014<K, V, H: Sized>);
         #[cfg(feature = "indexmap_1")]
         $m!(IndexMap<K, V, H: Sized>);
         #[cfg(feature = "indexmap_2")]
@@ -35,8 +35,8 @@ macro_rules! foreach_set {
         $m!(BTreeSet<$T>);
         #[cfg(feature = "std")]
         $m!(HashSet<$T, H: Sized>);
-        #[cfg(feature = "hashbrown")]
-        $m!(HashbrownSet<$T, H: Sized>);
+        #[cfg(feature = "hashbrown_0_14")]
+        $m!(HashbrownSet014<$T, H: Sized>);
         #[cfg(feature = "indexmap_1")]
         $m!(IndexSet<$T, H: Sized>);
         #[cfg(feature = "indexmap_2")]

@@ -28,8 +28,8 @@ where
     }
 }
 
-#[cfg(feature = "hashbrown")]
-impl<T, S> DuplicateInsertsLastWinsSet<T> for hashbrown::HashSet<T, S>
+#[cfg(feature = "hashbrown_0_14")]
+impl<T, S> DuplicateInsertsLastWinsSet<T> for hashbrown_0_14::HashSet<T, S>
 where
     T: Eq + Hash,
     S: BuildHasher + Default,

@@ -54,6 +54,7 @@ chrono = ["chrono_0_4"]
 chrono_0_4 = ["dep:chrono_0_4"]
 guide = ["dep:doc-comment", "macros", "std"]
 hex = ["dep:hex", "alloc"]
+hashbrown_0_14 = ["dep:hashbrown_0_14", "alloc"]
 indexmap = ["indexmap_1"]
 indexmap_1 = ["dep:indexmap_1", "alloc"]
 indexmap_2 = ["dep:indexmap_2", "alloc"]
@@ -66,7 +67,7 @@ time_0_3 = ["dep:time_0_3"]
 base64 = {version = "0.21.0", optional = true, default-features = false}
 chrono_0_4 = {package = "chrono", version = "0.4.20", optional = true, default-features = false, features = ["serde"]}
 doc-comment = {version = "0.3.3", optional = true}
-hashbrown = {version = "0.14.0", optional = true, features = ["serde"]}
+hashbrown_0_14 = {package = "hashbrown", version = "0.14.0", optional = true, default-features = false, features = ["ahash", "serde"]}
 hex = {version = "0.4.3", optional = true, default-features = false}
 indexmap_1 = {package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
 indexmap_2 = {package = "indexmap", version = "2.0", optional = true, default-features = false, features = ["serde"]}
@@ -114,9 +115,9 @@ path = "tests/hex.rs"
 required-features = ["hex", "macros"]
 
 [[test]]
-name = "hashbrown"
-path = "tests/hashbrown.rs"
-required-features = ["hashbrown", "macros"]
+name = "hashbrown_0_14"
+path = "tests/hashbrown_0_14.rs"
+required-features = ["hashbrown_0_14", "macros"]
 
 [[test]]
 name = "indexmap_1"

@@ -34,8 +34,8 @@ where
     }
 }
 
-#[cfg(feature = "hashbrown")]
-impl<T, S> PreventDuplicateInsertsSet<T> for hashbrown::HashSet<T, S>
+#[cfg(feature = "hashbrown_0_14")]
+impl<T, S> PreventDuplicateInsertsSet<T> for hashbrown_0_14::HashSet<T, S>
 where
     T: Eq + Hash,
     S: BuildHasher + Default,
@@ -129,8 +129,8 @@ where
     }
 }
 
-#[cfg(feature = "hashbrown")]
-impl<K, V, S> PreventDuplicateInsertsMap<K, V> for hashbrown::HashMap<K, V, S>
+#[cfg(feature = "hashbrown_0_14")]
+impl<K, V, S> PreventDuplicateInsertsMap<K, V> for hashbrown_0_14::HashMap<K, V, S>
 where
     K: Eq + Hash,
     S: BuildHasher + Default,
