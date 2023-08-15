@@ -1,9 +1,12 @@
 [package]
-edition = "2021"
 name = "serde_with_test"
 publish = false
 version = "0.0.0"
-rust-version = "1.64"
+
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
