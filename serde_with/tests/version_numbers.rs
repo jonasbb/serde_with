@@ -20,10 +20,7 @@ fn test_serde_with_macros_dependency() {
         "../serde_with/Cargo.toml",
         r#"^serde_with_macros = .*? version = "={version}""#
     );
-    version_sync::assert_contains_regex!(
-        "../serde_with_macros/Cargo.toml",
-        r#"^version = "{version}""#
-    );
+    version_sync::assert_contains_regex!("../Cargo.toml", r#"^version = "{version}""#);
 }
 
 /// Check that all docs.rs links point to the current version

@@ -5,17 +5,18 @@ authors = [
     "Marcin Kaźmierczak",
 ]
 name = "serde_with"
-rust-version = "1.64"
-version = "3.2.0"
 
 categories = ["encoding", "no-std", "no-std::no-alloc"]
 description = "Custom de/serialization functions for Rust's serde"
 documentation = "https://docs.rs/serde_with/"
-edition = "2021"
 keywords = ["serde", "utilities", "serialization", "deserialization"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
-repository = "https://github.com/jonasbb/serde_with"
+
+edition.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 include = ["src/**/*", "tests/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
 
