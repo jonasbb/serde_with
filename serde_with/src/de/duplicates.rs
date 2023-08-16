@@ -1,4 +1,4 @@
-use super::impls::{foreach_map, foreach_set_create};
+use super::impls::{foreach_map, foreach_set};
 use crate::{
     duplicate_key_impls::{
         DuplicateInsertsFirstWinsMap, DuplicateInsertsLastWinsSet, PreventDuplicateInsertsMap,
@@ -111,7 +111,7 @@ macro_rules! set_impl {
         }
     }
 }
-foreach_set_create!(set_impl);
+foreach_set!(set_impl);
 
 struct MapPreventDuplicatesVisitor<MAP, K, KAs, V, VAs>(PhantomData<(MAP, K, KAs, V, VAs)>);
 

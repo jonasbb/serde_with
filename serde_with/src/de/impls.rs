@@ -43,22 +43,6 @@ pub(crate) use foreach_map;
 macro_rules! foreach_set {
     ($m:ident) => {
         #[cfg(feature = "alloc")]
-        $m!(BTreeSet<(K, V): Ord>);
-        #[cfg(feature = "std")]
-        $m!(HashSet<(K, V): Eq + Hash>);
-        #[cfg(all(feature = "std", feature = "hashbrown_0_14"))]
-        $m!(HashbrownSet014<(K, V): Eq + Hash>);
-        #[cfg(all(feature = "std", feature = "indexmap_1"))]
-        $m!(IndexSet<(K, V): Eq + Hash>);
-        #[cfg(all(feature = "std", feature = "indexmap_2"))]
-        $m!(IndexSet2<(K, V): Eq + Hash>);
-    }
-}
-pub(crate) use foreach_set;
-
-macro_rules! foreach_set_create {
-    ($m:ident) => {
-        #[cfg(feature = "alloc")]
         $m!(BTreeSet<T: Ord>, (|_| BTreeSet::new()), insert);
         #[cfg(feature = "std")]
         $m!(
@@ -86,27 +70,11 @@ macro_rules! foreach_set_create {
         );
     };
 }
-pub(crate) use foreach_set_create;
+pub(crate) use foreach_set;
 
 macro_rules! foreach_seq {
     ($m:ident) => {
         foreach_set!($m);
-
-        #[cfg(feature = "alloc")]
-        $m!(BinaryHeap<(K, V): Ord>);
-        #[cfg(feature = "alloc")]
-        $m!(LinkedList<(K, V)>);
-        #[cfg(feature = "alloc")]
-        $m!(Vec<(K, V)>);
-        #[cfg(feature = "alloc")]
-        $m!(VecDeque<(K, V)>);
-    }
-}
-pub(crate) use foreach_seq;
-
-macro_rules! foreach_seq_create {
-    ($m:ident) => {
-        foreach_set_create!($m);
 
         #[cfg(feature = "alloc")]
         $m!(
@@ -128,7 +96,7 @@ macro_rules! foreach_seq_create {
         );
     };
 }
-pub(crate) use foreach_seq_create;
+pub(crate) use foreach_seq;
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
@@ -439,7 +407,7 @@ macro_rules! seq_impl {
         }
     };
 }
-foreach_seq_create!(seq_impl);
+foreach_seq!(seq_impl);
 
 #[cfg(feature = "alloc")]
 macro_rules! map_impl {
@@ -641,29 +609,36 @@ foreach_map!(map_as_tuple_seq);
 
 #[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_impl_intern {
-    ($tyorig:ident < (K, V) $(: $($bound:ident $(+)?)+)?>, $ty:ident <KAs, VAs>) => {
+    (
+        $tyorig:ident < (K, V) $(: $($bound:ident $(+)?)+)? $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)* )* >,
+        $with_capacity:expr,
+        $append:ident,
+        $ty:ident <KAs, VAs>
+    ) => {
         #[allow(clippy::implicit_hasher)]
-        impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $tyorig < (K, V) >> for $ty<KAs, VAs>
+        impl<'de, K, KAs, V, VAs $(, $typaram)*> DeserializeAs<'de, $tyorig < (K, V) $(, $typaram)* >> for $ty<KAs, VAs>
         where
             KAs: DeserializeAs<'de, K>,
             VAs: DeserializeAs<'de, V>,
-            (K, V): $($($bound +)*)*,
+            (K, V): $($($bound +)*)?,
+            $($typaram: $bound1 $(+ $bound2)*,)*
         {
-            fn deserialize_as<D>(deserializer: D) -> Result<$tyorig < (K, V) >, D::Error>
+            fn deserialize_as<D>(deserializer: D) -> Result<$tyorig < (K, V) $(, $typaram)* >, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct MapVisitor<K, KAs, V, VAs> {
-                    marker: PhantomData<(K, KAs, V, VAs)>,
+                struct MapVisitor<K, KAs, V, VAs $(, $typaram)*> {
+                    marker: PhantomData<(K, KAs, V, VAs $(, $typaram)*)>,
                 }
 
-                impl<'de, K, KAs, V, VAs> Visitor<'de> for MapVisitor<K, KAs, V, VAs>
+                impl<'de, K, KAs, V, VAs $(, $typaram)*> Visitor<'de> for MapVisitor<K, KAs, V, VAs $(, $typaram)*>
                 where
                     KAs: DeserializeAs<'de, K>,
                     VAs: DeserializeAs<'de, V>,
-                    (K, V): $($($bound +)*)*,
+                    (K, V): $($($bound +)*)?,
+                    $($typaram: $bound1 $(+ $bound2)*,)*
                 {
-                    type Value = $tyorig < (K, V) >;
+                    type Value = $tyorig < (K, V) $(, $typaram)* >;
 
                     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str("a map")
@@ -686,7 +661,7 @@ macro_rules! tuple_seq_as_map_impl_intern {
                     }
                 }
 
-                let visitor = MapVisitor::<K, KAs, V, VAs> {
+                let visitor = MapVisitor::<K, KAs, V, VAs $(, $typaram)*> {
                     marker: PhantomData,
                 };
                 deserializer.deserialize_map(visitor)
@@ -696,12 +671,16 @@ macro_rules! tuple_seq_as_map_impl_intern {
 }
 #[cfg(feature = "alloc")]
 macro_rules! tuple_seq_as_map_impl {
-    ($tyorig:ident < (K, V) $(: $($bound:ident $(+)?)+)?>) => {
-        tuple_seq_as_map_impl_intern!($tyorig < (K, V) $(: $($bound +)+)? >, Map<KAs, VAs>);
+    (
+        $tyorig:ident < T $(: $($bound:ident $(+)?)+)? $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)* )* >,
+        $with_capacity:expr,
+        $append:ident
+    ) => {
+        tuple_seq_as_map_impl_intern!($tyorig < (K, V) $(: $($bound +)+)? $(, $typaram: $bound1 $(+ $bound2)*)*>, $with_capacity, $append, Map<KAs, VAs>);
         #[cfg(feature = "alloc")]
-        tuple_seq_as_map_impl_intern!($tyorig < (K, V) $(: $($bound +)+)? >, BTreeMap<KAs, VAs>);
+        tuple_seq_as_map_impl_intern!($tyorig < (K, V) $(: $($bound +)+)? $(, $typaram: $bound1 $(+ $bound2)*)*>, $with_capacity, $append, BTreeMap<KAs, VAs>);
         #[cfg(feature = "std")]
-        tuple_seq_as_map_impl_intern!($tyorig < (K, V) $(: $($bound +)+)? >, HashMap<KAs, VAs>);
+        tuple_seq_as_map_impl_intern!($tyorig < (K, V) $(: $($bound +)+)? $(, $typaram: $bound1 $(+ $bound2)*)*>, $with_capacity, $append, HashMap<KAs, VAs>);
     }
 }
 foreach_seq!(tuple_seq_as_map_impl);
