@@ -15,22 +15,6 @@ type BoxedSlice<T> = Box<[T]>;
 macro_rules! foreach_map {
     ($m:ident) => {
         #[cfg(feature = "alloc")]
-        $m!(BTreeMap<K: Ord, V>);
-        #[cfg(feature = "std")]
-        $m!(HashMap<K: Eq + Hash, V, H: Sized>);
-        #[cfg(all(feature = "std", feature = "hashbrown_0_14"))]
-        $m!(HashbrownMap014<K: Eq + Hash, V, H: Sized>);
-        #[cfg(all(feature = "std", feature = "indexmap_1"))]
-        $m!(IndexMap<K: Eq + Hash, V, H: Sized>);
-        #[cfg(all(feature = "std", feature = "indexmap_2"))]
-        $m!(IndexMap2<K: Eq + Hash, V, H: Sized>);
-    };
-}
-pub(crate) use foreach_map;
-
-macro_rules! foreach_map_create {
-    ($m:ident) => {
-        #[cfg(feature = "alloc")]
         $m!(BTreeMap<K: Ord, V>, (|_size| BTreeMap::new()));
         #[cfg(feature = "std")]
         $m!(
@@ -54,7 +38,7 @@ macro_rules! foreach_map_create {
         );
     };
 }
-pub(crate) use foreach_map_create;
+pub(crate) use foreach_map;
 
 macro_rules! foreach_set {
     ($m:ident) => {
@@ -395,7 +379,7 @@ where
 #[cfg(feature = "alloc")]
 macro_rules! seq_impl {
     (
-        $ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)* )* >,
+        $ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)? $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)* )* >,
         $with_capacity:expr,
         $append:ident
     ) => {
@@ -406,7 +390,7 @@ macro_rules! seq_impl {
         impl<'de, T, U $(, $typaram)*> DeserializeAs<'de, $ty<T $(, $typaram)*>> for $ty<U $(, $typaram)*>
         where
             U: DeserializeAs<'de, T>,
-            $(T: $tbound1 $(+ $tbound2)*,)*
+            $(T: $tbound1 $(+ $tbound2)*,)?
             $($typaram: $bound1 $(+ $bound2)*),*
         {
             fn deserialize_as<D>(deserializer: D) -> Result<$ty<T $(, $typaram)*>, D::Error>
@@ -420,7 +404,7 @@ macro_rules! seq_impl {
                 impl<'de, T, U $(, $typaram)*> Visitor<'de> for SeqVisitor<T, U $(, $typaram)*>
                 where
                     U: DeserializeAs<'de, T>,
-                    $(T: $tbound1 $(+ $tbound2)*,)*
+                    $(T: $tbound1 $(+ $tbound2)*,)?
                     $($typaram: $bound1 $(+ $bound2)*),*
                 {
                     type Value = $ty<T $(, $typaram)*>;
@@ -515,7 +499,7 @@ macro_rules! map_impl {
         }
     }
 }
-foreach_map_create!(map_impl);
+foreach_map!(map_impl);
 
 macro_rules! tuple_impl {
     ($len:literal $($n:tt $t:ident $tas:ident)+) => {
@@ -584,28 +568,34 @@ tuple_impl!(16 0 T0 As0 1 T1 As1 2 T2 As2 3 T3 As3 4 T4 As4 5 T5 As5 6 T6 As6 7 
 
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq_intern {
-    ($tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >, $ty:ident <(KAs, VAs)>) => {
-        impl<'de, K, KAs, V, VAs> DeserializeAs<'de, $tyorig<K, V>> for $ty<(KAs, VAs)>
+    (
+        $tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)?, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >,
+        $with_capacity:expr,
+        $ty:ident <(KAs, VAs)>
+    ) => {
+        impl<'de, K, KAs, V, VAs $(, $typaram)*> DeserializeAs<'de, $tyorig<K, V $(, $typaram)*>> for $ty<(KAs, VAs)>
         where
             KAs: DeserializeAs<'de, K>,
             VAs: DeserializeAs<'de, V>,
-            $(K: $kbound1 $(+ $kbound2)*,)*
+            $(K: $kbound1 $(+ $kbound2)*,)?
+            $($typaram: $bound1 $(+ $bound2)*,)*
         {
-            fn deserialize_as<D>(deserializer: D) -> Result<$tyorig<K, V>, D::Error>
+            fn deserialize_as<D>(deserializer: D) -> Result<$tyorig<K, V $(, $typaram)*>, D::Error>
             where
                 D: Deserializer<'de>,
             {
-                struct SeqVisitor<K, KAs, V, VAs> {
-                    marker: PhantomData<(K, KAs, V, VAs)>,
+                struct SeqVisitor<K, KAs, V, VAs $(, $typaram)*> {
+                    marker: PhantomData<(K, KAs, V, VAs $(, $typaram)*)>,
                 }
 
-                impl<'de, K, KAs, V, VAs> Visitor<'de> for SeqVisitor<K, KAs, V, VAs>
+                impl<'de, K, KAs, V, VAs $(, $typaram)*> Visitor<'de> for SeqVisitor<K, KAs, V, VAs $(, $typaram)*>
                 where
                     KAs: DeserializeAs<'de, K>,
                     VAs: DeserializeAs<'de, V>,
-                    $(K: $kbound1 $(+ $kbound2)*,)*
+                    $(K: $kbound1 $(+ $kbound2)*,)?
+                    $($typaram: $bound1 $(+ $bound2)*,)*
                 {
-                    type Value = $tyorig<K, V>;
+                    type Value = $tyorig<K, V $(, $typaram)*>;
 
                     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                         formatter.write_str("a sequence")
@@ -628,7 +618,7 @@ macro_rules! map_as_tuple_seq_intern {
                     }
                 }
 
-                let visitor = SeqVisitor::<K, KAs, V, VAs> {
+                let visitor = SeqVisitor::<K, KAs, V, VAs $(, $typaram)*> {
                     marker: PhantomData,
                 };
                 deserializer.deserialize_seq(visitor)
@@ -638,10 +628,13 @@ macro_rules! map_as_tuple_seq_intern {
 }
 #[cfg(feature = "alloc")]
 macro_rules! map_as_tuple_seq {
-    ($tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)*, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >) => {
-        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(, $typaram : $bound1 $(+ $bound2)*)* > , Seq<(KAs, VAs)>);
+    (
+        $tyorig:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)?, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >,
+        $with_capacity:expr
+    ) => {
+        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)? , V $(, $typaram : $bound1 $(+ $bound2)*)* >, $with_capacity, Seq<(KAs, VAs)>);
         #[cfg(feature = "alloc")]
-        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)* , V $(, $typaram : $bound1 $(+ $bound2)*)* >, Vec<(KAs, VAs)>);
+        map_as_tuple_seq_intern!($tyorig < K $(: $kbound1 $(+ $kbound2)*)? , V $(, $typaram : $bound1 $(+ $bound2)*)* >, $with_capacity, Vec<(KAs, VAs)>);
     }
 }
 foreach_map!(map_as_tuple_seq);
