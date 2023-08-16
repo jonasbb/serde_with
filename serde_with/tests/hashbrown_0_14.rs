@@ -11,10 +11,12 @@ mod utils;
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
 use core::iter::FromIterator;
 use expect_test::expect;
-use hashbrown_0_14::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr, Same};
 use std::net::IpAddr;
+
+type HashMap<K, V, S = fnv::FnvBuildHasher> = hashbrown_0_14::HashMap<K, V, S>;
+type HashSet<V, S = fnv::FnvBuildHasher> = hashbrown_0_14::HashSet<V, S>;
 
 #[test]
 fn test_hashmap() {
@@ -26,13 +28,32 @@ fn test_hashmap() {
     is_equal(
         S([(1, 1), (3, 3), (111, 111)].iter().cloned().collect()),
         expect![[r#"
-            {
-              "1": "1",
-              "111": "111",
-              "3": "3"
-            }"#]],
+          {
+            "1": "1",
+            "3": "3",
+            "111": "111"
+          }"#]],
     );
     is_equal(S(HashMap::default()), expect![[r#"{}"#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SStd(
+        #[serde_as(
+            as = "HashMap<DisplayFromStr, DisplayFromStr, core::hash::BuildHasherDefault<std::collections::hash_map::DefaultHasher>>"
+        )]
+        HashMap<u8, u32, core::hash::BuildHasherDefault<std::collections::hash_map::DefaultHasher>>,
+    );
+
+    // Normal
+    is_equal(
+        SStd([(1, 1)].iter().cloned().collect()),
+        expect![[r#"
+          {
+            "1": "1"
+          }"#]],
+    );
+    is_equal(SStd(HashMap::default()), expect![[r#"{}"#]]);
 }
 
 #[test]
@@ -45,15 +66,34 @@ fn test_hashset() {
     is_equal(
         S([1, 2, 3, 4, 5].iter().cloned().collect()),
         expect![[r#"
-            [
-              "1",
-              "5",
-              "4",
-              "3",
-              "2"
-            ]"#]],
+          [
+            "5",
+            "4",
+            "1",
+            "3",
+            "2"
+          ]"#]],
     );
     is_equal(S(HashSet::default()), expect![[r#"[]"#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SStd(
+        #[serde_as(
+            as = "HashSet<DisplayFromStr, core::hash::BuildHasherDefault<std::collections::hash_map::DefaultHasher>>"
+        )]
+        HashSet<u32, core::hash::BuildHasherDefault<std::collections::hash_map::DefaultHasher>>,
+    );
+
+    // Normal
+    is_equal(
+        SStd([1].iter().cloned().collect()),
+        expect![[r#"
+          [
+            "1"
+          ]"#]],
+    );
+    is_equal(SStd(HashSet::default()), expect![[r#"[]"#]]);
 }
 
 #[test]
@@ -120,8 +160,8 @@ fn duplicate_key_first_wins_hashmap() {
         expect![[r#"
             {
               "1": 1,
-              "2": 2,
-              "3": 3
+              "3": 3,
+              "2": 2
             }"#]],
     );
 
@@ -131,8 +171,8 @@ fn duplicate_key_first_wins_hashmap() {
         expect![[r#"
             {
               "1": 1,
-              "2": 1,
-              "3": 1
+              "3": 1,
+              "2": 1
             }"#]],
     );
 
@@ -156,8 +196,8 @@ fn prohibit_duplicate_key_hashmap() {
         expect![[r#"
             {
               "1": 1,
-              "2": 2,
-              "3": 3
+              "3": 3,
+              "2": 2
             }"#]],
     );
 
@@ -167,8 +207,8 @@ fn prohibit_duplicate_key_hashmap() {
         expect![[r#"
             {
               "1": 1,
-              "2": 1,
-              "3": 1
+              "3": 1,
+              "2": 1
             }"#]],
     );
 
@@ -214,12 +254,12 @@ fn duplicate_value_last_wins_hashset() {
                 true
               ],
               [
-                2,
-                false
-              ],
-              [
                 3,
                 true
+              ],
+              [
+                2,
+                false
               ]
             ]"#]],
     );
@@ -249,8 +289,8 @@ fn prohibit_duplicate_value_hashset() {
         S(HashSet::from_iter(vec![1, 2, 3, 4])),
         expect![[r#"
             [
-              1,
               4,
+              1,
               3,
               2
             ]"#]],
