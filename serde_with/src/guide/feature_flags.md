@@ -11,12 +11,13 @@ Using it in a `no_std` environment requires using `default-features = false`, si
 3. [`base64`](#base64)
 4. [`chrono_0_4`](#chrono_0_4)
 5. [`guide`](#guide)
-6. [`hex`](#hex)
-7. [`indexmap_1`](#indexmap_1)
-8. [`indexmap_2`](#indexmap_2)
-9. [`json`](#json)
-10. [`macros` (default)](#macros-default)
-11. [`time_0_3`](#time_0_3)
+6. [`hashbrown_0_14`](#hashbrown_0_14)
+7. [`hex`](#hex)
+8. [`indexmap_1`](#indexmap_1)
+9. [`indexmap_2`](#indexmap_2)
+10. [`json`](#json)
+11. [`macros` (default)](#macros-default)
+12. [`time_0_3`](#time_0_3)
 
 ## `alloc`
 
@@ -48,6 +49,14 @@ This pulls in `chrono` v0.4 as a dependency.
 
 The `guide` feature enables inclusion of this user guide.
 The feature only changes the rustdoc output and enables no other effects.
+
+## `hashbrown_0_14`
+
+The `hashbrown_0_14` feature enables `hashbown::{HashMap, HashSet}` as supported containers.
+
+This pulls in `hashbrown` v0.14 as a dependency.
+It enables the `alloc` feature.
+Some functionality is only available when `std` is enabled too.
 
 ## `hex`
 
