@@ -375,7 +375,7 @@ macro_rules! generate_guide {
 #[cfg(feature = "guide")]
 generate_guide! {
     pub mod guide {
-        pub mod feature_flags;
+        @code pub mod feature_flags;
         pub mod serde_as;
         pub mod serde_as_transformations;
     }
