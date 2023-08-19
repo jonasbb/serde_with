@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.3.0] - 2023-08-19
+
+### Added
+
+* Support the `hashbrown` type `HashMap` and `HashSet` (#636, #637)
+    Thanks to @OliverNChalk for raising the issue and submitting a PR.
+
+    This extends the existing support for `HashMap`s and `HashSet`s to the `hashbrown` crate v0.14.
+    The same conversions as for the `std` and `indexmap` types are available, like general support for `#[serde_as]` and converting it to/from sequences or maps.
+
+### Changed
+
+* Generalize some trait bounds for `DeserializeAs` implementations
+
+    While working on #637 it came to light that some of the macros for generating `DeserializeAs` implementations were not as generic as they could.
+    This means they didn't work with custom hasher types, but only the default hashers.
+    This has now been fixed and custom hashers should work better, as long as they implement `BuildHasher + Default`.
+
+* (internal) Change how features are documented (#639)
+
+    This change moves the feature documentation into `Cargo.toml` in a format that can be read by lib.rs.
+    It will improve the generated features documentation there.
+    The page with all features remains in the guide but is now generated from the `Cargo.toml` information.
+
 ## [3.2.0] - 2023-08-04
 
 ### Added
