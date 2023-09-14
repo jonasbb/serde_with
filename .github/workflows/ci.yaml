@@ -22,7 +22,7 @@ jobs:
         rust: ["stable", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: "Install/Update the Rust version"
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -44,7 +44,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: "Install/Update the Rust version"
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -64,7 +64,7 @@ jobs:
         rust: ["1.64", "1.65", "1.70", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: "Install/Update the Rust version"
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:

@@ -22,5 +22,5 @@ jobs:
       # Allow the action to post about found problems
       issues: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rust-lang/audit@v1
