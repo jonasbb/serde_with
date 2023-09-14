@@ -14,13 +14,13 @@ use ::chrono_0_4::{DateTime, Duration, NaiveDateTime, TimeZone, Utc};
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Utc`] timezone
 fn unix_epoch_utc() -> DateTime<Utc> {
-    DateTime::<Utc>::from_utc(unix_epoch_naive(), Utc)
+    Utc.from_utc_datetime(&unix_epoch_naive())
 }
 
 /// Create a [`DateTime`] for the Unix Epoch using the [`Local`] timezone
 #[cfg(feature = "std")]
 fn unix_epoch_local() -> DateTime<Local> {
-    unix_epoch_utc().with_timezone(&Local)
+    Local.from_utc_datetime(&unix_epoch_naive())
 }
 
 /// Create a [`NaiveDateTime`] for the Unix Epoch
@@ -76,7 +76,7 @@ pub mod datetime_utc_ts_seconds_from_any {
             {
                 let ndt = NaiveDateTime::from_timestamp_opt(value, 0);
                 if let Some(ndt) = ndt {
-                    Ok(DateTime::<Utc>::from_utc(ndt, Utc))
+                    Ok(Utc.from_utc_datetime(&ndt))
                 } else {
                     Err(DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{value}'"
@@ -90,7 +90,7 @@ pub mod datetime_utc_ts_seconds_from_any {
             {
                 let ndt = NaiveDateTime::from_timestamp_opt(value as i64, 0);
                 if let Some(ndt) = ndt {
-                    Ok(DateTime::<Utc>::from_utc(ndt, Utc))
+                    Ok(Utc.from_utc_datetime(&ndt))
                 } else {
                     Err(DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{value}'"
@@ -106,7 +106,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                 let nsecs = (value.fract() * 1_000_000_000_f64).abs() as u32;
                 let ndt = NaiveDateTime::from_timestamp_opt(seconds, nsecs);
                 if let Some(ndt) = ndt {
-                    Ok(DateTime::<Utc>::from_utc(ndt, Utc))
+                    Ok(Utc.from_utc_datetime(&ndt))
                 } else {
                     Err(DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{value}'"
@@ -125,7 +125,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                         if let Ok(seconds) = seconds.parse() {
                             let ndt = NaiveDateTime::from_timestamp_opt(seconds, 0);
                             if let Some(ndt) = ndt {
-                                Ok(DateTime::<Utc>::from_utc(ndt, Utc))
+                                Ok(Utc.from_utc_datetime(&ndt))
                             } else {
                                 Err(DeError::custom(format_args!(
                                     "a timestamp which can be represented in a DateTime but received '{value}'"
@@ -149,7 +149,7 @@ pub mod datetime_utc_ts_seconds_from_any {
                                 subseconds *= 10u32.pow(9 - subseclen);
                                 let ndt = NaiveDateTime::from_timestamp_opt(seconds, subseconds);
                                 if let Some(ndt) = ndt {
-                                    Ok(DateTime::<Utc>::from_utc(ndt, Utc))
+                                    Ok(Utc.from_utc_datetime(&ndt))
                                 } else {
                                     Err(DeError::custom(format_args!(
                                         "a timestamp which can be represented in a DateTime but received '{value}'"
@@ -177,7 +177,7 @@ impl SerializeAs<NaiveDateTime> for DateTime<Utc> {
     where
         S: Serializer,
     {
-        let datetime = DateTime::<Utc>::from_utc(*source, Utc);
+        let datetime = Utc.from_utc_datetime(source);
         datetime.serialize(serializer)
     }
 }

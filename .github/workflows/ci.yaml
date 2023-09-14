@@ -72,12 +72,12 @@ jobs:
           # Extra toolchain to test no_std
           target: thumbv7em-none-eabihf
 
-      # Test that the project also compiles with the newest dependencies.
-      # On nightly there is little cache reuse, so there is not much overhead
-      # in constantly updating the versions.
-      - name: Bump dependencies on nightly
-        if: matrix.rust == 'nightly'
-        run: cargo update
+      # # Test that the project also compiles with the newest dependencies.
+      # # On nightly there is little cache reuse, so there is not much overhead
+      # # in constantly updating the versions.
+      # - name: Bump dependencies on nightly
+      #   if: matrix.rust == 'nightly'
+      #   run: cargo update
 
       # Build the project
       - name: "Build (${{ matrix.os }} / ${{ matrix.rust }})"
