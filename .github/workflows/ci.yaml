@@ -112,7 +112,7 @@ jobs:
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           cargo install cargo-tarpaulin
-          cargo tarpaulin --out Xml --workspace --all-features -- --test-threads=1
+          cargo tarpaulin --out xml --workspace --all-features -- --test-threads=1
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v3
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
