@@ -1194,8 +1194,8 @@ pub fn __private_consume_serde_as_attributes(_: TokenStream) -> TokenStream {
 /// Whenever you experience the need to apply the same attributes to multiple fields, you can use
 /// this macro. It allows you to specify a list of types and a list of attributes.
 /// Each field with a "matching" type will then get the attributes applied.
-/// The `apply` attribute must be place *before* any consuming attributes, such as `derive`, because
-/// Rust expands all attributes in order.
+/// The `apply` attribute must be placed *before* any consuming attributes, such as `derive` or
+/// `serde_as`, because Rust expands all attributes in order.
 ///
 /// For example, if your struct or enum contains many `Option<T>` fields, but you do not want to
 /// serialize `None` values, you can use this macro to apply the `#[serde(skip_serializing_if =
