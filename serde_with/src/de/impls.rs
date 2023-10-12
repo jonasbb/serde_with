@@ -165,6 +165,24 @@ where
     }
 }
 
+impl<'de, T, U> DeserializeAs<'de, Bound<T>> for Bound<U>
+where
+    U: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Bound<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(
+            match Bound::<DeserializeAsWrap<T, U>>::deserialize(deserializer)? {
+                Bound::Unbounded => Bound::Unbounded,
+                Bound::Included(v) => Bound::Included(v.into_inner()),
+                Bound::Excluded(v) => Bound::Excluded(v.into_inner()),
+            },
+        )
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, Rc<T>> for Rc<U>
 where
