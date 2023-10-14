@@ -130,6 +130,24 @@ where
     }
 }
 
+impl<T, U> SerializeAs<Bound<T>> for Bound<U>
+where
+    U: SerializeAs<T>,
+    T: Sized,
+{
+    fn serialize_as<S>(source: &Bound<T>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source {
+            Bound::Unbounded => Bound::Unbounded,
+            Bound::Included(ref v) => Bound::Included(SerializeAsWrap::<T, U>::new(v)),
+            Bound::Excluded(ref v) => Bound::Excluded(SerializeAsWrap::<T, U>::new(v)),
+        }
+        .serialize(serializer)
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<T, U> SerializeAs<Rc<T>> for Rc<U>
 where

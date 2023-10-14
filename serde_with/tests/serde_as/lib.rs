@@ -29,6 +29,7 @@ use alloc::{
     sync::{Arc, Weak as ArcWeak},
 };
 use core::cell::{Cell, RefCell};
+use core::ops::Bound;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
@@ -129,6 +130,41 @@ fn test_option() {
     struct Struct {
         #[serde_as(as = "_")]
         value: Option<u32>,
+    }
+    check_error_deserialization::<Struct>(
+        r#"{}"#,
+        expect![[r#"missing field `value` at line 1 column 2"#]],
+    );
+}
+
+#[test]
+fn test_bound() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "Bound<DisplayFromStr>")] Bound<u32>);
+
+    is_equal(S(Bound::Unbounded), expect![[r#""Unbounded""#]]);
+    is_equal(
+        S(Bound::Included(42)),
+        expect![[r#"
+        {
+          "Included": "42"
+        }"#]],
+    );
+    is_equal(
+        S(Bound::Excluded(42)),
+        expect![[r#"
+        {
+          "Excluded": "42"
+        }"#]],
+    );
+    check_error_deserialization::<S>(r#"{}"#, expect![[r#"expected value at line 1 column 2"#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Struct {
+        #[serde_as(as = "Bound<DisplayFromStr>")]
+        value: Bound<u32>,
     }
     check_error_deserialization::<Struct>(
         r#"{}"#,
