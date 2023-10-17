@@ -28,8 +28,10 @@ use alloc::{
     rc::{Rc, Weak as RcWeak},
     sync::{Arc, Weak as ArcWeak},
 };
-use core::cell::{Cell, RefCell};
-use core::ops::Bound;
+use core::{
+    cell::{Cell, RefCell},
+    ops::Bound,
+};
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
