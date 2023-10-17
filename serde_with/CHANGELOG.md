@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.4.0] - 2023-10-17
+
+* Lower minimum required serde version to 1.0.152 (#653)
+    Thanks to @banool for submitting the PR.
+
+    This allows people that have a problem with 1.0.153 to still use `serde_with`.
+* Add support for `core::ops::Bound` (#655)
+    Thanks to @qsantos for submitting the PR.
+
 ## [3.3.0] - 2023-08-19
 
 ### Added
