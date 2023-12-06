@@ -59,9 +59,6 @@ macro_rules! declare_snapshot_test {
 
 #[test]
 fn schemars_basic() {
-    use ::schemars_0_8::JsonSchema;
-    use serde::Serialize;
-
     #[serde_as]
     #[derive(JsonSchema, Serialize)]
     #[schemars(crate = "::schemars_0_8")]
@@ -183,6 +180,14 @@ mod snapshots {
     use serde_with::formats::*;
     use std::collections::BTreeSet;
 
+    #[allow(dead_code)]
+    #[derive(JsonSchema, Serialize)]
+    enum Mappable {
+        A(i32),
+        B(String),
+        C { c: i32, b: Option<u64> },
+    }
+
     declare_snapshot_test! {
         bytes {
             struct Test {
@@ -256,6 +261,13 @@ mod snapshots {
 
                 #[serde_as(as = "TimestampSeconds<i64, Flexible>")]
                 time_i64: std::time::SystemTime,
+            }
+        }
+
+        enum_map {
+            struct Test {
+                #[serde_as(as = "EnumMap")]
+                data: Vec<Mappable>,
             }
         }
     }
@@ -454,6 +466,74 @@ mod bytes_or_string {
     fn test_int_not_valid_json() {
         check_matches_schema::<Test>(&json!({
             "bytes": 5
+        }));
+    }
+}
+
+mod enum_map {
+    use super::*;
+
+    #[derive(Serialize, JsonSchema)]
+    struct InnerStruct {
+        c: String,
+        d: f64,
+    }
+
+    #[derive(Serialize, JsonSchema)]
+    enum Inner {
+        A(i32),
+        B(String),
+        C(InnerStruct),
+    }
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    #[serde(transparent)]
+    struct Outer(#[serde_as(as = "EnumMap")] Vec<Inner>);
+
+    #[test]
+    fn test_serialized_is_valid() {
+        check_valid_json_schema(&Outer(vec![
+            Inner::A(5),
+            Inner::B("test".into()),
+            Inner::C(InnerStruct {
+                c: "c".into(),
+                d: -34.0,
+            }),
+        ]));
+    }
+
+    #[test]
+    fn test_matches_expected() {
+        check_matches_schema::<Outer>(&json!({
+            "A": 75,
+            "B": "BBBBBB",
+            "C": {
+                "c": "inner C",
+                "d": 777
+            }
+        }));
+    }
+
+    #[test]
+    fn test_no_fields_required() {
+        check_matches_schema::<Outer>(&json!({}));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_mixed_up_schemas() {
+        check_matches_schema::<Outer>(&json!({
+            "A": "b",
+            "B": 5
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_key() {
+        check_matches_schema::<Outer>(&json!({
+            "invalid": 4
         }));
     }
 }

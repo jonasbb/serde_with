@@ -518,6 +518,58 @@ where
     forward_schema!(WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>);
 }
 
+impl<T> JsonSchemaAs<Vec<T>> for EnumMap
+where
+    T: JsonSchema,
+{
+    fn schema_name() -> String {
+        std::format!("EnumMap<{}>", T::schema_name())
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        std::format!("serde_with::EnumMap<{}>", T::schema_id()).into()
+    }
+
+    // We generate the shcema here by going through all the variants of the
+    // enum (the oneOf property) and sticking all their properties onto an
+    // object.
+    //
+    // This will be wrong if the object is not an externally tagged enum but in
+    // that case serialization and deserialization will fail so it is probably
+    // OK.
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        let mut object = SchemaObject {
+            instance_type: Some(InstanceType::Object.into()),
+            ..Default::default()
+        };
+        let inner = T::json_schema(gen).into_object();
+
+        let one_of = match inner.subschemas {
+            Some(subschemas) => match subschemas.one_of {
+                Some(one_of) => one_of,
+                None => return object.into(),
+            },
+            None => return object.into(),
+        };
+
+        let properties = &mut object.object().properties;
+        for schema in one_of {
+            let mut schema = schema.into_object();
+
+            if let Some(object) = &mut schema.object {
+                properties.append(&mut object.properties);
+            }
+        }
+
+        object.object().additional_properties = Some(Box::new(Schema::Bool(false)));
+        object.into()
+    }
+
+    fn is_referenceable() -> bool {
+        true
+    }
+}
+
 impl<K, V, KA, VA, const N: usize> JsonSchemaAs<[(K, V); N]> for Map<KA, VA>
 where
     VA: JsonSchemaAs<V>,
