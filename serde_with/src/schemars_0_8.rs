@@ -441,6 +441,42 @@ impl<T> JsonSchemaAs<T> for Bytes {
     forward_schema!(Vec<u8>);
 }
 
+impl JsonSchemaAs<Vec<u8>> for BytesOrString {
+    fn schema_name() -> String {
+        "BytesOrString".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::BytesOrString".into()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        SchemaObject {
+            subschemas: Some(Box::new(SubschemaValidation {
+                any_of: Some(std::vec![
+                    gen.subschema_for::<Vec<u8>>(),
+                    SchemaObject {
+                        instance_type: Some(InstanceType::String.into()),
+                        metadata: Some(Box::new(Metadata {
+                            write_only: true,
+                            ..Default::default()
+                        })),
+                        ..Default::default()
+                    }
+                    .into()
+                ]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
+}
+
 impl<T, TA> JsonSchemaAs<T> for DefaultOnError<TA>
 where
     TA: JsonSchemaAs<T>,
