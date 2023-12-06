@@ -248,3 +248,11 @@ where
 {
     forward_schema!(Option<WrapSchema<T, TA>>);
 }
+
+impl<T: JsonSchema> JsonSchema for WrapSchema<T, FromInto<T>> {
+    forward_schema!(T);
+}
+
+impl<T: JsonSchema> JsonSchema for WrapSchema<T, FromIntoRef<T>> {
+    forward_schema!(T);
+}
