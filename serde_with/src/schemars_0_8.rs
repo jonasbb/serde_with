@@ -261,3 +261,32 @@ schema_for_tuple!(
     (T0 T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 T11 T12 T13 T14 T15)
     (A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15)
 );
+
+//===================================================================
+// Impls for serde_with types.
+
+impl<T: JsonSchema> JsonSchemaFor<T> for Same {
+    forward_schema!(T);
+}
+
+impl<T> JsonSchemaFor<T> for DisplayFromStr {
+    fn schema_name() -> String {
+        "DisplayFromStr".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        Cow::Borrowed("serde_with::DisplayFromStr")
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        SchemaObject {
+            instance_type: Some(InstanceType::String.into()),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
+}
