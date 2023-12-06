@@ -32,6 +32,9 @@ proc-macro = true
 [badges]
 maintenance = {status = "actively-developed"}
 
+[features]
+schemars_0_8 = []
+
 [dependencies]
 darling = "0.20.0"
 proc-macro2 = "1.0.1"
