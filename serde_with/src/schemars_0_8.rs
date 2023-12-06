@@ -6,12 +6,15 @@
 //! see [`JsonSchemaAs`].
 
 use crate::{
-    formats::Separator,
+    formats::{Flexible, Separator, Strict},
     prelude::{Schema as WrapSchema, *},
 };
 use ::schemars_0_8::{
     gen::SchemaGenerator,
-    schema::{ArrayValidation, InstanceType, Schema, SchemaObject},
+    schema::{
+        ArrayValidation, InstanceType, Metadata, NumberValidation, Schema, SchemaObject,
+        SubschemaValidation,
+    },
     JsonSchema,
 };
 use std::borrow::Cow;
@@ -360,6 +363,70 @@ impl<T: JsonSchema> JsonSchemaAs<T> for Same {
 
 impl<T> JsonSchemaAs<T> for DisplayFromStr {
     forward_schema!(String);
+}
+
+impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
+    fn schema_name() -> String {
+        "BoolFromInt<Strict>".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::BoolFromInt<Strict>".into()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        SchemaObject {
+            instance_type: Some(InstanceType::Integer.into()),
+            number: Some(Box::new(NumberValidation {
+                minimum: Some(0.0),
+                maximum: Some(0.0),
+                ..Default::default()
+            })),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
+}
+
+impl JsonSchemaAs<bool> for BoolFromInt<Flexible> {
+    fn schema_name() -> String {
+        "BoolFromInt<Flexible>".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::BoolFromInt<Flexible>".into()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        SchemaObject {
+            instance_type: Some(InstanceType::Integer.into()),
+            subschemas: Some(Box::new(SubschemaValidation {
+                any_of: Some(std::vec![
+                    gen.subschema_for::<WrapSchema<bool, BoolFromInt<Strict>>>(),
+                    SchemaObject {
+                        instance_type: Some(InstanceType::Integer.into()),
+                        metadata: Some(Box::new(Metadata {
+                            write_only: true,
+                            ..Default::default()
+                        })),
+                        ..Default::default()
+                    }
+                    .into()
+                ]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
 }
 
 impl<'a, T: 'a> JsonSchemaAs<Cow<'a, T>> for BorrowCow
