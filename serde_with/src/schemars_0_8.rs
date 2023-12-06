@@ -256,3 +256,29 @@ impl<T: JsonSchema> JsonSchema for WrapSchema<T, FromInto<T>> {
 impl<T: JsonSchema> JsonSchema for WrapSchema<T, FromIntoRef<T>> {
     forward_schema!(T);
 }
+
+macro_rules! schema_for_map {
+    ($type:ty) => {
+        impl<K, V, KA, VA> JsonSchema for WrapSchema<$type, Map<KA, VA>>
+        where
+            WrapSchema<V, VA>: JsonSchema,
+        {
+            forward_schema!(WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>);
+        }
+    };
+}
+
+schema_for_map!([(K, V)]);
+schema_for_map!(BTreeSet<(K, V)>);
+schema_for_map!(BinaryHeap<(K, V)>);
+schema_for_map!(Box<[(K, V)]>);
+schema_for_map!(LinkedList<(K, V)>);
+schema_for_map!(Vec<(K, V)>);
+schema_for_map!(VecDeque<(K, V)>);
+
+impl<K, V, S, KA, VA> JsonSchema for WrapSchema<HashSet<(K, V), S>, Map<KA, VA>>
+where
+    WrapSchema<V, VA>: JsonSchema,
+{
+    forward_schema!(WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>);
+}
