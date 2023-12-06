@@ -222,3 +222,15 @@ impl<T: JsonSchema> JsonSchema for WrapSchema<T, Same> {
 impl<T> JsonSchema for WrapSchema<T, DisplayFromStr> {
     forward_schema!(String);
 }
+
+impl<'a, T: 'a> JsonSchema for WrapSchema<Cow<'a, T>, BorrowCow>
+where
+    T: ?Sized + ToOwned,
+    Cow<'a, T>: JsonSchema,
+{
+    forward_schema!(Cow<'a, T>);
+}
+
+impl<T> JsonSchema for WrapSchema<T, Bytes> {
+    forward_schema!(Vec<u8>);
+}
