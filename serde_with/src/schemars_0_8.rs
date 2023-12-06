@@ -234,3 +234,17 @@ where
 impl<T> JsonSchema for WrapSchema<T, Bytes> {
     forward_schema!(Vec<u8>);
 }
+
+impl<T, TA> JsonSchema for WrapSchema<T, DefaultOnError<TA>>
+where
+    WrapSchema<T, TA>: JsonSchema,
+{
+    forward_schema!(WrapSchema<T, TA>);
+}
+
+impl<T, TA> JsonSchema for WrapSchema<T, DefaultOnNull<TA>>
+where
+    WrapSchema<T, TA>: JsonSchema,
+{
+    forward_schema!(Option<WrapSchema<T, TA>>);
+}
