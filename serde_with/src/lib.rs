@@ -330,6 +330,8 @@ pub mod json;
 #[cfg(feature = "alloc")]
 mod key_value_map;
 pub mod rust;
+#[cfg(feature = "schemars_0_8")]
+pub mod schemars_0_8;
 pub mod ser;
 #[cfg(feature = "std")]
 mod serde_conv;
@@ -2512,3 +2514,14 @@ pub struct SetPreventDuplicates<T>(PhantomData<T>);
 /// [`BTreeSet`]: std::collections::HashSet
 #[cfg(feature = "alloc")]
 pub struct SetLastValueWins<T>(PhantomData<T>);
+
+/// Helper for implementing [`JsonSchema`] on serializers whose output depends
+/// on the type of the concrete field.
+///
+/// It is added implicitly by the [`#[serde_as]`] macro when any `schemars`
+/// feature is enabled.
+///
+/// [`JsonSchema`]: ::schemars_0_8::JsonSchema
+/// [`#[serde_as]`]: crate::serde_as
+#[cfg(feature = "schemars_0_8")]
+pub struct Schema<T: ?Sized, TA>(PhantomData<T>, PhantomData<TA>);
