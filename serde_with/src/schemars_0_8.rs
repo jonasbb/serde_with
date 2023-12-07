@@ -282,3 +282,30 @@ where
 {
     forward_schema!(WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>);
 }
+
+macro_rules! map_first_last_wins_schema {
+    ($(=> $extra:ident)? $type:ty) => {
+        impl<K, V, $($extra,)? KA, VA> JsonSchema for WrapSchema<$type, MapFirstKeyWins<KA, VA>>
+        where
+            WrapSchema<V, VA>: JsonSchema
+        {
+            forward_schema!(BTreeMap<WrapSchema<K, KA>, WrapSchema<V, VA>>);
+        }
+
+        impl<K, V, $($extra,)? KA, VA> JsonSchema for WrapSchema<$type, MapPreventDuplicates<KA, VA>>
+        where
+            WrapSchema<V, VA>: JsonSchema
+        {
+            forward_schema!(BTreeMap<WrapSchema<K, KA>, WrapSchema<V, VA>>);
+        }
+    }
+}
+
+map_first_last_wins_schema!(BTreeMap<K, V>);
+map_first_last_wins_schema!(=> S HashMap<K, V, S>);
+#[cfg(feature = "hashbrown_0_14")]
+map_first_last_wins_schema!(=> S hashbrown_0_14::HashMap<K, V, S>);
+#[cfg(feature = "indexmap_1")]
+map_first_last_wins_schema!(=> S indexmap_1::IndexMap<K, V, S>);
+#[cfg(feature = "indexmap_2")]
+map_first_last_wins_schema!(=> S indexmap_2::IndexMap<K, V, S>);
