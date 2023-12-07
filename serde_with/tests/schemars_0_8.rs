@@ -360,6 +360,14 @@ mod snapshots {
                 data: Vec<i32>,
             }
         }
+
+        pickfirst {
+            #[serde(transparent)]
+            struct Test {
+                #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
+                value: u32
+            }
+        }
     }
 }
 
@@ -377,6 +385,7 @@ mod derive {
     #[serde_as]
     #[derive(Serialize)]
     #[cfg_attr(any(), derive(JsonSchema))]
+    #[allow(dead_code)]
     struct Disabled {
         // If we are incorrectly adding `#[schemars(with = ...)]` attributes
         // then we should get an error on this field.
@@ -940,4 +949,15 @@ mod one_or_many {
     fn test_prefer_many_no_invalid_type_many() {
         check_matches_schema::<WithPreferMany>(&json!(["test", 1]));
     }
+}
+
+#[test]
+fn test_pickfirst() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct IntOrDisplay(#[serde_as(as = "PickFirst<(_, DisplayFromStr)>")] u32);
+
+    check_matches_schema::<IntOrDisplay>(&json!(7));
+    check_matches_schema::<IntOrDisplay>(&json!("17"));
 }

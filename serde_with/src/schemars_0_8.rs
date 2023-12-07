@@ -887,6 +887,79 @@ where
     }
 }
 
+macro_rules! schema_for_pickfirst {
+    ($( $param:ident )+) => {
+        impl<T, $($param,)+> JsonSchemaAs<T> for PickFirst<($( $param, )+)>
+        where
+            $( $param: JsonSchemaAs<T>, )+
+        {
+            fn schema_name() -> String {
+                std::format!(
+                    concat!(
+                        "PickFirst<(",
+                        $( "{", stringify!($param), "}", )+
+                        ")>"
+                    ),
+                    $( $param = <WrapSchema<T, $param>>::schema_name(), )+
+                )
+            }
+
+            fn schema_id() -> Cow<'static, str> {
+                std::format!(
+                    concat!(
+                        "serde_with::PickFirst<(",
+                        $( "{", stringify!($param), "}", )+
+                        ")>"
+                    ),
+                    $( $param = <WrapSchema<T, $param>>::schema_id(), )+
+                )
+                .into()
+            }
+
+            fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+                let mut first = true;
+                let subschemas = std::vec![$(
+                    {
+                        let is_first = std::mem::replace(&mut first, false);
+                        let schema = gen.subschema_for::<WrapSchema<T, $param>>();
+
+                        if !is_first {
+                            SchemaObject {
+                                metadata: Some(Box::new(Metadata {
+                                    write_only: true,
+                                    ..Default::default()
+                                })),
+                                subschemas: Some(Box::new(SubschemaValidation {
+                                    all_of: Some(std::vec![schema]),
+                                    ..Default::default()
+                                })),
+                                ..Default::default()
+                            }
+                            .into()
+                        } else {
+                            schema
+                        }
+                    }
+                ),+];
+
+                SchemaObject {
+                    subschemas: Some(Box::new(SubschemaValidation {
+                        any_of: Some(subschemas),
+                        ..Default::default()
+                    })),
+                    ..Default::default()
+                }
+                .into()
+            }
+        }
+    }
+}
+
+schema_for_pickfirst!(A);
+schema_for_pickfirst!(A B);
+schema_for_pickfirst!(A B C);
+schema_for_pickfirst!(A B C D);
+
 impl<T, TA> JsonSchemaAs<T> for SetLastValueWins<TA>
 where
     TA: JsonSchemaAs<T>,
