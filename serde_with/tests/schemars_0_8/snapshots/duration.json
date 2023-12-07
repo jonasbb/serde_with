@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Test",
+  "type": "object",
+  "required": [
+    "frac",
+    "seconds",
+    "seconds_u64_strict",
+    "time_i64"
+  ],
+  "properties": {
+    "frac": {
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": 0.0
+        },
+        {
+          "writeOnly": true,
+          "type": "string"
+        }
+      ]
+    },
+    "seconds": {
+      "oneOf": [
+        {
+          "type": "number",
+          "minimum": 0.0
+        },
+        {
+          "writeOnly": true,
+          "type": "string"
+        }
+      ]
+    },
+    "seconds_u64_strict": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "time_i64": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "writeOnly": true,
+          "type": "string"
+        }
+      ]
+    }
+  }
+}
