@@ -10,56 +10,6 @@ use ::schemars_0_8::{
 };
 use std::borrow::Cow;
 
-/// A mirror of [`JsonSchema`] which also includes the type being serialized.
-///
-/// This is used by [`Schema`](crate::Schema) to implement [`JsonSchema`].
-pub trait JsonSchemaFor<T: ?Sized> {
-    /// The name of the generated JSON schema.
-    ///
-    /// See [`JsonSchema::schema_name`].
-    fn schema_name() -> String {
-        Self::schema_id().into_owned()
-    }
-
-    /// A unique string identifying the schema emitted by this type.
-    ///
-    /// See [`JsonSchema::schema_id`].
-    fn schema_id() -> Cow<'static, str>;
-
-    /// Generate a JSON schema for the combination of `Self` and `T`.
-    ///
-    /// See [`JsonSchema::json_schema`].
-    fn json_schema(gen: &mut SchemaGenerator) -> Schema;
-
-    /// Whether JSON schemas generated for this type should be re-used where
-    /// possible using the `$ref` keyword.
-    ///
-    /// See [`JsonSchema::is_referenceable`].
-    fn is_referenceable() -> bool;
-}
-
-impl<T, TA> JsonSchema for WrapSchema<T, TA>
-where
-    T: ?Sized,
-    TA: JsonSchemaFor<T>,
-{
-    fn schema_name() -> String {
-        <TA as JsonSchemaFor<T>>::schema_name()
-    }
-
-    fn schema_id() -> Cow<'static, str> {
-        <TA as JsonSchemaFor<T>>::schema_id()
-    }
-
-    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
-        <TA as JsonSchemaFor<T>>::json_schema(gen)
-    }
-
-    fn is_referenceable() -> bool {
-        <TA as JsonSchemaFor<T>>::is_referenceable()
-    }
-}
-
 //===================================================================
 // Macro helpers
 
@@ -86,107 +36,107 @@ macro_rules! forward_schema {
 //===================================================================
 // Common definitions for various std types
 
-impl<'a, T, TA> JsonSchemaFor<&'a T> for &'a TA
+impl<'a, T: 'a, TA: 'a> JsonSchema for WrapSchema<&'a T, &'a TA>
 where
-    T: ?Sized + 'a,
-    TA: JsonSchemaFor<T> + 'a,
+    T: ?Sized,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(&'a WrapSchema<T, TA>);
 }
 
-impl<'a, T, TA> JsonSchemaFor<&'a mut T> for &'a mut TA
+impl<'a, T: 'a, TA: 'a> JsonSchema for WrapSchema<&'a mut T, &'a mut TA>
 where
-    T: ?Sized + 'a,
-    TA: JsonSchemaFor<T> + 'a,
+    T: ?Sized,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(&'a mut WrapSchema<T, TA>);
 }
 
-impl<T, TA> JsonSchemaFor<Option<T>> for Option<TA>
+impl<T, TA> JsonSchema for WrapSchema<Option<T>, Option<TA>>
 where
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(Option<WrapSchema<T, TA>>);
 }
 
-impl<T, TA> JsonSchemaFor<Box<T>> for Box<TA>
+impl<T, TA> JsonSchema for WrapSchema<Box<T>, Box<TA>>
 where
     T: ?Sized,
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(Box<WrapSchema<T, TA>>);
 }
 
-impl<T, TA> JsonSchemaFor<Rc<T>> for Rc<TA>
+impl<T, TA> JsonSchema for WrapSchema<Rc<T>, Rc<TA>>
 where
     T: ?Sized,
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(Rc<WrapSchema<T, TA>>);
 }
 
-impl<T, TA> JsonSchemaFor<Arc<T>> for Arc<TA>
+impl<T, TA> JsonSchema for WrapSchema<Arc<T>, Arc<TA>>
 where
     T: ?Sized,
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(Arc<WrapSchema<T, TA>>);
 }
 
-impl<T, TA> JsonSchemaFor<Vec<T>> for Vec<TA>
+impl<T, TA> JsonSchema for WrapSchema<Vec<T>, Vec<TA>>
 where
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(Vec<WrapSchema<T, TA>>);
 }
 
-impl<T, TA> JsonSchemaFor<VecDeque<T>> for VecDeque<TA>
+impl<T, TA> JsonSchema for WrapSchema<VecDeque<T>, VecDeque<TA>>
 where
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(VecDeque<WrapSchema<T, TA>>);
 }
 
 // schemars only requires that V implement JsonSchema for BTreeMap<K, V>
-impl<K, V, KA, VA> JsonSchemaFor<BTreeMap<K, V>> for BTreeMap<KA, VA>
+impl<K, V, KA, VA> JsonSchema for WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>
 where
-    VA: JsonSchemaFor<V>,
+    WrapSchema<V, VA>: JsonSchema,
 {
     forward_schema!(BTreeMap<WrapSchema<K, KA>, WrapSchema<V, VA>>);
 }
 
 // schemars only requires that V implement JsonSchema for HashMap<K, V>
-impl<K, V, H, KA, VA> JsonSchemaFor<HashMap<K, V, H>> for HashMap<KA, VA, H>
+impl<K, V, S, KA, VA> JsonSchema for WrapSchema<HashMap<K, V, S>, HashMap<KA, VA, S>>
 where
-    VA: JsonSchemaFor<V>,
+    WrapSchema<V, VA>: JsonSchema,
 {
-    forward_schema!(HashMap<WrapSchema<K, KA>, WrapSchema<V, VA>, H>);
+    forward_schema!(HashMap<WrapSchema<K, KA>, WrapSchema<V, VA>, S>);
 }
 
-impl<T, TA> JsonSchemaFor<BTreeSet<T>> for BTreeSet<TA>
+impl<T, TA> JsonSchema for WrapSchema<BTreeSet<T>, BTreeSet<TA>>
 where
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     forward_schema!(BTreeSet<WrapSchema<T, TA>>);
 }
 
-impl<T, TA, H> JsonSchemaFor<HashSet<T, H>> for HashSet<TA, H>
+impl<T, TA, H> JsonSchema for WrapSchema<HashSet<T, H>, HashSet<TA, H>>
 where
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
-    forward_schema!(HashSet<WrapSchema<T, TA>>);
+    forward_schema!(HashSet<WrapSchema<T, TA>, H>);
 }
 
-impl<T, TA, const N: usize> JsonSchemaFor<[T; N]> for [TA; N]
+impl<T, TA, const N: usize> JsonSchema for WrapSchema<[T; N], [TA; N]>
 where
-    TA: JsonSchemaFor<T>,
+    WrapSchema<T, TA>: JsonSchema,
 {
     fn schema_name() -> String {
-        std::format!("[{}; {}]", TA::schema_name(), N)
+        std::format!("[{}; {}]", <WrapSchema<T, TA>>::schema_name(), N)
     }
 
     fn schema_id() -> Cow<'static, str> {
-        std::format!("[{}; {}]", TA::schema_id(), N).into()
+        std::format!("[{}; {}]", <WrapSchema<T, TA>>::schema_id(), N).into()
     }
 
     fn json_schema(gen: &mut SchemaGenerator) -> Schema {
@@ -218,16 +168,16 @@ macro_rules! schema_for_tuple {
         ( $( $ts:ident )+ )
         ( $( $as:ident )+ )
     ) => {
-        impl<$($ts,)+ $($as,)+> JsonSchemaFor<( $( $ts, )+)> for ($($as,)+)
+        impl<$($ts,)+ $($as,)+> JsonSchema for WrapSchema<($($ts,)+), ($($as,)+)>
         where
-            $( $as: JsonSchemaFor<$ts>, )+
+            $( WrapSchema<$ts, $as>: JsonSchema, )+
         {
             forward_schema!(( $( WrapSchema<$ts, $as>, )+ ));
         }
     }
 }
 
-impl JsonSchemaFor<()> for () {
+impl JsonSchema for WrapSchema<(), ()> {
     forward_schema!(());
 }
 
@@ -265,11 +215,11 @@ schema_for_tuple!(
 //===================================================================
 // Impls for serde_with types.
 
-impl<T: JsonSchema> JsonSchemaFor<T> for Same {
+impl<T: JsonSchema> JsonSchema for WrapSchema<T, Same> {
     forward_schema!(T);
 }
 
-impl<T> JsonSchemaFor<T> for DisplayFromStr {
+impl<T> JsonSchema for WrapSchema<T, DisplayFromStr> {
     fn schema_name() -> String {
         "DisplayFromStr".into()
     }
