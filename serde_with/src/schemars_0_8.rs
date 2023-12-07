@@ -323,3 +323,10 @@ where
 {
     forward_schema!(WrapSchema<T, TA>);
 }
+
+impl<SEP, T, TA> JsonSchema for WrapSchema<T, StringWithSeparator<SEP, TA>>
+where
+    SEP: Separator,
+{
+    forward_schema!(String);
+}
