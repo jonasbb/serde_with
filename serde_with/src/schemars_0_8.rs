@@ -309,3 +309,17 @@ map_first_last_wins_schema!(=> S hashbrown_0_14::HashMap<K, V, S>);
 map_first_last_wins_schema!(=> S indexmap_1::IndexMap<K, V, S>);
 #[cfg(feature = "indexmap_2")]
 map_first_last_wins_schema!(=> S indexmap_2::IndexMap<K, V, S>);
+
+impl<T, TA> JsonSchema for WrapSchema<T, SetLastValueWins<TA>>
+where
+    WrapSchema<T, TA>: JsonSchema,
+{
+    forward_schema!(WrapSchema<T, TA>);
+}
+
+impl<T, TA> JsonSchema for WrapSchema<T, SetPreventDuplicates<TA>>
+where
+    WrapSchema<T, TA>: JsonSchema,
+{
+    forward_schema!(WrapSchema<T, TA>);
+}
