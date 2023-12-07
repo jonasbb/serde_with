@@ -338,3 +338,10 @@ impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromInto<U>> {
 impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromIntoRef<U>> {
     forward_schema!(U);
 }
+
+impl<T, TA> JsonSchema for WrapSchema<Vec<T>, VecSkipError<TA>>
+where
+    WrapSchema<T, TA>: JsonSchema,
+{
+    forward_schema!(Vec<WrapSchema<T, TA>>);
+}
