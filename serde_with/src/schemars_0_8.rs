@@ -330,3 +330,11 @@ where
 {
     forward_schema!(String);
 }
+
+impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromInto<U>> {
+    forward_schema!(U);
+}
+
+impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromIntoRef<U>> {
+    forward_schema!(U);
+}
