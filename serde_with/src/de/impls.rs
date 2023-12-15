@@ -1578,8 +1578,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "OneOrMany could not deserialize any variant:\n  One: {}\n  Many: {}",
-            one_err, many_err
+            "OneOrMany could not deserialize any variant:\n  One: {one_err}\n  Many: {many_err}",
         )))
     }
 }
@@ -1623,8 +1622,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}",
-            first_err, second_err
+            "PickFirst could not deserialize any variant:\n  First: {first_err}\n  Second: {second_err}",
         )))
     }
 }
@@ -1662,8 +1660,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}\n  Third: {}",
-            first_err, second_err, third_err,
+            "PickFirst could not deserialize any variant:\n  First: {first_err}\n  Second: {second_err}\n  Third: {third_err}",
         )))
     }
 }
@@ -1708,8 +1705,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}\n  Third: {}\n  Fourth: {}",
-            first_err, second_err, third_err, fourth_err,
+            "PickFirst could not deserialize any variant:\n  First: {first_err}\n  Second: {second_err}\n  Third: {third_err}\n  Fourth: {fourth_err}",
         )))
     }
 }
@@ -1854,7 +1850,7 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                     0 => Ok(false),
                     1 => Ok(true),
                     unexp => Err(DeError::invalid_value(
-                        Unexpected::Unsigned(unexp as u64),
+                        Unexpected::Unsigned(u64::from(unexp)),
                         &"0 or 1",
                     )),
                 }
@@ -1868,7 +1864,7 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                     0 => Ok(false),
                     1 => Ok(true),
                     unexp => Err(DeError::invalid_value(
-                        Unexpected::Signed(unexp as i64),
+                        Unexpected::Signed(i64::from(unexp)),
                         &"0 or 1",
                     )),
                 }

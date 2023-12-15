@@ -62,17 +62,17 @@ impl<'de> Content<'de> {
     fn unexpected(&self) -> Unexpected<'_> {
         match *self {
             Content::Bool(b) => Unexpected::Bool(b),
-            Content::U8(n) => Unexpected::Unsigned(n as u64),
-            Content::U16(n) => Unexpected::Unsigned(n as u64),
-            Content::U32(n) => Unexpected::Unsigned(n as u64),
+            Content::U8(n) => Unexpected::Unsigned(u64::from(n)),
+            Content::U16(n) => Unexpected::Unsigned(u64::from(n)),
+            Content::U32(n) => Unexpected::Unsigned(u64::from(n)),
             Content::U64(n) => Unexpected::Unsigned(n),
             Content::U128(_) => Unexpected::Other("u128"),
-            Content::I8(n) => Unexpected::Signed(n as i64),
-            Content::I16(n) => Unexpected::Signed(n as i64),
-            Content::I32(n) => Unexpected::Signed(n as i64),
+            Content::I8(n) => Unexpected::Signed(i64::from(n)),
+            Content::I16(n) => Unexpected::Signed(i64::from(n)),
+            Content::I32(n) => Unexpected::Signed(i64::from(n)),
             Content::I64(n) => Unexpected::Signed(n),
             Content::I128(_) => Unexpected::Other("i128"),
-            Content::F32(f) => Unexpected::Float(f as f64),
+            Content::F32(f) => Unexpected::Float(f64::from(f)),
             Content::F64(f) => Unexpected::Float(f),
             Content::Char(c) => Unexpected::Char(c),
             Content::String(ref s) => Unexpected::Str(s),
@@ -765,7 +765,7 @@ where
                 }
                 (variant, Some(value))
             }
-            s @ Content::String(_) | s @ Content::Str(_) => (s, None),
+            s @ (Content::String(_) | Content::Str(_)) => (s, None),
             other => {
                 return Err(DeError::invalid_type(other.unexpected(), &"string or map"));
             }
@@ -1540,7 +1540,7 @@ where
                 }
                 (variant, Some(value))
             }
-            ref s @ Content::String(_) | ref s @ Content::Str(_) => (s, None),
+            ref s @ (Content::String(_) | Content::Str(_)) => (s, None),
             ref other => {
                 return Err(DeError::invalid_type(other.unexpected(), &"string or map"));
             }

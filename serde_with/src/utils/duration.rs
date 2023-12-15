@@ -14,22 +14,32 @@ pub(crate) enum Sign {
 
 impl Sign {
     #[allow(dead_code)]
-    pub(crate) fn is_positive(&self) -> bool {
-        *self == Sign::Positive
+    pub(crate) fn is_positive(self) -> bool {
+        self == Sign::Positive
     }
 
     #[allow(dead_code)]
-    pub(crate) fn is_negative(&self) -> bool {
-        *self == Sign::Negative
+    pub(crate) fn is_negative(self) -> bool {
+        self == Sign::Negative
     }
 
-    pub(crate) fn apply<T>(&self, value: T) -> T
+    pub(crate) fn apply<T>(self, value: T) -> T
     where
         T: core::ops::Neg<Output = T>,
     {
-        match *self {
+        match self {
             Sign::Positive => value,
             Sign::Negative => value.neg(),
+        }
+    }
+}
+
+impl From<i64> for Sign {
+    fn from(value: i64) -> Self {
+        if value.is_negative() {
+            Sign::Negative
+        } else {
+            Sign::Positive
         }
     }
 }
@@ -356,13 +366,8 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<i64, Strict> {
     where
         D: Deserializer<'de>,
     {
-        i64::deserialize(deserializer).map(|secs: i64| {
-            let sign = match secs.is_negative() {
-                true => Sign::Negative,
-                false => Sign::Positive,
-            };
-            DurationSigned::new(sign, secs.abs_diff(0), 0)
-        })
+        i64::deserialize(deserializer)
+            .map(|secs: i64| DurationSigned::new(secs.into(), secs.abs_diff(0), 0))
     }
 }
 
@@ -398,11 +403,7 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<String, Strict>
                 E: DeError,
             {
                 let secs: i64 = value.parse().map_err(DeError::custom)?;
-                let sign = match secs.is_negative() {
-                    true => Sign::Negative,
-                    false => Sign::Positive,
-                };
-                Ok(DurationSigned::new(sign, secs.abs_diff(0), 0))
+                Ok(DurationSigned::new(secs.into(), secs.abs_diff(0), 0))
             }
         }
 

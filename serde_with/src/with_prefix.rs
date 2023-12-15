@@ -218,8 +218,8 @@ where
     }
 
     fn serialize_str(self, v: &str) -> Result<Self::Ok, Self::Error> {
-        self.delegate
-            .collect_str(&format_args!("{}{}", self.prefix, v))
+        let prefix = self.prefix;
+        self.delegate.collect_str(&format_args!("{prefix}{v}"))
     }
 
     fn serialize_bytes(self, _v: &[u8]) -> Result<Self::Ok, Self::Error> {

@@ -22,3 +22,21 @@ push = false
 shared-version = true
 sign-tag = true
 tag = false
+
+[workspace.lints.rust]
+unused_qualifications = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+cast_possible_truncation = "allow"
+cast_possible_wrap = "allow"
+cast_precision_loss = "allow"
+cast_sign_loss = "allow"
+match_same_arms = "allow"
+match_wildcard_for_single_variants = "allow"
+missing_errors_doc = "allow"
+module_name_repetitions = "allow"
+redundant_closure_for_method_calls = "allow"
+similar_names = "allow"
+too_many_lines = "allow"
+wildcard_imports = "allow"

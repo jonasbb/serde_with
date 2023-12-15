@@ -115,7 +115,7 @@ where
     }
 }
 
-/// Like [apply_function_to_struct_and_enum_fields] but for darling errors
+/// Like [`apply_function_to_struct_and_enum_fields`] but for darling errors
 fn apply_function_to_struct_and_enum_fields_darling<F>(
     input: TokenStream,
     serde_with_crate_path: &Path,
@@ -317,17 +317,13 @@ where
 /// ```
 #[proc_macro_attribute]
 pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let res = match apply_function_to_struct_and_enum_fields(
-        input,
-        skip_serializing_none_add_attr_to_field,
-    ) {
-        Ok(res) => res,
-        Err(err) => err.to_compile_error(),
-    };
+    let res =
+        apply_function_to_struct_and_enum_fields(input, skip_serializing_none_add_attr_to_field)
+            .unwrap_or_else(|err| err.to_compile_error());
     TokenStream::from(res)
 }
 
-/// Add the skip_serializing_if annotation to each field of the struct
+/// Add the `skip_serializing_if` annotation to each field of the struct
 fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), String> {
     if is_std_option(&field.ty) {
         let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
@@ -423,8 +419,8 @@ fn is_std_option(type_: &Type) -> bool {
 /// `#[serde(skip_serializing_if = "Option::is_none")]`
 ///
 /// * `serde` is the outermost path, here namespace
-/// * it contains a Meta::List
-/// * which contains in another Meta a Meta::NameValue
+/// * it contains a `Meta::List`
+/// * which contains in another Meta a `Meta::NameValue`
 /// * with the name being `skip_serializing_if`
 fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
     for attr in &field.attrs {
@@ -453,7 +449,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
                                 }
                             }
                         }
-                        _ => (),
+                        Meta::List(_) => (),
                     }
                 }
             }
@@ -614,14 +610,12 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
                 .unwrap_or_else(|| syn::parse_quote!(::serde_with));
 
             // Convert any error message into a nice compiler error
-            let res = match apply_function_to_struct_and_enum_fields_darling(
+            let res = apply_function_to_struct_and_enum_fields_darling(
                 input,
                 &serde_with_crate_path,
                 |field| serde_as_add_attr_to_field(field, &serde_with_crate_path),
-            ) {
-                Ok(res) => res,
-                Err(err) => err.write_errors(),
-            };
+            )
+            .unwrap_or_else(|err| err.write_errors());
             TokenStream::from(res)
         }
         Err(e) => TokenStream::from(DarlingError::from(e).write_errors()),
@@ -780,7 +774,7 @@ fn serde_as_add_attr_to_field(
 
 /// Recursively replace all occurrences of `_` with `replacement` in a [Type][]
 ///
-/// The [serde_as][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for
+/// The [`serde_as`][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for
 /// `serde_with::As`. This function replaces all occurrences of the infer type with another type.
 fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
     match to_replace {
@@ -804,45 +798,42 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
             Type::Paren(inner)
         }
         Type::Path(mut inner) => {
-            match inner.path.segments.pop() {
-                Some(Pair::End(mut t)) | Some(Pair::Punctuated(mut t, _)) => {
-                    t.arguments = match t.arguments {
-                        PathArguments::None => PathArguments::None,
-                        PathArguments::AngleBracketed(mut inner) => {
-                            // Iterate over the args between the angle brackets
-                            inner.args = inner
-                                .args
-                                .into_iter()
-                                .map(|generic_argument| match generic_argument {
-                                    // replace types within the generics list, but leave other stuff
-                                    // like lifetimes untouched
-                                    GenericArgument::Type(type_) => GenericArgument::Type(
-                                        replace_infer_type_with_type(type_, replacement),
-                                    ),
-                                    ga => ga,
-                                })
-                                .collect();
-                            PathArguments::AngleBracketed(inner)
-                        }
-                        PathArguments::Parenthesized(mut inner) => {
-                            inner.inputs = inner
-                                .inputs
-                                .into_iter()
-                                .map(|type_| replace_infer_type_with_type(type_, replacement))
-                                .collect();
-                            inner.output = match inner.output {
-                                ReturnType::Type(arrow, mut type_) => {
-                                    *type_ = replace_infer_type_with_type(*type_, replacement);
-                                    ReturnType::Type(arrow, type_)
-                                }
-                                default => default,
-                            };
-                            PathArguments::Parenthesized(inner)
-                        }
-                    };
-                    inner.path.segments.push(t);
-                }
-                None => {}
+            if let Some(Pair::End(mut t) | Pair::Punctuated(mut t, _)) = inner.path.segments.pop() {
+                t.arguments = match t.arguments {
+                    PathArguments::None => PathArguments::None,
+                    PathArguments::AngleBracketed(mut inner) => {
+                        // Iterate over the args between the angle brackets
+                        inner.args = inner
+                            .args
+                            .into_iter()
+                            .map(|generic_argument| match generic_argument {
+                                // replace types within the generics list, but leave other stuff
+                                // like lifetimes untouched
+                                GenericArgument::Type(type_) => GenericArgument::Type(
+                                    replace_infer_type_with_type(type_, replacement),
+                                ),
+                                ga => ga,
+                            })
+                            .collect();
+                        PathArguments::AngleBracketed(inner)
+                    }
+                    PathArguments::Parenthesized(mut inner) => {
+                        inner.inputs = inner
+                            .inputs
+                            .into_iter()
+                            .map(|type_| replace_infer_type_with_type(type_, replacement))
+                            .collect();
+                        inner.output = match inner.output {
+                            ReturnType::Type(arrow, mut type_) => {
+                                *type_ = replace_infer_type_with_type(*type_, replacement);
+                                ReturnType::Type(arrow, type_)
+                            }
+                            default => default,
+                        };
+                        PathArguments::Parenthesized(inner)
+                    }
+                };
+                inner.path.segments.push(t);
             }
             Type::Path(inner)
         }
@@ -1021,11 +1012,11 @@ pub fn derive_deserialize_fromstr(item: TokenStream) -> TokenStream {
     };
     TokenStream::from(deserialize_fromstr(
         input,
-        derive_options.get_serde_with_path(),
+        &derive_options.get_serde_with_path(),
     ))
 }
 
-fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
+fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: &Path) -> TokenStream2 {
     let ident = input.ident;
     let where_clause = &mut input.generics.make_where_clause().predicates;
     where_clause.push(parse_quote!(Self: #serde_with_crate_path::__private__::FromStr));
@@ -1141,11 +1132,11 @@ pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
     };
     TokenStream::from(serialize_display(
         input,
-        derive_options.get_serde_with_path(),
+        &derive_options.get_serde_with_path(),
     ))
 }
 
-fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
+fn serialize_display(mut input: DeriveInput, serde_with_crate_path: &Path) -> TokenStream2 {
     let ident = input.ident;
     input
         .generics

@@ -1,3 +1,5 @@
+lints.workspace = true
+
 [package]
 name = "serde_with_test"
 publish = false

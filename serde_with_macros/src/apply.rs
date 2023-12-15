@@ -59,13 +59,13 @@ impl Parse for ApplyInput {
 }
 
 pub fn apply(args: TokenStream, input: TokenStream) -> TokenStream {
-    let args = syn::parse_macro_input!(args as ApplyInput);
-
     #[derive(FromMeta)]
     struct SerdeContainerOptions {
         #[darling(rename = "crate")]
         alt_crate_path: Option<Path>,
     }
+
+    let args = syn::parse_macro_input!(args as ApplyInput);
 
     let container_options = match SerdeContainerOptions::from_list(&args.metas) {
         Ok(v) => v,
@@ -101,7 +101,7 @@ fn prepare_apply_attribute_to_field(
             return Ok(());
         }
 
-        for matcher in input.rules.iter() {
+        for matcher in &input.rules {
             if ty_pattern_matches_ty(&matcher.ty, &field.ty) {
                 field.attrs.extend(matcher.attrs.clone());
             }

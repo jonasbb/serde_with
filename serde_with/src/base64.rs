@@ -221,7 +221,7 @@ impl Alphabet for ImapMutf7 {
     }
 }
 
-/// The character set used in BinHex 4.0 files.
+/// The character set used in `BinHex` 4.0 files.
 ///
 /// See [BinHex 4.0 Definition](http://files.stairways.com/other/binhex-40-specs-info.txt).
 pub struct BinHex;
