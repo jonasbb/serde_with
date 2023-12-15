@@ -36,8 +36,8 @@ use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
     formats::{CommaSeparator, Flexible, Strict},
-    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, NoneAsEmptyString, OneOrMany, Same,
-    StringWithSeparator,
+    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, Map, NoneAsEmptyString, OneOrMany, Same,
+    Seq, StringWithSeparator,
 };
 use std::{
     collections::HashMap,

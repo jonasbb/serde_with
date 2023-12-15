@@ -24,7 +24,7 @@ sign-tag = true
 tag = false
 
 [workspace.lints.rust]
-unused_qualifications = "warn"
+# unused_qualifications = "warn"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
