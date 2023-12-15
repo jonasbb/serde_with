@@ -242,6 +242,7 @@ fn test_default_on_option() {
         expect!["missing field `a` at line 1 column 2"],
     );
 
+    #[allow(clippy::unnecessary_wraps)]
     fn default_555() -> Option<u32> {
         Some(555)
     }

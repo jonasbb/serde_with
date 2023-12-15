@@ -1,4 +1,4 @@
-//! Test that flattened_maybe properly names all the types and traits used
+//! Test that `flattened_maybe` properly names all the types and traits used
 
 // Ensure no prelude is available
 #![no_implicit_prelude]

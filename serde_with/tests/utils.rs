@@ -75,5 +75,5 @@ where
         &serde_json::from_str::<T>(deserialize_from)
             .unwrap_err()
             .to_string(),
-    )
+    );
 }

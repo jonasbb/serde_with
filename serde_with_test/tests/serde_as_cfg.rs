@@ -1,4 +1,4 @@
-//! Test that cfg_eval helps in cfg-gating serde_with attributes
+//! Test that `cfg_eval` helps in cfg-gating `serde_with` attributes
 
 // Ensure no prelude is available
 #![no_implicit_prelude]

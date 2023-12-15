@@ -544,7 +544,7 @@ fn test_parse_float_into_time_parts() {
         parse_float_into_time_parts("-123.000987")
     );
     assert_eq!(
-        Ok((Sign::Positive, 18446744073709551615, 123_456_789)),
+        Ok((Sign::Positive, 18_446_744_073_709_551_615, 123_456_789)),
         parse_float_into_time_parts("18446744073709551615.123456789")
     );
 

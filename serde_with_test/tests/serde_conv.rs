@@ -1,8 +1,9 @@
-//! Test that the serde_conv macros properly name all the types and traits used
+//! Test that the `serde_conv` macros properly name all the types and traits used
 
 // Ensure no prelude is available
 #![no_implicit_prelude]
 #![allow(dead_code, unused_imports)]
+#![allow(clippy::trivially_copy_pass_by_ref)]
 
 use ::s_with::serde_conv;
 

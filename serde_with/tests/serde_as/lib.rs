@@ -510,7 +510,7 @@ fn string_with_separator() {
 
     let x = A {
         tags: vec!["1".to_string(), "2".to_string(), "3".to_string()],
-        more_tags: Default::default(),
+        more_tags: BTreeSet::default(),
     };
     assert_eq!(
         r#"{"tags":"1 2 3","more_tags":""}"#,
@@ -737,6 +737,7 @@ fn test_big_arrays() {
 }
 
 #[test]
+#[allow(clippy::ref_option_ref)]
 fn test_bytes() {
     // The test case is copied from
     // https://github.com/serde-rs/bytes/blob/cbae606b9dc225fc094b031cc84eac9493da2058/tests/test_derive.rs
