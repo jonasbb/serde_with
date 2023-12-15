@@ -798,7 +798,7 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
             Type::Paren(inner)
         }
         Type::Path(mut inner) => {
-            if let Some(Pair::End(mut t) | Pair::Punctuated(mut t, _)) = inner.path.segments.pop() {
+            if let Some(Pair::End(mut t) | Pair::Punctuated(t, _)) = inner.path.segments.pop() {
                 t.arguments = match t.arguments {
                     PathArguments::None => PathArguments::None,
                     PathArguments::AngleBracketed(mut inner) => {

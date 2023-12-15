@@ -191,7 +191,7 @@ impl<'de> DeserializeAs<'de, NaiveDateTime> for DateTime<Utc> {
     }
 }
 
-/// Convert a [`chrono_0_4::Duration`] into a [`DurationSigned`]
+/// Convert a [`Duration`] into a [`DurationSigned`]
 fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     match dur.to_std() {
         Ok(dur) => DurationSigned::with_duration(Sign::Positive, dur),
@@ -205,7 +205,7 @@ fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     }
 }
 
-/// Convert a [`DurationSigned`] into a [`chrono_0_4::Duration`]
+/// Convert a [`DurationSigned`] into a [`Duration`]
 fn duration_from_duration_signed<'de, D>(dur: DurationSigned) -> Result<Duration, D::Error>
 where
     D: Deserializer<'de>,
