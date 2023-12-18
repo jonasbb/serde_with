@@ -220,23 +220,5 @@ impl<T: JsonSchema> JsonSchema for WrapSchema<T, Same> {
 }
 
 impl<T> JsonSchema for WrapSchema<T, DisplayFromStr> {
-    fn schema_name() -> String {
-        "DisplayFromStr".into()
-    }
-
-    fn schema_id() -> Cow<'static, str> {
-        Cow::Borrowed("serde_with::DisplayFromStr")
-    }
-
-    fn json_schema(_: &mut SchemaGenerator) -> Schema {
-        SchemaObject {
-            instance_type: Some(InstanceType::String.into()),
-            ..Default::default()
-        }
-        .into()
-    }
-
-    fn is_referenceable() -> bool {
-        false
-    }
+    forward_schema!(String);
 }
