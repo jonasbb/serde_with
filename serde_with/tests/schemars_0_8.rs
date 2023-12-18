@@ -92,11 +92,31 @@ fn schemars_basic() {
     assert_eq!(value, expected);
 }
 
-#[test]
-fn trybuild() {
-    let t = trybuild::TestCases::new();
-    t.pass("tests/trybuild/schemars_0_8/pass.conditional_derive_enabled.rs");
-    t.compile_fail("tests/trybuild/schemars_0_8/fail.conditional_derive_disabled.rs");
+mod derive {
+    use super::*;
+
+    #[serde_with::serde_as]
+    #[derive(Serialize)]
+    #[cfg_attr(all(), derive(JsonSchema))]
+    struct Enabled {
+        #[serde_as(as = "DisplayFromStr")]
+        field: u32,
+    }
+
+    #[serde_with::serde_as]
+    #[derive(Serialize)]
+    #[cfg_attr(any(), derive(JsonSchema))]
+    struct Disabled {
+        // If we are incorrectly adding `#[schemars(with = ...)]` attributes
+        // then we should get an error on this field.
+        #[serde_as(as = "DisplayFromStr")]
+        field: u32,
+    }
+
+    #[test]
+    fn test_enabled_has_correct_schema() {
+        check_valid_json_schema(&Enabled { field: 77 });
+    }
 }
 
 mod array {
