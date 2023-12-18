@@ -153,6 +153,7 @@ serde_json = {version = "1.0.25", features = ["preserve_order"]}
 serde_test = "1.0.124"
 serde_yaml = "0.9.2"
 serde-xml-rs = "0.6.0"
+trybuild = "1.0.85"
 version-sync = "0.9.1"
 
 # There is a change that breaks some tests, starting with 0.8.9.

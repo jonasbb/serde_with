@@ -1,6 +1,11 @@
+use crate::utils::{check_matches_schema, check_valid_json_schema};
 use ::schemars_0_8::JsonSchema;
+use serde::Serialize;
+use serde_json::json;
 use serde_with::*;
 
+// This avoids us having to add `#[schemars(crate = "::schemars_0_8")]` all
+// over the place. We're not testing that and it is inconvenient.
 extern crate schemars_0_8 as schemars;
 
 mod utils;
@@ -87,11 +92,15 @@ fn schemars_basic() {
     assert_eq!(value, expected);
 }
 
+#[test]
+fn trybuild() {
+    let t = trybuild::TestCases::new();
+    t.pass("tests/trybuild/schemars_0_8/pass.conditional_derive_enabled.rs");
+    t.compile_fail("tests/trybuild/schemars_0_8/fail.conditional_derive_disabled.rs");
+}
+
 mod array {
     use super::*;
-    use crate::utils::{check_matches_schema, check_valid_json_schema};
-    use serde_json::json;
-    use serde::Serialize;
 
     #[serde_with::serde_as]
     #[derive(JsonSchema, Serialize)]
