@@ -94,7 +94,7 @@ where
             Err(e) => panic!("schema for T was not a valid JSON schema: {e}"),
         };
 
-        if let Err(errs) = schema.validate(&value) {
+        if let Err(errs) = schema.validate(value) {
             let mut message = String::new();
 
             let _ = writeln!(
@@ -106,14 +106,14 @@ where
                 let _ = writeln!(&mut message, "  -> {}", err);
             }
 
-            let _ = writeln!(&mut message, "");
+            let _ = writeln!(&mut message);
             let _ = writeln!(&mut message, "Object Value:");
             let _ = writeln!(
                 &mut message,
                 "{}",
                 serde_json::to_string_pretty(&value).unwrap_or_else(|e| format!("> error: {e}"))
             );
-            let _ = writeln!(&mut message, "");
+            let _ = writeln!(&mut message);
             let _ = writeln!(&mut message, "JSON Schema:");
             let _ = writeln!(
                 &mut message,
