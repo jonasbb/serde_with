@@ -81,7 +81,7 @@ where
 #[track_caller]
 pub fn check_matches_schema<T>(value: &serde_json::Value)
 where
-    T: schemars_0_8::JsonSchema
+    T: schemars_0_8::JsonSchema,
 {
     use jsonschema::JSONSchema;
     use std::fmt::Write;
