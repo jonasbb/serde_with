@@ -1,6 +1,10 @@
 use ::schemars_0_8::JsonSchema;
 use serde_with::*;
 
+extern crate schemars_0_8 as schemars;
+
+mod utils;
+
 #[test]
 fn schemars_basic() {
     use ::schemars_0_8::JsonSchema;
@@ -81,4 +85,63 @@ fn schemars_basic() {
     });
 
     assert_eq!(value, expected);
+}
+
+mod array {
+    use super::*;
+    use crate::utils::{check_matches_schema, check_valid_json_schema};
+    use serde_json::json;
+    use serde::Serialize;
+
+    #[serde_with::serde_as]
+    #[derive(JsonSchema, Serialize)]
+    struct FixedArray {
+        #[serde_as(as = "[_; 3]")]
+        array: [u32; 3],
+    }
+
+    #[test]
+    fn test_serialized_is_valid() {
+        let array = FixedArray { array: [1, 2, 3] };
+
+        check_valid_json_schema(&array);
+    }
+
+    #[test]
+    fn test_valid_json() {
+        let value = json!({ "array": [1, 2, 3] });
+        check_matches_schema::<FixedArray>(&value);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_too_short() {
+        check_matches_schema::<FixedArray>(&json!({
+            "array": [1],
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_too_long() {
+        check_matches_schema::<FixedArray>(&json!({
+            "array": [1, 2, 3, 4]
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_wrong_item_type() {
+        check_matches_schema::<FixedArray>(&json!({
+            "array": ["1", "2", "3"]
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_oob_item() {
+        check_matches_schema::<FixedArray>(&json!({
+            "array": [-1, 0x1_0000_0000i64, 32]
+        }))
+    }
 }
