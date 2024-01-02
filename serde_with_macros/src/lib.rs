@@ -115,7 +115,7 @@ where
     }
 }
 
-/// Like [apply_function_to_struct_and_enum_fields] but for darling errors
+/// Like [`apply_function_to_struct_and_enum_fields`] but for darling errors
 fn apply_function_to_struct_and_enum_fields_darling<F>(
     input: TokenStream,
     serde_with_crate_path: &Path,
@@ -327,7 +327,7 @@ pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStr
     TokenStream::from(res)
 }
 
-/// Add the skip_serializing_if annotation to each field of the struct
+/// Add the `skip_serializing_if` annotation to each field of the struct
 fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), String> {
     if is_std_option(&field.ty) {
         let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
@@ -423,8 +423,8 @@ fn is_std_option(type_: &Type) -> bool {
 /// `#[serde(skip_serializing_if = "Option::is_none")]`
 ///
 /// * `serde` is the outermost path, here namespace
-/// * it contains a Meta::List
-/// * which contains in another Meta a Meta::NameValue
+/// * it contains a `Meta::List`
+/// * which contains in another Meta a `Meta::NameValue`
 /// * with the name being `skip_serializing_if`
 fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
     for attr in &field.attrs {
@@ -780,7 +780,7 @@ fn serde_as_add_attr_to_field(
 
 /// Recursively replace all occurrences of `_` with `replacement` in a [Type][]
 ///
-/// The [serde_as][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for
+/// The [`serde_as`][macro@serde_as] macro allows to use the infer type, i.e., `_`, as shortcut for
 /// `serde_with::As`. This function replaces all occurrences of the infer type with another type.
 fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
     match to_replace {

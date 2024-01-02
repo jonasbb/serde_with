@@ -178,7 +178,7 @@ pub mod unwrap_or_skip {
 ///
 /// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
 ///
-/// # Converting to serde_as
+/// # Converting to `serde_as`
 ///
 /// The same functionality can be more clearly expressed using the `serde_as` macro and [`SetPreventDuplicates`].
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
@@ -294,7 +294,7 @@ pub mod sets_duplicate_value_is_error {
 ///
 /// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
 ///
-/// # Converting to serde_as
+/// # Converting to `serde_as`
 ///
 /// The same functionality can be more clearly expressed using the `serde_as` macro and [`MapPreventDuplicates`].
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
@@ -414,7 +414,7 @@ pub mod maps_duplicate_key_is_error {
 ///
 /// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
 ///
-/// # Converting to serde_as
+/// # Converting to `serde_as`
 ///
 /// The same functionality can be more clearly expressed using the `serde_as` macro and [`SetLastValueWins`].
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
@@ -502,7 +502,7 @@ pub mod sets_last_value_wins {
 /// [`HashMap`]: std::collections::HashMap
 /// [`BTreeMap`]: std::collections::HashMap
 ///
-/// # Converting to serde_as
+/// # Converting to `serde_as`
 ///
 /// The same functionality can be more clearly expressed using the `serde_as` macro and [`MapFirstKeyWins`].
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
