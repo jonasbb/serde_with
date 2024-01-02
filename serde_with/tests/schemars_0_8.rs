@@ -11,6 +11,50 @@ extern crate schemars_0_8 as schemars;
 
 mod utils;
 
+/// Declare a snapshot tests for a struct.
+///
+/// The snapshot files are stored under the `schemars_0_8` folder alongside
+/// this test file.
+macro_rules! declare_snapshot_test {
+    {$(
+        $( #[$tattr:meta] )*
+        $test:ident {
+            $( #[$stattr:meta] )*
+            struct $name:ident {
+                $(
+                    $( #[ $fattr:meta ] )*
+                    $field:ident : $ty:ty
+                ),*
+                $(,)?
+            }
+        }
+    )*} => {$(
+        #[test]
+        $(#[$tattr])*
+        fn $test() {
+            #[serde_with::serde_as]
+            #[derive(JsonSchema, Serialize)]
+            $( #[$stattr] )*
+            struct $name {
+                $(
+                    $( #[$fattr] )*
+                    $field: $ty,
+                )*
+            }
+
+            let schema = schemars::schema_for!($name);
+            let schema = serde_json::to_string_pretty(&schema)
+                .expect("schema could not be serialized");
+
+            let filename = concat!("./", module_path!(), "::", stringify!($test), ".json")
+                .replace("::", "/");
+
+            let expected = expect_file![filename];
+            expected.assert_eq(&schema);
+        }
+    )*}
+}
+
 #[test]
 fn schemars_basic() {
     use ::schemars_0_8::JsonSchema;
@@ -46,6 +90,64 @@ fn schemars_basic() {
 
     let expected = expect_file!["./schemars_0_8/schemars_basic.json"];
     expected.assert_eq(&schema);
+}
+
+mod test_std {
+    use super::*;
+    use std::collections::{BTreeMap, BTreeSet, VecDeque};
+
+    declare_snapshot_test! {
+        option {
+            struct Test {
+                #[serde_with(as = "Option<_>")]
+                optional: Option<i32>,
+            }
+        }
+
+        vec {
+            struct Test {
+                #[serde_with(as = "Vec<_>")]
+                vec: Vec<String>
+            }
+        }
+
+        vec_deque {
+            struct Test {
+                #[serde_with(as = "VecDeque<_>")]
+                vec_deque: VecDeque<String>
+            }
+        }
+
+        map {
+            struct Test {
+                #[serde_with(as = "BTreeMap<_, _>")]
+                map: BTreeMap<String, i32>
+            }
+        }
+
+        set {
+            struct Test {
+                #[serde_with(as = "BTreeSet<_>")]
+                map: BTreeSet<String>,
+            }
+        }
+
+        tuples {
+            struct Test {
+                #[serde_with(as = "()")]
+                tuple0: (),
+
+                #[serde_with(as = "(_ ,)")]
+                tuple1: (i32,),
+
+                #[serde_with(as = "(_, _)")]
+                tuple2: (i32, i32),
+
+                #[serde_with(as = "(_, _, _)")]
+                tuple3: (i32, i32, String)
+            }
+        }
+    }
 }
 
 mod derive {
