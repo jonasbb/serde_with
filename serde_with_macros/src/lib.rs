@@ -317,13 +317,9 @@ where
 /// ```
 #[proc_macro_attribute]
 pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let res = match apply_function_to_struct_and_enum_fields(
-        input,
-        skip_serializing_none_add_attr_to_field,
-    ) {
-        Ok(res) => res,
-        Err(err) => err.to_compile_error(),
-    };
+    let res =
+        apply_function_to_struct_and_enum_fields(input, skip_serializing_none_add_attr_to_field)
+            .unwrap_or_else(|err| err.to_compile_error());
     TokenStream::from(res)
 }
 
@@ -614,14 +610,12 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
                 .unwrap_or_else(|| syn::parse_quote!(::serde_with));
 
             // Convert any error message into a nice compiler error
-            let res = match apply_function_to_struct_and_enum_fields_darling(
+            let res = apply_function_to_struct_and_enum_fields_darling(
                 input,
                 &serde_with_crate_path,
                 |field| serde_as_add_attr_to_field(field, &serde_with_crate_path),
-            ) {
-                Ok(res) => res,
-                Err(err) => err.write_errors(),
-            };
+            )
+            .unwrap_or_else(darling::Error::write_errors);
             TokenStream::from(res)
         }
         Err(e) => TokenStream::from(DarlingError::from(e).write_errors()),
@@ -804,45 +798,44 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
             Type::Paren(inner)
         }
         Type::Path(mut inner) => {
-            match inner.path.segments.pop() {
-                Some(Pair::End(mut t)) | Some(Pair::Punctuated(mut t, _)) => {
-                    t.arguments = match t.arguments {
-                        PathArguments::None => PathArguments::None,
-                        PathArguments::AngleBracketed(mut inner) => {
-                            // Iterate over the args between the angle brackets
-                            inner.args = inner
-                                .args
-                                .into_iter()
-                                .map(|generic_argument| match generic_argument {
-                                    // replace types within the generics list, but leave other stuff
-                                    // like lifetimes untouched
-                                    GenericArgument::Type(type_) => GenericArgument::Type(
-                                        replace_infer_type_with_type(type_, replacement),
-                                    ),
-                                    ga => ga,
-                                })
-                                .collect();
-                            PathArguments::AngleBracketed(inner)
-                        }
-                        PathArguments::Parenthesized(mut inner) => {
-                            inner.inputs = inner
-                                .inputs
-                                .into_iter()
-                                .map(|type_| replace_infer_type_with_type(type_, replacement))
-                                .collect();
-                            inner.output = match inner.output {
-                                ReturnType::Type(arrow, mut type_) => {
-                                    *type_ = replace_infer_type_with_type(*type_, replacement);
-                                    ReturnType::Type(arrow, type_)
-                                }
-                                default => default,
-                            };
-                            PathArguments::Parenthesized(inner)
-                        }
-                    };
-                    inner.path.segments.push(t);
-                }
-                None => {}
+            if let Some(Pair::End(mut t)) | Some(Pair::Punctuated(mut t, _)) =
+                inner.path.segments.pop()
+            {
+                t.arguments = match t.arguments {
+                    PathArguments::None => PathArguments::None,
+                    PathArguments::AngleBracketed(mut inner) => {
+                        // Iterate over the args between the angle brackets
+                        inner.args = inner
+                            .args
+                            .into_iter()
+                            .map(|generic_argument| match generic_argument {
+                                // replace types within the generics list, but leave other stuff
+                                // like lifetimes untouched
+                                GenericArgument::Type(type_) => GenericArgument::Type(
+                                    replace_infer_type_with_type(type_, replacement),
+                                ),
+                                ga => ga,
+                            })
+                            .collect();
+                        PathArguments::AngleBracketed(inner)
+                    }
+                    PathArguments::Parenthesized(mut inner) => {
+                        inner.inputs = inner
+                            .inputs
+                            .into_iter()
+                            .map(|type_| replace_infer_type_with_type(type_, replacement))
+                            .collect();
+                        inner.output = match inner.output {
+                            ReturnType::Type(arrow, mut type_) => {
+                                *type_ = replace_infer_type_with_type(*type_, replacement);
+                                ReturnType::Type(arrow, type_)
+                            }
+                            default => default,
+                        };
+                        PathArguments::Parenthesized(inner)
+                    }
+                };
+                inner.path.segments.push(t);
             }
             Type::Path(inner)
         }
