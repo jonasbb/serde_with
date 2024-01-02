@@ -1,5 +1,6 @@
 use crate::utils::{check_matches_schema, check_valid_json_schema};
 use ::schemars_0_8::JsonSchema;
+use expect_test::expect_file;
 use serde::Serialize;
 use serde_json::json;
 use serde_with::*;
@@ -40,56 +41,11 @@ fn schemars_basic() {
         vec_same: Vec<u32>,
     }
 
-    let schema = ::schemars_0_8::schema_for!(Basic);
-    let value = serde_json::to_value(schema).expect("schema could not be serialized");
+    let schema = schemars::schema_for!(Basic);
+    let schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
 
-    let expected = serde_json::json!({
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Basic",
-      "type": "object",
-      "required": [
-        "bare_field",
-        "box_same",
-        "display_from_str",
-        "same",
-        "vec_same"
-      ],
-      "properties": {
-        "bare_field": {
-          "description": "Basic field, no attribute",
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0.0
-        },
-        "box_same": {
-          "description": "This checks that Same still works when wrapped in a box.",
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0.0
-        },
-        "display_from_str": {
-          "description": "Field that directly uses DisplayFromStr",
-          "type": "string"
-        },
-        "same": {
-          "description": "Same does not implement JsonSchema directly so this checks that the correct schemars attribute was injected.",
-          "type": "integer",
-          "format": "uint32",
-          "minimum": 0.0
-        },
-        "vec_same": {
-          "description": "Same thing, but with a Vec this time.",
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "format": "uint32",
-            "minimum": 0.0
-          }
-        }
-      }
-    });
-
-    assert_eq!(value, expected);
+    let expected = expect_file!["./schemars_0_8/schemars_basic.json"];
+    expected.assert_eq(&schema);
 }
 
 mod derive {
