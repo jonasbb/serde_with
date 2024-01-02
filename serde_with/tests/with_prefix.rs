@@ -127,7 +127,7 @@ fn test_plain_with_prefix() {
     );
 }
 
-/// Ensure that with_prefix works for unit type enum variants.
+/// Ensure that `with_prefix` works for unit type enum variants.
 #[test]
 fn test_enum_unit_variant_with_prefix() {
     #[derive(Hash, PartialEq, Eq, Debug, Serialize, Deserialize, Ord, PartialOrd)]

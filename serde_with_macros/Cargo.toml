@@ -1,3 +1,5 @@
+lints.workspace = true
+
 [package]
 authors = ["Jonas Bushart"]
 name = "serde_with_macros"
