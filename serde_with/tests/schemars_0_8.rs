@@ -182,6 +182,20 @@ mod snapshots {
                 data: u32,
             }
         }
+
+        map {
+            struct Test {
+                #[serde_as(as = "Map<_, _>")]
+                data: Vec<(String, u32)>,
+            }
+        }
+
+        map_fixed {
+            struct Test {
+                #[serde_as(as = "Map<_, _>")]
+                data: [(String, u32); 4],
+            }
+        }
     }
 }
 
@@ -281,5 +295,18 @@ fn test_borrow_cow() {
 
     check_valid_json_schema(&Borrowed {
         data: Cow::Borrowed("test"),
+    });
+}
+
+#[test]
+fn test_map() {
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        map: [(&'static str, u32); 2],
+    }
+
+    check_valid_json_schema(&Test {
+        map: [("a", 1), ("b", 2)],
     });
 }

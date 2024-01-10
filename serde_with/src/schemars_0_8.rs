@@ -294,6 +294,13 @@ where
     forward_schema!(WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>);
 }
 
+impl<K, V, KA, VA, const N: usize> JsonSchema for WrapSchema<[(K, V); N], Map<KA, VA>>
+where
+    WrapSchema<V, VA>: JsonSchema
+{
+    forward_schema!(WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>);
+}
+
 macro_rules! map_first_last_wins_schema {
     ($(=> $extra:ident)? $type:ty) => {
         impl<K, V, $($extra,)? KA, VA> JsonSchema for WrapSchema<$type, MapFirstKeyWins<KA, VA>>
