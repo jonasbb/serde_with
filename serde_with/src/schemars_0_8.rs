@@ -252,12 +252,20 @@ where
     forward_schema!(Option<WrapSchema<T, TA>>);
 }
 
-impl<T: JsonSchema> JsonSchema for WrapSchema<T, FromInto<T>> {
+impl<O, T: JsonSchema> JsonSchema for WrapSchema<O, FromInto<T>> {
     forward_schema!(T);
 }
 
-impl<T: JsonSchema> JsonSchema for WrapSchema<T, FromIntoRef<T>> {
+impl<O, T: JsonSchema> JsonSchema for WrapSchema<O, FromIntoRef<T>> {
     forward_schema!(T);
+}
+
+impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromInto<U>> {
+    forward_schema!(U);
+}
+
+impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromIntoRef<U>> {
+    forward_schema!(U);
 }
 
 macro_rules! schema_for_map {
@@ -332,14 +340,6 @@ where
     SEP: Separator,
 {
     forward_schema!(String);
-}
-
-impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromInto<U>> {
-    forward_schema!(U);
-}
-
-impl<T, U: JsonSchema> JsonSchema for WrapSchema<T, TryFromIntoRef<U>> {
-    forward_schema!(U);
 }
 
 impl<T, TA> JsonSchema for WrapSchema<Vec<T>, VecSkipError<TA>>

@@ -175,6 +175,13 @@ mod snapshots {
                 data: Vec<String>,
             }
         }
+
+        from_into {
+            struct Test {
+                #[serde_as(as = "FromInto<u64>")]
+                data: u32,
+            }
+        }
     }
 }
 
