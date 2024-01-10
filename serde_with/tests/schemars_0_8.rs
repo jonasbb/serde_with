@@ -4,6 +4,7 @@ use expect_test::expect_file;
 use serde::Serialize;
 use serde_json::json;
 use serde_with::*;
+use std::collections::BTreeSet;
 
 // This avoids us having to add `#[schemars(crate = "::schemars_0_8")]` all
 // over the place. We're not testing that and it is inconvenient.
@@ -153,6 +154,7 @@ mod test_std {
 mod snapshots {
     use super::*;
     use serde_with::formats::CommaSeparator;
+    use std::collections::BTreeSet;
 
     declare_snapshot_test! {
         bytes {
@@ -194,6 +196,20 @@ mod snapshots {
             struct Test {
                 #[serde_as(as = "Map<_, _>")]
                 data: [(String, u32); 4],
+            }
+        }
+
+        set_last_value_wins {
+            struct Test {
+                #[serde_as(as = "SetLastValueWins<_>")]
+                data: BTreeSet<u32>,
+            }
+        }
+
+        set_prevent_duplicates {
+            struct Test {
+                #[serde_as(as = "SetPreventDuplicates<_>")]
+                data: BTreeSet<u32>,
             }
         }
     }
@@ -309,4 +325,33 @@ fn test_map() {
     check_valid_json_schema(&Test {
         map: [("a", 1), ("b", 2)],
     });
+}
+
+#[test]
+fn test_set_last_value_wins_with_duplicates() {
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        #[serde_as(as = "SetLastValueWins<_>")]
+        set: BTreeSet<u32>,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "set": [ 1, 2, 3, 1, 4, 2 ]
+    }));
+}
+
+#[test]
+#[should_panic]
+fn test_set_prevent_duplicates_with_duplicates() {
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        #[serde_as(as = "SetPreventDuplicates<_>")]
+        set: BTreeSet<u32>,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "set": [ 1, 1 ]
+    }));
 }

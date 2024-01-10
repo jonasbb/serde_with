@@ -296,7 +296,7 @@ where
 
 impl<K, V, KA, VA, const N: usize> JsonSchema for WrapSchema<[(K, V); N], Map<KA, VA>>
 where
-    WrapSchema<V, VA>: JsonSchema
+    WrapSchema<V, VA>: JsonSchema,
 {
     forward_schema!(WrapSchema<BTreeMap<K, V>, BTreeMap<KA, VA>>);
 }
@@ -332,7 +332,38 @@ impl<T, TA> JsonSchema for WrapSchema<T, SetLastValueWins<TA>>
 where
     WrapSchema<T, TA>: JsonSchema,
 {
-    forward_schema!(WrapSchema<T, TA>);
+    fn schema_id() -> Cow<'static, str> {
+        std::format!(
+            "serde_with::SetLastValueWins<{}>",
+            <WrapSchema<T, TA> as JsonSchema>::schema_id()
+        )
+        .into()
+    }
+
+    fn schema_name() -> String {
+        std::format!(
+            "SetLastValueWins<{}>",
+            <WrapSchema<T, TA> as JsonSchema>::schema_name()
+        )
+        .into()
+    }
+
+    fn json_schema(gen: &mut ::schemars_0_8::gen::SchemaGenerator) -> Schema {
+        let schema = <WrapSchema<T, TA> as JsonSchema>::json_schema(gen);
+        let mut schema = schema.into_object();
+
+        // We explicitly allow duplicate items since the whole point of
+        // SetLastValueWins is to take the duplicate value.
+        if let Some(array) = &mut schema.array {
+            array.unique_items = None;
+        }
+
+        schema.into()
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
 }
 
 impl<T, TA> JsonSchema for WrapSchema<T, SetPreventDuplicates<TA>>
