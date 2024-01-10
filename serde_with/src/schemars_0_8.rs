@@ -2,7 +2,10 @@
 //!
 //! This module is only available if using the `schemars_0_8` feature of the crate.
 
-use crate::prelude::{Schema as WrapSchema, *};
+use crate::{
+    formats::Separator,
+    prelude::{Schema as WrapSchema, *},
+};
 use ::schemars_0_8::{
     gen::SchemaGenerator,
     schema::{ArrayValidation, InstanceType, Schema, SchemaObject},
