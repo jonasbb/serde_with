@@ -3,7 +3,7 @@ use darling::FromDeriveInput;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
-use syn::{parse_quote, Error, Generics, Path, TypeGenerics};
+use syn::{parse_quote, punctuated::Punctuated, Error, Generics, Path, TypeGenerics};
 
 /// Merge multiple [`syn::Error`] into one.
 pub(crate) trait IteratorExt {
@@ -73,5 +73,110 @@ impl<'a> ToTokens for DeImplGenerics<'a> {
             .collect();
         let (impl_generics, _, _) = generics.split_for_impl();
         impl_generics.to_tokens(tokens);
+    }
+}
+
+/// Determine if there is a `#[derive(JsonSchema)]` on this struct.
+pub(crate) fn has_derive_jsonschema(input: TokenStream) -> SchemaFieldConfig {
+    /// Represents the macro body of a `#[cfg_attr]` attribute.
+    ///
+    /// ```text
+    /// #[cfg_attr(feature = "things", derive(Macro))]
+    ///            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    /// ```
+    struct CfgAttr {
+        cfg: syn::Expr,
+        _comma: syn::Token![,],
+        meta: syn::Meta,
+    }
+
+    impl syn::parse::Parse for CfgAttr {
+        fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
+            Ok(Self {
+                cfg: input.parse()?,
+                _comma: input.parse()?,
+                meta: input.parse()?,
+            })
+        }
+    }
+
+    fn parse_derive_args(
+        input: syn::parse::ParseStream<'_>,
+    ) -> syn::Result<Punctuated<Path, syn::Token![,]>> {
+        Punctuated::parse_terminated_with(input, Path::parse_mod_style)
+    }
+
+    fn eval_attribute(attr: &syn::Attribute) -> syn::Result<SchemaFieldConfig> {
+        let args: CfgAttr;
+        let mut meta = &attr.meta;
+        let mut config = SchemaFieldConfig::Unconditional;
+
+        if meta.path().is_ident("cfg_attr") {
+            let list = meta.require_list()?;
+            args = list.parse_args()?;
+
+            meta = &args.meta;
+            config = SchemaFieldConfig::Conditional(args.cfg);
+        }
+
+        let list = meta.require_list()?;
+        if !list.path.is_ident("derive") {
+            return Ok(SchemaFieldConfig::Disabled);
+        }
+
+        let derives = list.parse_args_with(parse_derive_args)?;
+        for derive in &derives {
+            let segments = &derive.segments;
+
+            // Check for $(::)? $(schemars::)? JsonSchema
+            match segments.len() {
+                1 if segments[0].ident == "JsonSchema" => (),
+                2 if segments[0].ident == "schemars" && segments[1].ident == "JsonSchema" => (),
+                _ => continue,
+            }
+
+            return Ok(config);
+        }
+
+        Ok(SchemaFieldConfig::Disabled)
+    }
+
+    let input: syn::DeriveInput = match syn::parse(input) {
+        Ok(input) => input,
+        Err(_) => return SchemaFieldConfig::Disabled,
+    };
+
+    for attr in input.attrs {
+        match eval_attribute(&attr) {
+            Ok(SchemaFieldConfig::Disabled) => continue,
+            Ok(config) => return config,
+            Err(_) => continue,
+        }
+    }
+
+    SchemaFieldConfig::Disabled
+}
+
+/// Enum controlling when we should emit a `#[schemars]` field attribute.
+pub(crate) enum SchemaFieldConfig {
+    /// Emit a `#[cfg_attr(#cfg, schemars(...))]` attribute.
+    Conditional(syn::Expr),
+    /// Emit a `#[schemars(...)]` attribute (or equivalent).
+    Unconditional,
+    /// Do not emit an attribute.
+    Disabled,
+}
+
+impl SchemaFieldConfig {
+    /// Get a `#[cfg]` expression suitable for emitting the `#[schemars]` attribute.
+    ///
+    /// If this config is `Unconditional` then it will just return `all()` which
+    /// is always true.
+    pub(crate) fn cfg_expr(&self) -> Option<syn::Expr> {
+        match self {
+            Self::Unconditional => Some(syn::parse_quote!(all())),
+            Self::Conditional(cfg) => Some(cfg.clone()),
+            Self::Disabled => None,
+        }
     }
 }
