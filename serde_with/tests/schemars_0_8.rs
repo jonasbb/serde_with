@@ -150,6 +150,34 @@ mod test_std {
     }
 }
 
+mod snapshots {
+    use super::*;
+    use serde_with::formats::CommaSeparator;
+
+    declare_snapshot_test! {
+        bytes {
+            struct Test {
+                #[serde_as(as = "Bytes")]
+                bytes: Vec<u8>,
+            }
+        }
+
+        default_on_null {
+            struct Test {
+                #[serde_as(as = "DefaultOnNull<_>")]
+                data: String,
+            }
+        }
+
+        string_with_separator {
+            struct Test {
+                #[serde_as(as = "StringWithSeparator<CommaSeparator, String>")]
+                data: Vec<String>,
+            }
+        }
+    }
+}
+
 mod derive {
     use super::*;
 
@@ -232,3 +260,4 @@ mod array {
         }))
     }
 }
+
