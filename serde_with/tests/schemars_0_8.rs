@@ -44,8 +44,9 @@ macro_rules! declare_snapshot_test {
             }
 
             let schema = schemars::schema_for!($name);
-            let schema = serde_json::to_string_pretty(&schema)
+            let mut schema = serde_json::to_string_pretty(&schema)
                 .expect("schema could not be serialized");
+            schema.push('\n');
 
             let filename = concat!("./", module_path!(), "::", stringify!($test), ".json")
                 .replace("::", "/");
@@ -87,7 +88,8 @@ fn schemars_basic() {
     }
 
     let schema = schemars::schema_for!(Basic);
-    let schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
+    let mut schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
+    schema.push('\n');
 
     let expected = expect_file!["./schemars_0_8/schemars_basic.json"];
     expected.assert_eq(&schema);
