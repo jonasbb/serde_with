@@ -261,3 +261,18 @@ mod array {
     }
 }
 
+#[test]
+fn test_borrow_cow() {
+    use std::borrow::Cow;
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Borrowed<'a> {
+        #[serde_as(as = "BorrowCow")]
+        data: Cow<'a, str>,
+    }
+
+    check_valid_json_schema(&Borrowed {
+        data: Cow::Borrowed("test"),
+    });
+}
