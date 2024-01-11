@@ -345,7 +345,6 @@ where
             "SetLastValueWins<{}>",
             <WrapSchema<T, TA> as JsonSchema>::schema_name()
         )
-        .into()
     }
 
     fn json_schema(gen: &mut ::schemars_0_8::gen::SchemaGenerator) -> Schema {
