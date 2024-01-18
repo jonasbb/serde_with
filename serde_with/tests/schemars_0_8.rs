@@ -300,6 +300,64 @@ mod array {
     }
 }
 
+mod bool_from_int {
+    use super::*;
+    use serde_with::formats::{Flexible, Strict};
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct BoolStrict {
+        #[serde_as(as = "BoolFromInt<Strict>")]
+        value: bool,
+    }
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct BoolFlexible {
+        #[serde_as(as = "BoolFromInt<Flexible>")]
+        value: bool,
+    }
+
+    #[test]
+    fn test_serialized_strict_is_valid() {
+        check_valid_json_schema(&vec![
+            BoolStrict { value: true },
+            BoolStrict { value: false },
+        ]);
+    }
+
+    #[test]
+    fn test_serialized_flexible_is_valid() {
+        check_valid_json_schema(&vec![
+            BoolFlexible { value: true },
+            BoolFlexible { value: false },
+        ]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn strict_out_of_range() {
+        check_matches_schema::<BoolStrict>(&json!({
+            "value": 5
+        }));
+    }
+
+    #[test]
+    fn flexible_out_of_range() {
+        check_matches_schema::<BoolFlexible>(&json!({
+            "value": 5
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn flexible_wrong_type() {
+        check_matches_schema::<BoolFlexible>(&json!({
+            "value": "seven"
+        }));
+    }
+}
+
 mod bytes_or_string {
     use super::*;
 

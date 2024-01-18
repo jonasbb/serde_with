@@ -379,7 +379,7 @@ impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
             instance_type: Some(InstanceType::Integer.into()),
             number: Some(Box::new(NumberValidation {
                 minimum: Some(0.0),
-                maximum: Some(0.0),
+                maximum: Some(1.0),
                 ..Default::default()
             })),
             ..Default::default()
