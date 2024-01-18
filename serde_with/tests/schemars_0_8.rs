@@ -300,6 +300,46 @@ mod array {
     }
 }
 
+mod bytes_or_string {
+    use super::*;
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        #[serde_as(as = "BytesOrString")]
+        bytes: Vec<u8>,
+    }
+
+    #[test]
+    fn test_serialized_is_valid() {
+        check_valid_json_schema(&Test {
+            bytes: b"test".to_vec(),
+        });
+    }
+
+    #[test]
+    fn test_string_valid_json() {
+        check_matches_schema::<Test>(&json!({
+            "bytes": "test string"
+        }));
+    }
+
+    #[test]
+    fn test_bytes_valid_json() {
+        check_matches_schema::<Test>(&json!({
+            "bytes": [1, 2, 3, 4]
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_int_not_valid_json() {
+        check_matches_schema::<Test>(&json!({
+            "bytes": 5
+        }));
+    }
+}
+
 #[test]
 fn test_borrow_cow() {
     use std::borrow::Cow;
