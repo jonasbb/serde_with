@@ -3,14 +3,17 @@
   "title": "Test",
   "type": "object",
   "required": [
-    "vec"
+    "data"
   ],
   "properties": {
-    "vec": {
+    "data": {
       "type": "array",
       "items": {
-        "type": "string"
-      }
+        "type": "integer",
+        "format": "uint32",
+        "minimum": 0.0
+      },
+      "uniqueItems": true
     }
   }
 }

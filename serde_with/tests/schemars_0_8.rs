@@ -4,6 +4,7 @@ use expect_test::expect_file;
 use serde::Serialize;
 use serde_json::json;
 use serde_with::*;
+use std::collections::BTreeSet;
 
 // This avoids us having to add `#[schemars(crate = "::schemars_0_8")]` all
 // over the place. We're not testing that and it is inconvenient.
@@ -43,8 +44,9 @@ macro_rules! declare_snapshot_test {
             }
 
             let schema = schemars::schema_for!($name);
-            let schema = serde_json::to_string_pretty(&schema)
+            let mut schema = serde_json::to_string_pretty(&schema)
                 .expect("schema could not be serialized");
+            schema.push('\n');
 
             let filename = concat!("./", module_path!(), "::", stringify!($test), ".json")
                 .replace("::", "/");
@@ -86,7 +88,8 @@ fn schemars_basic() {
     }
 
     let schema = schemars::schema_for!(Basic);
-    let schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
+    let mut schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
+    schema.push('\n');
 
     let expected = expect_file!["./schemars_0_8/schemars_basic.json"];
     expected.assert_eq(&schema);
@@ -145,6 +148,70 @@ mod test_std {
 
                 #[serde_with(as = "(_, _, _)")]
                 tuple3: (i32, i32, String)
+            }
+        }
+    }
+}
+
+mod snapshots {
+    use super::*;
+    use serde_with::formats::CommaSeparator;
+    use std::collections::BTreeSet;
+
+    declare_snapshot_test! {
+        bytes {
+            struct Test {
+                #[serde_as(as = "Bytes")]
+                bytes: Vec<u8>,
+            }
+        }
+
+        default_on_null {
+            struct Test {
+                #[serde_as(as = "DefaultOnNull<_>")]
+                data: String,
+            }
+        }
+
+        string_with_separator {
+            struct Test {
+                #[serde_as(as = "StringWithSeparator<CommaSeparator, String>")]
+                data: Vec<String>,
+            }
+        }
+
+        from_into {
+            struct Test {
+                #[serde_as(as = "FromInto<u64>")]
+                data: u32,
+            }
+        }
+
+        map {
+            struct Test {
+                #[serde_as(as = "Map<_, _>")]
+                data: Vec<(String, u32)>,
+            }
+        }
+
+        map_fixed {
+            struct Test {
+                #[serde_as(as = "Map<_, _>")]
+                data: [(String, u32); 4],
+            }
+        }
+
+        set_last_value_wins {
+            struct Test {
+                #[serde_as(as = "SetLastValueWins<_>")]
+                data: BTreeSet<u32>,
+            }
+        }
+
+        set_prevent_duplicates {
+            struct Test {
+                #[serde_as(as = "SetPreventDuplicates<_>")]
+                data: BTreeSet<u32>,
             }
         }
     }
@@ -231,4 +298,62 @@ mod array {
             "array": [-1, 0x1_0000_0000i64, 32]
         }))
     }
+}
+
+#[test]
+fn test_borrow_cow() {
+    use std::borrow::Cow;
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Borrowed<'a> {
+        #[serde_as(as = "BorrowCow")]
+        data: Cow<'a, str>,
+    }
+
+    check_valid_json_schema(&Borrowed {
+        data: Cow::Borrowed("test"),
+    });
+}
+
+#[test]
+fn test_map() {
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        map: [(&'static str, u32); 2],
+    }
+
+    check_valid_json_schema(&Test {
+        map: [("a", 1), ("b", 2)],
+    });
+}
+
+#[test]
+fn test_set_last_value_wins_with_duplicates() {
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        #[serde_as(as = "SetLastValueWins<_>")]
+        set: BTreeSet<u32>,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "set": [ 1, 2, 3, 1, 4, 2 ]
+    }));
+}
+
+#[test]
+#[should_panic]
+fn test_set_prevent_duplicates_with_duplicates() {
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        #[serde_as(as = "SetPreventDuplicates<_>")]
+        set: BTreeSet<u32>,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "set": [ 1, 1 ]
+    }));
 }

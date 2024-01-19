@@ -3,13 +3,15 @@
   "title": "Test",
   "type": "object",
   "required": [
-    "vec"
+    "bytes"
   ],
   "properties": {
-    "vec": {
+    "bytes": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "integer",
+        "format": "uint8",
+        "minimum": 0.0
       }
     }
   }

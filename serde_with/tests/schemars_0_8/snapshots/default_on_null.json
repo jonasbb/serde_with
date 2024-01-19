@@ -3,14 +3,14 @@
   "title": "Test",
   "type": "object",
   "required": [
-    "vec"
+    "data"
   ],
   "properties": {
-    "vec": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "data": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   }
 }
