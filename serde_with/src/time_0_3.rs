@@ -1,6 +1,9 @@
 //! De/Serialization of [time v0.3][time] types
 //!
 //! This modules is only available if using the `time_0_3` feature of the crate.
+//! No extra types are exposed. Instead it enables support for [`time_0_3::Duration`] together with [`DurationSeconds`] and its variants.
+//! The types [`time_0_3::PrimitiveDateTime`] and [`time_0_3::OffsetDateTime`] are supported by [`TimestampSeconds`] and its variants.
+//! The well-known format descriptions [`Rfc2822`], [`Rfc3339`] and [`Iso8601`] are supported for [`OffsetDateTime`].
 //!
 //! [time]: https://docs.rs/time/0.3/
 

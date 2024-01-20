@@ -121,7 +121,7 @@ pub trait JsonSchemaAs<T: ?Sized> {
     /// Generates a JSON Schema for this type.
     ///
     /// If the returned schema depends on any [referenceable](JsonSchema::is_referenceable) schemas, then this method will
-    /// add them to the [`SchemaGenerator`](gen::SchemaGenerator)'s schema definitions.
+    /// add them to the [`SchemaGenerator`]'s schema definitions.
     ///
     /// This should not return a `$ref` schema.
     fn json_schema(gen: &mut SchemaGenerator) -> Schema;

@@ -504,7 +504,7 @@ pub struct As<T: ?Sized>(PhantomData<T>);
 /// Adapter to convert from `serde_as` to the serde traits.
 ///
 /// This is the counter-type to [`As`][].
-/// It can be used whenever a type implementing [`DeserializeAs`][]/[`SerializeAs`][] is required but the normal `Deserialize`/`Serialize` traits should be used.
+/// It can be used whenever a type implementing [`DeserializeAs`]/[`SerializeAs`] is required but the normal [`Deserialize`](::serde::Deserialize)/[`Serialize`](::serde::Serialize) traits should be used.
 /// Check [`As`] for an example.
 pub struct Same;
 
@@ -558,7 +558,7 @@ pub struct DisplayFromStr;
 
 /// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
 ///
-/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`] implementations.
+/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`](::core::fmt::Display) implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
 /// # Examples
@@ -1636,8 +1636,11 @@ pub struct Bytes;
 /// This distinction is not semantically important on the Rust side, thus both forms should deserialize into the same `Vec`.
 ///
 /// The `OneOrMany` adapter achieves exactly this use case.
-/// The serialization behavior can be tweaked to either always serialize as a list using `PreferMany` or to serialize as the inner element if possible using `PreferOne`.
-/// By default, `PreferOne` is assumed, which can also be omitted like `OneOrMany<_>`.
+/// The serialization behavior can be tweaked to either always serialize as a list using [`PreferMany`] or to serialize as the inner element if possible using [`PreferOne`].
+/// By default, [`PreferOne`] is assumed, which can also be omitted like `OneOrMany<_>`.
+///
+/// [`PreferMany`]: crate::formats::PreferMany
+/// [`PreferOne`]: crate::formats::PreferOne
 ///
 /// # Examples
 ///
@@ -1768,7 +1771,7 @@ pub struct PickFirst<T>(PhantomData<T>);
 /// For deserialization the opposite `T: Into<O>` is required.
 /// The `Clone` bound is required since `serialize` operates on a reference but `Into` implementations on references are uncommon.
 ///
-/// **Note**: [`TryFromInto`] is the more generalized version of this adapter which uses the [`TryInto`](std::convert::TryInto) trait instead.
+/// **Note**: [`TryFromInto`] is the more generalized version of this adapter which uses the [`TryInto`] trait instead.
 ///
 /// # Example
 ///
@@ -1849,7 +1852,7 @@ pub struct FromInto<T>(PhantomData<T>);
 /// For serialization `O` needs to be `for<'a> &'a O: Into<T>`.
 /// For deserialization the opposite `T: Into<O>` is required.
 ///
-/// **Note**: [`TryFromIntoRef`] is the more generalized version of this adapter which uses the [`TryInto`](std::convert::TryInto) trait instead.
+/// **Note**: [`TryFromIntoRef`] is the more generalized version of this adapter which uses the [`TryInto`] trait instead.
 ///
 /// # Example
 ///
@@ -2518,10 +2521,9 @@ pub struct SetLastValueWins<T>(PhantomData<T>);
 /// Helper for implementing [`JsonSchema`] on serializers whose output depends
 /// on the type of the concrete field.
 ///
-/// It is added implicitly by the [`#[serde_as]`] macro when any `schemars`
+/// It is added implicitly by the [`#[serde_as]`](crate::serde_as) macro when any `schemars`
 /// feature is enabled.
 ///
 /// [`JsonSchema`]: ::schemars_0_8::JsonSchema
-/// [`#[serde_as]`]: crate::serde_as
 #[cfg(feature = "schemars_0_8")]
 pub struct Schema<T: ?Sized, TA>(PhantomData<T>, PhantomData<TA>);
