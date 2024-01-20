@@ -558,7 +558,7 @@ pub struct DisplayFromStr;
 
 /// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
 ///
-/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`] implementations.
+/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`](::core::fmt::Display) implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
 /// # Examples
@@ -1768,7 +1768,7 @@ pub struct PickFirst<T>(PhantomData<T>);
 /// For deserialization the opposite `T: Into<O>` is required.
 /// The `Clone` bound is required since `serialize` operates on a reference but `Into` implementations on references are uncommon.
 ///
-/// **Note**: [`TryFromInto`] is the more generalized version of this adapter which uses the [`TryInto`](std::convert::TryInto) trait instead.
+/// **Note**: [`TryFromInto`] is the more generalized version of this adapter which uses the [`TryInto`] trait instead.
 ///
 /// # Example
 ///
@@ -1849,7 +1849,7 @@ pub struct FromInto<T>(PhantomData<T>);
 /// For serialization `O` needs to be `for<'a> &'a O: Into<T>`.
 /// For deserialization the opposite `T: Into<O>` is required.
 ///
-/// **Note**: [`TryFromIntoRef`] is the more generalized version of this adapter which uses the [`TryInto`](std::convert::TryInto) trait instead.
+/// **Note**: [`TryFromIntoRef`] is the more generalized version of this adapter which uses the [`TryInto`] trait instead.
 ///
 /// # Example
 ///
