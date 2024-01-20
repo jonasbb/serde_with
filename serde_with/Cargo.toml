@@ -54,7 +54,7 @@ guide = ["dep:doc-comment", "dep:document-features", "macros", "std"]
 #! # Features
 #!
 #! The following features enable support for types from other crates or enable additional functionality, that requires further dependencies to be pulled in.
-#! These features are disabled by default to miniminze the amount of required dependencies.
+#! These features are disabled by default to minimize the amount of required dependencies.
 
 ## The feature enables serializing data in base64 format.
 base64 = ["dep:base64", "alloc"]
@@ -63,11 +63,11 @@ chrono = ["chrono_0_4"]
 ## The feature enables integration of `chrono` v0.4 specific conversions.
 ## This includes support for the timestamp and duration types.
 ## More features are available in combination with `alloc` or `std`.
-## The legacy feature name `chrono` is still available for v1 compatability.
+## The legacy feature name `chrono` is still available for v1 compatibility.
 ##
 ## This pulls in `chrono` v0.4 as a dependency.
 chrono_0_4 = ["dep:chrono_0_4"]
-## The feature enables `hashbown::{HashMap, HashSet}` as supported containers.
+## The feature enables `hashbrown::{HashMap, HashSet}` as supported containers.
 ##
 ## This pulls in `hashbrown` v0.14 as a dependency.
 ## It enables the `alloc` feature.
@@ -82,7 +82,7 @@ hex = ["dep:hex", "alloc"]
 indexmap = ["indexmap_1"]
 ## The feature enables implementations of `indexmap` v1 specific checks.
 ## This includes support for checking duplicate keys and duplicate values.
-## The legacy feature name `indexmap` is still available for v1 compatability.
+## The legacy feature name `indexmap` is still available for v1 compatibility.
 ##
 ## This pulls in `indexmap` v1 as a dependency.
 ## It enables the `alloc` feature.

@@ -565,7 +565,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     For example, using `#[serde_as(as = "NoneAsEmptyString")]` on `Option<String>` will not see
 ///     any change.
 ///
-///     If the automatically applied attribute is undesired, the behavior can be supressed by adding
+///     If the automatically applied attribute is undesired, the behavior can be suppressed by adding
 ///     `#[serde_as(no_default)]`.
 
 ///      This can be combined like `#[serde_as(as = "Option<S>", no_default)]`.
