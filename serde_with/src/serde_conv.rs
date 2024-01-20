@@ -12,7 +12,9 @@
 /// 2. The type `T` we want to extend with custom behavior.
 /// 3. A function or macro taking a `&T` and returning a serializable type.
 /// 4. A function or macro taking a deserializable type and returning a `Result<T, E>`.
-///     The error type `E` must implement `Display`.
+///     The error type `E` must implement [`Display`].
+///
+/// [`Display`]: std::fmt::Display
 ///
 /// # Example
 ///
