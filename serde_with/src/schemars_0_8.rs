@@ -401,24 +401,9 @@ impl JsonSchemaAs<bool> for BoolFromInt<Flexible> {
         "serde_with::BoolFromInt<Flexible>".into()
     }
 
-    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
         SchemaObject {
             instance_type: Some(InstanceType::Integer.into()),
-            subschemas: Some(Box::new(SubschemaValidation {
-                any_of: Some(std::vec![
-                    gen.subschema_for::<WrapSchema<bool, BoolFromInt<Strict>>>(),
-                    SchemaObject {
-                        instance_type: Some(InstanceType::Integer.into()),
-                        metadata: Some(Box::new(Metadata {
-                            write_only: true,
-                            ..Default::default()
-                        })),
-                        ..Default::default()
-                    }
-                    .into()
-                ]),
-                ..Default::default()
-            })),
             ..Default::default()
         }
         .into()
