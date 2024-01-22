@@ -95,6 +95,26 @@ fn schemars_basic() {
     expected.assert_eq(&schema);
 }
 
+#[test]
+fn schemars_custom_with() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    struct Test {
+        #[serde_as(as = "DisplayFromStr")]
+        #[schemars(with = "i32")]
+        custom: i32,
+
+        #[serde_as(as = "DisplayFromStr")]
+        #[cfg_attr(any(), schemars(with = "i32"))]
+        with_disabled: i32,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "custom": 5,
+        "with_disabled": "5",
+    }));
+}
+
 mod test_std {
     use super::*;
     use std::collections::{BTreeMap, BTreeSet, VecDeque};
