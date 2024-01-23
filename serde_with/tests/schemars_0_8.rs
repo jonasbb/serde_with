@@ -325,6 +325,120 @@ mod array {
     }
 }
 
+mod bool_from_int {
+    use super::*;
+    use serde_with::formats::{Flexible, Strict};
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct BoolStrict {
+        #[serde_as(as = "BoolFromInt<Strict>")]
+        value: bool,
+    }
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct BoolFlexible {
+        #[serde_as(as = "BoolFromInt<Flexible>")]
+        value: bool,
+    }
+
+    #[test]
+    fn test_serialized_strict_is_valid() {
+        check_valid_json_schema(&vec![
+            BoolStrict { value: true },
+            BoolStrict { value: false },
+        ]);
+    }
+
+    #[test]
+    fn test_serialized_flexible_is_valid() {
+        check_valid_json_schema(&vec![
+            BoolFlexible { value: true },
+            BoolFlexible { value: false },
+        ]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn strict_out_of_range() {
+        check_matches_schema::<BoolStrict>(&json!({
+            "value": 5
+        }));
+    }
+
+    #[test]
+    fn flexible_out_of_range() {
+        check_matches_schema::<BoolFlexible>(&json!({
+            "value": 5
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn flexible_wrong_type() {
+        check_matches_schema::<BoolFlexible>(&json!({
+            "value": "seven"
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_fractional_value_strict() {
+        check_matches_schema::<BoolStrict>(&json!({
+            "value": 0.5
+        }))
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_fractional_value_flexible() {
+        check_matches_schema::<BoolFlexible>(&json!({
+            "value": 0.5
+        }))
+    }
+}
+
+mod bytes_or_string {
+    use super::*;
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        #[serde_as(as = "BytesOrString")]
+        bytes: Vec<u8>,
+    }
+
+    #[test]
+    fn test_serialized_is_valid() {
+        check_valid_json_schema(&Test {
+            bytes: b"test".to_vec(),
+        });
+    }
+
+    #[test]
+    fn test_string_valid_json() {
+        check_matches_schema::<Test>(&json!({
+            "bytes": "test string"
+        }));
+    }
+
+    #[test]
+    fn test_bytes_valid_json() {
+        check_matches_schema::<Test>(&json!({
+            "bytes": [1, 2, 3, 4]
+        }));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_int_not_valid_json() {
+        check_matches_schema::<Test>(&json!({
+            "bytes": 5
+        }));
+    }
+}
+
 #[test]
 fn test_borrow_cow() {
     use std::borrow::Cow;
