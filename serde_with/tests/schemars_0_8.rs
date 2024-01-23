@@ -356,6 +356,22 @@ mod bool_from_int {
             "value": "seven"
         }));
     }
+
+    #[test]
+    #[should_panic]
+    fn test_fractional_value_strict() {
+        check_matches_schema::<BoolStrict>(&json!({
+            "value": 0.5
+        }))
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_fractional_value_flexible() {
+        check_matches_schema::<BoolFlexible>(&json!({
+            "value": 0.5
+        }))
+    }
 }
 
 mod bytes_or_string {
