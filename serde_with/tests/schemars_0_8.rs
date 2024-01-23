@@ -33,7 +33,7 @@ macro_rules! declare_snapshot_test {
         #[test]
         $(#[$tattr])*
         fn $test() {
-            #[serde_with::serde_as]
+            #[serde_as]
             #[derive(JsonSchema, Serialize)]
             $( #[$stattr] )*
             struct $name {
@@ -62,7 +62,7 @@ fn schemars_basic() {
     use ::schemars_0_8::JsonSchema;
     use serde::Serialize;
 
-    #[serde_with::serde_as]
+    #[serde_as]
     #[derive(JsonSchema, Serialize)]
     #[schemars(crate = "::schemars_0_8")]
     struct Basic {
@@ -93,6 +93,31 @@ fn schemars_basic() {
 
     let expected = expect_file!["./schemars_0_8/schemars_basic.json"];
     expected.assert_eq(&schema);
+}
+
+#[test]
+fn schemars_custom_with() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    struct Test {
+        #[serde_as(as = "DisplayFromStr")]
+        #[schemars(with = "i32")]
+        custom: i32,
+
+        #[serde_as(as = "DisplayFromStr")]
+        #[cfg_attr(any(), schemars(with = "i32"))]
+        with_disabled: i32,
+
+        #[serde_as(as = "DisplayFromStr")]
+        #[cfg_attr(all(), schemars(with = "i32"))]
+        always_enabled: i32,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "custom": 3,
+        "with_disabled": "5",
+        "always_enabled": 7,
+    }));
 }
 
 mod test_std {
@@ -220,7 +245,7 @@ mod snapshots {
 mod derive {
     use super::*;
 
-    #[serde_with::serde_as]
+    #[serde_as]
     #[derive(Serialize)]
     #[cfg_attr(all(), derive(JsonSchema))]
     struct Enabled {
@@ -228,7 +253,7 @@ mod derive {
         field: u32,
     }
 
-    #[serde_with::serde_as]
+    #[serde_as]
     #[derive(Serialize)]
     #[cfg_attr(any(), derive(JsonSchema))]
     struct Disabled {
@@ -247,7 +272,7 @@ mod derive {
 mod array {
     use super::*;
 
-    #[serde_with::serde_as]
+    #[serde_as]
     #[derive(JsonSchema, Serialize)]
     struct FixedArray {
         #[serde_as(as = "[_; 3]")]
