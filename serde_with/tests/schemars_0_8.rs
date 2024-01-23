@@ -107,11 +107,16 @@ fn schemars_custom_with() {
         #[serde_as(as = "DisplayFromStr")]
         #[cfg_attr(any(), schemars(with = "i32"))]
         with_disabled: i32,
+
+        #[serde_as(as = "DisplayFromStr")]
+        #[cfg_attr(all(), schemars(with = "i32"))]
+        always_enabled: i32,
     }
 
     check_matches_schema::<Test>(&json!({
-        "custom": 5,
+        "custom": 3,
         "with_disabled": "5",
+        "always_enabled": 7,
     }));
 }
 
