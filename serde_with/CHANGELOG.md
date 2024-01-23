@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* The `serde_as` macro now better detects existing `schemars` attributes on fields and incorporates them (#682)
+    This avoids errors on existing `#[schemars(with = ...)]` annotations.
+
 ## [3.5.0] - 2024-01-20
 
 ### Added
