@@ -30,6 +30,7 @@ This page lists the transformations implemented in this crate and supported by `
 26. [Value into JSON String](#value-into-json-string)
 27. [`Vec` of tuples to `Maps`](#vec-of-tuples-to-maps)
 28. [Well-known time formats for `OffsetDateTime`](#well-known-time-formats-for-offsetdatetime)
+29. [De/Serialize depending on `De/Serializer::is_human_readable`](#deserialize-depending-on-deserializeris_human_readable)
 
 ## Base64 encode bytes
 
@@ -562,6 +563,21 @@ iso_8601: OffsetDateTime,
 
 These conversions are available with the `time_0_3` feature flag.
 
+## De/Serialize depending on `De/Serializer::is_human_readable`
+
+Used to specify different transformations for text-based and binary formats.
+
+[`IfIsHumanReadable`]
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::IfIsHumanReadable<serde_with::DisplayFromStr>")]
+value: u128,
+
+// JSON
+"value": "340282366920938463463374607431768211455",
+```
+
 [`Base64`]: crate::base64::Base64
 [`BoolFromInt<Flexible>`]: crate::BoolFromInt
 [`BoolFromInt<Strict>`]: crate::BoolFromInt
@@ -578,6 +594,7 @@ These conversions are available with the `time_0_3` feature flag.
 [`EnumMap`]: crate::EnumMap
 [`FromInto`]: crate::FromInto
 [`Hex`]: crate::hex::Hex
+[`IfIsHumanReadable`]: crate::IfIsHumanReadable
 [`JsonString`]: crate::json::JsonString
 [`KeyValueMap`]: crate::KeyValueMap
 [`MapFirstKeyWins`]: crate::MapFirstKeyWins

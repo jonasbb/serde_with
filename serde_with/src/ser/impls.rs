@@ -500,6 +500,24 @@ where
     }
 }
 
+impl<T, H, F> SerializeAs<T> for IfIsHumanReadable<H, F>
+where
+    T: ?Sized,
+    H: SerializeAs<T>,
+    F: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        if serializer.is_human_readable() {
+            H::serialize_as(source, serializer)
+        } else {
+            F::serialize_as(source, serializer)
+        }
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<T, U> SerializeAs<Vec<T>> for VecSkipError<U>
 where
