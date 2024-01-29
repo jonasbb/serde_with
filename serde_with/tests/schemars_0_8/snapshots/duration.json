@@ -3,12 +3,26 @@
   "title": "Test",
   "type": "object",
   "required": [
+    "flexible_string",
     "frac",
     "seconds",
     "seconds_u64_strict",
     "time_i64"
   ],
   "properties": {
+    "flexible_string": {
+      "oneOf": [
+        {
+          "writeOnly": true,
+          "type": "number",
+          "minimum": 0.0
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?$"
+        }
+      ]
+    },
     "frac": {
       "oneOf": [
         {
@@ -17,7 +31,8 @@
         },
         {
           "writeOnly": true,
-          "type": "string"
+          "type": "string",
+          "pattern": "^[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?$"
         }
       ]
     },
@@ -29,7 +44,8 @@
         },
         {
           "writeOnly": true,
-          "type": "string"
+          "type": "string",
+          "pattern": "^[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?$"
         }
       ]
     },
@@ -45,7 +61,8 @@
         },
         {
           "writeOnly": true,
-          "type": "string"
+          "type": "string",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?([eE][+-]?[0-9]+)?$"
         }
       ]
     }

@@ -248,6 +248,9 @@ mod snapshots {
                 #[serde_as(as = "DurationSecondsWithFrac<f64, Flexible>")]
                 frac: std::time::Duration,
 
+                #[serde_as(as = "DurationSeconds<String, Flexible>")]
+                flexible_string: std::time::Duration,
+
                 #[serde_as(as = "DurationSeconds<u64, Strict>")]
                 seconds_u64_strict: std::time::Duration,
 
