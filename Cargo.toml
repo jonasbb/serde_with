@@ -11,7 +11,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/jonasbb/serde_with/"
-rust-version = "1.64"
+rust-version = "1.65"
 version = "3.5.1"
 
 [workspace.metadata.release]

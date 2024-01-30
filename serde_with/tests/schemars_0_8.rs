@@ -180,7 +180,7 @@ mod test_std {
 
 mod snapshots {
     use super::*;
-    use serde_with::formats::CommaSeparator;
+    use serde_with::formats::*;
     use std::collections::BTreeSet;
 
     declare_snapshot_test! {
@@ -237,6 +237,25 @@ mod snapshots {
             struct Test {
                 #[serde_as(as = "SetPreventDuplicates<_>")]
                 data: BTreeSet<u32>,
+            }
+        }
+
+        duration {
+            struct Test {
+                #[serde_as(as = "DurationSeconds<u64, Flexible>")]
+                seconds: std::time::Duration,
+
+                #[serde_as(as = "DurationSecondsWithFrac<f64, Flexible>")]
+                frac: std::time::Duration,
+
+                #[serde_as(as = "DurationSeconds<String, Flexible>")]
+                flexible_string: std::time::Duration,
+
+                #[serde_as(as = "DurationSeconds<u64, Strict>")]
+                seconds_u64_strict: std::time::Duration,
+
+                #[serde_as(as = "TimestampSeconds<i64, Flexible>")]
+                time_i64: std::time::SystemTime,
             }
         }
     }
@@ -436,6 +455,110 @@ mod bytes_or_string {
         check_matches_schema::<Test>(&json!({
             "bytes": 5
         }));
+    }
+}
+
+mod duration {
+    use super::*;
+    use serde_with::formats::{Flexible, Strict};
+    use std::time::{Duration, SystemTime};
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct DurationTest {
+        #[serde_as(as = "DurationSeconds<u64, Strict>")]
+        strict_u64: Duration,
+
+        #[serde_as(as = "DurationSeconds<String, Strict>")]
+        strict_str: Duration,
+
+        #[serde_as(as = "DurationSecondsWithFrac<f64, Strict>")]
+        strict_f64: Duration,
+
+        #[serde_as(as = "DurationSeconds<u64, Flexible>")]
+        flexible_u64: Duration,
+
+        #[serde_as(as = "DurationSeconds<f64, Flexible>")]
+        flexible_f64: Duration,
+
+        #[serde_as(as = "DurationSeconds<String, Flexible>")]
+        flexible_str: Duration,
+    }
+
+    #[test]
+    fn test_serialized_is_valid() {
+        check_valid_json_schema(&DurationTest {
+            strict_u64: Duration::from_millis(2500),
+            strict_str: Duration::from_millis(2500),
+            strict_f64: Duration::from_millis(2500),
+            flexible_u64: Duration::from_millis(2500),
+            flexible_f64: Duration::from_millis(2500),
+            flexible_str: Duration::from_millis(2500),
+        });
+    }
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct FlexibleU64Duration(#[serde_as(as = "DurationSeconds<u64, Flexible>")] Duration);
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct FlexibleStringDuration(#[serde_as(as = "DurationSeconds<String, Flexible>")] Duration);
+
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct FlexibleTimestamp(#[serde_as(as = "TimestampSeconds<i64, Flexible>")] SystemTime);
+
+    #[test]
+    fn test_string_as_flexible_u64() {
+        check_matches_schema::<FlexibleU64Duration>(&json!("32"));
+    }
+
+    #[test]
+    fn test_integer_as_flexible_u64() {
+        check_matches_schema::<FlexibleU64Duration>(&json!(16));
+    }
+
+    #[test]
+    fn test_number_as_flexible_u64() {
+        check_matches_schema::<FlexibleU64Duration>(&json!(54.1));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_negative_as_flexible_u64() {
+        check_matches_schema::<FlexibleU64Duration>(&json!(-5));
+    }
+
+    #[test]
+    fn test_string_as_flexible_string() {
+        check_matches_schema::<FlexibleStringDuration>(&json!("32"));
+    }
+
+    #[test]
+    fn test_integer_as_flexible_string() {
+        check_matches_schema::<FlexibleStringDuration>(&json!(16));
+    }
+
+    #[test]
+    fn test_number_as_flexible_string() {
+        check_matches_schema::<FlexibleStringDuration>(&json!(54.1));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_negative_as_flexible_string() {
+        check_matches_schema::<FlexibleStringDuration>(&json!(-5));
+    }
+
+    #[test]
+    fn test_negative_as_flexible_timestamp() {
+        check_matches_schema::<FlexibleTimestamp>(&json!(-50000));
+    }
+
+    #[test]
+    fn test_negative_string_as_flexible_timestamp() {
+        check_matches_schema::<FlexibleTimestamp>(&json!("-50000"));
     }
 }
 
