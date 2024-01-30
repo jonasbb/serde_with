@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.6.0] - 2024-01-30
+
 ### Added
 
-* IfIsHumanReadable
+* Add `IfIsHumanReadable` for conditional implementation by @irriden (#690)
     Used to specify different transformations for text-based and binary formats.
+* Add more `JsonSchemaAs` impls for all `Duration*` and `Timestamp*` adaptors by @swlynch99 (#685)
 
 ### Changed
 
