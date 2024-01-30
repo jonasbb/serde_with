@@ -6,7 +6,7 @@
 //! see [`JsonSchemaAs`].
 
 use crate::{
-    formats::{Flexible, Separator, Strict},
+    formats::{Flexible, Format, Separator, Strict},
     prelude::{Schema as WrapSchema, *},
 };
 use ::schemars_0_8::{
@@ -609,3 +609,237 @@ where
 {
     forward_schema!(Vec<WrapSchema<T, TA>>);
 }
+
+mod timespan {
+    use super::*;
+
+    // #[non_exhaustive] is not actually necessary here but it should
+    // help avoid warnings about semver breakage if this ever changes.
+    #[non_exhaustive]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum TimespanTargetType {
+        String,
+        F64,
+        U64,
+        I64,
+    }
+
+    impl TimespanTargetType {
+        pub const fn is_signed(self) -> bool {
+            !matches!(self, Self::U64)
+        }
+    }
+
+    /// Internal helper trait used to constrain which types we implement
+    /// `JsonSchemaAs<T>` for.
+    pub trait TimespanSchemaTarget<F> {
+        /// The underlying type.
+        ///
+        /// This is mainly used to decide which variant of the resulting schema
+        /// should be marked as `write_only: true`.
+        const TYPE: TimespanTargetType;
+
+        /// Whether the target type is signed.
+        ///
+        /// This is only true for `std::time::Duration`.
+        const SIGNED: bool = true;
+    }
+
+    macro_rules! timespan_type_of {
+        (String) => {
+            TimespanTargetType::String
+        };
+        (f64) => {
+            TimespanTargetType::F64
+        };
+        (i64) => {
+            TimespanTargetType::I64
+        };
+        (u64) => {
+            TimespanTargetType::U64
+        };
+    }
+
+    macro_rules! declare_timespan_target {
+        ( $target:ty { $($format:ident),* $(,)? } ) => {
+            $(
+                impl TimespanSchemaTarget<$format> for $target {
+                    const TYPE: TimespanTargetType = timespan_type_of!($format);
+                }
+            )*
+        }
+    }
+
+    impl TimespanSchemaTarget<u64> for Duration {
+        const TYPE: TimespanTargetType = TimespanTargetType::U64;
+        const SIGNED: bool = false;
+    }
+
+    impl TimespanSchemaTarget<f64> for Duration {
+        const TYPE: TimespanTargetType = TimespanTargetType::F64;
+        const SIGNED: bool = false;
+    }
+
+    impl TimespanSchemaTarget<String> for Duration {
+        const TYPE: TimespanTargetType = TimespanTargetType::String;
+        const SIGNED: bool = false;
+    }
+
+    declare_timespan_target!(SystemTime { i64, f64, String });
+
+    #[cfg(feature = "chrono_0_4")]
+    declare_timespan_target!(::chrono_0_4::Duration { i64, f64, String });
+    #[cfg(feature = "chrono_0_4")]
+    declare_timespan_target!(::chrono_0_4::DateTime<::chrono_0_4::Utc> { i64, f64, String });
+    #[cfg(feature = "chrono_0_4")]
+    declare_timespan_target!(::chrono_0_4::DateTime<::chrono_0_4::Local> { i64, f64, String });
+    #[cfg(feature = "chrono_0_4")]
+    declare_timespan_target!(::chrono_0_4::NaiveDateTime { i64, f64, String });
+
+    #[cfg(feature = "time_0_3")]
+    declare_timespan_target!(::time_0_3::Duration { i64, f64, String });
+    #[cfg(feature = "time_0_3")]
+    declare_timespan_target!(::time_0_3::OffsetDateTime { i64, f64, String });
+    #[cfg(feature = "time_0_3")]
+    declare_timespan_target!(::time_0_3::PrimitiveDateTime { i64, f64, String });
+}
+
+use self::timespan::{TimespanSchemaTarget, TimespanTargetType};
+
+/// Internal type used for the base impls on DurationXXX and TimestampYYY types.
+///
+/// This allows the JsonSchema impls that are Strict to be generic without
+/// committing to it as part of the public API.
+struct Timespan<Format, Strictness>(PhantomData<(Format, Strictness)>);
+
+impl<T, F> JsonSchemaAs<T> for Timespan<F, Strict>
+where
+    T: TimespanSchemaTarget<F>,
+    F: Format + JsonSchema,
+{
+    forward_schema!(F);
+}
+
+impl TimespanTargetType {
+    pub(crate) fn to_flexible_schema(self, signed: bool) -> Schema {
+        use ::schemars_0_8::schema::StringValidation;
+
+        let mut number = SchemaObject {
+            instance_type: Some(InstanceType::Number.into()),
+            number: (!signed).then(|| {
+                Box::new(NumberValidation {
+                    minimum: Some(0.0),
+                    ..Default::default()
+                })
+            }),
+            ..Default::default()
+        };
+
+        // This is a more lenient version of the regex used to determine
+        // whether JSON numbers are valid. Specifically, it allows multiple
+        // leading zeroes whereas that is illegal in JSON.
+        let regex = r#"[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?"#;
+        let mut string = SchemaObject {
+            instance_type: Some(InstanceType::String.into()),
+            string: Some(Box::new(StringValidation {
+                pattern: Some(match signed {
+                    true => std::format!("^-?{regex}$"),
+                    false => std::format!("^{regex}$"),
+                }),
+                ..Default::default()
+            })),
+            ..Default::default()
+        };
+
+        if self == Self::String {
+            number.metadata().write_only = true;
+        } else {
+            string.metadata().write_only = true;
+        }
+
+        SchemaObject {
+            subschemas: Some(Box::new(SubschemaValidation {
+                one_of: Some(std::vec![number.into(), string.into()]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    pub(crate) fn schema_id(self) -> &'static str {
+        match self {
+            Self::String => "serde_with::FlexibleStringTimespan",
+            Self::F64 => "serde_with::FlexibleF64Timespan",
+            Self::U64 => "serde_with::FlexibleU64Timespan",
+            Self::I64 => "serde_with::FlexibleI64Timespan",
+        }
+    }
+}
+
+impl<T, F> JsonSchemaAs<T> for Timespan<F, Flexible>
+where
+    T: TimespanSchemaTarget<F>,
+    F: Format + JsonSchema,
+{
+    fn schema_name() -> String {
+        <T as TimespanSchemaTarget<F>>::TYPE
+            .schema_id()
+            .strip_prefix("serde_with::")
+            .expect("schema id did not start with `serde_with::` - this is a bug")
+            .into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        <T as TimespanSchemaTarget<F>>::TYPE.schema_id().into()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        <T as TimespanSchemaTarget<F>>::TYPE
+            .to_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
+}
+
+macro_rules! forward_duration_schema {
+    ($ty:ident) => {
+        impl<T, F> JsonSchemaAs<T> for $ty<F, Strict>
+        where
+            T: TimespanSchemaTarget<F>,
+            F: Format + JsonSchema
+        {
+            forward_schema!(WrapSchema<T, Timespan<F, Strict>>);
+        }
+
+        impl<T, F> JsonSchemaAs<T> for $ty<F, Flexible>
+        where
+            T: TimespanSchemaTarget<F>,
+            F: Format + JsonSchema
+        {
+            forward_schema!(WrapSchema<T, Timespan<F, Flexible>>);
+        }
+    };
+}
+
+forward_duration_schema!(DurationSeconds);
+forward_duration_schema!(DurationMilliSeconds);
+forward_duration_schema!(DurationMicroSeconds);
+forward_duration_schema!(DurationNanoSeconds);
+
+forward_duration_schema!(DurationSecondsWithFrac);
+forward_duration_schema!(DurationMilliSecondsWithFrac);
+forward_duration_schema!(DurationMicroSecondsWithFrac);
+forward_duration_schema!(DurationNanoSecondsWithFrac);
+
+forward_duration_schema!(TimestampSeconds);
+forward_duration_schema!(TimestampMilliSeconds);
+forward_duration_schema!(TimestampMicroSeconds);
+forward_duration_schema!(TimestampNanoSeconds);
+
+forward_duration_schema!(TimestampSecondsWithFrac);
+forward_duration_schema!(TimestampMilliSecondsWithFrac);
+forward_duration_schema!(TimestampMicroSecondsWithFrac);
+forward_duration_schema!(TimestampNanoSecondsWithFrac);
