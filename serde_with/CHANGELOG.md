@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Bump MSRV to 1.65, since that is required for the `regex` dependency.
+
 ## [3.5.1] - 2024-01-23
 
 ### Fixed
