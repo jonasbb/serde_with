@@ -556,6 +556,49 @@ pub struct Same;
 /// [`FromStr`]: std::str::FromStr
 pub struct DisplayFromStr;
 
+/// Use the first format if [`De/Serializer::is_human_readable`], otherwise use the second
+///
+/// If the second format is not specified, the normal
+/// [`Deserialize`](::serde::Deserialize)/[`Serialize`](::serde::Serialize) traits are used.
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, DisplayFromStr, IfIsHumanReadable, DurationMilliSeconds, DurationSeconds};
+/// use std::time::Duration;
+///
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct A {
+///     #[serde_as(as = "IfIsHumanReadable<DisplayFromStr>")]
+///     number: u32,
+/// }
+/// let x = A {
+///     number: 777,
+/// };
+/// assert_eq!(json!({ "number": "777" }), serde_json::to_value(&x).unwrap());
+/// assert_eq!(vec![145, 205, 3, 9], rmp_serde::to_vec(&x).unwrap());
+///
+/// #[serde_as]
+/// #[derive(Deserialize, Serialize)]
+/// struct B {
+///     #[serde_as(as = "IfIsHumanReadable<DurationMilliSeconds, DurationSeconds>")]
+///     duration: Duration,
+/// }
+/// let x = B {
+///     duration: Duration::from_millis(1500),
+/// };
+/// assert_eq!(json!({ "duration": 1500 }), serde_json::to_value(&x).unwrap());
+/// assert_eq!(vec![145, 2], rmp_serde::to_vec(&x).unwrap());
+/// # }
+/// ```
+/// [`De/Serializer::is_human_readable`]: serde::Serializer::is_human_readable
+/// [`is_human_readable`]: serde::Serializer::is_human_readable
+pub struct IfIsHumanReadable<H, F = Same>(PhantomData<H>, PhantomData<F>);
+
 /// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
 ///
 /// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`](::core::fmt::Display) implementations.

@@ -862,6 +862,23 @@ where
     }
 }
 
+impl<'de, T, H, F> DeserializeAs<'de, T> for IfIsHumanReadable<H, F>
+where
+    H: DeserializeAs<'de, T>,
+    F: DeserializeAs<'de, T>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<T, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        if deserializer.is_human_readable() {
+            H::deserialize_as(deserializer)
+        } else {
+            F::deserialize_as(deserializer)
+        }
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, Vec<T>> for VecSkipError<U>
 where

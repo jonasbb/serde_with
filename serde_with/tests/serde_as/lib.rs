@@ -36,8 +36,8 @@ use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
     formats::{CommaSeparator, Flexible, Strict},
-    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, Map, NoneAsEmptyString, OneOrMany, Same,
-    Seq, StringWithSeparator,
+    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, IfIsHumanReadable, Map,
+    NoneAsEmptyString, OneOrMany, Same, Seq, StringWithSeparator,
 };
 use std::{
     collections::HashMap,
@@ -207,6 +207,23 @@ fn test_display_fromstr() {
     struct S(#[serde_as(as = "DisplayFromStr")] u32);
 
     is_equal(S(123), expect![[r#""123""#]]);
+}
+
+#[test]
+fn test_if_is_human_readable() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "IfIsHumanReadable<DisplayFromStr>")] u32);
+
+    let ser_json = serde_json::to_string(&S(123)).unwrap();
+    assert_eq!(ser_json, r#""123""#);
+    let ser_rmp = rmp_serde::to_vec(&S(123)).unwrap();
+    assert_eq!(ser_rmp, vec![123]);
+
+    let de_json: S = serde_json::from_str(r#""123""#).unwrap();
+    assert_eq!(S(123), de_json);
+    let de_rmp: S = rmp_serde::from_read(&*vec![123]).unwrap();
+    assert_eq!(S(123), de_rmp);
 }
 
 #[test]

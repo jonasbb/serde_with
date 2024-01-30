@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* IfIsHumanReadable
+    Used to specify different transformations for text-based and binary formats.
+
 ### Changed
 
 * Bump MSRV to 1.65, since that is required for the `regex` dependency.
