@@ -130,9 +130,8 @@ hex = {version = "0.4.3", optional = true, default-features = false}
 indexmap_1 = {package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
 indexmap_2 = {package = "indexmap", version = "2.0", optional = true, default-features = false, features = ["serde"]}
 schemars_0_8 = {package = "schemars", version = "0.8.16", optional = true, default-features = false}
-# The derive feature is needed for the flattened_maybe macro.
-# https://github.com/jonasbb/serde_with/blob/eb1965a74a3be073ecd13ec05f02a01bc1c44309/serde_with/src/flatten_maybe.rs#L67
-serde = {version = "1.0.152", default-features = false, features = ["derive"] }
+serde = {version = "1.0.152", default-features = false}
+serde_derive = "1.0.152"
 serde_json = {version = "1.0.45", optional = true, default-features = false}
 serde_with_macros = {path = "../serde_with_macros", version = "=3.6.0", optional = true}
 time_0_3 = {package = "time", version = "~0.3.11", optional = true, default-features = false}
@@ -149,6 +148,7 @@ rmp-serde = "1.1.0"
 ron = "0.8"
 rustversion = "1.0.0"
 schemars_0_8 = {package = "schemars", version = "0.8.16"}
+serde = {version = "1.0.152", default-features = false, features = ["derive"]}
 serde_json = {version = "1.0.25", features = ["preserve_order"]}
 serde_test = "1.0.124"
 serde_yaml = "0.9.2"

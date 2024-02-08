@@ -861,6 +861,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde-xml-rs",
+ "serde_derive",
  "serde_json",
  "serde_test",
  "serde_with_macros",

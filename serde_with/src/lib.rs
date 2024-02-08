@@ -296,6 +296,8 @@ extern crate alloc;
 pub extern crate core;
 #[doc(hidden)]
 pub extern crate serde;
+#[doc(hidden)]
+pub extern crate serde_derive;
 #[cfg(feature = "std")]
 extern crate std;
 
