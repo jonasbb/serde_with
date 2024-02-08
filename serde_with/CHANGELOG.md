@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.6.1] - 2024-02-08
+
+### Changed
+
+* Eliminate dependency on serde's "derive" feature by @dtolnay (#694)
+    This allows parallel compilation of `serde` and `serde_derive` which can speed up the wallclock time.
+    It requires that downstream crates do not use the "derive" feature either.
+
 ## [3.6.0] - 2024-01-30
 
 ### Added
