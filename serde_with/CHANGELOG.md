@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Implement `JsonSchemaAs` for `EnumMap` by @swlynch99 (#697)
+
 ## [3.6.1] - 2024-02-08
 
 ### Changed
