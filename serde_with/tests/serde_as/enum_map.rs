@@ -9,7 +9,7 @@ fn bytes_debug_readable(bytes: &[u8]) -> String {
     for &byte in bytes {
         match byte {
             non_printable if !(0x20..0x7f).contains(&non_printable) => {
-                write!(result, "\\x{byte:02x}").unwrap();
+                result.write_fmt(format_args!("\\x{byte:02x}")).unwrap();
             }
             b'\\' => result.push_str("\\\\"),
             _ => {
