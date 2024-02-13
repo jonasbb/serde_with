@@ -46,6 +46,8 @@ fn unix_epoch_naive() -> NaiveDateTime {
 ///
 /// // Deserializes integers
 /// assert!(serde_json::from_str::<S>(r#"{ "date": 1478563200 }"#).is_ok());
+/// # // Ensure the date field is not dead code
+/// # assert_eq!(serde_json::from_str::<S>(r#"{ "date": 1478563200 }"#).unwrap().date.timestamp(), 1478563200);
 /// // floats
 /// assert!(serde_json::from_str::<S>(r#"{ "date": 1478563200.123 }"#).is_ok());
 /// // and strings with numbers, for high-precision values

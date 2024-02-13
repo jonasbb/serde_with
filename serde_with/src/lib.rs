@@ -12,16 +12,18 @@
     unused_extern_crates,
     unused_import_braces,
     unused_qualifications,
-    variant_size_differences
+    variant_size_differences,
 )]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_debug_implementations,
+    rust_2018_idioms,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
     unused_import_braces,
     unused_qualifications,
+    warnings,
 ))))]
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
@@ -217,6 +219,7 @@
 //! #     serde::{Deserialize, Serialize},
 //! #     serde_with::{serde_as, DisplayFromStr, DurationSeconds, hex::Hex, Map},
 //! # };
+//! # #[cfg(all(feature = "macros", feature = "hex"))]
 //! use std::time::Duration;
 //!
 //! # #[cfg(all(feature = "macros", feature = "hex"))]
@@ -720,7 +723,7 @@ pub struct NoneAsEmptyString;
 /// struct C {
 ///     #[serde_as(as = "Vec<DefaultOnError<DisplayFromStr>>")]
 ///     value: Vec<u32>,
-/// };
+/// }
 ///
 /// let c: C = serde_json::from_value(json!({
 ///     "value": ["1", "2", "a3", "", {}, "6"]
@@ -776,7 +779,7 @@ pub struct DefaultOnError<T = Same>(PhantomData<T>);
 /// struct C {
 ///     #[serde_as(as = "Vec<DefaultOnNull<DisplayFromStr>>")]
 ///     value: Vec<u32>,
-/// };
+/// }
 ///
 /// let c: C = serde_json::from_value(json!({
 ///     "value": ["1", "2", null, null, "5"]
@@ -881,7 +884,7 @@ pub struct BytesOrString;
 ///     d_f64: Duration,
 ///     #[serde_as(as = "DurationSeconds<String>")]
 ///     d_string: Duration,
-/// };
+/// }
 ///
 /// // Serialization
 /// // See how the values get rounded, since subsecond precision is not allowed.
@@ -939,7 +942,7 @@ pub struct BytesOrString;
 ///     d_f64: Duration,
 ///     #[serde_as(as = "DurationSeconds<String>")]
 ///     d_string: Duration,
-/// };
+/// }
 ///
 /// // Serialization
 /// // See how the values get rounded, since subsecond precision is not allowed.
@@ -1025,7 +1028,7 @@ pub struct DurationSeconds<
 ///     d_f64: Duration,
 ///     #[serde_as(as = "DurationSecondsWithFrac<String>")]
 ///     d_string: Duration,
-/// };
+/// }
 ///
 /// // Serialization
 /// // See how the values get rounded, since subsecond precision is not allowed.
@@ -1077,7 +1080,7 @@ pub struct DurationSeconds<
 ///     d_f64: Duration,
 ///     #[serde_as(as = "DurationSecondsWithFrac<String>")]
 ///     d_string: Duration,
-/// };
+/// }
 ///
 /// // Serialization
 ///
@@ -1213,7 +1216,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///     st_f64: SystemTime,
 ///     #[serde_as(as = "TimestampSeconds<String>")]
 ///     st_string: SystemTime,
-/// };
+/// }
 ///
 /// // Serialization
 /// // See how the values get rounded, since subsecond precision is not allowed.
@@ -1271,15 +1274,15 @@ pub struct DurationNanoSecondsWithFrac<
 ///     dt_f64: DateTime<Local>,
 ///     #[serde_as(as = "TimestampSeconds<String>")]
 ///     dt_string: DateTime<Utc>,
-/// };
+/// }
 ///
 /// // Serialization
 /// // See how the values get rounded, since subsecond precision is not allowed.
 ///
 /// let ts = Timestamps {
-///     dt_i64: Utc.timestamp(-12345, 0),
-///     dt_f64: Local.timestamp(-12345, 500_000_000),
-///     dt_string: Utc.timestamp(12345, 999_999_999),
+///     dt_i64: Utc.timestamp_opt(-12345, 0).unwrap(),
+///     dt_f64: Local.timestamp_opt(-12345, 500_000_000).unwrap(),
+///     dt_string: Utc.timestamp_opt(12345, 999_999_999).unwrap(),
 /// };
 /// // Observe the different data types
 /// let expected = json!({
@@ -1298,9 +1301,9 @@ pub struct DurationNanoSecondsWithFrac<
 ///     "dt_string": "12346",
 /// });
 /// let expected = Timestamps {
-///     dt_i64: Utc.timestamp(-12345, 0),
-///     dt_f64: Local.timestamp(-12346, 0),
-///     dt_string: Utc.timestamp(12346, 0),
+///     dt_i64: Utc.timestamp_opt(-12345, 0).unwrap(),
+///     dt_f64: Local.timestamp_opt(-12346, 0).unwrap(),
+///     dt_string: Utc.timestamp_opt(12346, 0).unwrap(),
 /// };
 /// assert_eq!(expected, serde_json::from_value(json).unwrap());
 /// # }
@@ -1365,7 +1368,7 @@ pub struct TimestampSeconds<
 ///     st_f64: SystemTime,
 ///     #[serde_as(as = "TimestampSecondsWithFrac<String>")]
 ///     st_string: SystemTime,
-/// };
+/// }
 ///
 /// // Serialization
 /// // See how the values get rounded, since subsecond precision is not allowed.
@@ -1417,13 +1420,13 @@ pub struct TimestampSeconds<
 ///     dt_f64: DateTime<Utc>,
 ///     #[serde_as(as = "TimestampSecondsWithFrac<String>")]
 ///     dt_string: DateTime<Local>,
-/// };
+/// }
 ///
 /// // Serialization
 ///
 /// let ts = Timestamps {
-///     dt_f64: Utc.timestamp(-12345, 500_000_000),
-///     dt_string: Local.timestamp(12345, 999_999_000),
+///     dt_f64: Utc.timestamp_opt(-12345, 500_000_000).unwrap(),
+///     dt_string: Local.timestamp_opt(12345, 999_999_000).unwrap(),
 /// };
 /// // Observe the different data types
 /// let expected = json!({
@@ -1439,8 +1442,8 @@ pub struct TimestampSeconds<
 ///     "dt_string": "12345.987",
 /// });
 /// let expected = Timestamps {
-///     dt_f64: Utc.timestamp(-12345, 500_000_000),
-///     dt_string: Local.timestamp(12345, 987_000_000),
+///     dt_f64: Utc.timestamp_opt(-12345, 500_000_000).unwrap(),
+///     dt_string: Local.timestamp_opt(12345, 987_000_000).unwrap(),
 /// };
 /// assert_eq!(expected, serde_json::from_value(json).unwrap());
 /// # }
@@ -1537,7 +1540,6 @@ pub struct TimestampNanoSecondsWithFrac<
 /// # #[derive(Debug, PartialEq)]
 /// #[derive(Deserialize, Serialize)]
 /// struct Test<'a> {
-/// #   #[cfg(FALSE)]
 ///     #[serde_as(as = "Bytes")]
 ///     array: [u8; 15],
 ///     #[serde_as(as = "Bytes")]
@@ -1545,7 +1547,6 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     #[serde_as(as = "Bytes")]
 ///     #[serde(borrow)]
 ///     cow: Cow<'a, [u8]>,
-/// #   #[cfg(FALSE)]
 ///     #[serde_as(as = "Bytes")]
 ///     #[serde(borrow)]
 ///     cow_array: Cow<'a, [u8; 15]>,
@@ -1554,11 +1555,9 @@ pub struct TimestampNanoSecondsWithFrac<
 /// }
 ///
 /// let value = Test {
-/// #   #[cfg(FALSE)]
 ///     array: b"0123456789ABCDE".clone(),
 ///     boxed: b"...".to_vec().into_boxed_slice(),
 ///     cow: Cow::Borrowed(b"FooBar"),
-/// #   #[cfg(FALSE)]
 ///     cow_array: Cow::Borrowed(&[42u8; 15]),
 ///     vec: vec![0x41, 0x61, 0x21],
 /// };
@@ -1569,13 +1568,6 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     cow_array: "KioqKioqKioqKioqKioq",
 ///     vec: "QWEh",
 /// )"#;
-/// # drop(expected);
-/// # // Create a fake expected value that doesn't use const generics
-/// # let expected = r#"(
-/// #     boxed: "Li4u",
-/// #     cow: "Rm9vQmFy",
-/// #     vec: "QWEh",
-/// # )"#;
 ///
 /// # let pretty_config = ron::ser::PrettyConfig::new()
 /// #     .new_line("\n".into());
@@ -1591,13 +1583,11 @@ pub struct TimestampNanoSecondsWithFrac<
 /// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{serde_as, Bytes};
-/// # use std::borrow::Cow;
 /// #
 /// #[serde_as]
 /// # #[derive(Debug, PartialEq)]
 /// #[derive(Deserialize, Serialize)]
 /// struct TestBorrows<'a> {
-/// #   #[cfg(FALSE)]
 ///     #[serde_as(as = "Bytes")]
 ///     #[serde(borrow)]
 ///     array_buf: &'a [u8; 15],
@@ -1607,7 +1597,6 @@ pub struct TimestampNanoSecondsWithFrac<
 /// }
 ///
 /// let value = TestBorrows {
-/// #   #[cfg(FALSE)]
 ///     array_buf: &[10u8; 15],
 ///     buf: &[20u8, 21u8, 22u8],
 /// };
@@ -1615,11 +1604,6 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     array_buf: "CgoKCgoKCgoKCgoKCgoK",
 ///     buf: "FBUW",
 /// )"#;
-/// # drop(expected);
-/// # // Create a fake expected value that doesn't use const generics
-/// # let expected = r#"(
-/// #     buf: "FBUW",
-/// # )"#;
 ///
 /// # let pretty_config = ron::ser::PrettyConfig::new()
 /// #     .new_line("\n".into());
@@ -1991,7 +1975,6 @@ pub struct FromIntoRef<T>(PhantomData<T>);
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TryFromInto};
-/// # use std::convert::TryFrom;
 /// #
 /// #[derive(Clone, Debug, PartialEq)]
 /// enum Boollike {
@@ -2080,7 +2063,6 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_json::json;
 /// # use serde_with::{serde_as, TryFromIntoRef};
-/// # use std::convert::TryFrom;
 /// #
 /// #[derive(Debug, PartialEq)]
 /// enum Boollike {
@@ -2363,7 +2345,6 @@ pub struct StringWithSeparator<Sep, T>(PhantomData<(Sep, T)>);
 /// ```rust
 /// # #[cfg(feature = "macros")] {
 /// # use serde::{Deserialize, Serialize};
-/// # use serde_json::json;
 /// # use serde_with::{serde_as, Map};
 /// #
 /// #[serde_as]
