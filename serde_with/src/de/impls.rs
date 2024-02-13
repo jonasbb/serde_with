@@ -847,7 +847,7 @@ where
             type Value = S;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(formatter, "a string")
+                formatter.write_str("a string")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
@@ -1091,7 +1091,7 @@ where
             type Value = I;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(formatter, "a string")
+                formatter.write_str("a string")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>

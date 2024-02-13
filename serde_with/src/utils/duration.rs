@@ -390,7 +390,7 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<String, Strict>
             type Value = DurationSigned;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-                write!(formatter, "a string containing a number")
+                formatter.write_str("a string containing a number")
             }
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
