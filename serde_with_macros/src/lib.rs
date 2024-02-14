@@ -15,13 +15,14 @@
 )]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
-    missing_copy_implementations,
     missing_debug_implementations,
+    rust_2018_idioms,
     trivial_casts,
     trivial_numeric_casts,
     unused_extern_crates,
     unused_import_braces,
     unused_qualifications,
+    warnings,
 ))))]
 #![doc(test(attr(warn(rust_2018_idioms))))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`

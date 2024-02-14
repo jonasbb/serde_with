@@ -46,6 +46,7 @@ use std::borrow::Cow;
 /// use schemars::schema::Schema;
 /// use schemars::JsonSchema;
 ///
+/// # #[allow(dead_code)]
 /// struct PositiveInt;
 ///
 /// impl SerializeAs<i32> for PositiveInt {
