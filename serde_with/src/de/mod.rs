@@ -58,7 +58,7 @@ use crate::prelude::*;
 /// ```
 ///
 /// It uses two type parameters, `T` and `U` instead of only one and performs the deserialization step using the `DeserializeAsWrap` type.
-/// The `T` type is the on the Rust side after deserialization, whereas the `U` type determines how the value will be deserialized.
+/// The `T` type is the type on the Rust side after deserialization, whereas the `U` type determines how the value will be deserialized.
 /// These two changes are usually enough to make a container type implement [`DeserializeAs`][].
 ///
 ///

@@ -60,7 +60,7 @@ use crate::prelude::*;
 /// ```
 ///
 /// It uses two type parameters, `T` and `U` instead of only one and performs the serialization step using the `SerializeAsWrap` type.
-/// The `T` type is the on the Rust side before serialization, whereas the `U` type determines how the value will be serialized.
+/// The `T` type is the type on the Rust side before serialization, whereas the `U` type determines how the value will be serialized.
 /// These two changes are usually enough to make a container type implement [`SerializeAs`][].
 ///
 /// [`SerializeAsWrap`] is a piece of glue code which turns [`SerializeAs`] into a serde compatible datatype, by converting all calls to `serialize` into `serialize_as`.
