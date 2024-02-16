@@ -2494,9 +2494,9 @@ pub struct Seq<V>(PhantomData<V>);
 #[cfg(feature = "alloc")]
 pub struct MapPreventDuplicates<K, V>(PhantomData<(K, V)>);
 
-/// Ensure that the last value is taken, if duplicate values exist
+/// Ensure that the first value is taken, if duplicate values exist
 ///
-/// By default serde has a first-value-wins implementation, if duplicate keys for a set exist.
+/// By default serde has a last-value-wins implementation, if duplicate keys for a set exist.
 /// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
 ///
 /// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
