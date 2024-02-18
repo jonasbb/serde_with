@@ -2456,8 +2456,8 @@ pub struct Seq<V>(PhantomData<V>);
 ///
 /// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
 ///
+/// [`BTreeMap`]: std::collections::BTreeMap
 /// [`HashMap`]: std::collections::HashMap
-/// [`BTreeMap`]: std::collections::HashMap
 ///
 /// # Example
 ///
@@ -2494,15 +2494,15 @@ pub struct Seq<V>(PhantomData<V>);
 #[cfg(feature = "alloc")]
 pub struct MapPreventDuplicates<K, V>(PhantomData<(K, V)>);
 
-/// Ensure that the first value is taken, if duplicate values exist
+/// Ensure that the first key is taken, if duplicate keys exist
 ///
-/// By default serde has a last-value-wins implementation, if duplicate keys for a set exist.
-/// Sometimes the opposite strategy is desired. This helper implements a first-value-wins strategy.
+/// By default serde has a last-key-wins implementation, if duplicate keys for a map exist.
+/// Sometimes the opposite strategy is desired. This helper implements a first-key-wins strategy.
 ///
-/// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
+/// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
 ///
-/// [`HashSet`]: std::collections::HashSet
-/// [`BTreeSet`]: std::collections::HashSet
+/// [`BTreeMap`]: std::collections::BTreeMap
+/// [`HashMap`]: std::collections::HashMap
 #[cfg(feature = "alloc")]
 pub struct MapFirstKeyWins<K, V>(PhantomData<(K, V)>);
 
@@ -2516,8 +2516,8 @@ pub struct MapFirstKeyWins<K, V>(PhantomData<(K, V)>);
 ///
 /// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
 ///
+/// [`BTreeSet`]: std::collections::BTreeSet
 /// [`HashSet`]: std::collections::HashSet
-/// [`BTreeSet`]: std::collections::HashSet
 ///
 /// # Example
 ///
@@ -2558,8 +2558,8 @@ pub struct SetPreventDuplicates<T>(PhantomData<T>);
 ///
 /// The implementation supports both the [`HashSet`] and the [`BTreeSet`] from the standard library.
 ///
+/// [`BTreeSet`]: std::collections::BTreeSet
 /// [`HashSet`]: std::collections::HashSet
-/// [`BTreeSet`]: std::collections::HashSet
 #[cfg(feature = "alloc")]
 pub struct SetLastValueWins<T>(PhantomData<T>);
 
