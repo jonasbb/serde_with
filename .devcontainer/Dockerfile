@@ -3,7 +3,8 @@
 FROM mcr.microsoft.com/devcontainers/rust:1
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends lld python3-pip \
+    && apt-get -y install --no-install-recommends lld pipx \
+    && pipx install pre-commit \
     && rustup update \
     && rustup toolchain install nightly --profile minimal --component clippy,rustfmt
 COPY config /root/.cargo/config
