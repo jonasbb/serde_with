@@ -17,7 +17,6 @@ use ::schemars_0_8::{
     },
     JsonSchema,
 };
-use std::borrow::Cow;
 
 //===================================================================
 // Trait Definition

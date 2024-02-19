@@ -5,7 +5,6 @@ use crate::{
         PreventDuplicateInsertsSet,
     },
     prelude::*,
-    MapFirstKeyWins, MapPreventDuplicates, SetLastValueWins, SetPreventDuplicates,
 };
 #[cfg(feature = "hashbrown_0_14")]
 use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};

@@ -119,7 +119,7 @@ fn schemars_custom_with() {
 
 mod test_std {
     use super::*;
-    use std::collections::{BTreeMap, BTreeSet, VecDeque};
+    use std::collections::{BTreeMap, VecDeque};
 
     declare_snapshot_test! {
         option {
@@ -178,7 +178,6 @@ mod test_std {
 mod snapshots {
     use super::*;
     use serde_with::formats::*;
-    use std::collections::BTreeSet;
 
     #[allow(dead_code)]
     #[derive(JsonSchema, Serialize)]

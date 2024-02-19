@@ -1,4 +1,4 @@
-use crate::{formats, formats::Strictness, prelude::*};
+use crate::{formats::Strictness, prelude::*};
 #[cfg(feature = "hashbrown_0_14")]
 use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};
 #[cfg(feature = "indexmap_1")]
@@ -69,7 +69,6 @@ macro_rules! foreach_seq {
         foreach_seq!($m, T);
     };
 }
-pub(crate) use foreach_seq;
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)

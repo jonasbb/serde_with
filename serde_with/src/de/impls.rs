@@ -96,7 +96,6 @@ macro_rules! foreach_seq {
         );
     };
 }
-pub(crate) use foreach_seq;
 
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
