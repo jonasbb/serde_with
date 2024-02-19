@@ -9,7 +9,6 @@
 mod utils;
 
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
-use core::iter::FromIterator;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr, Same};

@@ -1,11 +1,10 @@
-use super::impls::{foreach_map, foreach_set};
+use super::impls::macros::{foreach_map, foreach_set};
 use crate::{
     duplicate_key_impls::{
         DuplicateInsertsFirstWinsMap, DuplicateInsertsLastWinsSet, PreventDuplicateInsertsMap,
         PreventDuplicateInsertsSet,
     },
     prelude::*,
-    MapFirstKeyWins, MapPreventDuplicates, SetLastValueWins, SetPreventDuplicates,
 };
 #[cfg(feature = "hashbrown_0_14")]
 use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};

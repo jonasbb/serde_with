@@ -9,7 +9,6 @@
 mod utils;
 
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
-use core::iter::FromIterator;
 use expect_test::expect;
 use indexmap_2::{IndexMap, IndexSet};
 use serde::{Deserialize, Serialize};

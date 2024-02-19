@@ -1,7 +1,5 @@
-use super::impls::{foreach_map, foreach_set};
-use crate::{
-    prelude::*, MapFirstKeyWins, MapPreventDuplicates, SetLastValueWins, SetPreventDuplicates,
-};
+use super::impls::macros::{foreach_map, foreach_set};
+use crate::prelude::*;
 #[cfg(feature = "hashbrown_0_14")]
 use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};
 #[cfg(feature = "indexmap_1")]

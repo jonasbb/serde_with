@@ -15,7 +15,7 @@ use crate::utils::{
 };
 use alloc::collections::BTreeMap;
 use chrono_0_4::{DateTime, Duration, Local, NaiveDateTime, TimeZone, Utc};
-use core::{iter::FromIterator, str::FromStr};
+use core::str::FromStr;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
