@@ -1,4 +1,4 @@
-use super::impls::{foreach_map, foreach_set};
+use super::impls::macros::{foreach_map, foreach_set};
 use crate::{
     duplicate_key_impls::{
         DuplicateInsertsFirstWinsMap, DuplicateInsertsLastWinsSet, PreventDuplicateInsertsMap,
