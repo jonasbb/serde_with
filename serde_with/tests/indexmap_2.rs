@@ -1,11 +1,3 @@
-#![allow(
-  // clippy is broken and shows wrong warnings
-  // clippy on stable does not know yet about the lint name
-  unknown_lints,
-  // https://github.com/rust-lang/rust-clippy/issues/8867
-  clippy::derive_partial_eq_without_eq,
-)]
-
 mod utils;
 
 use crate::utils::{check_deserialization, check_error_deserialization, is_equal};
@@ -195,7 +187,7 @@ fn duplicate_value_last_wins_indexset() {
         where
             H: std::hash::Hasher,
         {
-            self.0.hash(state)
+            self.0.hash(state);
         }
     }
 

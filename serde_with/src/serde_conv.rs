@@ -111,7 +111,6 @@ macro_rules! serde_conv {
         $vis struct $m;
 
         const _:() = {
-            #[allow(clippy::ptr_arg)]
             impl $m {
                 $vis fn serialize<S>(x: &$t, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
                 where

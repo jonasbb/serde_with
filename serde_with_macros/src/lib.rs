@@ -1,18 +1,7 @@
+// Cleanup when workspace lints can be overriden
+// https://github.com/rust-lang/cargo/issues/13157
 #![forbid(unsafe_code)]
-#![warn(
-    clippy::semicolon_if_nothing_returned,
-    missing_copy_implementations,
-    missing_debug_implementations,
-    missing_docs,
-    rust_2018_idioms,
-    rustdoc::missing_crate_level_docs,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    variant_size_differences
-)]
+#![warn(missing_copy_implementations, missing_debug_implementations)]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_debug_implementations,
@@ -28,10 +17,6 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/3.6.1/")]
-// Necessary to silence the warning about clippy::unknown_clippy_lints on nightly
-#![allow(renamed_and_removed_lints)]
-// Necessary for nightly clippy lints
-#![allow(clippy::unknown_clippy_lints)]
 // Tarpaulin does not work well with proc macros and marks most of the lines as uncovered.
 #![cfg(not(tarpaulin_include))]
 
@@ -41,9 +26,6 @@
 //! All macros **MUST** be used via the re-exports in the [`serde_with`] crate.
 //!
 //! [`serde_with`]: https://crates.io/crates/serde_with/
-
-#[allow(unused_extern_crates)]
-extern crate proc_macro;
 
 mod apply;
 mod utils;

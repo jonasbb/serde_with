@@ -1,7 +1,3 @@
-// Needed to suppress a 2021 incompatibility warning in the macro generated code
-// The non_fmt_panic lint is not yet available on most Rust versions
-#![allow(unknown_lints, non_fmt_panics)]
-
 use version_sync::{assert_contains_regex, assert_html_root_url_updated};
 
 #[test]
@@ -60,7 +56,7 @@ fn test_docs_rs_url_point_to_current_version() -> Result<(), Box<dyn std::error:
                             line_number + 1,
                             pkg_version,
                             capture.get(0).expect("Group 0 always exists").as_str()
-                        )
+                        );
                     }
                     _ => {}
                 }

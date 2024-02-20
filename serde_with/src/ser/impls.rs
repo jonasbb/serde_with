@@ -15,9 +15,9 @@ type BoxedSlice<T> = Box<[T]>;
 type Slice<T> = [T];
 
 pub(crate) mod macros {
-    // The unused_import lint has false-positives around macros
+    // The unused_imports lint has false-positives around macros
     // https://github.com/rust-lang/rust/issues/78894
-    #![allow(unused_import)]
+    #![allow(unused_imports)]
 
     macro_rules! foreach_map {
     ($m:ident) => {

@@ -2,7 +2,7 @@
 
 // Ensure no prelude is available
 #![no_implicit_prelude]
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code)]
 
 use ::s_with::serde_conv;
 

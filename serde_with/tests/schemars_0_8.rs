@@ -351,7 +351,7 @@ mod array {
     fn test_oob_item() {
         check_matches_schema::<FixedArray>(&json!({
             "array": [-1, 0x1_0000_0000i64, 32]
-        }))
+        }));
     }
 }
 
@@ -417,7 +417,7 @@ mod bool_from_int {
     fn test_fractional_value_strict() {
         check_matches_schema::<BoolStrict>(&json!({
             "value": 0.5
-        }))
+        }));
     }
 
     #[test]
@@ -425,7 +425,7 @@ mod bool_from_int {
     fn test_fractional_value_flexible() {
         check_matches_schema::<BoolFlexible>(&json!({
             "value": 0.5
-        }))
+        }));
     }
 }
 

@@ -1,19 +1,3 @@
-#![warn(
-    clippy::semicolon_if_nothing_returned,
-    // New clippy lints, not yet stable
-    // clippy::std_instead_of_core,
-    // clippy::std_instead_of_alloc,
-    // clippy::alloc_instead_of_core,
-    missing_docs,
-    rust_2018_idioms,
-    rustdoc::missing_crate_level_docs,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    variant_size_differences,
-)]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_debug_implementations,
@@ -30,17 +14,6 @@
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with/3.6.1/")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![allow(
-    // clippy is broken and shows wrong warnings
-    // clippy on stable does not know yet about the lint name
-    unknown_lints,
-    // https://github.com/rust-lang/rust-clippy/issues/8560
-    clippy::only_used_in_recursion,
-    // https://github.com/rust-lang/rust-clippy/issues/8867
-    clippy::derive_partial_eq_without_eq,
-    // https://github.com/rust-lang/rust-clippy/issues/9101
-    clippy::explicit_auto_deref
-)]
 #![no_std]
 
 //! [![crates.io badge](https://img.shields.io/crates/v/serde_with.svg)](https://crates.io/crates/serde_with/)

@@ -2,7 +2,7 @@
 
 // Ensure no prelude is available
 #![no_implicit_prelude]
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code)]
 
 // The macro creates custom deserialization code.
 // You need to specify a function name and the field name of the flattened field.
