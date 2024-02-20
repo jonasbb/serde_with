@@ -27,9 +27,6 @@
 //!
 //! [`serde_with`]: https://crates.io/crates/serde_with/
 
-#[allow(unused_extern_crates)]
-extern crate proc_macro;
-
 mod apply;
 mod utils;
 
