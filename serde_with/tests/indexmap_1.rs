@@ -195,7 +195,7 @@ fn duplicate_value_last_wins_indexset() {
         where
             H: std::hash::Hasher,
         {
-            self.0.hash(state)
+            self.0.hash(state);
         }
     }
 

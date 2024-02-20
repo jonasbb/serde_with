@@ -43,6 +43,8 @@ struct DataBasic {
 }
 test!(test_basic, DataBasic);
 
+// This tests different ways of qualifying the Option type
+#[allow(unused_qualifications)]
 #[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
 struct DataFullyQualified {
@@ -116,11 +118,15 @@ fn test_serialize_always() {
     assert_eq!(data, serde_json::from_value(res).unwrap());
 }
 
+// This tests different ways of qualifying the Option type
+#[allow(unused_qualifications)]
 #[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize)]
 struct DataTuple(Option<String>, std::option::Option<String>);
 test_tuple!(test_tuple, DataTuple);
 
+// This tests different ways of qualifying the Option type
+#[allow(unused_qualifications)]
 #[skip_serializing_none]
 #[derive(Debug, Eq, PartialEq, Serialize)]
 enum DataEnum {

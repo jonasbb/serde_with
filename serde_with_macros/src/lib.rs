@@ -1,18 +1,5 @@
 #![forbid(unsafe_code)]
-#![warn(
-    clippy::semicolon_if_nothing_returned,
-    missing_copy_implementations,
-    missing_debug_implementations,
-    missing_docs,
-    rust_2018_idioms,
-    rustdoc::missing_crate_level_docs,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    variant_size_differences
-)]
+#![warn(missing_copy_implementations, missing_debug_implementations)]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_debug_implementations,

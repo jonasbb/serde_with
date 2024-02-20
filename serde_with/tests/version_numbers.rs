@@ -60,7 +60,7 @@ fn test_docs_rs_url_point_to_current_version() -> Result<(), Box<dyn std::error:
                             line_number + 1,
                             pkg_version,
                             capture.get(0).expect("Group 0 always exists").as_str()
-                        )
+                        );
                     }
                     _ => {}
                 }

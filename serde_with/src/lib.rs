@@ -1,19 +1,3 @@
-#![warn(
-    clippy::semicolon_if_nothing_returned,
-    // New clippy lints, not yet stable
-    // clippy::std_instead_of_core,
-    // clippy::std_instead_of_alloc,
-    // clippy::alloc_instead_of_core,
-    missing_docs,
-    rust_2018_idioms,
-    rustdoc::missing_crate_level_docs,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    variant_size_differences,
-)]
 #![doc(test(attr(forbid(unsafe_code))))]
 #![doc(test(attr(deny(
     missing_debug_implementations,
