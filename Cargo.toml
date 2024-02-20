@@ -32,8 +32,16 @@ unused_extern_crates = "warn"
 unused_import_braces = "warn"
 unused_qualifications = "warn"
 variant_size_differences = "warn"
+# Unsafe code is needed for array initialization using MaybeUninit.
+# unsafe_code = "forbid"
 
 [workspace.lints.clippy]
+# These lints have false positives and are disabled until they are fixed.
+
+# explicit_auto_deref suggests code that does not compile
+# https://github.com/rust-lang/rust-clippy/issues/9841
+explicit_auto_deref = "allow"
+
 # alloc_instead_of_core = "warn"
 # Checks for usage of `cloned()` on an `Iterator` or `Option` where `copied()` could be used instead.
 cloned_instead_of_copied = "warn"

@@ -1,3 +1,5 @@
+// Cleanup when workspace lints can be overriden
+// https://github.com/rust-lang/cargo/issues/13157
 #![forbid(unsafe_code)]
 #![warn(missing_copy_implementations, missing_debug_implementations)]
 #![doc(test(attr(forbid(unsafe_code))))]
@@ -15,10 +17,6 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/3.6.1/")]
-// Necessary to silence the warning about clippy::unknown_clippy_lints on nightly
-#![allow(renamed_and_removed_lints)]
-// Necessary for nightly clippy lints
-#![allow(clippy::unknown_clippy_lints)]
 // Tarpaulin does not work well with proc macros and marks most of the lines as uncovered.
 #![cfg(not(tarpaulin_include))]
 
