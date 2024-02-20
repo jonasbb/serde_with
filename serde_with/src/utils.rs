@@ -171,9 +171,6 @@ where
     // TODO could be simplified with nightly maybe_uninit_uninit_array feature
     // https://doc.rust-lang.org/nightly/std/mem/union.MaybeUninit.html#method.uninit_array
 
-    // Clippy is broken and has a false positive here
-    // https://github.com/rust-lang/rust-clippy/issues/10551
-    #[allow(clippy::uninit_assumed_init)]
     let mut arr: [MaybeUninit<T>; N] = unsafe { MaybeUninit::uninit().assume_init() };
 
     // Dropping a `MaybeUninit` does nothing. Thus using raw pointer

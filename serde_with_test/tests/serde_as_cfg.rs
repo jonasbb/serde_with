@@ -2,7 +2,7 @@
 
 // Ensure no prelude is available
 #![no_implicit_prelude]
-#![allow(dead_code, unused_imports)]
+#![allow(dead_code)]
 
 #[cfg_attr(test, ::cfg_eval::cfg_eval, ::s_with::serde_as(crate = "::s_with"))]
 #[cfg_attr(test, derive(::s::Serialize, ::s::Deserialize))]
