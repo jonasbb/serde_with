@@ -18,20 +18,21 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 Make sure to include the three major parts of information:
 
 1. Show your code and serialized data.
-    Without them it is almost impossible to understand where the problem arises.
+    Without them, it is almost impossible to understand where the problem arises.
 2. Explain what the expected result and/or expected serialized data is.
-3. If possible prepare a minimal running example.
+3. If possible, prepare a minimal running example.
 
 Security vulnerabilities should be reported privately as [security advisory](https://github.com/jonasbb/serde_with/security).
 Check [SECURITY.md](./SECURITY.md) for details.
 
 ## Submitting a PR
 
-This repository provides a devcontainer setup, which can be used with VS Code or GitHub codespaces to simplify contributions.
+This repository provides a dev container setup, which can be used with VS Code or GitHub Codespaces to simplify contributing.
 
-1. Simply start by opening a PR.
+1. Start by opening a PR.
 2. New features should always be accompanied by tests and documentation.
-    * New transformations should have a documentation using rustdoc. A short descriptions should be added to `serde_as_transformations.md` too.
+    * New transformations should have documentation using rustdoc.
+      A short description should be added to `serde_as_transformations.md` too.
     * Integration tests belong in the `tests` folder.
     * A changelog entry can also be added.
 3. Contributions must pass `cargo clippy` and `cargo fmt`.
@@ -40,7 +41,7 @@ This repository provides a devcontainer setup, which can be used with VS Code or
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall
-be dual licensed as above, without any additional terms or conditions.
+be dual-licensed as above, without any additional terms or conditions.
 
 [user guide]: https://docs.rs/serde_with/latest/serde_with/guide/index.html
 
@@ -55,4 +56,4 @@ A new chrono v0.5 would get the feature name `chrono_0_5` and the v1 release `ch
 
 `serde_with` depends also on further crates to implement the converters, such as `base64` or `hex`.
 Here the feature name should not depend on the crate, but rather describe the added functionality enabled by it.
-For example, additional JSON functionality is behind the `json` feature and it depends on `serde_json` for the implementation.
+For example, additional JSON functionality is behind the `json` feature, and it depends on `serde_json` for the implementation.

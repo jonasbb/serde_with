@@ -1,4 +1,4 @@
-// Cleanup when workspace lints can be overriden
+// Cleanup when workspace lints can be overridden
 // https://github.com/rust-lang/cargo/issues/13157
 #![forbid(unsafe_code)]
 #![warn(missing_copy_implementations, missing_debug_implementations)]
@@ -447,7 +447,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 
 /// Convenience macro to use the [`serde_as`] system.
 ///
-/// The [`serde_as`] system is designed as a more flexible alternative to serde's with-annotation.
+/// The [`serde_as`] system is designed as a more flexible alternative to serde's `with` annotation.
 /// The `#[serde_as]` attribute must be placed *before* the `#[derive]` attribute.
 /// Each field of a struct or enum can be annotated with `#[serde_as(...)]` to specify which
 /// transformations should be applied. `serde_as` is *not* supported on enum variants.

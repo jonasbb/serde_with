@@ -159,7 +159,7 @@ where
 impl<T: ?Sized> As<T> {
     /// Serialize type `T` using [`SerializeAs`][]
     ///
-    /// The function signature is compatible with [serde's with-annotation][with-annotation].
+    /// The function signature is compatible with [serde's `with` annotation][with-annotation].
     ///
     /// [with-annotation]: https://serde.rs/field-attrs.html#with
     pub fn serialize<S, I>(value: &I, serializer: S) -> Result<S::Ok, S::Error>

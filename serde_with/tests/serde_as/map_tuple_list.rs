@@ -320,7 +320,7 @@ fn test_tuple_array_as_map() {
     );
 }
 
-// Test that the `Seq` conversion works when the inner type is explicity specified.
+// Test that the `Seq` conversion works when the inner type is explicitly specified.
 #[test]
 fn test_map_as_tuple_with_nested_complex_type() {
     #[serde_as]

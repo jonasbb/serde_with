@@ -28,7 +28,7 @@ fn unix_epoch_naive() -> NaiveDateTime {
     NaiveDateTime::from_timestamp_opt(0, 0).unwrap()
 }
 
-/// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
+/// Deserialize a Unix timestamp with optional sub-second precision into a `DateTime<Utc>`.
 ///
 /// The `DateTime<Utc>` can be serialized from an integer, a float, or a string representing a number.
 ///

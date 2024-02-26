@@ -28,7 +28,7 @@
 //!
 //! ---
 //!
-//! This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][as-annotation]-annotation.
+//! This crate provides custom de/serialization helpers to use in combination with [serde's `with` annotation][with-annotation] and with the improved [`serde_as`][as-annotation]-annotation.
 //! Some common use cases are:
 //!
 //! * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
@@ -187,7 +187,7 @@
 //!
 //! ## Advanced `serde_as` usage
 //!
-//! This example is mainly supposed to highlight the flexibility of the `serde_as`-annotation compared to [serde's with-annotation][with-annotation].
+//! This example is mainly supposed to highlight the flexibility of the `serde_as` annotation compared to [serde's `with` annotation][with-annotation].
 //! More details about `serde_as` can be found in the [user guide].
 //!
 //! ```rust
@@ -439,8 +439,8 @@ pub use serde_with_macros::*;
 
 /// Adapter to convert from `serde_as` to the serde traits.
 ///
-/// The `As` type adapter allows using types which implement [`DeserializeAs`] or [`SerializeAs`] in place of serde's with-annotation.
-/// The with-annotation allows running custom code when de/serializing, however it is quite inflexible.
+/// The `As` type adapter allows using types which implement [`DeserializeAs`] or [`SerializeAs`] in place of serde's `with` annotation.
+/// The `with` annotation allows running custom code when de/serializing, however it is quite inflexible.
 /// The traits [`DeserializeAs`]/[`SerializeAs`] are more flexible, as they allow composition and nesting of types to create more complex de/serialization behavior.
 /// However, they are not directly compatible with serde, as they are not provided by serde.
 /// The `As` type adapter makes them compatible, by forwarding the function calls to `serialize`/`deserialize` to the corresponding functions `serialize_as` and `deserialize_as`.
@@ -817,8 +817,8 @@ pub struct BytesOrString;
 
 /// De/Serialize Durations as number of seconds.
 ///
-/// De/serialize durations as number of seconds with subsecond precision.
-/// Subsecond precision is *only* supported for [`DurationSecondsWithFrac`], but not for [`DurationSeconds`].
+/// De/serialize durations as number of seconds with sub-second precision.
+/// Sub-second precision is *only* supported for [`DurationSecondsWithFrac`], but not for [`DurationSeconds`].
 /// You can configure the serialization format between integers, floats, and stringified numbers with the `FORMAT` specifier and configure the deserialization with the `STRICTNESS` specifier.
 ///
 /// The `STRICTNESS` specifier can either be [`formats::Strict`] or [`formats::Flexible`] and defaults to [`formats::Strict`].
@@ -1490,7 +1490,7 @@ pub struct TimestampNanoSecondsWithFrac<
 /// Serialization of byte sequences like `&[u8]` or `Vec<u8>` is quite inefficient since each value will be serialized individually.
 /// This converter type optimizes the serialization and deserialization.
 ///
-/// This is a port of the [`serde_bytes`] crate making it compatible with the `serde_as`-annotation, which allows it to be used in more cases than provided by [`serde_bytes`].
+/// This is a port of the [`serde_bytes`] crate making it compatible with the `serde_as` annotation, which allows it to be used in more cases than provided by [`serde_bytes`].
 ///
 /// The type provides de/serialization for these types:
 ///
