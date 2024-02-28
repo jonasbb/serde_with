@@ -53,8 +53,8 @@ guide = ["dep:doc-comment", "dep:document-features", "macros", "std"]
 
 #! # Features
 #!
-#! The following features enable support for types from other crates or enable additional functionality, that requires further dependencies to be pulled in.
-#! These features are disabled by default to minimize the amount of required dependencies.
+#! The following features enable support for types from other crates or enable additional functionality that requires further dependencies to be pulled in.
+#! These features are disabled by default to minimize the number of required dependencies.
 
 ## The feature enables serializing data in base64 format.
 base64 = ["dep:base64", "alloc"]
@@ -119,7 +119,7 @@ schemars_0_8 = ["dep:schemars_0_8", "std", "serde_with_macros?/schemars_0_8"]
 ## Some functionality is only available when `alloc` or `std` is enabled too.
 time_0_3 = ["dep:time_0_3"]
 
-# When adding new optional dependencies update the documentation in feature-flags.md
+# When adding new optional dependencies, update the documentation in feature-flags.md
 [dependencies]
 base64 = {version = "0.21.0", optional = true, default-features = false}
 chrono_0_4 = {package = "chrono", version = "0.4.20", optional = true, default-features = false, features = ["serde"]}

@@ -107,7 +107,7 @@ pub trait JsonSchemaAs<T: ?Sized> {
 
     /// The name of the generated JSON Schema.
     ///
-    /// This is used as the title for root schemas, and the key within the root's `definitions` property for subschemas.
+    /// This is used as the title for root schemas, and the key within the root's `definitions` property for sub-schemas.
     fn schema_name() -> String;
 
     /// Returns a string that uniquely identifies the schema produced by this type.
@@ -530,7 +530,7 @@ where
         std::format!("serde_with::EnumMap<{}>", T::schema_id()).into()
     }
 
-    // We generate the shcema here by going through all the variants of the
+    // We generate the schema here by going through all the variants of the
     // enum (the oneOf property) and sticking all their properties onto an
     // object.
     //

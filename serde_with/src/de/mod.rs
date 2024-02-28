@@ -145,7 +145,7 @@ where
 impl<T: ?Sized> As<T> {
     /// Deserialize type `T` using [`DeserializeAs`][]
     ///
-    /// The function signature is compatible with [serde's with-annotation][with-annotation].
+    /// The function signature is compatible with [serde's `with` annotation][with-annotation].
     ///
     /// [with-annotation]: https://serde.rs/field-attrs.html#with
     pub fn deserialize<'de, D, I>(deserializer: D) -> Result<I, D::Error>

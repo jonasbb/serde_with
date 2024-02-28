@@ -36,7 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # This pulls from the "Get Changelog Entry" step above, referencing its ID to get its outputs object.
+          # This pulls from the "Get Changelog Entry" step above, referencing its ID to get its `outputs` object.
           # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           tag_name: "v${{ steps.changelog_reader.outputs.version }}"
           name: "serde_with v${{ steps.changelog_reader.outputs.version }}"

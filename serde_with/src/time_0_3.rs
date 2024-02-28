@@ -320,7 +320,7 @@ where
     Ok(unix_epoch_primitive() + duration_from_duration_signed::<D>(dur)?)
 }
 
-// No subsecond precision
+// No sub-second precision
 use_duration_signed_de!(
     DurationSeconds DurationSeconds,
     DurationMilliSeconds DurationMilliSeconds,

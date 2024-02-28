@@ -13,7 +13,7 @@ struct ConflictingAsAnnotations {
     c: u32,
 }
 
-/// Test error message for conflicts with serde's with-annotation
+/// Test error message for conflicts with serde's `with` annotation
 #[serde_as]
 #[derive(Serialize)]
 struct ConflictingWithAnnotations {

@@ -8,7 +8,7 @@
 
 ---
 
-This crate provides custom de/serialization helpers to use in combination with [serde's with-annotation][with-annotation] and with the improved [`serde_as`][as-annotation]-annotation.
+This crate provides custom de/serialization helpers to use in combination with [serde's `with` annotation][with-annotation] and with the improved [`serde_as`][as-annotation]-annotation.
 Some common use cases are:
 
 * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
@@ -25,7 +25,7 @@ Some common use cases are:
 
 **Check out the [user guide][user guide] to find out more tips and tricks about this crate.**
 
-For further help using this crate you can [open a new discussion](https://github.com/jonasbb/serde_with/discussions/new) or ask on [users.rust-lang.org](https://users.rust-lang.org/).
+For further help using this crate, you can [open a new discussion](https://github.com/jonasbb/serde_with/discussions/new) or ask on [users.rust-lang.org](https://users.rust-lang.org/).
 For bugs, please open a [new issue](https://github.com/jonasbb/serde_with/issues/new) on GitHub.
 
 ## Use `serde_with` in your Project
@@ -131,7 +131,7 @@ Foo {a: None, b: None, c: None, d: Some(4), e: None, f: None, g: Some(7)}
 
 ### Advanced `serde_as` usage
 
-This example is mainly supposed to highlight the flexibility of the `serde_as`-annotation compared to [serde's with-annotation][with-annotation].
+This example is mainly supposed to highlight the flexibility of the `serde_as` annotation compared to [serde's `with` annotation][with-annotation].
 More details about `serde_as` can be found in the [user guide].
 
 ```rust
@@ -207,6 +207,6 @@ For detailed contribution instructions please read [`CONTRIBUTING.md`].
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall
-be dual licensed as above, without any additional terms or conditions.
+be dual-licensed as above, without any additional terms or conditions.
 
 [`CONTRIBUTING.md`]: https://github.com/jonasbb/serde_with/blob/master/CONTRIBUTING.md

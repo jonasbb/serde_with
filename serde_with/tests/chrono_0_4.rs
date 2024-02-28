@@ -43,7 +43,7 @@ fn json_datetime_from_any_to_string_deserialization() {
         ]"#,
     );
 
-    // floats, shows precision errors in subsecond part
+    // floats, shows precision errors in sub-second part
     check_deserialization(
         vec![
             S(new_datetime(1_478_563_200, 122_999_906)),

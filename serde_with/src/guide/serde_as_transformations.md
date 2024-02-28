@@ -160,7 +160,7 @@ null => 0
 
 [`VecSkipError`]
 
-For formats with heterogenous-typed sequences, we can collect only the deserializable elements.
+For formats with heterogeneously typed sequences, we can collect only the deserializable elements.
 This is also useful for unknown enum variants.
 
 ```ignore
@@ -212,7 +212,7 @@ value: Duration,
 "value": 86400,
 ```
 
-[`DurationSecondsWithFrac`] supports subsecond precision:
+[`DurationSecondsWithFrac`] supports sub-second precision:
 
 ```ignore
 // Rust
@@ -382,7 +382,7 @@ value: Vec<String>,
 [`SetLastValueWins`]
 
 serdes default behavior for sets is to take the first value, when multiple "equal" values are inserted into a set.
-This changes the logic, to prefer the last value.
+This changes the logic to prefer the last value.
 
 ## Pick first successful deserialization
 
@@ -405,7 +405,7 @@ value: u32,
 
 [`MapFirstKeyWins`]
 
-serdes default behavior is to take the last key and value combination, if multiple "equal" keys exist.
+Serde's default behavior is to take the last key-value combination, if multiple "equal" keys exist.
 This changes the logic to instead prefer the first found key-value combination.
 
 ## Prevent duplicate map keys
@@ -466,7 +466,7 @@ value: SystemTime,
 "value": 86400,
 ```
 
-[`TimestampSecondsWithFrac`] supports subsecond precision:
+[`TimestampSecondsWithFrac`] supports sub-second precision:
 
 ```ignore
 // Rust

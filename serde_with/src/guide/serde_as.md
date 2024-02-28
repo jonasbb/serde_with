@@ -1,7 +1,7 @@
 # `serde_as` Annotation
 
-This is an alternative to serde's with-annotation.
-It is more flexible and composable, but work with fewer types.
+This is an alternative to serde's `with` annotation.
+It is more flexible and composable, but works with fewer types.
 
 The scheme is based on two new traits, [`SerializeAs`] and [`DeserializeAs`], which need to be implemented by all types which want to be compatible with `serde_as`.
 The proc-macro attribute [`#[serde_as]`][crate::serde_as] exists as a usability boost for users.
@@ -52,7 +52,7 @@ struct A {
 }
 ```
 
-The main advantage is that you can compose `serde_as` stuff, which is impossible with the with-annotation.
+The main advantage is that you can compose `serde_as` stuff, which is impossible with the `with` annotation.
 For example, the `mime` field from above could be nested in one or more data structures:
 
 ```rust
@@ -106,7 +106,7 @@ Gating `serde_as` behind optional features is possible using the `cfg_eval` attr
 The attribute is available via the [`cfg_eval`-crate](https://docs.rs/cfg_eval) on stable or using the [Rust attribute](https://doc.rust-lang.org/1.70.0/core/prelude/v1/attr.cfg_eval.html) on unstable nightly.
 
 The `cfg_eval` attribute must be placed **before** the struct-level `serde_as` attribute.
-You can combine them together in a single `cfg_attr`, as long as the order is preserved.
+You can combine them in a single `cfg_attr`, as long as the order is preserved.
 
 ```rust,ignore
 #[cfg_attr(feature="serde", cfg_eval::cfg_eval, serde_as)]
@@ -121,8 +121,8 @@ struct Struct {
 
 You can support [`SerializeAs`] / [`DeserializeAs`] on your own types too.
 Most "leaf" types do not need to implement these traits, since they are supported implicitly.
-"Leaf" type refers to types which directly serialize like plain data types.
-[`SerializeAs`] / [`DeserializeAs`] is very important for collection types, like `Vec` or `BTreeMap`, since they need special handling for the key/value de/serialization such that the conversions can be done on the key/values.
+"Leaf" types refer to types which directly serialize, like plain data types.
+[`SerializeAs`] / [`DeserializeAs`] is essential for collection types, like `Vec` or `BTreeMap`, since they need special handling for the key/value de/serialization such that the conversions can be done on the key/values.
 You also find them implemented on the conversion types, such as the [`DisplayFromStr`] type.
 These comprise the bulk of this crate and allow you to perform all the nice conversions to [hex strings], the [bytes to string converter], or [duration to UNIX epoch].
 
@@ -182,8 +182,8 @@ impl<'de> DeserializeAs<'de, RemoteType> for LocalType {
 # }
 ```
 
-This is how the final implementation looks like.
-We assumed we have a module `MODULE` with a `serialize` function already, which we use here to provide the implementation.
+This is what the final implementation looks like.
+We assumed we already have a module `MODULE` with a `serialize` function, which we use here to provide the implementation.
 As can be seen, this is mostly boilerplate, since the most part is encapsulated in `$module::serialize`.
 The final `Data` struct will now look like:
 
