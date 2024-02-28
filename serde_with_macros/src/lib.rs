@@ -2,18 +2,22 @@
 // https://github.com/rust-lang/cargo/issues/13157
 #![forbid(unsafe_code)]
 #![warn(missing_copy_implementations, missing_debug_implementations)]
-#![doc(test(attr(forbid(unsafe_code))))]
-#![doc(test(attr(deny(
-    missing_debug_implementations,
-    rust_2018_idioms,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    warnings,
-))))]
-#![doc(test(attr(warn(rust_2018_idioms))))]
+#![doc(test(attr(
+    // Problematic handling for foreign From<T> impls in tests
+    // https://github.com/rust-lang/rust/issues/121621
+    allow(unknown_lints, non_local_definitions),
+    deny(
+        missing_debug_implementations,
+        rust_2018_idioms,
+        trivial_casts,
+        trivial_numeric_casts,
+        unused_extern_crates,
+        unused_import_braces,
+        unused_qualifications,
+        warnings,
+    ),
+    forbid(unsafe_code),
+)))]
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/3.6.1/")]
