@@ -313,6 +313,7 @@ pub mod json;
 mod key_value_map;
 pub mod rust;
 #[cfg(feature = "schemars_0_8")]
+#[cfg_attr(docsrs, doc(cfg(feature = "schemars_0_8")))]
 pub mod schemars_0_8;
 pub mod ser;
 #[cfg(feature = "std")]
