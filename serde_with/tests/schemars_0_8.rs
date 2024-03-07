@@ -117,6 +117,41 @@ fn schemars_custom_with() {
     }));
 }
 
+#[test]
+fn schemars_custom_schema_with() {
+    fn custom_int(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        use schemars::schema::*;
+
+        SchemaObject {
+            instance_type: Some(InstanceType::Integer.into()),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    struct Test {
+        #[serde_as(as = "DisplayFromStr")]
+        #[schemars(schema_with = "custom_int")]
+        custom: i32,
+
+        #[serde_as(as = "DisplayFromStr")]
+        #[cfg_attr(any(), schemars(schema_with = "custom_int"))]
+        with_disabled: i32,
+
+        #[serde_as(as = "DisplayFromStr")]
+        #[cfg_attr(all(), schemars(schema_with = "custom_int"))]
+        always_enabled: i32,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "custom": 3,
+        "with_disabled": "5",
+        "always_enabled": 7,
+    }));
+}
+
 mod test_std {
     use super::*;
     use std::collections::{BTreeMap, VecDeque};
