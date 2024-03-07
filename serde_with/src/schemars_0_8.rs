@@ -492,6 +492,15 @@ impl<T, U: JsonSchema> JsonSchemaAs<T> for TryFromIntoRef<U> {
     forward_schema!(U);
 }
 
+impl<T, TA, FA> JsonSchemaAs<T> for IfIsHumanReadable<TA, FA>
+where
+    TA: JsonSchemaAs<T>,
+{
+    // serde_json always has `is_human_readable` set to true so we just use the
+    // schema for the human readable variant.
+    forward_schema!(WrapSchema<T, TA>);
+}
+
 macro_rules! schema_for_map {
     ($type:ty) => {
         impl<K, V, KA, VA> JsonSchemaAs<$type> for Map<KA, VA>
