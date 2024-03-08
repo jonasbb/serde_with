@@ -355,7 +355,7 @@ where
                 utils::array_from_iterator(
                     utils::SeqIter::new(seq).map(
                         |res: Result<DeserializeAsWrap<T, As>, A::Error>| {
-                            res.map(de::DeserializeAsWrap::into_inner)
+                            res.map(DeserializeAsWrap::into_inner)
                         },
                     ),
                     &self,
@@ -1298,7 +1298,7 @@ impl<'de> DeserializeAs<'de, Box<[u8]>> for Bytes {
         D: Deserializer<'de>,
     {
         <Bytes as DeserializeAs<'de, Vec<u8>>>::deserialize_as(deserializer)
-            .map(alloc::vec::Vec::into_boxed_slice)
+            .map(Vec::into_boxed_slice)
     }
 }
 

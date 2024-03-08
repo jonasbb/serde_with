@@ -618,7 +618,7 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
                 _ if cfg!(not(feature = "schemars_0_8")) => SchemaFieldConfig::Disabled,
                 Some(true) => SchemaFieldConfig::Unconditional,
                 Some(false) => SchemaFieldConfig::Disabled,
-                None => crate::utils::has_derive_jsonschema(input.clone()),
+                None => utils::has_derive_jsonschema(input.clone()),
             };
 
             // Convert any error message into a nice compiler error
@@ -769,7 +769,7 @@ fn serde_as_add_attr_to_field(
         field.attrs.push(attr);
 
         if let Some(cfg) = schemars_config.cfg_expr() {
-            let with_cfg = crate::utils::schemars_with_attr_if(
+            let with_cfg = utils::schemars_with_attr_if(
                 &field.attrs,
                 &["with", "serialize_with", "deserialize_with"],
             )?;
@@ -797,7 +797,7 @@ fn serde_as_add_attr_to_field(
 
         if let Some(cfg) = schemars_config.cfg_expr() {
             let with_cfg =
-                crate::utils::schemars_with_attr_if(&field.attrs, &["with", "deserialize_with"])?;
+                utils::schemars_with_attr_if(&field.attrs, &["with", "deserialize_with"])?;
             let attr_inner_tokens =
                 quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>::deserialize)
                     .to_string();
@@ -818,8 +818,7 @@ fn serde_as_add_attr_to_field(
         field.attrs.push(attr);
 
         if let Some(cfg) = schemars_config.cfg_expr() {
-            let with_cfg =
-                crate::utils::schemars_with_attr_if(&field.attrs, &["with", "serialize_with"])?;
+            let with_cfg = utils::schemars_with_attr_if(&field.attrs, &["with", "serialize_with"])?;
             let attr_inner_tokens =
                 quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>::serialize)
                     .to_string();

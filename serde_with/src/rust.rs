@@ -708,5 +708,5 @@ pub mod maps_first_key_wins {
 pub fn deserialize_ignore_any<'de, D: Deserializer<'de>, T: Default>(
     deserializer: D,
 ) -> Result<T, D::Error> {
-    serde::de::IgnoredAny::deserialize(deserializer).map(|_| T::default())
+    IgnoredAny::deserialize(deserializer).map(|_| T::default())
 }

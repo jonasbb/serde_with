@@ -30,7 +30,8 @@ trivial_casts = "warn"
 trivial_numeric_casts = "warn"
 unused_extern_crates = "warn"
 unused_import_braces = "warn"
-unused_qualifications = "warn"
+# Causes problems with the darling derives in the serde_with_macros crate.
+# unused_qualifications = "warn"
 variant_size_differences = "warn"
 # Unsafe code is needed for array initialization using MaybeUninit.
 # unsafe_code = "forbid"
@@ -49,7 +50,7 @@ cloned_instead_of_copied = "warn"
 default_trait_access = "warn"
 # Checks for the presence of `_`, `::` or camel-case words outside ticks in documentation.
 # Disabled due to FP: https://github.com/rust-lang/rust-clippy/issues/12075
-# doc_markdown = "warn"
+doc_markdown = "warn"
 # Checks for closures which only invoke a method on the closure argument and can be replaced by referencing the method directly.
 redundant_closure_for_method_calls = "warn"
 semicolon_if_nothing_returned = "warn"

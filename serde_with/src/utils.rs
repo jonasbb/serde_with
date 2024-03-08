@@ -128,13 +128,13 @@ pub(crate) fn duration_signed_from_secs_f64(secs: f64) -> Result<DurationSigned,
     if nanos >= MAX_NANOS_F64 {
         return Err("overflow when converting float to duration");
     }
-    let mut sign = self::duration::Sign::Positive;
+    let mut sign = Sign::Positive;
     if nanos < 0.0 {
         nanos = -nanos;
-        sign = self::duration::Sign::Negative;
+        sign = Sign::Negative;
     }
     let nanos = nanos as u128;
-    Ok(self::duration::DurationSigned::new(
+    Ok(DurationSigned::new(
         sign,
         (nanos / (NANOS_PER_SEC as u128)) as u64,
         (nanos % (NANOS_PER_SEC as u128)) as u32,
