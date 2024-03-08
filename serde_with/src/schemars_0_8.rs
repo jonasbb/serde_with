@@ -623,7 +623,7 @@ where
         )
     }
 
-    fn json_schema(gen: &mut ::schemars_0_8::gen::SchemaGenerator) -> Schema {
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
         let schema = <WrapSchema<T, TA> as JsonSchema>::json_schema(gen);
         let mut schema = schema.into_object();
 
