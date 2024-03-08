@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Detect conflicting `schema_with` attributes on fields with `schemars` annotations by @swlynch99 (#715)
+    This extends the existing avoidance mechanism to a new variant fixing #712.
+
 ## [3.6.1] - 2024-02-08
 
 No changes.
