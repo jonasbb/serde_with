@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Implement `JsonSchemaAs` for `EnumMap` by @swlynch99 (#697)
 
+### Fixed
+
+* Detect conflicting `schema_with` attributes on fields with `schemars` annotations by @swlynch99 (#715)
+    This extends the existing avoidance mechanism to a new variant fixing #712.
+
 ## [3.6.1] - 2024-02-08
 
 ### Changed
