@@ -50,7 +50,7 @@ cloned_instead_of_copied = "warn"
 default_trait_access = "warn"
 # Checks for the presence of `_`, `::` or camel-case words outside ticks in documentation.
 # Disabled due to FP: https://github.com/rust-lang/rust-clippy/issues/12075
-# doc_markdown = "warn"
+doc_markdown = "warn"
 # Checks for closures which only invoke a method on the closure argument and can be replaced by referencing the method directly.
 redundant_closure_for_method_calls = "warn"
 semicolon_if_nothing_returned = "warn"

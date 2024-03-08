@@ -2,7 +2,7 @@
 //!
 //! This module is only available if using the `schemars_0_8` feature of the crate.
 //!
-//! If you would like to add support for schemars to your own serde_with helpers
+//! If you would like to add support for schemars to your own `serde_with` helpers
 //! see [`JsonSchemaAs`].
 
 use crate::{
@@ -758,9 +758,9 @@ mod timespan {
 
 use self::timespan::{TimespanSchemaTarget, TimespanTargetType};
 
-/// Internal type used for the base impls on DurationXXX and TimestampYYY types.
+/// Internal type used for the base impls on `DurationXXX` and `TimestampYYY` types.
 ///
-/// This allows the JsonSchema impls that are Strict to be generic without
+/// This allows the `JsonSchema` impls that are Strict to be generic without
 /// committing to it as part of the public API.
 struct Timespan<Format, Strictness>(PhantomData<(Format, Strictness)>);
 
