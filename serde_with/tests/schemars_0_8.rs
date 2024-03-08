@@ -706,6 +706,19 @@ fn test_map() {
 }
 
 #[test]
+fn test_if_is_human_readable() {
+    #[serde_as]
+    #[derive(Serialize, JsonSchema)]
+    struct Test {
+        #[serde_as(as = "IfIsHumanReadable<DisplayFromStr>")]
+        data: i32,
+    }
+
+    check_valid_json_schema(&Test { data: 5 });
+    check_matches_schema::<Test>(&json!({ "data": "5" }));
+}
+
+#[test]
 fn test_set_last_value_wins_with_duplicates() {
     #[serde_as]
     #[derive(Serialize, JsonSchema)]
