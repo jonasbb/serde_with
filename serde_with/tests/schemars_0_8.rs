@@ -1,6 +1,6 @@
 use crate::utils::{check_matches_schema, check_valid_json_schema};
-use ::schemars_0_8::JsonSchema;
 use expect_test::expect_file;
+use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::json;
 use serde_with::*;
@@ -222,6 +222,33 @@ mod snapshots {
         C { c: i32, b: Option<u64> },
     }
 
+    #[derive(JsonSchema, Serialize)]
+    struct KvMapData {
+        #[serde(rename = "$key$")]
+        key: String,
+
+        a: u32,
+        b: String,
+        c: f32,
+        d: bool,
+    }
+
+    #[allow(dead_code, variant_size_differences)]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(tag = "$key$")]
+    enum KvMapEnum {
+        TypeA { a: u32 },
+        TypeB { b: String },
+        TypeC { c: bool },
+    }
+
+    #[derive(JsonSchema, Serialize)]
+    struct KvMapFlatten {
+        #[serde(flatten)]
+        data: KvMapEnum,
+        extra: bool,
+    }
+
     declare_snapshot_test! {
         bytes {
             struct Test {
@@ -302,6 +329,27 @@ mod snapshots {
             struct Test {
                 #[serde_as(as = "EnumMap")]
                 data: Vec<Mappable>,
+            }
+        }
+
+        key_value_map {
+            struct Test {
+                #[serde_as(as = "KeyValueMap<_>")]
+                data: Vec<KvMapData>,
+            }
+        }
+
+        key_value_map_enum {
+            struct Test {
+                #[serde_as(as = "KeyValueMap<_>")]
+                data: Vec<KvMapEnum>,
+            }
+        }
+
+        key_value_map_flatten {
+            struct Test {
+                #[serde_as(as = "KeyValueMap<_>")]
+                data: Vec<KvMapFlatten>,
             }
         }
     }
@@ -745,4 +793,80 @@ fn test_set_prevent_duplicates_with_duplicates() {
     check_matches_schema::<Test>(&json!({
         "set": [ 1, 1 ]
     }));
+}
+
+mod key_value_map {
+    use super::*;
+    use std::collections::BTreeMap;
+
+    #[serde_as]
+    #[derive(Clone, Debug, JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct KVMap<E>(
+        #[serde_as(as = "KeyValueMap<_>")]
+        #[serde(bound(serialize = "E: Serialize", deserialize = "E: Deserialize<'de>"))]
+        Vec<E>,
+    );
+
+    #[derive(Clone, Debug, JsonSchema, Serialize)]
+    #[serde(untagged)]
+    enum UntaggedEnum {
+        A {
+            #[serde(rename = "$key$")]
+            key: String,
+            field1: String,
+        },
+        B(String, i32),
+    }
+
+    #[test]
+    fn test_untagged_enum() {
+        let value = KVMap(vec![
+            UntaggedEnum::A {
+                key: "v1".into(),
+                field1: "field".into(),
+            },
+            UntaggedEnum::B("v2".into(), 7),
+        ]);
+
+        check_valid_json_schema(&value);
+    }
+
+    #[derive(Clone, Debug, JsonSchema, Serialize)]
+    #[serde(untagged)]
+    enum UntaggedNestedEnum {
+        Nested(UntaggedEnum),
+        C {
+            #[serde(rename = "$key$")]
+            key: String,
+            field2: i32,
+        },
+    }
+
+    #[test]
+    fn test_untagged_nested_enum() {
+        let value = KVMap(vec![
+            UntaggedNestedEnum::Nested(UntaggedEnum::A {
+                key: "v1".into(),
+                field1: "field".into(),
+            }),
+            UntaggedNestedEnum::Nested(UntaggedEnum::B("v2".into(), 7)),
+            UntaggedNestedEnum::C {
+                key: "v2".into(),
+                field2: 222,
+            },
+        ]);
+
+        check_valid_json_schema(&value);
+    }
+
+    #[test]
+    fn test_btreemap() {
+        let value = KVMap(vec![
+            BTreeMap::from_iter([("$key$", "a"), ("value", "b")]),
+            BTreeMap::from_iter([("$key$", "b"), ("value", "d")]),
+        ]);
+
+        check_valid_json_schema(&value);
+    }
 }
