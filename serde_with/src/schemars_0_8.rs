@@ -6,7 +6,7 @@
 //! see [`JsonSchemaAs`].
 
 use crate::{
-    formats::{Flexible, Format, Separator, Strict},
+    formats::{Flexible, Format, PreferMany, PreferOne, Separator, Strict},
     prelude::{Schema as WrapSchema, *},
 };
 use ::schemars_0_8::{
@@ -793,6 +793,99 @@ map_first_last_wins_schema!(=> S hashbrown_0_14::HashMap<K, V, S>);
 map_first_last_wins_schema!(=> S indexmap_1::IndexMap<K, V, S>);
 #[cfg(feature = "indexmap_2")]
 map_first_last_wins_schema!(=> S indexmap_2::IndexMap<K, V, S>);
+
+impl<T, TA> JsonSchema for WrapSchema<Vec<T>, OneOrMany<TA, PreferOne>>
+where
+    WrapSchema<T, TA>: JsonSchema,
+{
+    fn schema_name() -> String {
+        std::format!(
+            "OneOrMany<{}, PreferOne>",
+            <WrapSchema<T, TA>>::schema_name()
+        )
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        std::format!(
+            "serde_with::OneOrMany<{}, PreferOne>",
+            <WrapSchema<T, TA>>::schema_id()
+        )
+        .into()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        let single = gen.subschema_for::<WrapSchema<T, TA>>();
+        let array = SchemaObject {
+            instance_type: Some(InstanceType::Array.into()),
+            array: Some(Box::new(ArrayValidation {
+                items: Some(single.clone().into()),
+                ..Default::default()
+            })),
+            ..Default::default()
+        };
+
+        SchemaObject {
+            subschemas: Some(Box::new(SubschemaValidation {
+                any_of: Some(std::vec![single, array.into()]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        }
+        .into()
+    }
+}
+
+impl<T, TA> JsonSchema for WrapSchema<Vec<T>, OneOrMany<TA, PreferMany>>
+where
+    WrapSchema<T, TA>: JsonSchema,
+{
+    fn schema_name() -> String {
+        std::format!(
+            "OneOrMany<{}, PreferMany>",
+            <WrapSchema<T, TA>>::schema_name()
+        )
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        std::format!(
+            "serde_with::OneOrMany<{}, PreferMany>",
+            <WrapSchema<T, TA>>::schema_id()
+        )
+        .into()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        let inner = gen.subschema_for::<WrapSchema<T, TA>>();
+        let single = SchemaObject {
+            metadata: Some(Box::new(Metadata {
+                write_only: true,
+                ..Default::default()
+            })),
+            subschemas: Some(Box::new(SubschemaValidation {
+                all_of: Some(std::vec![inner.clone()]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        };
+        let array = SchemaObject {
+            instance_type: Some(InstanceType::Array.into()),
+            array: Some(Box::new(ArrayValidation {
+                items: Some(Schema::from(single.clone()).into()),
+                ..Default::default()
+            })),
+            ..Default::default()
+        };
+
+        SchemaObject {
+            subschemas: Some(Box::new(SubschemaValidation {
+                any_of: Some(std::vec![single.into(), array.into()]),
+                ..Default::default()
+            })),
+            ..Default::default()
+        }
+        .into()
+    }
+}
 
 impl<T, TA> JsonSchemaAs<T> for SetLastValueWins<TA>
 where

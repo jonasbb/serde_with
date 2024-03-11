@@ -352,6 +352,14 @@ mod snapshots {
                 data: Vec<KvMapFlatten>,
             }
         }
+
+        one_or_many_prefer_one {
+            #[serde(transparent)]
+            struct Test {
+                #[serde_as(as = "OneOrMany<_, PreferOne>")]
+                data: Vec<i32>,
+            }
+        }
     }
 }
 
@@ -868,5 +876,68 @@ mod key_value_map {
         ]);
 
         check_valid_json_schema(&value);
+    }
+}
+
+mod one_or_many {
+    use super::*;
+    use serde_with::formats::{PreferMany, PreferOne};
+
+    #[serde_as]
+    #[derive(Clone, Debug, JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct WithPreferOne(#[serde_as(as = "OneOrMany<_, PreferOne>")] Vec<i32>);
+
+    #[serde_as]
+    #[derive(Clone, Debug, JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct WithPreferMany(#[serde_as(as = "OneOrMany<_, PreferMany>")] Vec<i32>);
+
+    #[test]
+    fn test_prefer_one() {
+        let single = WithPreferOne(vec![7]);
+        let multiple = WithPreferOne(vec![1, 2, 3]);
+
+        check_valid_json_schema(&single);
+        check_valid_json_schema(&multiple);
+    }
+
+    #[test]
+    fn test_prefer_one_matches() {
+        check_matches_schema::<WithPreferOne>(&json!(7));
+        check_matches_schema::<WithPreferOne>(&json!([1, 2, 3]));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_prefer_one_no_invalid_type_one() {
+        check_matches_schema::<WithPreferOne>(&json!("test"));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_prefer_one_no_invalid_type_many() {
+        check_matches_schema::<WithPreferOne>(&json!(["test", 1]));
+    }
+
+    #[test]
+    fn test_prefer_many() {
+        let single = WithPreferMany(vec![7]);
+        let multiple = WithPreferMany(vec![1, 2, 3]);
+
+        check_valid_json_schema(&single);
+        check_valid_json_schema(&multiple);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_prefer_many_no_invalid_type_one() {
+        check_matches_schema::<WithPreferMany>(&json!("test"));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_prefer_many_no_invalid_type_many() {
+        check_matches_schema::<WithPreferMany>(&json!(["test", 1]));
     }
 }
