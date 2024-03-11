@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.7.0] - 2024-03-11
+
 ### Added
 
 * Implement `JsonSchemaAs` for `EnumMap` by @swlynch99 (#697)
+* Implement `JsonSchemaAs` for `IfIsHumanReadable` by @swlynch99 (#717)
+* Implement `JsonSchemaAs` for `KeyValueMap` by @swlynch99 (#713)
+* Implement `JsonSchemaAs` for `OneOrMany` by @swlynch99 (#719)
 
 ### Fixed
 
