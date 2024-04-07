@@ -42,6 +42,9 @@ variant_size_differences = "warn"
 # explicit_auto_deref suggests code that does not compile
 # https://github.com/rust-lang/rust-clippy/issues/9841
 explicit_auto_deref = "allow"
+# Triggers in macro generated code of darling
+# https://github.com/rust-lang/rust-clippy/issues/12643
+manual-unwrap-or-default = "allow"
 
 # alloc_instead_of_core = "warn"
 # Checks for usage of `cloned()` on an `Iterator` or `Option` where `copied()` could be used instead.
