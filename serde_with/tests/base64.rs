@@ -38,7 +38,7 @@ fn base64_vec() {
 
     check_error_deserialization::<BDefault>(
         r#"["0"]"#,
-        expect!["Encoded text cannot have a 6-bit remainder. at line 1 column 4"],
+        expect!["Invalid input length: 1 at line 1 column 4"],
     );
     check_error_deserialization::<BDefault>(
         r#"["zz"]"#,
