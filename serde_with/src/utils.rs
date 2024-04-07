@@ -113,12 +113,8 @@ where
     }
 }
 
-pub(crate) fn duration_as_secs_f64(dur: &Duration) -> f64 {
-    (dur.as_secs() as f64) + (dur.subsec_nanos() as f64) / (NANOS_PER_SEC as f64)
-}
-
 pub(crate) fn duration_signed_from_secs_f64(secs: f64) -> Result<DurationSigned, &'static str> {
-    const MAX_NANOS_F64: f64 = ((u64::max_value() as u128 + 1) * (NANOS_PER_SEC as u128)) as f64;
+    const MAX_NANOS_F64: f64 = ((u64::MAX as u128 + 1) * (NANOS_PER_SEC as u128)) as f64;
     // TODO why are the seconds converted to nanoseconds first?
     // Does it make sense to just truncate the value?
     let mut nanos = secs * (NANOS_PER_SEC as f64);

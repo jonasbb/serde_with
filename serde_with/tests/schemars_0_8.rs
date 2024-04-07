@@ -374,6 +374,7 @@ mod derive {
         field: u32,
     }
 
+    #[allow(dead_code)]
     #[serde_as]
     #[derive(Serialize)]
     #[cfg_attr(any(), derive(JsonSchema))]
