@@ -229,6 +229,7 @@ where
 /// ```rust
 /// # use serde::Serialize;
 /// #
+/// # #[allow(dead_code)]
 /// #[derive(Serialize)]
 /// struct Data {
 ///     #[serde(skip_serializing_if = "Option::is_none")]
@@ -248,6 +249,8 @@ where
 /// ```rust
 /// # use serde::Serialize;
 /// # use serde_with_macros::skip_serializing_none;
+/// #
+/// # #[allow(dead_code)]
 /// #[skip_serializing_none]
 /// #[derive(Serialize)]
 /// struct Data {
@@ -278,8 +281,10 @@ where
 /// ```rust
 /// # use serde::Serialize;
 /// # use serde_with_macros::skip_serializing_none;
+/// # #[allow(dead_code)]
 /// type MyOption<T> = Option<T>;
 ///
+/// # #[allow(dead_code)]
 /// #[skip_serializing_none]
 /// #[derive(Serialize)]
 /// struct Data {

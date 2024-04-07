@@ -580,7 +580,7 @@ fn test_serialize_reference() {
     #[derive(Debug, Serialize)]
     struct S1a<'a>(#[serde_as(as = "&Vec<DisplayFromStr>")] &'a Vec<u32>);
     check_serialization(
-        S1(&vec![1, 2]),
+        S1a(&vec![1, 2]),
         expect![[r#"
         [
           "1",
@@ -592,7 +592,7 @@ fn test_serialize_reference() {
     #[derive(Debug, Serialize)]
     struct S1Mut<'a>(#[serde_as(as = "Vec<DisplayFromStr>")] &'a mut Vec<u32>);
     check_serialization(
-        S1(&vec![1, 2]),
+        S1Mut(&mut vec![1, 2]),
         expect![[r#"
         [
           "1",
@@ -604,7 +604,7 @@ fn test_serialize_reference() {
     #[derive(Debug, Serialize)]
     struct S1aMut<'a>(#[serde_as(as = "&mut Vec<DisplayFromStr>")] &'a mut Vec<u32>);
     check_serialization(
-        S1(&vec![1, 2]),
+        S1aMut(&mut vec![1, 2]),
         expect![[r#"
         [
           "1",
