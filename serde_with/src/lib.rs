@@ -1,7 +1,5 @@
 #![doc(test(attr(
-    // Problematic handling for foreign From<T> impls in tests
-    // https://github.com/rust-lang/rust/issues/121621
-    allow(unknown_lints, non_local_definitions),
+    // allow(unknown_lints),
     deny(
         missing_debug_implementations,
         rust_2018_idioms,
