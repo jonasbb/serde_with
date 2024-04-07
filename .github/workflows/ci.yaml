@@ -113,6 +113,9 @@ jobs:
         run: |
           cargo install cargo-tarpaulin
           cargo tarpaulin --out xml --workspace --all-features -- --test-threads=1
+        env:
+          # https://github.com/xd009642/tarpaulin/issues/1499
+          CARGO_PROFILE_DEV_DEBUG: 1
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v4
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
