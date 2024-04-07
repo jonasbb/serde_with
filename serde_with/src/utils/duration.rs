@@ -225,7 +225,7 @@ where
     {
         source
             .sign
-            .apply(utils::duration_as_secs_f64(&source.duration))
+            .apply(source.duration.as_secs_f64())
             .serialize(serializer)
     }
 }
@@ -241,7 +241,7 @@ where
     {
         source
             .sign
-            .apply(utils::duration_as_secs_f64(&source.duration))
+            .apply(source.duration.as_secs_f64())
             .to_string()
             .serialize(serializer)
     }
