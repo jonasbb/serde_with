@@ -112,6 +112,7 @@ macro_rules! serde_conv {
 
         const _:() = {
             impl $m {
+                #[allow(clippy::ptr_arg)]
                 $vis fn serialize<S>(x: &$t, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
                 where
                     S: $crate::serde::Serializer,
