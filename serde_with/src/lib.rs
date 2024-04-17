@@ -1662,9 +1662,9 @@ pub struct Bytes;
 /// # #[derive(Debug, PartialEq)]
 /// #[derive(Deserialize, serde::Serialize)]
 /// struct Data {
-///     #[serde_as(deserialize_as = "OneOrMany<_, PreferOne>")]
+///     #[serde_as(as = "OneOrMany<_, PreferOne>")]
 ///     countries: Vec<String>,
-///     #[serde_as(deserialize_as = "OneOrMany<_, PreferMany>")]
+///     #[serde_as(as = "OneOrMany<_, PreferMany>")]
 ///     cities: Vec<String>,
 /// }
 ///
@@ -1693,7 +1693,7 @@ pub struct Bytes;
 ///     "countries": "Spain",
 ///     "cities": ["Berlin"],
 /// });
-/// assert_eq!(data, serde_json::from_value(j).unwrap());
+/// assert_eq!(serde_json::to_value(data).unwrap(), j);
 /// # }
 /// ```
 #[cfg(feature = "alloc")]
