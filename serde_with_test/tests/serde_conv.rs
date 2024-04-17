@@ -34,3 +34,16 @@ fn string_to_u32(
 #[derive(::s::Serialize, ::s::Deserialize)]
 #[serde(crate = "::s")]
 struct S2(#[serde(with = "number")] u32);
+
+// Test for clippy warning clippy::ptr_arg
+// warning: writing `&String` instead of `&str` involves a new object where a slice will do
+// https://github.com/jonasbb/serde_with/pull/320
+// https://github.com/jonasbb/serde_with/pull/729
+serde_conv!(
+    pub StringAsHtml,
+    ::std::string::String,
+    |string: &str| ::std::borrow::ToOwned::to_owned(string),
+    |string: ::std::string::String| -> ::std::result::Result<_, ::std::convert::Infallible> {
+::std::result::Result::Ok(string)
+    }
+);
