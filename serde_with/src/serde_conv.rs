@@ -110,6 +110,10 @@ macro_rules! serde_conv {
         #[allow(non_camel_case_types)]
         $vis struct $m;
 
+        // Prevent clippy lints triggering because of the template here
+        // https://github.com/jonasbb/serde_with/pull/320
+        // https://github.com/jonasbb/serde_with/pull/729
+        #[allow(clippy::all)]
         const _:() = {
             impl $m {
                 $vis fn serialize<S>(x: &$t, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
