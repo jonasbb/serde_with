@@ -84,6 +84,23 @@ pub(crate) mod macros {
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
 
+#[allow(unused_macros)]
+macro_rules! pinned_wrapper {
+    ($wrapper:ident) => {
+        impl<T, U> SerializeAs<Pin<$wrapper<T>>> for Pin<$wrapper<U>>
+        where
+            U: SerializeAs<T>,
+        {
+            fn serialize_as<S>(source: &Pin<$wrapper<T>>, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                SerializeAsWrap::<T, U>::new(source).serialize(serializer)
+            }
+        }
+    };
+}
+
 impl<'a, T, U> SerializeAs<&'a T> for &'a U
 where
     U: SerializeAs<T>,
@@ -124,6 +141,9 @@ where
         SerializeAsWrap::<T, U>::new(source).serialize(serializer)
     }
 }
+
+#[cfg(feature = "alloc")]
+pinned_wrapper!(Box);
 
 impl<T, U> SerializeAs<Option<T>> for Option<U>
 where
@@ -172,6 +192,9 @@ where
 }
 
 #[cfg(feature = "alloc")]
+pinned_wrapper!(Rc);
+
+#[cfg(feature = "alloc")]
 impl<T, U> SerializeAs<RcWeak<T>> for RcWeak<U>
 where
     U: SerializeAs<T>,
@@ -197,6 +220,9 @@ where
         SerializeAsWrap::<T, U>::new(source).serialize(serializer)
     }
 }
+
+#[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
+pinned_wrapper!(Arc);
 
 #[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
 impl<T, U> SerializeAs<ArcWeak<T>> for ArcWeak<U>

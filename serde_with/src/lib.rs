@@ -390,6 +390,7 @@ pub(crate) mod prelude {
         marker::PhantomData,
         ops::Bound,
         option::Option,
+        pin::Pin,
         result::Result,
         str::FromStr,
         time::Duration,

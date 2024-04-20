@@ -110,6 +110,25 @@ pub(crate) mod macros {
 ///////////////////////////////////////////////////////////////////////////////
 // region: Simple Wrapper types (e.g., Box, Option)
 
+#[allow(unused_macros)]
+macro_rules! pinned_wrapper {
+    ($wrapper:ident) => {
+        impl<'de, T, U> DeserializeAs<'de, Pin<$wrapper<T>>> for Pin<$wrapper<U>>
+        where
+            U: DeserializeAs<'de, T>,
+        {
+            fn deserialize_as<D>(deserializer: D) -> Result<Pin<$wrapper<T>>, D::Error>
+            where
+                D: Deserializer<'de>,
+            {
+                Ok($wrapper::pin(
+                    DeserializeAsWrap::<T, U>::deserialize(deserializer)?.into_inner(),
+                ))
+            }
+        }
+    };
+}
+
 #[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, Box<T>> for Box<U>
 where
@@ -124,6 +143,9 @@ where
         ))
     }
 }
+
+#[cfg(feature = "alloc")]
+pinned_wrapper!(Box);
 
 impl<'de, T, U> DeserializeAs<'de, Option<T>> for Option<U>
 where
@@ -208,6 +230,9 @@ where
 }
 
 #[cfg(feature = "alloc")]
+pinned_wrapper!(Rc);
+
+#[cfg(feature = "alloc")]
 impl<'de, T, U> DeserializeAs<'de, RcWeak<T>> for RcWeak<U>
 where
     U: DeserializeAs<'de, T>,
@@ -235,6 +260,9 @@ where
         ))
     }
 }
+
+#[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
+pinned_wrapper!(Arc);
 
 #[cfg(all(feature = "alloc", target_has_atomic = "ptr"))]
 impl<'de, T, U> DeserializeAs<'de, ArcWeak<T>> for ArcWeak<U>

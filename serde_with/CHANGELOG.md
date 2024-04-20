@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+* Implement (De)Serialization for Pinned Smart Pointers by @Astralchroma (#733)
+
 ## [3.7.0] - 2024-03-11
 
 ### Added
