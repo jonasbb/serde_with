@@ -13,6 +13,8 @@ use indexmap_2::{IndexMap as IndexMap2, IndexSet as IndexSet2};
 #[cfg(feature = "alloc")]
 type BoxedSlice<T> = Box<[T]>;
 type Slice<T> = [T];
+type Ref<'a, T> = &'a T;
+type RefMut<'a, T> = &'a mut T;
 
 pub(crate) mod macros {
     // The unused_imports lint has false-positives around macros
@@ -86,12 +88,12 @@ pub(crate) mod macros {
 
 #[allow(unused_macros)]
 macro_rules! pinned_wrapper {
-    ($wrapper:ident) => {
-        impl<T, U> SerializeAs<Pin<$wrapper<T>>> for Pin<$wrapper<U>>
+    ($wrapper:ident $($lifetime:lifetime)?) => {
+        impl<$($lifetime,)? T, U> SerializeAs<Pin<$wrapper<$($lifetime,)? T>>> for Pin<$wrapper<$($lifetime,)? U>>
         where
             U: SerializeAs<T>,
         {
-            fn serialize_as<S>(source: &Pin<$wrapper<T>>, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize_as<S>(source: &Pin<$wrapper<$($lifetime,)? T>>, serializer: S) -> Result<S::Ok, S::Error>
             where
                 S: Serializer,
             {
@@ -128,6 +130,9 @@ where
         SerializeAsWrap::<T, U>::new(source).serialize(serializer)
     }
 }
+
+pinned_wrapper!(Ref 'a);
+pinned_wrapper!(RefMut 'a);
 
 #[cfg(feature = "alloc")]
 impl<T, U> SerializeAs<Box<T>> for Box<U>

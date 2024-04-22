@@ -45,6 +45,13 @@ fn test_basic_wrappers() {
 
     is_equal(SBox(Box::new(123)), expect![[r#""123""#]]);
 
+    // Deserialization in generally is not possible, only for unpin types
+    #[serde_as]
+    #[derive(Debug, Serialize, PartialEq)]
+    struct SPin<'a>(#[serde_as(as = "Pin<&DisplayFromStr>")] Pin<&'a u32>);
+    let tmp = 123;
+    check_serialization(SPin(Pin::new(&tmp)), expect![[r#""123""#]]);
+
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct SPinBox(#[serde_as(as = "Pin<Box<DisplayFromStr>>")] Pin<Box<u32>>);
