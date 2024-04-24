@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.8.0] - 2024-04-24
+
+### Added
+
 * Implement (De)Serialization for Pinned Smart Pointers by @Astralchroma (#733)
+* Implement `JsonSchemaAs` for `PickFirst` by @swlynch99  (#721)
+
+### Changed
+
+* Bump `base64` dependency to v0.22 (#724)
+* Update dev dependencies
+
+### Fixed
+
+* `serde_conv` regressed and triggered `clippy::ptr_arg` and add test to prevent future problems. (#731)
 
 ## [3.7.0] - 2024-03-11
 
