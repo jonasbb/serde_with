@@ -23,6 +23,7 @@ use alloc::{
 use core::{
     cell::{Cell, RefCell},
     ops::Bound,
+    pin::Pin,
 };
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
@@ -44,11 +45,30 @@ fn test_basic_wrappers() {
 
     is_equal(SBox(Box::new(123)), expect![[r#""123""#]]);
 
+    // Deserialization in generally is not possible, only for unpin types
+    #[serde_as]
+    #[derive(Debug, Serialize, PartialEq)]
+    struct SPin<'a>(#[serde_as(as = "Pin<&DisplayFromStr>")] Pin<&'a u32>);
+    let tmp = 123;
+    check_serialization(SPin(Pin::new(&tmp)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SPinBox(#[serde_as(as = "Pin<Box<DisplayFromStr>>")] Pin<Box<u32>>);
+
+    is_equal(SPinBox(Box::pin(123)), expect![[r#""123""#]]);
+
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct SRc(#[serde_as(as = "Rc<DisplayFromStr>")] Rc<u32>);
 
     is_equal(SRc(Rc::new(123)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SPinRc(#[serde_as(as = "Pin<Rc<DisplayFromStr>>")] Pin<Rc<u32>>);
+
+    is_equal(SPinRc(Rc::pin(123)), expect![[r#""123""#]]);
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize)]
@@ -65,6 +85,12 @@ fn test_basic_wrappers() {
     struct SArc(#[serde_as(as = "Arc<DisplayFromStr>")] Arc<u32>);
 
     is_equal(SArc(Arc::new(123)), expect![[r#""123""#]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SPinArc(#[serde_as(as = "Pin<Arc<DisplayFromStr>>")] Pin<Arc<u32>>);
+
+    is_equal(SPinArc(Arc::pin(123)), expect![[r#""123""#]]);
 
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize)]
