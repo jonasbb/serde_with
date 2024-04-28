@@ -799,23 +799,6 @@ fn serde_as_add_attr_to_field(
             quote!(#serde_with_crate_path::As::<#replacement_type>::deserialize).to_string();
         let attr = parse_quote!(#[serde(deserialize_with = #attr_inner_tokens)]);
         field.attrs.push(attr);
-
-        if let Some(cfg) = schemars_config.cfg_expr() {
-            let with_cfg = utils::schemars_with_attr_if(
-                &field.attrs,
-                &["with", "deserialize_with", "schema_with"],
-            )?;
-            let attr_inner_tokens =
-                quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>::deserialize)
-                    .to_string();
-            let attr = parse_quote! {
-                #[cfg_attr(
-                    all(#cfg, not(#with_cfg)),
-                    schemars(deserialize_with = #attr_inner_tokens))
-                ]
-            };
-            field.attrs.push(attr);
-        }
     }
     if let Some(type_) = serde_as_options.serialize_as {
         let replacement_type = replace_infer_type_with_type(type_.clone(), type_same);
@@ -823,23 +806,6 @@ fn serde_as_add_attr_to_field(
             quote!(#serde_with_crate_path::As::<#replacement_type>::serialize).to_string();
         let attr = parse_quote!(#[serde(serialize_with = #attr_inner_tokens)]);
         field.attrs.push(attr);
-
-        if let Some(cfg) = schemars_config.cfg_expr() {
-            let with_cfg = utils::schemars_with_attr_if(
-                &field.attrs,
-                &["with", "serialize_with", "schema_with"],
-            )?;
-            let attr_inner_tokens =
-                quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>::serialize)
-                    .to_string();
-            let attr = parse_quote! {
-                #[cfg_attr(
-                    all(#cfg, not(#with_cfg)),
-                    schemars(serialize_with = #attr_inner_tokens))
-                ]
-            };
-            field.attrs.push(attr);
-        }
     }
 
     Ok(())
