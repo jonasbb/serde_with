@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Bump MSRV to 1.66, since that is required for the `rmp` dependency.
+
 ## [3.8.1] - 2024-04-28
 
 ### Fixed
