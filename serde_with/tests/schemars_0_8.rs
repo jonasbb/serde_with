@@ -118,6 +118,44 @@ fn schemars_custom_with() {
 }
 
 #[test]
+fn schemars_deserialize_only_bug_735() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[schemars(crate = "::schemars_0_8")]
+    struct Basic {
+        /// Basic field, no attribute
+        bare_field: u32,
+
+        /// Will emit matching schemars attribute
+        #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
+        both: u32,
+
+        /// Can emit schemars with serialize_as, but it will be ignored
+        #[serde_as(serialize_as = "PickFirst<(_, DisplayFromStr)>")]
+        serialize_only: u32,
+
+        /// schemars doesn't support deserialize_as
+        #[serde_as(deserialize_as = "PickFirst<(_, DisplayFromStr)>")]
+        deserialize_only: u32,
+
+        /// Can emit schemars with serialize_as, but it will be ignored
+        /// schemars doesn't support deserialize_as
+        #[serde_as(
+            serialize_as = "PickFirst<(_, DisplayFromStr)>",
+            deserialize_as = "PickFirst<(_, DisplayFromStr)>"
+        )]
+        serialize_and_deserialize: u32,
+    }
+
+    let schema = schemars::schema_for!(Basic);
+    let mut schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
+    schema.push('\n');
+
+    let expected = expect_file!["./schemars_0_8/schemars_deserialize_only_bug_735.json"];
+    expected.assert_eq(&schema);
+}
+
+#[test]
 fn schemars_custom_schema_with() {
     fn custom_int(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         use schemars::schema::*;
