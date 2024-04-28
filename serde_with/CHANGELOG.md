@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.8.1] - 2024-04-28
+
 ### Fixed
 
 * Do not emit `schemars(deserialize_with = "...")` annotations, as `schemars` does not support them (#735)
