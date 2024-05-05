@@ -1767,7 +1767,7 @@ pub struct PickFirst<T>(PhantomData<T>);
 /// Deserializing works analogue, by deserializing a `T` and then converting into `O`.
 ///
 /// ```rust
-/// # #[cfg(FALSE)] {
+/// # #[cfg(any())] {
 /// struct S {
 ///     #[serde_as(as = "FromInto<T>")]
 ///     value: O,
@@ -1849,7 +1849,7 @@ pub struct FromInto<T>(PhantomData<T>);
 /// Deserializing works analogue, by deserializing a `T` and then converting into `O`.
 ///
 /// ```rust
-/// # #[cfg(FALSE)] {
+/// # #[cfg(any())] {
 /// struct S {
 ///     #[serde_as(as = "FromIntoRef<T>")]
 ///     value: O,
@@ -1930,7 +1930,7 @@ pub struct FromIntoRef<T>(PhantomData<T>);
 /// Deserializing works analogue, by deserializing a `T` and then converting into `O`.
 ///
 /// ```rust
-/// # #[cfg(FALSE)] {
+/// # #[cfg(any())] {
 /// struct S {
 ///     #[serde_as(as = "TryFromInto<T>")]
 ///     value: O,
@@ -2019,7 +2019,7 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// Deserializing works analogue, by deserializing a `T` and then converting into `O`.
 ///
 /// ```rust
-/// # #[cfg(FALSE)] {
+/// # #[cfg(any())] {
 /// struct S {
 ///     #[serde_as(as = "TryFromIntoRef<T>")]
 ///     value: O,
