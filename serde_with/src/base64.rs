@@ -49,7 +49,7 @@ use crate::prelude::*;
 /// };
 /// let json = serde_json::json!({
 ///     "default": "SGVsbG8gV29ybGQ=",
-///     "charset_binhex": "5'8VD'mI8epaD'3=",
+///     "charset_binhex": "5'9XE'mJ9fpbE'3=",
 ///     "explicit_padding": "SGVsbG8gV29ybGQ=",
 ///     "no_padding": "QETqZE6eT07wZEO",
 /// });

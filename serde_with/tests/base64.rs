@@ -134,6 +134,6 @@ fn base64_different_charsets() {
 
     is_equal(
         B64BinHex(bytes.to_vec()),
-        expect![[r##""CDEFGHIJKLMNPQRSTUVXYZ[`ab!\"#$%&'()*+,-0123456789@ABcdehijklmpqr!!==""##]],
+        expect![[r##""DEFGHIJKLMNPQRSTUVXYZ[`abc!\"#$%&'()*+,-012345689@ABCdefhijklmpqr!!==""##]],
     );
 }
