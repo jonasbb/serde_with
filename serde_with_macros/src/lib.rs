@@ -1323,7 +1323,7 @@ pub fn __private_consume_serde_as_attributes(_: TokenStream) -> TokenStream {
 /// {
 ///     "always_serialize_this_field": null
 /// }
-/// # ), serde_json::to_value(&data).unwrap());
+/// # ), serde_json::to_value(data).unwrap());
 /// ```
 ///
 /// # Alternative path to `serde_with` crate

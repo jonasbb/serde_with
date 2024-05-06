@@ -1,7 +1,12 @@
 #![doc(test(attr(
-    // Problematic handling for foreign From<T> impls in tests
-    // https://github.com/rust-lang/rust/issues/121621
-    allow(unknown_lints, non_local_definitions),
+    allow(
+        unknown_lints,
+        // Problematic handling for foreign From<T> impls in tests
+        // https://github.com/rust-lang/rust/issues/121621
+        non_local_definitions,
+        // Some tests use foo as name
+        clippy::disallowed_names,
+    ),
     deny(
         missing_debug_implementations,
         rust_2018_idioms,
@@ -97,7 +102,7 @@
 //! {"bar": "12"}
 //! # "#;
 //! # assert_eq!(json.replace(" ", "").replace("\n", ""), serde_json::to_string(&foo).unwrap());
-//! # assert_eq!(foo, serde_json::from_str(&json).unwrap());
+//! # assert_eq!(foo, serde_json::from_str(json).unwrap());
 //! # }
 //! ```
 //!
@@ -181,7 +186,7 @@
 //! {"d": 4, "g": 7}
 //! # "#;
 //! # assert_eq!(json.replace(" ", "").replace("\n", ""), serde_json::to_string(&foo).unwrap());
-//! # assert_eq!(foo, serde_json::from_str(&json).unwrap());
+//! # assert_eq!(foo, serde_json::from_str(json).unwrap());
 //! # }
 //! ```
 //!
@@ -232,7 +237,7 @@
 //! }
 //! # "#;
 //! # assert_eq!(json.replace(" ", "").replace("\n", ""), serde_json::to_string(&foo).unwrap());
-//! # assert_eq!(foo, serde_json::from_str(&json).unwrap());
+//! # assert_eq!(foo, serde_json::from_str(json).unwrap());
 //!
 //! // and serializes
 //! # let foo =
@@ -257,7 +262,7 @@
 //! }
 //! # "#;
 //! # assert_eq!(json.replace(" ", "").replace("\n", ""), serde_json::to_string(&foo).unwrap());
-//! # assert_eq!(foo, serde_json::from_str(&json).unwrap());
+//! # assert_eq!(foo, serde_json::from_str(json).unwrap());
 //! # }
 //! ```
 //!
@@ -532,7 +537,7 @@ pub struct Same;
 ///     mime: mime::STAR_STAR,
 ///     number: 777,
 /// };
-/// assert_eq!(json!({ "mime": "*/*", "number": "777" }), serde_json::to_value(&x).unwrap());
+/// assert_eq!(json!({ "mime": "*/*", "number": "777" }), serde_json::to_value(x).unwrap());
 /// # }
 /// ```
 ///
@@ -612,12 +617,12 @@ pub struct IfIsHumanReadable<H, F = Same>(PhantomData<H>, PhantomData<F>);
 /// let x = A {
 ///     tags: Some("This is text".to_string()),
 /// };
-/// assert_eq!(json!({ "tags": "This is text" }), serde_json::to_value(&x).unwrap());
+/// assert_eq!(json!({ "tags": "This is text" }), serde_json::to_value(x).unwrap());
 ///
 /// let x = A {
 ///     tags: None,
 /// };
-/// assert_eq!(json!({ "tags": "" }), serde_json::to_value(&x).unwrap());
+/// assert_eq!(json!({ "tags": "" }), serde_json::to_value(x).unwrap());
 /// # }
 /// ```
 ///
@@ -879,7 +884,7 @@ pub struct BytesOrString;
 ///     "d_f64": 12346.0,
 ///     "d_string": "12346",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+/// assert_eq!(expected, serde_json::to_value(d).unwrap());
 ///
 /// // Deserialization works too
 /// // Subsecond precision in numbers will be rounded away
@@ -937,7 +942,7 @@ pub struct BytesOrString;
 ///     "d_f64": -12345.0,
 ///     "d_string": "12346",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+/// assert_eq!(expected, serde_json::to_value(d).unwrap());
 ///
 /// // Deserialization works too
 /// // Subsecond precision in numbers will be rounded away
@@ -1021,7 +1026,7 @@ pub struct DurationSeconds<
 ///     "d_f64": 12345.5,
 ///     "d_string": "12345.999999",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+/// assert_eq!(expected, serde_json::to_value(d).unwrap());
 ///
 /// // Deserialization works too
 /// // Subsecond precision in numbers will be rounded away
@@ -1072,7 +1077,7 @@ pub struct DurationSeconds<
 ///     "d_f64": -12344.5,
 ///     "d_string": "12345.999999",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&d).unwrap());
+/// assert_eq!(expected, serde_json::to_value(d).unwrap());
 ///
 /// // Deserialization works too
 ///
@@ -1211,7 +1216,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///     "st_f64": 12346.0,
 ///     "st_string": "12346",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+/// assert_eq!(expected, serde_json::to_value(ts).unwrap());
 ///
 /// // Deserialization works too
 /// // Subsecond precision in numbers will be rounded away
@@ -1269,7 +1274,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///     "dt_f64": -12345.0,
 ///     "dt_string": "12346",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+/// assert_eq!(expected, serde_json::to_value(ts).unwrap());
 ///
 /// // Deserialization works too
 /// // Subsecond precision in numbers will be rounded away
@@ -1361,7 +1366,7 @@ pub struct TimestampSeconds<
 ///     "st_f64": 12345.5,
 ///     "st_string": "12345.999999",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+/// assert_eq!(expected, serde_json::to_value(ts).unwrap());
 ///
 /// // Deserialization works too
 /// // Subsecond precision in numbers will be rounded away
@@ -1412,7 +1417,7 @@ pub struct TimestampSeconds<
 ///     "dt_f64": -12344.5,
 ///     "dt_string": "12345.999999",
 /// });
-/// assert_eq!(expected, serde_json::to_value(&ts).unwrap());
+/// assert_eq!(expected, serde_json::to_value(ts).unwrap());
 ///
 /// // Deserialization works too
 ///
@@ -1534,7 +1539,7 @@ pub struct TimestampNanoSecondsWithFrac<
 /// }
 ///
 /// let value = Test {
-///     array: b"0123456789ABCDE".clone(),
+///     array: *b"0123456789ABCDE",
 ///     boxed: b"...".to_vec().into_boxed_slice(),
 ///     cow: Cow::Borrowed(b"FooBar"),
 ///     cow_array: Cow::Borrowed(&[42u8; 15]),
@@ -1551,7 +1556,7 @@ pub struct TimestampNanoSecondsWithFrac<
 /// # let pretty_config = ron::ser::PrettyConfig::new()
 /// #     .new_line("\n".into());
 /// assert_eq!(expected, ron::ser::to_string_pretty(&value, pretty_config).unwrap());
-/// assert_eq!(value, ron::from_str(&expected).unwrap());
+/// assert_eq!(value, ron::from_str(expected).unwrap());
 /// # }
 /// ```
 ///
