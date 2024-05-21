@@ -134,7 +134,7 @@ serde = {version = "1.0.152", default-features = false}
 serde_derive = "1.0.152"
 serde_json = {version = "1.0.45", optional = true, default-features = false}
 serde_with_macros = {path = "../serde_with_macros", version = "=3.8.1", optional = true}
-time_0_3 = {package = "time", version = "~0.3.11", optional = true, default-features = false}
+time_0_3 = {package = "time", version = "~0.3.36", optional = true, default-features = false}
 
 [dev-dependencies]
 expect-test = "1.5.0"
