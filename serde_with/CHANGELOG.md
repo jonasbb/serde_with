@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-* Bump MSRV to 1.66, since that is required for the `rmp` dependency.
+* Bump MSRV to 1.67, since that is required for the `time` dependency.
 
 ## [3.8.1] - 2024-04-28
 
