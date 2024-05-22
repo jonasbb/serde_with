@@ -35,10 +35,7 @@ unused_import_braces = "warn"
 variant_size_differences = "warn"
 # Unsafe code is needed for array initialization using MaybeUninit.
 # unsafe_code = "forbid"
-# FIXME: For tarpaulin some code is excluded, since tarpaulin does not detect the line coverage well
-# Statements like: #![cfg(not(tarpaulin_include))]
-# but the lint doesn't like them and it is probably better to not have a build.rs just for that.
-unexpected_cfgs = "allow"
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin)', 'cfg(tarpaulin_include)'] }
 
 [workspace.lints.clippy]
 # These lints have false positives and are disabled until they are fixed.
