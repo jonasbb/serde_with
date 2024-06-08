@@ -24,8 +24,8 @@ sign-tag = true
 tag = false
 
 [workspace.lints.rust]
+rust_2018_idioms = { level = "warn", priority = -1 }
 missing_docs = "warn"
-rust_2018_idioms = "warn"
 trivial_casts = "warn"
 trivial_numeric_casts = "warn"
 unused_extern_crates = "warn"
