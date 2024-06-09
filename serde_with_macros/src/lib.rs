@@ -538,8 +538,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     If `#[serde(borrow)]` or `#[serde(borrow = "...")]` is already present, this step will be
 ///     skipped.
 ///
-/// 5. Restore the ability of accepting missing fields if both the field and the
-/// transformation are `Option`.
+/// 5. Restore the ability of accepting missing fields if both the field and the transformation are `Option`.
 ///
 ///     An `Option` is detected by an exact text match.
 ///     Renaming an import or type aliases can cause confusion here.
