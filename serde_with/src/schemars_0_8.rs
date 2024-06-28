@@ -794,9 +794,9 @@ map_first_last_wins_schema!(=> S indexmap_1::IndexMap<K, V, S>);
 #[cfg(feature = "indexmap_2")]
 map_first_last_wins_schema!(=> S indexmap_2::IndexMap<K, V, S>);
 
-impl<T, TA> JsonSchema for WrapSchema<Vec<T>, OneOrMany<TA, PreferOne>>
+impl<T, TA> JsonSchemaAs<Vec<T>> for OneOrMany<TA, PreferOne>
 where
-    WrapSchema<T, TA>: JsonSchema,
+    TA: JsonSchemaAs<T>,
 {
     fn schema_name() -> String {
         std::format!(
@@ -835,9 +835,9 @@ where
     }
 }
 
-impl<T, TA> JsonSchema for WrapSchema<Vec<T>, OneOrMany<TA, PreferMany>>
+impl<T, TA> JsonSchemaAs<Vec<T>> for OneOrMany<TA, PreferMany>
 where
-    WrapSchema<T, TA>: JsonSchema,
+    TA: JsonSchemaAs<T>,
 {
     fn schema_name() -> String {
         std::format!(
