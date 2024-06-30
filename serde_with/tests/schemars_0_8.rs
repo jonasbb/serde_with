@@ -406,6 +406,13 @@ mod snapshots {
                 value: u32
             }
         }
+
+        one_or_many_nested {
+            struct Test {
+                #[serde_as(as = "Option<OneOrMany<_>>")]
+                optional_many: Option<Vec<String>>,
+            }
+        }
     }
 }
 
