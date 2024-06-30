@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.8.2] - 2024-06-30
+
 ### Changed
 
 * Bump MSRV to 1.67, since that is required for the `time` dependency.
+    The `time` version needed to be updated for nightly compatibility.
+
+### Fixed
+
+* Implement `JsonSchemaAs` for `OneOrMany` instead of `JsonSchema` by @swlynch99 (#760)
 
 ## [3.8.1] - 2024-04-28
 
