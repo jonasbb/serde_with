@@ -2205,6 +2205,64 @@ pub struct BorrowCow;
 #[cfg(feature = "alloc")]
 pub struct VecSkipError<T>(PhantomData<T>);
 
+/// Deserialize a map, skipping keys and values which fail to deserialize.
+///
+/// By default serde terminates if it fails to deserialize a key or a value when deserializing
+/// a map. Sometimes a map has heterogeneous keys or values but we only care about some specific
+/// types, and it is desirable to skip entries on errors.
+///
+/// It is especially useful in conjunction to `#[serde(flatten)]` to capture a map mixed in with
+/// other entries which we don't want to exhaust in the type definition.
+///
+/// The serialization behavior is identical to the underlying map.
+///
+/// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
+///
+/// [`BTreeMap`]: std::collections::BTreeMap
+/// [`HashMap`]: std::collections::HashMap
+///
+/// # Examples
+///
+/// ```rust
+/// # #[cfg(feature = "macros")] {
+/// # use serde::{Deserialize, Serialize};
+/// # use std::collections::BTreeMap;
+/// # use serde_with::{serde_as, DisplayFromStr, MapSkipError};
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct VersionNames {
+///     yanked: Vec<u16>,
+///     #[serde_as(as = "MapSkipError<DisplayFromStr, _>")]
+///     #[serde(flatten)]
+///     names: BTreeMap<u16, String>,
+/// }
+///
+/// let data = VersionNames {
+///     yanked: vec![2, 5],
+///     names: BTreeMap::from_iter([
+///         (0u16, "v0".to_string()),
+///         (1, "v1".to_string()),
+///         (4, "v4".to_string())
+///     ]),
+/// };
+/// let source_json = r#"{
+///   "0": "v0",
+///   "1": "v1",
+///   "4": "v4",
+///   "yanked": [2, 5],
+///   "last_updated": 1704085200
+/// }"#;
+/// let data_json = r#"{"yanked":[2,5],"0":"v0","1":"v1","4":"v4"}"#;
+/// // Ensure serialization and deserialization produce the expected results
+/// assert_eq!(data_json, serde_json::to_string(&data).unwrap());
+/// assert_eq!(data, serde_json::from_str(source_json).unwrap());
+/// # }
+/// ```
+#[cfg(feature = "alloc")]
+pub struct MapSkipError<K, V>(PhantomData<(K, V)>);
+
 /// Deserialize a boolean from a number
 ///
 /// Deserialize a number (of `u8`) and turn it into a boolean.
