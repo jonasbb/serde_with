@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.8.3] - 2024-07-03
+
 ### Fixed
 
 * Fix compile issues when dependency `schemars_0_8` is used with the `preserve_order` features (#762)
