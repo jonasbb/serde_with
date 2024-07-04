@@ -282,6 +282,10 @@ fn test_map_skip_error_indexmap() {
           }
         }"#,
     );
+    check_error_deserialization::<S>(
+        r#"{"tag":"type", "values":{"0": 1,}}"#,
+        expect!["trailing comma at line 1 column 33"],
+    );
     is_equal(
         S {
             tag: "round-trip".into(),

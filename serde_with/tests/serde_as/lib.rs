@@ -572,6 +572,10 @@ fn test_vec_skip_error() {
         },
         r#"{"tag":"type","values":[0, "str", 1, [10, 11], -2, {}, 300]}"#,
     );
+    check_error_deserialization::<S>(
+        r#"{"tag":"type", "values":[0, "str", 1, , 300]}"#,
+        expect!["expected value at line 1 column 39"],
+    );
     is_equal(
         S {
             tag: "round-trip".into(),
@@ -617,6 +621,10 @@ fn test_map_skip_error_btreemap() {
             "10": 20
           }
         }"#,
+    );
+    check_error_deserialization::<S>(
+        r#"{"tag":"type", "values":{"0": 1,}}"#,
+        expect!["trailing comma at line 1 column 33"],
     );
     is_equal(
         S {
@@ -705,6 +713,10 @@ fn test_map_skip_error_hashmap() {
             "5": {}
           }
         }"#,
+    );
+    check_error_deserialization::<S>(
+        r#"{"tag":"type", "values":{"0": 1,}}"#,
+        expect!["trailing comma at line 1 column 33"],
     );
     is_equal(
         S {
