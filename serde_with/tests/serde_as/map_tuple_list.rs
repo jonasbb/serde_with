@@ -224,7 +224,7 @@ fn test_tuple_array_as_map() {
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct S0(#[serde_as(as = "Map<_, _>")] [(u8, u8); 1]);
     is_equal(
-        S1([(1, 2)]),
+        S0([(1, 2)]),
         expect![[r#"
           {
             "1": 2
