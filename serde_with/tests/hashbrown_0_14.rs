@@ -291,3 +291,96 @@ fn prohibit_duplicate_value_hashset() {
         expect![[r#"invalid entry: found duplicate value at line 1 column 15"#]],
     );
 }
+
+#[test]
+fn test_map_skip_error_hashmap() {
+    use serde_with::MapSkipError;
+
+    #[serde_as]
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S {
+        tag: String,
+        #[serde_as(as = "MapSkipError<DisplayFromStr, _>")]
+        values: HashMap<u8, u8>,
+    }
+
+    check_deserialization(
+        S {
+            tag: "type".into(),
+            values: [(0, 1), (10, 20)].into_iter().collect(),
+        },
+        r#"
+        {
+          "tag":"type",
+          "values": {
+            "0": 1,
+            "str": 2,
+            "3": "str",
+            "4": [10, 11],
+            "5": {},
+            "10": 20
+          }
+        }"#,
+    );
+    check_error_deserialization::<S>(
+        r#"{"tag":"type", "values":{"0": 1,}}"#,
+        expect!["trailing comma at line 1 column 33"],
+    );
+    is_equal(
+        S {
+            tag: "round-trip".into(),
+            values: [(0, 0), (255, 255)].into_iter().collect(),
+        },
+        expect![[r#"
+            {
+              "tag": "round-trip",
+              "values": {
+                "255": 255,
+                "0": 0
+              }
+            }"#]],
+    );
+}
+
+#[test]
+fn test_map_skip_error_hashmap_flatten() {
+    use serde_with::MapSkipError;
+
+    #[serde_as]
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    struct S {
+        tag: String,
+        #[serde_as(as = "MapSkipError<DisplayFromStr, _>")]
+        #[serde(flatten)]
+        values: HashMap<u8, u8>,
+    }
+
+    check_deserialization(
+        S {
+            tag: "type".into(),
+            values: [(0, 1), (10, 20)].into_iter().collect(),
+        },
+        r#"
+        {
+          "tag":"type",
+          "0": 1,
+          "str": 2,
+          "3": "str",
+          "4": [10, 11],
+          "5": {},
+          "10": 20
+        }"#,
+    );
+    is_equal(
+        S {
+            tag: "round-trip".into(),
+            values: [(0, 0), (255, 255)].into_iter().collect(),
+        },
+        expect![[r#"
+            {
+              "tag": "round-trip",
+              "255": 255,
+              "0": 0
+            }"#]],
+    );
+}

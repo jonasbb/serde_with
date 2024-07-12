@@ -10,6 +10,8 @@
 #[cfg(feature = "alloc")]
 mod duplicates;
 mod impls;
+#[cfg(feature = "alloc")]
+mod skip_error;
 
 use crate::prelude::*;
 
