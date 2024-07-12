@@ -187,7 +187,7 @@ colors: Vec<Color>,
 [`MapSkipError`]
 
 For formats with heterogeneously typed maps, we can collect only the elements where both key and value are deserializable.
-This is also useful in conjunction to `#[serde(flatten)]` to ingore some entries when capturing additional fields.
+This is also useful in conjunction to `#[serde(flatten)]` to ignore some entries when capturing additional fields.
 
 ```ignore
 // JSON
