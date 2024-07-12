@@ -77,11 +77,9 @@
 //!
 //! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/py7ida)
 //! ```rust
-//! # #[cfg(feature = "macros")]
+//! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! # use serde::{Deserialize, Serialize};
-//! # #[cfg(feature = "macros")]
 //! # use serde_with::{serde_as, DisplayFromStr};
-//! # #[cfg(feature = "macros")]
 //! #[serde_as]
 //! # #[derive(Debug, Eq, PartialEq)]
 //! #[derive(Deserialize, Serialize)]
@@ -91,7 +89,6 @@
 //!     bar: u8,
 //! }
 //!
-//! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! // This will serialize
 //! # let foo =
 //! Foo {bar: 12}
@@ -115,11 +112,9 @@
 //!
 //! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/um0xyi)
 //! ```rust
-//! # #[cfg(feature = "macros")]
+//! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! # use serde::{Deserialize, Serialize};
-//! # #[cfg(feature = "macros")]
 //! # use serde_with::{serde_as, Bytes};
-//! # #[cfg(feature = "macros")]
 //! #[serde_as]
 //! # #[derive(Debug, Eq, PartialEq)]
 //! #[derive(Deserialize, Serialize)]
@@ -137,7 +132,6 @@
 //!     bytes: [u8; M],
 //! }
 //!
-//! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! // This allows us to serialize a struct like this
 //! let arrays: Arrays<100, 128> = Arrays {
 //!     constgeneric: [true; 100],
@@ -157,11 +151,9 @@
 //!
 //! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/xr1tm0)
 //! ```rust
-//! # #[cfg(feature = "macros")]
+//! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! # use serde::{Deserialize, Serialize};
-//! # #[cfg(feature = "macros")]
 //! # use serde_with::skip_serializing_none;
-//! # #[cfg(feature = "macros")]
 //! #[skip_serializing_none]
 //! # #[derive(Debug, Eq, PartialEq)]
 //! #[derive(Deserialize, Serialize)]
@@ -175,7 +167,6 @@
 //!     g: Option<usize>,
 //! }
 //!
-//! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! // This will serialize
 //! # let foo =
 //! Foo {a: None, b: None, c: None, d: Some(4), e: None, f: None, g: Some(7)}
@@ -461,6 +452,7 @@ pub use serde_with_macros::*;
 /// # use serde::{Deserialize, Serialize};
 /// # use serde_with::{As, DisplayFromStr};
 /// #
+/// # #[allow(dead_code)]
 /// #[derive(Deserialize, Serialize)]
 /// # struct S {
 /// // Serialize numbers as sequence of strings, using Display and FromStr
@@ -478,6 +470,7 @@ pub use serde_with_macros::*;
 /// # use serde_with::{As, DisplayFromStr, Same};
 /// # use std::collections::BTreeMap;
 /// #
+/// # #[allow(dead_code)]
 /// #[derive(Deserialize, Serialize)]
 /// # struct S {
 /// // Serialize map, turn keys into strings but keep type of value

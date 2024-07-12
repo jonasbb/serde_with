@@ -44,6 +44,7 @@ Combined, this looks like:
 use serde::{Deserialize, Serialize};
 use serde_with::{serde_as, DisplayFromStr};
 
+# #[allow(dead_code)]
 #[serde_as]
 #[derive(Serialize, Deserialize)]
 struct A {
@@ -60,6 +61,7 @@ For example, the `mime` field from above could be nested in one or more data str
 # use serde::{Deserialize, Serialize};
 # use serde_with::{serde_as, DisplayFromStr};
 #
+# #[allow(dead_code)]
 #[serde_as]
 #[derive(Serialize, Deserialize)]
 struct A {
@@ -76,6 +78,7 @@ This means the field can still be missing during deserialization and will be fil
 This "magic" can break in some cases. Then it becomes necessary to apply `#[serde(default)]` on the field in question.
 If the field is of type `Option<T>` and the conversion type is of `Option<S>`, the default attribute is automatically applied.
 These variants are detected as `Option`.
+
 * `Option`
 * `std::option::Option`, with or without leading `::`
 * `core::option::Option`, with or without leading `::`
@@ -87,6 +90,7 @@ For more information, you can inspect the documentation of the `serde_as` macro.
 # use serde::{Deserialize, Serialize};
 # use serde_with::{serde_as, DisplayFromStr};
 #
+# #[allow(dead_code)]
 #[serde_as]
 #[derive(Serialize, Deserialize)]
 struct A {
