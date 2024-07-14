@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.9.0] - 2024-07-14
+
+### Added
+
+* Deserialize a map` and skip all elements failing to deserialize by @johnmave126 (#763)
+
+    `MapSkipError` acts like a map (`HashMap`/`BTreeMap`), but keys or values that fail to deserialize, like are ignored.
+
+    For formats with heterogeneously typed maps, we can collect only the elements where both key and value are deserializable.
+    This is also useful in conjunction to `#[serde(flatten)]` to ignore some entries when capturing additional fields.
+
+    ```text
+    // JSON
+    "value": {"0": "v0", "5": "v5", "str": "str", "10": 2},
+
+    // Rust
+    #[serde_as(as = "MapSkipError<DisplayFromStr, _>")]
+    value: BTreeMap<u32, String>,
+
+    // Only deserializes entries with a numerical key and a string value, i.e.,
+    {0 => "v0", 5 => "v5"}
+    ```
+
 ## [3.8.3] - 2024-07-03
 
 ### Fixed
