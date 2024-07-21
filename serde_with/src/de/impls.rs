@@ -1891,10 +1891,13 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(DeError::invalid_value(
-                        Unexpected::Unsigned(unexp as u64),
-                        &"0 or 1",
-                    )),
+                    unexp => {
+                        let mut buf: [u8; 58] = [0u8; 58];
+                        Err(DeError::invalid_value(
+                            crate::utils::get_unexpected_u128(unexp, &mut buf),
+                            &self,
+                        ))
+                    }
                 }
             }
 
@@ -1905,10 +1908,13 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                 match v {
                     0 => Ok(false),
                     1 => Ok(true),
-                    unexp => Err(DeError::invalid_value(
-                        Unexpected::Signed(unexp as i64),
-                        &"0 or 1",
-                    )),
+                    unexp => {
+                        let mut buf: [u8; 58] = [0u8; 58];
+                        Err(DeError::invalid_value(
+                            crate::utils::get_unexpected_i128(unexp, &mut buf),
+                            &"0 or 1",
+                        ))
+                    }
                 }
             }
         }
