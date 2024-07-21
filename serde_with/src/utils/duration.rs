@@ -23,13 +23,17 @@ impl Sign {
         *self == Sign::Negative
     }
 
-    pub(crate) fn apply<T>(&self, value: T) -> T
-    where
-        T: core::ops::Neg<Output = T>,
-    {
+    pub(crate) fn apply_f64(&self, value: f64) -> f64 {
         match *self {
             Sign::Positive => value,
-            Sign::Negative => value.neg(),
+            Sign::Negative => -value,
+        }
+    }
+
+    pub(crate) fn apply_i64(&self, value: i64) -> Option<i64> {
+        match *self {
+            Sign::Positive => Some(value),
+            Sign::Negative => value.checked_neg(),
         }
     }
 }
@@ -46,6 +50,16 @@ impl DurationSigned {
             sign,
             duration: Duration::new(secs, nanosecs),
         }
+    }
+
+    pub(crate) fn checked_mul(mut self, rhs: u32) -> Option<Self> {
+        self.duration = self.duration.checked_mul(rhs)?;
+        Some(self)
+    }
+
+    pub(crate) fn checked_div(mut self, rhs: u32) -> Option<Self> {
+        self.duration = self.duration.checked_div(rhs)?;
+        Some(self)
     }
 
     #[cfg(any(feature = "chrono_0_4", feature = "time_0_3"))]
@@ -102,24 +116,6 @@ impl From<&SystemTime> for DurationSigned {
     }
 }
 
-impl core::ops::Mul<u32> for DurationSigned {
-    type Output = DurationSigned;
-
-    fn mul(mut self, rhs: u32) -> Self::Output {
-        self.duration *= rhs;
-        self
-    }
-}
-
-impl core::ops::Div<u32> for DurationSigned {
-    type Output = DurationSigned;
-
-    fn div(mut self, rhs: u32) -> Self::Output {
-        self.duration /= rhs;
-        self
-    }
-}
-
 impl<STRICTNESS> SerializeAs<DurationSigned> for DurationSeconds<u64, STRICTNESS>
 where
     STRICTNESS: Strictness,
@@ -156,9 +152,16 @@ where
     where
         S: Serializer,
     {
-        let mut secs = source.sign.apply(source.duration.as_secs() as i64);
+        let mut secs = source
+            .sign
+            // TODO BUG771 the as i64 can fail
+            .apply_i64(source.duration.as_secs() as i64)
+            .ok_or_else(|| {
+                S::Error::custom("Failed to serialize value as the value cannot be represented.")
+            })?;
 
         // Properly round the value
+        // TODO check for overflows BUG771
         if source.duration.subsec_millis() >= 500 {
             if source.sign.is_positive() {
                 secs += 1;
@@ -178,7 +181,7 @@ where
     where
         S: Serializer,
     {
-        let mut secs = source.sign.apply(source.duration.as_secs() as f64);
+        let mut secs = source.sign.apply_f64(source.duration.as_secs() as f64);
 
         // Properly round the value
         if source.duration.subsec_millis() >= 500 {
@@ -201,7 +204,12 @@ where
     where
         S: Serializer,
     {
-        let mut secs = source.sign.apply(source.duration.as_secs() as i64);
+        let mut secs = source
+            .sign
+            .apply_i64(source.duration.as_secs() as i64)
+            .ok_or_else(|| {
+                S::Error::custom("Failed to serialize value as the value cannot be represented.")
+            })?;
 
         // Properly round the value
         if source.duration.subsec_millis() >= 500 {
@@ -225,7 +233,7 @@ where
     {
         source
             .sign
-            .apply(source.duration.as_secs_f64())
+            .apply_f64(source.duration.as_secs_f64())
             .serialize(serializer)
     }
 }
@@ -241,7 +249,7 @@ where
     {
         source
             .sign
-            .apply(source.duration.as_secs_f64())
+            .apply_f64(source.duration.as_secs_f64())
             .to_string()
             .serialize(serializer)
     }
@@ -261,7 +269,8 @@ macro_rules! duration_impls {
             where
                 S: Serializer,
             {
-                $inner::<FORMAT, STRICTNESS>::serialize_as(&(*source * $factor), serializer)
+                let value = source.checked_mul($factor).ok_or_else(|| S::Error::custom("Failed to serialize value as the value cannot be represented."))?;
+                $inner::<FORMAT, STRICTNESS>::serialize_as(&value, serializer)
             }
         }
 
@@ -276,7 +285,8 @@ macro_rules! duration_impls {
                 D: Deserializer<'de>,
             {
                 let dur = $inner::<FORMAT, STRICTNESS>::deserialize_as(deserializer)?;
-                Ok(dur / $factor)
+                let dur = dur.checked_div($factor).ok_or_else(|| D::Error::custom("Failed to deserialize value as the value cannot be represented."))?;
+                Ok(dur)
             }
         }
 
