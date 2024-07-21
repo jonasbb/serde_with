@@ -34,11 +34,13 @@ where
     _size_hint_from_bounds(iter.size_hint())
 }
 
-pub(crate) const NANOS_PER_SEC: u32 = 1_000_000_000;
+pub(crate) const NANOS_PER_SEC: u128 = 1_000_000_000;
+pub(crate) const NANOS_PER_SEC_F64: f64 = 1_000_000_000.0;
 // pub(crate) const NANOS_PER_MILLI: u32 = 1_000_000;
 // pub(crate) const NANOS_PER_MICRO: u32 = 1_000;
 // pub(crate) const MILLIS_PER_SEC: u64 = 1_000;
 // pub(crate) const MICROS_PER_SEC: u64 = 1_000_000;
+pub(crate) const U64_MAX: u128 = u64::MAX as u128;
 
 pub(crate) struct MapIter<'de, A, K, V> {
     pub(crate) access: A,
@@ -114,10 +116,10 @@ where
 }
 
 pub(crate) fn duration_signed_from_secs_f64(secs: f64) -> Result<DurationSigned, &'static str> {
-    const MAX_NANOS_F64: f64 = ((u64::MAX as u128 + 1) * (NANOS_PER_SEC as u128)) as f64;
+    const MAX_NANOS_F64: f64 = ((U64_MAX + 1) * NANOS_PER_SEC) as f64;
     // TODO why are the seconds converted to nanoseconds first?
     // Does it make sense to just truncate the value?
-    let mut nanos = secs * (NANOS_PER_SEC as f64);
+    let mut nanos = secs * NANOS_PER_SEC_F64;
     if !nanos.is_finite() {
         return Err("got non-finite value when converting float to duration");
     }
@@ -132,8 +134,8 @@ pub(crate) fn duration_signed_from_secs_f64(secs: f64) -> Result<DurationSigned,
     let nanos = nanos as u128;
     Ok(DurationSigned::new(
         sign,
-        (nanos / (NANOS_PER_SEC as u128)) as u64,
-        (nanos % (NANOS_PER_SEC as u128)) as u32,
+        (nanos / NANOS_PER_SEC) as u64,
+        (nanos % NANOS_PER_SEC) as u32,
     ))
 }
 
@@ -193,4 +195,48 @@ where
     // A normal transmute is not possible because of:
     // https://github.com/rust-lang/rust/issues/61956
     Ok(unsafe { core::mem::transmute_copy::<_, [T; N]>(&arr) })
+}
+
+/// Writer that writes into a `&mut [u8]` while checking the length of the buffer
+struct BufWriter<'a> {
+    bytes: &'a mut [u8],
+    offset: usize,
+}
+
+impl<'a> BufWriter<'a> {
+    fn new(bytes: &'a mut [u8]) -> Self {
+        BufWriter { bytes, offset: 0 }
+    }
+
+    fn into_str(self) -> &'a str {
+        let slice = &self.bytes[..self.offset];
+        core::str::from_utf8(slice)
+            .unwrap_or("Failed to extract valid string from BufWriter. This should never happen.")
+    }
+}
+
+impl<'a> core::fmt::Write for BufWriter<'a> {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        if s.len() > self.bytes.len() - self.offset {
+            Err(fmt::Error)
+        } else {
+            self.bytes[self.offset..self.offset + s.len()].copy_from_slice(s.as_bytes());
+            self.offset += s.len();
+            Ok(())
+        }
+    }
+}
+
+// 58 chars is long enough for any i128 and u128 value
+pub(crate) fn get_unexpected_i128(value: i128, buf: &mut [u8; 58]) -> Unexpected<'_> {
+    let mut writer = BufWriter::new(buf);
+    fmt::Write::write_fmt(&mut writer, format_args!("integer `{value}` as i128")).unwrap();
+    Unexpected::Other(writer.into_str())
+}
+
+// 58 chars is long enough for any i128 and u128 value
+pub(crate) fn get_unexpected_u128(value: u128, buf: &mut [u8; 58]) -> Unexpected<'_> {
+    let mut writer = BufWriter::new(buf);
+    fmt::Write::write_fmt(&mut writer, format_args!("integer `{value}` as u128")).unwrap();
+    Unexpected::Other(writer.into_str())
 }
