@@ -312,11 +312,12 @@ impl Visitor<'_> for DurationVisitorFlexible {
     where
         E: DeError,
     {
-        if value >= 0 {
-            Ok(DurationSigned::new(Sign::Positive, value as u64, 0))
+        let sign = if value >= 0 {
+            Sign::Positive
         } else {
-            Ok(DurationSigned::new(Sign::Negative, (-value) as u64, 0))
-        }
+            Sign::Negative
+        };
+        Ok(DurationSigned::new(sign, value.unsigned_abs(), 0))
     }
 
     fn visit_u64<E>(self, secs: u64) -> Result<Self::Value, E>

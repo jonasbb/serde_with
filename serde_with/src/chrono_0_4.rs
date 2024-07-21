@@ -132,12 +132,13 @@ pub mod datetime_utc_ts_seconds_from_any {
                     }
                     [seconds, subseconds] => {
                         if let Ok(seconds) = seconds.parse() {
-                            let subseclen = subseconds.chars().count() as u32;
-                            if subseclen > 9 {
-                                return Err(DeError::custom(format_args!(
+                            let subseclen =
+                            match u32::try_from(subseconds.chars().count()) {
+                                Ok(subseclen) if subseclen <= 9 => subseclen,
+                                _ =>    return Err(DeError::custom(format_args!(
                                     "DateTimes only support nanosecond precision but '{value}' has more than 9 digits."
-                                )));
-                            }
+                                ))),
+                            };
 
                             if let Ok(mut subseconds) = subseconds.parse() {
                                 // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds

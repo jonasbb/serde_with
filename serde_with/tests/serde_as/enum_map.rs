@@ -13,7 +13,7 @@ fn bytes_debug_readable(bytes: &[u8]) -> String {
             }
             b'\\' => result.push_str("\\\\"),
             _ => {
-                result.push(byte as char);
+                result.push(char::from(byte));
             }
         }
     }
