@@ -519,7 +519,7 @@ fn test_bytes_or_string() {
 #[test]
 fn string_with_separator() {
     use serde_with::{
-        formats::{CommaSeparator, SpaceSeparator},
+        formats::{CommaSeparator, DosLineSeparator, SpaceSeparator, UnixLineSeparator},
         StringWithSeparator,
     };
 
@@ -529,26 +529,44 @@ fn string_with_separator() {
         #[serde_as(as = "StringWithSeparator::<SpaceSeparator, String>")]
         tags: Vec<String>,
         #[serde_as(as = "StringWithSeparator::<CommaSeparator, String>")]
-        // more_tags: Vec<String>,
         more_tags: BTreeSet<String>,
+        #[serde_as(as = "StringWithSeparator::<UnixLineSeparator, String>")]
+        lf_tags: BTreeSet<String>,
+        #[serde_as(as = "StringWithSeparator::<DosLineSeparator, String>")]
+        crlf_tags: BTreeSet<String>,
     }
 
     let v: A = serde_json::from_str(
         r##"{
     "tags": "#hello #world",
-    "more_tags": "foo,bar,bar"
+    "more_tags": "foo,bar,bar",
+    "lf_tags": "foo\nbar\nbar",
+    "crlf_tags": "foo\r\nbar\r\nbar"
 }"##,
     )
     .unwrap();
     assert_eq!(vec!["#hello", "#world"], v.tags);
-    assert_eq!(2, v.more_tags.len());
+    assert_eq!(
+        BTreeSet::from(["foo".to_string(), "bar".to_string()]),
+        v.more_tags
+    );
+    assert_eq!(
+        BTreeSet::from(["foo".to_string(), "bar".to_string()]),
+        v.lf_tags
+    );
+    assert_eq!(
+        BTreeSet::from(["foo".to_string(), "bar".to_string()]),
+        v.crlf_tags
+    );
 
     let x = A {
         tags: vec!["1".to_string(), "2".to_string(), "3".to_string()],
         more_tags: BTreeSet::default(),
+        lf_tags: BTreeSet::default(),
+        crlf_tags: BTreeSet::default(),
     };
     assert_eq!(
-        r#"{"tags":"1 2 3","more_tags":""}"#,
+        r#"{"tags":"1 2 3","more_tags":"","lf_tags":"","crlf_tags":""}"#,
         serde_json::to_string(&x).unwrap()
     );
 }
