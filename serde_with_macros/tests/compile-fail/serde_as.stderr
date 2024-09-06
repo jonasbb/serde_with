@@ -76,17 +76,17 @@ error: Unknown field: `does_not_exist`
 57 |     #[serde_as(does_not_exist = "123")]
    |                ^^^^^^^^^^^^^^
 
-error: Unknown field: `unknwn1`
+error: Unknown field: `unknown1`
   --> tests/compile-fail/serde_as.rs:59:16
    |
-59 |     #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
-   |                ^^^^^^^
+59 |     #[serde_as(unknown1 = "Hello", unknown2 = "World")]
+   |                ^^^^^^^^
 
-error: Unknown field: `unknw2`
-  --> tests/compile-fail/serde_as.rs:59:35
+error: Unknown field: `unknown2`
+  --> tests/compile-fail/serde_as.rs:59:36
    |
-59 |     #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
-   |                                   ^^^^^^
+59 |     #[serde_as(unknown1 = "Hello", unknown2 = "World")]
+   |                                    ^^^^^^^^
 
 error: Unknown literal value `123`
   --> tests/compile-fail/serde_as.rs:67:31

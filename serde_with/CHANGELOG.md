@@ -336,7 +336,7 @@ It only affects custom character sets used for base64 of which there are no inst
     }
     ```
 
-    The `apply` attribute will expand into this, applying the attributs to the matching fields:
+    The `apply` attribute will expand into this, applying the attributes to the matching fields:
 
     ```rust
     #[derive(serde::Serialize)]
