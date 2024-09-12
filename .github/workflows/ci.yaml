@@ -6,11 +6,10 @@ on:
   push:
     branches:
       - master
-      - staging
-      - trying
   # Test once per week: Saturday at 00:00
   schedule:
     - cron: "0 0 * * 6"
+  workflow_dispatch:
 permissions: read-all
 
 jobs:
@@ -61,7 +60,7 @@ jobs:
         # It is good to test more than the MSRV and stable since sometimes
         # breakage occurs in intermediate versions.
         # IMPORTANT: Synchronize the MSRV with the Cargo.toml values.
-        rust: ["1.67", "1.70", "1.75", "stable", "beta", "nightly"]
+        rust: ["1.67", "1.70", "1.75", "1.80", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
