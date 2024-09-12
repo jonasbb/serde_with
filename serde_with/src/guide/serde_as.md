@@ -95,7 +95,7 @@ For more information, you can inspect the documentation of the `serde_as` macro.
 #[derive(Serialize, Deserialize)]
 struct A {
     #[serde_as(as = "Option<DisplayFromStr>")]
-    // In this situation boths `Option`s will be correctly identified and
+    // In this situation both `Option`s will be correctly identified and
     // `#[serde(default)]` will be applied on this field.
     val: Option<u32>,
 }

@@ -56,8 +56,8 @@ struct ConflictingAsAnnotations {
     normal_field: u32,
     #[serde_as(does_not_exist = "123")]
     unknown: u32,
-    #[serde_as(unknwn1 = "Hello", unknw2 = "World")]
-    two_unkowns: u32,
+    #[serde_as(unknown1 = "Hello", unknown2 = "World")]
+    two_unknowns: u32,
 }
 
 /// Test error message for malformed attributes
