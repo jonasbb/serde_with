@@ -1,3 +1,5 @@
+//! Test Cases
+
 use version_sync::{assert_contains_regex, assert_html_root_url_updated};
 
 #[test]

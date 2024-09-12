@@ -1,3 +1,4 @@
+//! Test Cases
 #![allow(
     // This allows the tests to be written more uniform and not have to special case the last clone().
     clippy::redundant_clone,

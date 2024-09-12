@@ -1,3 +1,5 @@
+//! Test Cases
+
 use crate::utils::{check_matches_schema, check_valid_json_schema};
 use expect_test::expect_file;
 use schemars::JsonSchema;
