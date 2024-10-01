@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.10.0] - 2024-10-01
+
 ### Added
 
 * Add newline separator by @jayvdb (#777)
