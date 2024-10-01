@@ -95,6 +95,22 @@ fn schemars_basic() {
 }
 
 #[test]
+fn schemars_other_cfg_attrs() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    struct Test {
+        #[serde_as(as = "DisplayFromStr")]
+        #[cfg_attr(any(), arbitrary("some" |weird| syntax::<bool, 2>()))]
+        #[cfg_attr(any(), schemars(with = "i32"))]
+        custom: i32,
+    }
+
+    check_matches_schema::<Test>(&json!({
+        "custom": "23",
+    }));
+}
+
+#[test]
 fn schemars_custom_with() {
     #[serde_as]
     #[derive(JsonSchema, Serialize)]

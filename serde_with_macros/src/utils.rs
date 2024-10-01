@@ -1,18 +1,21 @@
+use crate::lazy_bool::LazyBool;
 use darling::FromDeriveInput;
 use proc_macro::TokenStream;
-use proc_macro2::{TokenStream as TokenStream2, TokenTree};
+use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
-use std::collections::BTreeSet;
+use std::ops::{BitAnd, BitOr, Not};
 use syn::{
-    ext::IdentExt, parse::Parse, parse_quote, punctuated::Punctuated, Error, Generics, Path,
-    TypeGenerics,
+    parse::{Parse, ParseStream},
+    parse_quote,
+    punctuated::Punctuated,
+    Attribute, DeriveInput, Generics, Meta, Path, PathSegment, Token, TypeGenerics, WhereClause,
 };
 
 /// Merge multiple [`syn::Error`] into one.
 pub(crate) trait IteratorExt {
-    fn collect_error(self) -> Result<(), Error>
+    fn collect_error(self) -> syn::Result<()>
     where
-        Self: Iterator<Item = Result<(), Error>> + Sized,
+        Self: Iterator<Item = syn::Result<()>> + Sized,
     {
         let accu = Ok(());
         self.fold(accu, |accu, error| match (accu, error) {
@@ -25,7 +28,7 @@ pub(crate) trait IteratorExt {
         })
     }
 }
-impl<I> IteratorExt for I where I: Iterator<Item = Result<(), Error>> + Sized {}
+impl<I> IteratorExt for I where I: Iterator<Item = syn::Result<()>> + Sized {}
 
 /// Attributes usable for derive macros
 #[derive(FromDeriveInput)]
@@ -37,7 +40,7 @@ pub(crate) struct DeriveOptions {
 }
 
 impl DeriveOptions {
-    pub(crate) fn from_derive_input(input: &syn::DeriveInput) -> Result<Self, TokenStream> {
+    pub(crate) fn from_derive_input(input: &DeriveInput) -> Result<Self, TokenStream> {
         match <Self as FromDeriveInput>::from_derive_input(input) {
             Ok(v) => Ok(v),
             Err(e) => Err(TokenStream::from(e.write_errors())),
@@ -55,11 +58,7 @@ impl DeriveOptions {
 // Serde is also licensed Apache 2 + MIT
 pub(crate) fn split_with_de_lifetime(
     generics: &Generics,
-) -> (
-    DeImplGenerics<'_>,
-    TypeGenerics<'_>,
-    Option<&syn::WhereClause>,
-) {
+) -> (DeImplGenerics<'_>, TypeGenerics<'_>, Option<&WhereClause>) {
     let de_impl_generics = DeImplGenerics(generics);
     let (_, ty_generics, where_clause) = generics.split_for_impl();
     (de_impl_generics, ty_generics, where_clause)
@@ -86,170 +85,174 @@ impl<'a> ToTokens for DeImplGenerics<'a> {
 ///            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 struct CfgAttr {
-    cfg: syn::Expr,
-    _comma: syn::Token![,],
-    meta: syn::Meta,
+    condition: Meta,
+    _comma: Token![,],
+    metas: Punctuated<Meta, Token![,]>,
 }
 
 impl Parse for CfgAttr {
-    fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
+    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
         Ok(Self {
-            cfg: input.parse()?,
+            condition: input.parse()?,
             _comma: input.parse()?,
-            meta: input.parse()?,
+            metas: Punctuated::parse_terminated(input)?,
         })
     }
 }
 
 /// Determine if there is a `#[derive(JsonSchema)]` on this struct.
-pub(crate) fn has_derive_jsonschema(input: TokenStream) -> SchemaFieldConfig {
-    fn parse_derive_args(
-        input: syn::parse::ParseStream<'_>,
-    ) -> syn::Result<Punctuated<Path, syn::Token![,]>> {
+pub(crate) fn has_derive_jsonschema(input: TokenStream) -> syn::Result<SchemaFieldConfig> {
+    fn parse_derive_args(input: ParseStream<'_>) -> syn::Result<Punctuated<Path, Token![,]>> {
         Punctuated::parse_terminated_with(input, Path::parse_mod_style)
     }
 
-    fn eval_attribute(attr: &syn::Attribute) -> syn::Result<SchemaFieldConfig> {
-        let args: CfgAttr;
-        let mut meta = &attr.meta;
-        let mut config = SchemaFieldConfig::Unconditional;
+    fn eval_metas<'a>(metas: impl IntoIterator<Item = &'a Meta>) -> syn::Result<SchemaFieldConfig> {
+        metas
+            .into_iter()
+            .map(eval_meta)
+            .try_fold(
+                SchemaFieldConfig::False,
+                |state, result| Ok(state | result?),
+            )
+    }
 
-        if meta.path().is_ident("cfg_attr") {
-            let list = meta.require_list()?;
-            args = list.parse_args()?;
+    fn eval_meta(meta: &Meta) -> syn::Result<SchemaFieldConfig> {
+        match meta.path() {
+            path if path.is_ident("cfg_attr") => {
+                let CfgAttr {
+                    condition, metas, ..
+                } = meta.require_list()?.parse_args()?;
 
-            meta = &args.meta;
-            config = SchemaFieldConfig::Conditional(args.cfg);
-        }
-
-        let list = meta.require_list()?;
-        if !list.path.is_ident("derive") {
-            return Ok(SchemaFieldConfig::Disabled);
-        }
-
-        let derives = list.parse_args_with(parse_derive_args)?;
-        for derive in &derives {
-            let segments = &derive.segments;
-
-            // Check for $(::)? $(schemars::)? JsonSchema
-            match segments.len() {
-                1 if segments[0].ident == "JsonSchema" => (),
-                2 if segments[0].ident == "schemars" && segments[1].ident == "JsonSchema" => (),
-                _ => continue,
+                Ok(eval_metas(&metas)? & SchemaFieldConfig::Lazy(condition.into()))
             }
+            path if path.is_ident("derive") => {
+                let config = meta
+                    .require_list()?
+                    .parse_args_with(parse_derive_args)?
+                    .into_iter()
+                    .any(|Path { segments, .. }| {
+                        // This matches `JsonSchema`, `schemars::JsonSchema`
+                        //   as well as any other path ending with `JsonSchema`.
+                        // This will not match aliased `JsonSchema`s,
+                        //   but might match other `JsonSchema` not `schemars::JsonSchema`!
+                        match segments.last() {
+                            Some(PathSegment { ident, .. }) => ident == "JsonSchema",
+                            _ => false,
+                        }
+                    })
+                    .then_some(SchemaFieldConfig::True)
+                    .unwrap_or_default();
 
-            return Ok(config);
+                Ok(config)
+            }
+            _ => Ok(SchemaFieldConfig::False),
         }
-
-        Ok(SchemaFieldConfig::Disabled)
     }
 
-    let input: syn::DeriveInput = match syn::parse(input) {
-        Ok(input) => input,
-        Err(_) => return SchemaFieldConfig::Disabled,
-    };
-
-    for attr in input.attrs {
-        match eval_attribute(&attr) {
-            Ok(SchemaFieldConfig::Disabled) => continue,
-            Ok(config) => return config,
-            Err(_) => continue,
-        }
-    }
-
-    SchemaFieldConfig::Disabled
+    let DeriveInput { attrs, .. } = syn::parse(input)?;
+    let metas = attrs.iter().map(|Attribute { meta, .. }| meta);
+    eval_metas(metas)
 }
 
 /// Enum controlling when we should emit a `#[schemars]` field attribute.
-pub(crate) enum SchemaFieldConfig {
-    /// Emit a `#[cfg_attr(#cfg, schemars(...))]` attribute.
-    Conditional(syn::Expr),
-    /// Emit a `#[schemars(...)]` attribute (or equivalent).
-    Unconditional,
-    /// Do not emit an attribute.
-    Disabled,
-}
+pub(crate) type SchemaFieldConfig = LazyBool<SchemaFieldCondition>;
 
-impl SchemaFieldConfig {
-    /// Get a `#[cfg]` expression suitable for emitting the `#[schemars]` attribute.
-    ///
-    /// If this config is `Unconditional` then it will just return `all()` which
-    /// is always true.
-    pub(crate) fn cfg_expr(&self) -> Option<syn::Expr> {
-        match self {
-            Self::Unconditional => Some(syn::parse_quote!(all())),
-            Self::Conditional(cfg) => Some(cfg.clone()),
-            Self::Disabled => None,
-        }
+impl From<Meta> for SchemaFieldConfig {
+    fn from(meta: Meta) -> Self {
+        Self::Lazy(meta.into())
     }
 }
 
-struct SchemarsAttr {
-    args: BTreeSet<String>,
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) struct SchemaFieldCondition(pub(crate) Meta);
+
+impl BitAnd for SchemaFieldCondition {
+    type Output = Self;
+
+    fn bitand(self, Self(rhs): Self) -> Self::Output {
+        let Self(lhs) = self;
+        Self(parse_quote!(all(#lhs, #rhs)))
+    }
 }
 
-impl Parse for SchemarsAttr {
-    fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
-        let mut args = BTreeSet::new();
+impl BitAnd<&SchemaFieldCondition> for SchemaFieldCondition {
+    type Output = Self;
 
-        while !input.is_empty() {
-            let arg = syn::Ident::parse_any(input)?;
-            let _eq: syn::Token![=] = input.parse()?;
+    fn bitand(self, Self(rhs): &Self) -> Self::Output {
+        let Self(lhs) = self;
+        Self(parse_quote!(all(#lhs, #rhs)))
+    }
+}
 
-            args.insert(arg.to_string());
+impl BitOr for SchemaFieldCondition {
+    type Output = Self;
 
-            // Don't parse the argument value, just advance until we hit the end or a comma.
-            input.step(|cursor| {
-                let mut rest = *cursor;
-                loop {
-                    match rest.token_tree() {
-                        Some((TokenTree::Punct(punct), next)) if punct.as_char() == ',' => {
-                            return Ok(((), next))
-                        }
-                        Some((_, next)) => rest = next,
-                        None => return Ok(((), rest)),
-                    }
-                }
-            })?;
-        }
+    fn bitor(self, Self(rhs): Self) -> Self::Output {
+        let Self(lhs) = self;
+        Self(parse_quote!(any(#lhs, #rhs)))
+    }
+}
 
-        Ok(Self { args })
+impl Not for SchemaFieldCondition {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        let Self(condition) = self;
+        Self(parse_quote!(not(#condition)))
+    }
+}
+
+impl From<Meta> for SchemaFieldCondition {
+    fn from(meta: Meta) -> Self {
+        Self(meta)
     }
 }
 
 /// Get a `#[cfg]` expression under which this field has a `#[schemars]` attribute
 /// with a `with = ...` argument.
 pub(crate) fn schemars_with_attr_if(
-    attrs: &[syn::Attribute],
+    attrs: &[Attribute],
     filter: &[&str],
-) -> syn::Result<syn::Expr> {
-    let mut conditions = Vec::new();
-
-    for attr in attrs {
-        let path = attr.path();
-
-        let nested;
-        let (cfg, meta) = match () {
-            _ if path.is_ident("cfg_attr") => {
-                let cfg_attr = attr.parse_args_with(CfgAttr::parse)?;
-                nested = cfg_attr.meta;
-
-                (cfg_attr.cfg, &nested)
-            }
-            _ if path.is_ident("schemars") => (syn::parse_quote!(all()), &attr.meta),
-            _ => continue,
-        };
-
-        let list = meta.require_list()?;
-        let schemars: SchemarsAttr = syn::parse2(list.tokens.clone())?;
-        let args = &schemars.args;
-
-        if !filter.iter().copied().any(|item| args.contains(item)) {
-            continue;
-        }
-
-        conditions.push(cfg);
+) -> syn::Result<SchemaFieldConfig> {
+    fn eval_metas<'a>(
+        filter: &[&str],
+        metas: impl IntoIterator<Item = &'a Meta>,
+    ) -> syn::Result<SchemaFieldConfig> {
+        metas
+            .into_iter()
+            .map(|meta| eval_meta(filter, meta))
+            .try_fold(
+                SchemaFieldConfig::False,
+                |state, result| Ok(state | result?),
+            )
     }
 
-    Ok(syn::parse_quote!(any(#( #conditions, )*)))
+    fn eval_meta(filter: &[&str], meta: &Meta) -> syn::Result<SchemaFieldConfig> {
+        match meta.path() {
+            path if path.is_ident("cfg_attr") => {
+                let CfgAttr {
+                    condition, metas, ..
+                } = meta.require_list()?.parse_args()?;
+
+                Ok(eval_metas(filter, &metas)? & SchemaFieldConfig::from(condition))
+            }
+            path if path.is_ident("schemars") => {
+                let config = meta
+                    .require_list()?
+                    .parse_args_with(<Punctuated<Meta, Token![,]>>::parse_terminated)?
+                    .into_iter()
+                    .any(|meta| match meta.path().get_ident() {
+                        Some(ident) => filter.iter().any(|relevant| ident == relevant),
+                        _ => false,
+                    })
+                    .then_some(SchemaFieldConfig::True)
+                    .unwrap_or_default();
+                Ok(config)
+            }
+            _ => Ok(SchemaFieldConfig::False),
+        }
+    }
+
+    let metas = attrs.iter().map(|Attribute { meta, .. }| meta);
+    eval_metas(filter, metas)
 }

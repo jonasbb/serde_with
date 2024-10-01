@@ -32,9 +32,13 @@
 //! [`serde_with`]: https://crates.io/crates/serde_with/
 
 mod apply;
+mod lazy_bool;
 mod utils;
 
-use crate::utils::{split_with_de_lifetime, DeriveOptions, IteratorExt as _, SchemaFieldConfig};
+use crate::utils::{
+    split_with_de_lifetime, DeriveOptions, IteratorExt as _, SchemaFieldCondition,
+    SchemaFieldConfig,
+};
 use darling::{
     ast::NestedMeta,
     util::{Flag, Override},
@@ -619,10 +623,9 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
                 .unwrap_or_else(|| syn::parse_quote!(::serde_with));
 
             let schemars_config = match container_options.enable_schemars_support {
-                _ if cfg!(not(feature = "schemars_0_8")) => SchemaFieldConfig::Disabled,
-                Some(true) => SchemaFieldConfig::Unconditional,
-                Some(false) => SchemaFieldConfig::Disabled,
-                None => utils::has_derive_jsonschema(input.clone()),
+                _ if cfg!(not(feature = "schemars_0_8")) => SchemaFieldConfig::False,
+                Some(condition) => condition.into(),
+                None => utils::has_derive_jsonschema(input.clone()).unwrap_or_default(),
             };
 
             // Convert any error message into a nice compiler error
@@ -772,21 +775,40 @@ fn serde_as_add_attr_to_field(
         let attr = parse_quote!(#[serde(with = #attr_inner_tokens)]);
         field.attrs.push(attr);
 
-        if let Some(cfg) = schemars_config.cfg_expr() {
-            let with_cfg = utils::schemars_with_attr_if(
-                &field.attrs,
-                &["with", "serialize_with", "deserialize_with", "schema_with"],
-            )?;
-            let attr_inner_tokens =
-                quote!(#serde_with_crate_path::Schema::<#type_original, #replacement_type>)
-                    .to_string();
-            let attr = parse_quote! {
-                #[cfg_attr(
-                    all(#cfg, not(#with_cfg)),
-                    schemars(with = #attr_inner_tokens))
-                ]
-            };
-            field.attrs.push(attr);
+        match schemars_config {
+            SchemaFieldConfig::False => {}
+            lhs => {
+                let rhs = utils::schemars_with_attr_if(
+                    &field.attrs,
+                    &["with", "serialize_with", "deserialize_with", "schema_with"],
+                )?;
+
+                match lhs & !rhs {
+                    SchemaFieldConfig::False => {}
+                    condition => {
+                        let attr_inner_tokens = quote! {
+                            #serde_with_crate_path::Schema::<#type_original, #replacement_type>
+                        };
+                        let attr_inner_tokens = attr_inner_tokens.to_string();
+                        let attr = match condition {
+                            SchemaFieldConfig::False => unreachable!(),
+                            SchemaFieldConfig::True => {
+                                parse_quote! { #[schemars(with = #attr_inner_tokens)] }
+                            }
+                            SchemaFieldConfig::Lazy(SchemaFieldCondition(condition)) => {
+                                parse_quote! {
+                                    #[cfg_attr(
+                                        #condition,
+                                        schemars(with = #attr_inner_tokens))
+                                    ]
+                                }
+                            }
+                        };
+
+                        field.attrs.push(attr);
+                    }
+                }
+            }
         }
     }
     if let Some(type_) = &serde_as_options.deserialize_as {
