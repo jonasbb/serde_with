@@ -133,7 +133,7 @@ schemars_0_8 = {package = "schemars", version = "0.8.16", optional = true, defau
 serde = {version = "1.0.152", default-features = false}
 serde_derive = "1.0.152"
 serde_json = {version = "1.0.45", optional = true, default-features = false}
-serde_with_macros = {path = "../serde_with_macros", version = "=3.9.0", optional = true}
+serde_with_macros = {path = "../serde_with_macros", version = "=3.10.0", optional = true}
 time_0_3 = {package = "time", version = "~0.3.36", optional = true, default-features = false}
 
 [dev-dependencies]

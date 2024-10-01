@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.10.0] - 2024-10-01
+
+### Added
+
+* Add newline separator by @jayvdb (#777)
+
+    The `UnixLineSeparator` and `DosLineSeparator` can be used together with `StringWithSeparator`.
+
+### Fixed
+
+* Proper handling of `cfg_attr` in the `serde_as` macro by @sivizius (#782)
+
+    This allows to parse more valid forms of the `cfg_attr` macro, including multiple values and attribute that do not follow the `key = value` schema.
+
 ## [3.9.0] - 2024-07-14
 
 ### Added
