@@ -562,7 +562,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///
 ///     If the automatically applied attribute is undesired, the behavior can be suppressed by adding
 ///     `#[serde_as(no_default)]`.
-
+///
 ///      This can be combined like `#[serde_as(as = "Option<S>", no_default)]`.
 ///
 /// After all these steps, the code snippet will have transformed into roughly this.

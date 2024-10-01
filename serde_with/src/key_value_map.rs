@@ -415,7 +415,6 @@ where
 /// It uses [`ElementAsKeyValueSerializer`] for the map element serialization.
 ///
 /// The [`Serializer`] implementation handles `serialize_struct`, `serialize_map` and `serialize_seq` functions by deferring the work to [`SerializeStruct`], [`SerializeMap`] and [`SerializeSeq`] respectively.
-
 struct SerializeSeqElement<M> {
     delegate: M,
     is_human_readable: bool,
