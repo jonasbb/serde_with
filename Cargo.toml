@@ -48,6 +48,8 @@ explicit_auto_deref = "allow"
 manual-unwrap-or-default = "allow"
 
 # alloc_instead_of_core = "warn"
+# as_conversions = "warn"
+# arithmetic_side_effects = "warn"
 # Checks for usage of `cloned()` on an `Iterator` or `Option` where `copied()` could be used instead.
 cloned_instead_of_copied = "warn"
 # Checks for literal calls to `Default::default()`.
