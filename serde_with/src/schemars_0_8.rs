@@ -787,6 +787,8 @@ map_first_last_wins_schema!(BTreeMap<K, V>);
 map_first_last_wins_schema!(=> S HashMap<K, V, S>);
 #[cfg(feature = "hashbrown_0_14")]
 map_first_last_wins_schema!(=> S hashbrown_0_14::HashMap<K, V, S>);
+#[cfg(feature = "hashbrown_0_15")]
+map_first_last_wins_schema!(=> S hashbrown_0_15::HashMap<K, V, S>);
 #[cfg(feature = "indexmap_1")]
 map_first_last_wins_schema!(=> S indexmap_1::IndexMap<K, V, S>);
 #[cfg(feature = "indexmap_2")]
