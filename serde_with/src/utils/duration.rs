@@ -296,7 +296,7 @@ duration_impls!(
 );
 
 struct DurationVisitorFlexible;
-impl<'de> Visitor<'de> for DurationVisitorFlexible {
+impl Visitor<'_> for DurationVisitorFlexible {
     type Value = DurationSigned;
 
     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -386,7 +386,7 @@ impl<'de> DeserializeAs<'de, DurationSigned> for DurationSeconds<String, Strict>
     {
         struct DurationDeserializationVisitor;
 
-        impl<'de> Visitor<'de> for DurationDeserializationVisitor {
+        impl Visitor<'_> for DurationDeserializationVisitor {
             type Value = DurationSigned;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

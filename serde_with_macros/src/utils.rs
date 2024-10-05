@@ -66,7 +66,7 @@ pub(crate) fn split_with_de_lifetime(
 
 pub(crate) struct DeImplGenerics<'a>(&'a Generics);
 
-impl<'a> ToTokens for DeImplGenerics<'a> {
+impl ToTokens for DeImplGenerics<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let mut generics = self.0.clone();
         generics.params = Some(parse_quote!('de))

@@ -64,7 +64,7 @@ pub mod datetime_utc_ts_seconds_from_any {
         D: Deserializer<'de>,
     {
         struct Helper;
-        impl<'de> Visitor<'de> for Helper {
+        impl Visitor<'_> for Helper {
             type Value = DateTime<Utc>;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

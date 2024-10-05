@@ -649,7 +649,7 @@ struct SerializeVariant<'a, M> {
     content: Content,
 }
 
-impl<'a, M> SerializeStructVariant for SerializeVariant<'a, M>
+impl<M> SerializeStructVariant for SerializeVariant<'_, M>
 where
     M: SerializeMap,
 {
@@ -674,7 +674,7 @@ where
     }
 }
 
-impl<'a, M> SerializeTupleVariant for SerializeVariant<'a, M>
+impl<M> SerializeTupleVariant for SerializeVariant<'_, M>
 where
     M: SerializeMap,
 {

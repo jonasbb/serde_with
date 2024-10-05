@@ -57,7 +57,7 @@ pub(crate) enum Content<'de> {
     Map(Vec<(Content<'de>, Content<'de>)>),
 }
 
-impl<'de> Content<'de> {
+impl Content<'_> {
     #[cold]
     fn unexpected(&self) -> Unexpected<'_> {
         match *self {
@@ -1123,7 +1123,7 @@ pub struct ContentRefDeserializer<'a, 'de, E> {
     err: PhantomData<E>,
 }
 
-impl<'a, 'de, E> ContentRefDeserializer<'a, 'de, E>
+impl<'de, E> ContentRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {
@@ -1214,7 +1214,7 @@ where
 
 /// Used when deserializing an untagged enum because the content may need
 /// to be used more than once.
-impl<'de, 'a, E> Deserializer<'de> for ContentRefDeserializer<'a, 'de, E>
+impl<'de, E> Deserializer<'de> for ContentRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {
@@ -1631,7 +1631,7 @@ where
     err: PhantomData<E>,
 }
 
-impl<'de, 'a, E> VariantAccess<'de> for VariantRefDeserializer<'a, 'de, E>
+impl<'de, E> VariantAccess<'de> for VariantRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {
@@ -1726,7 +1726,7 @@ where
     }
 }
 
-impl<'de, 'a, E> Deserializer<'de> for SeqRefDeserializer<'a, 'de, E>
+impl<'de, E> Deserializer<'de> for SeqRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {
@@ -1763,7 +1763,7 @@ where
     }
 }
 
-impl<'de, 'a, E> SeqAccess<'de> for SeqRefDeserializer<'a, 'de, E>
+impl<'de, E> SeqAccess<'de> for SeqRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {
@@ -1810,7 +1810,7 @@ where
     }
 }
 
-impl<'de, 'a, E> MapAccess<'de> for MapRefDeserializer<'a, 'de, E>
+impl<'de, E> MapAccess<'de> for MapRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {
@@ -1847,7 +1847,7 @@ where
     }
 }
 
-impl<'de, 'a, E> Deserializer<'de> for MapRefDeserializer<'a, 'de, E>
+impl<'de, E> Deserializer<'de> for MapRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {
@@ -1884,7 +1884,7 @@ where
     }
 }
 
-impl<'de, 'a, E> IntoDeserializer<'de, E> for ContentRefDeserializer<'a, 'de, E>
+impl<'de, E> IntoDeserializer<'de, E> for ContentRefDeserializer<'_, 'de, E>
 where
     E: DeError,
 {

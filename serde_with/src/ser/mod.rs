@@ -133,7 +133,7 @@ where
     }
 }
 
-impl<'a, T, U> Serialize for SerializeAsWrap<'a, T, U>
+impl<T, U> Serialize for SerializeAsWrap<'_, T, U>
 where
     T: ?Sized,
     U: ?Sized,
