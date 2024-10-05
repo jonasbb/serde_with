@@ -868,7 +868,7 @@ where
         D: Deserializer<'de>,
     {
         struct Helper<S>(PhantomData<S>);
-        impl<'de, S> Visitor<'de> for Helper<S>
+        impl<S> Visitor<'_> for Helper<S>
         where
             S: FromStr,
             <S as FromStr>::Err: Display,
@@ -918,7 +918,7 @@ where
         D: Deserializer<'de>,
     {
         struct OptionStringEmptyNone<S>(PhantomData<S>);
-        impl<'de, S> Visitor<'de> for OptionStringEmptyNone<S>
+        impl<S> Visitor<'_> for OptionStringEmptyNone<S>
         where
             S: FromStr,
             S::Err: Display,
@@ -1036,7 +1036,7 @@ where
     {
         struct Helper<SEPARATOR, I, T>(PhantomData<(SEPARATOR, I, T)>);
 
-        impl<'de, SEPARATOR, I, T> Visitor<'de> for Helper<SEPARATOR, I, T>
+        impl<SEPARATOR, I, T> Visitor<'_> for Helper<SEPARATOR, I, T>
         where
             SEPARATOR: Separator,
             I: FromIterator<T>,
@@ -1811,7 +1811,7 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
         D: Deserializer<'de>,
     {
         struct U8Visitor;
-        impl<'de> Visitor<'de> for U8Visitor {
+        impl Visitor<'_> for U8Visitor {
             type Value = bool;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1910,7 +1910,7 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Flexible> {
         D: Deserializer<'de>,
     {
         struct U8Visitor;
-        impl<'de> Visitor<'de> for U8Visitor {
+        impl Visitor<'_> for U8Visitor {
             type Value = bool;
 
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {

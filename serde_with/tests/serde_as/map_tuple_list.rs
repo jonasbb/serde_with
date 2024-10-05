@@ -391,7 +391,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
 
     struct TestSerializer;
 
-    impl<'a> Serializer for &'a mut TestSerializer {
+    impl Serializer for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
         type SerializeSeq = Self;
@@ -559,7 +559,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
         }
     }
 
-    impl<'a> SerializeMap for &'a mut TestSerializer {
+    impl SerializeMap for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
 
@@ -582,7 +582,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
         }
     }
 
-    impl<'a> SerializeSeq for &'a mut TestSerializer {
+    impl SerializeSeq for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
 
@@ -598,7 +598,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
         }
     }
 
-    impl<'a> SerializeStruct for &'a mut TestSerializer {
+    impl SerializeStruct for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
 
@@ -614,7 +614,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
         }
     }
 
-    impl<'a> SerializeStructVariant for &'a mut TestSerializer {
+    impl SerializeStructVariant for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
 
@@ -630,7 +630,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
         }
     }
 
-    impl<'a> SerializeTuple for &'a mut TestSerializer {
+    impl SerializeTuple for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
 
@@ -646,7 +646,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
         }
     }
 
-    impl<'a> SerializeTupleStruct for &'a mut TestSerializer {
+    impl SerializeTupleStruct for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
 
@@ -662,7 +662,7 @@ fn test_map_as_tuple_list_works_with_serializer_that_needs_length_to_serialize_s
         }
     }
 
-    impl<'a> SerializeTupleVariant for &'a mut TestSerializer {
+    impl SerializeTupleVariant for &mut TestSerializer {
         type Ok = ();
         type Error = TestError;
 

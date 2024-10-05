@@ -671,7 +671,7 @@ struct KeyValueSeqSerializer<'a, M> {
     key: Option<SerContent>,
 }
 
-impl<'a, M> SerializeSeq for KeyValueSeqSerializer<'a, M>
+impl<M> SerializeSeq for KeyValueSeqSerializer<'_, M>
 where
     M: SerializeMap,
 {
@@ -712,7 +712,7 @@ struct KeyValueTupleSerializer<'a, M> {
     key: Option<SerContent>,
 }
 
-impl<'a, M> SerializeTuple for KeyValueTupleSerializer<'a, M>
+impl<M> SerializeTuple for KeyValueTupleSerializer<'_, M>
 where
     M: SerializeMap,
 {
@@ -754,7 +754,7 @@ struct KeyValueTupleStructSerializer<'a, M> {
     key: Option<SerContent>,
 }
 
-impl<'a, M> SerializeTupleStruct for KeyValueTupleStructSerializer<'a, M>
+impl<M> SerializeTupleStruct for KeyValueTupleStructSerializer<'_, M>
 where
     M: SerializeMap,
 {
@@ -796,7 +796,7 @@ struct KeyValueMapSerializer<'a, M> {
     tmp: Option<SerContent>,
 }
 
-impl<'a, M> SerializeMap for KeyValueMapSerializer<'a, M>
+impl<M> SerializeMap for KeyValueMapSerializer<'_, M>
 where
     M: SerializeMap,
 {
@@ -857,7 +857,7 @@ struct KeyValueStructSerializer<'a, M> {
     key: Option<SerContent>,
 }
 
-impl<'a, M> SerializeStruct for KeyValueStructSerializer<'a, M>
+impl<M> SerializeStruct for KeyValueStructSerializer<'_, M>
 where
     M: SerializeMap,
 {
