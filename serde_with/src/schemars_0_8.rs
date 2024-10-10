@@ -426,7 +426,10 @@ where
     forward_schema!(Cow<'a, T>);
 }
 
-impl<T> JsonSchemaAs<T> for Bytes {
+impl<T, PREFERENCE> JsonSchemaAs<T> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     forward_schema!(Vec<u8>);
 }
 

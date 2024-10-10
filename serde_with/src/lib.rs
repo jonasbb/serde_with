@@ -1638,7 +1638,7 @@ pub struct TimestampNanoSecondsWithFrac<
 /// };
 /// assert_eq!(test, serde_json::from_value(j).unwrap());
 ///
-/// // and serialization will always be a byte sequence
+/// // and serialization will default to a byte sequence
 /// # assert_eq!(json!(
 /// {
 ///     "from_bytes": [70,111,111,45,66,97,114],
@@ -1647,7 +1647,20 @@ pub struct TimestampNanoSecondsWithFrac<
 /// # ), serde_json::to_value(&test).unwrap());
 /// # }
 /// ```
-pub struct Bytes;
+///
+/// Often it is prefered to serialize these bytes as string again.
+/// Like [`BytesOrString`], this can be adjusted using its generic type parameter,
+///   which can be either [`PreferBytes`] (default), [`PreferAsciiString`] or [`PreferString`].
+/// The latter two will try to convert arbitrary bytes to a `&str` first and will fallback to
+///   serializing as array of bytes only if these bytes would form an invalid string.
+/// `PreferAsciiString` will serialize strings containing non-ASCII characters as array as well.
+///
+/// [`PreferBytes`]: formats::PreferBytes
+/// [`PreferAsciiString`]: formats::PreferString
+/// [`PreferString`]: formats::PreferString
+pub struct Bytes<PREFERENCE: formats::TypePreference = formats::PreferBytes>(
+    PhantomData<PREFERENCE>,
+);
 
 /// Deserialize one or many elements
 ///

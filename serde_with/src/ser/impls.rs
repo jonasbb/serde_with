@@ -772,80 +772,104 @@ where
     }
 }
 
-impl SerializeAs<&[u8]> for Bytes {
+impl<PREFERENCE> SerializeAs<&[u8]> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &&[u8], serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(bytes)
+        PREFERENCE::serialize_as(*bytes, serializer)
     }
 }
 
 #[cfg(feature = "alloc")]
-impl SerializeAs<Vec<u8>> for Bytes {
+impl<PREFERENCE> SerializeAs<Vec<u8>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &Vec<u8>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(bytes)
+        PREFERENCE::serialize_as(bytes.as_slice(), serializer)
     }
 }
 
 #[cfg(feature = "alloc")]
-impl SerializeAs<Box<[u8]>> for Bytes {
+impl<PREFERENCE> SerializeAs<Box<[u8]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &Box<[u8]>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(bytes)
+        PREFERENCE::serialize_as(bytes.as_ref(), serializer)
     }
 }
 
 #[cfg(feature = "alloc")]
-impl<'a> SerializeAs<Cow<'a, [u8]>> for Bytes {
+impl<'a, PREFERENCE> SerializeAs<Cow<'a, [u8]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &Cow<'a, [u8]>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(bytes)
+        PREFERENCE::serialize_as(bytes.as_ref(), serializer)
     }
 }
 
-impl<const N: usize> SerializeAs<[u8; N]> for Bytes {
+impl<const N: usize, PREFERENCE> SerializeAs<[u8; N]> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &[u8; N], serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(bytes)
+        PREFERENCE::serialize_as(bytes.as_ref(), serializer)
     }
 }
 
-impl<const N: usize> SerializeAs<&[u8; N]> for Bytes {
+impl<const N: usize, PREFERENCE> SerializeAs<&[u8; N]> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &&[u8; N], serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(*bytes)
+        PREFERENCE::serialize_as(bytes.as_ref(), serializer)
     }
 }
 
 #[cfg(feature = "alloc")]
-impl<const N: usize> SerializeAs<Box<[u8; N]>> for Bytes {
+impl<const N: usize, PREFERENCE> SerializeAs<Box<[u8; N]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &Box<[u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(&**bytes)
+        PREFERENCE::serialize_as(bytes.as_ref(), serializer)
     }
 }
 
 #[cfg(feature = "alloc")]
-impl<'a, const N: usize> SerializeAs<Cow<'a, [u8; N]>> for Bytes {
+impl<'a, const N: usize, PREFERENCE> SerializeAs<Cow<'a, [u8; N]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn serialize_as<S>(bytes: &Cow<'a, [u8; N]>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        serializer.serialize_bytes(bytes.as_ref())
+        PREFERENCE::serialize_as(bytes.as_ref(), serializer)
     }
 }
 
