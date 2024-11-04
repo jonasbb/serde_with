@@ -83,18 +83,18 @@ pub fn check_matches_schema<T>(value: &serde_json::Value)
 where
     T: schemars_0_8::JsonSchema,
 {
-    use jsonschema::JSONSchema;
+    use jsonschema::Validator;
     use std::fmt::Write;
 
     if cfg!(feature = "schemars_0_8") {
         let schema_object = serde_json::to_value(schemars_0_8::schema_for!(T))
             .expect("schema for T could not be serialized to json");
-        let schema = match JSONSchema::compile(&schema_object) {
+        let schema = match Validator::new(&schema_object) {
             Ok(schema) => schema,
             Err(e) => panic!("schema for T was not a valid JSON schema: {e}"),
         };
 
-        if let Err(errs) = schema.validate(value) {
+        if let Err(err) = schema.validate(value) {
             let mut message = String::new();
 
             let _ = writeln!(
@@ -102,10 +102,7 @@ where
                 "Object was not valid according to its own schema:"
             );
 
-            for err in errs {
-                let _ = writeln!(&mut message, "  -> {}", err);
-            }
-
+            let _ = writeln!(&mut message, "  -> {}", err);
             let _ = writeln!(&mut message);
             let _ = writeln!(&mut message, "Object Value:");
             let _ = writeln!(
