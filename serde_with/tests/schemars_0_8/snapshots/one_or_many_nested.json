@@ -7,7 +7,7 @@
       "default": null,
       "anyOf": [
         {
-          "$ref": "#/definitions/OneOrMany<String, PreferOne>"
+          "$ref": "#/definitions/OneOrMany(String,PreferOne)"
         },
         {
           "type": "null"
@@ -16,7 +16,7 @@
     }
   },
   "definitions": {
-    "OneOrMany<String, PreferOne>": {
+    "OneOrMany(String,PreferOne)": {
       "anyOf": [
         {
           "type": "string"

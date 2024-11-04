@@ -20,7 +20,7 @@
       "description": "Will emit matching schemars attribute",
       "allOf": [
         {
-          "$ref": "#/definitions/PickFirst<(uint32String)>"
+          "$ref": "#/definitions/PickFirst(uint32String)"
         }
       ]
     },
@@ -44,7 +44,7 @@
     }
   },
   "definitions": {
-    "PickFirst<(uint32String)>": {
+    "PickFirst(uint32String)": {
       "anyOf": [
         {
           "type": "integer",

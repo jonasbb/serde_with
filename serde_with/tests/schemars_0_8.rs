@@ -430,6 +430,14 @@ mod snapshots {
             }
         }
 
+        pickfirst_nested {
+            #[serde(transparent)]
+            struct Test {
+                #[serde_as(as = "OneOrMany<PickFirst<(_, DisplayFromStr)>>")]
+                optional_value: Vec<u32>
+            }
+        }
+
         one_or_many_nested {
             struct Test {
                 #[serde_as(as = "Option<OneOrMany<_>>")]

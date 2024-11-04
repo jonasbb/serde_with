@@ -7,11 +7,11 @@
   ],
   "properties": {
     "data": {
-      "$ref": "#/definitions/KeyValueMap<KvMapFlatten>"
+      "$ref": "#/definitions/KeyValueMap(KvMapFlatten)"
     }
   },
   "definitions": {
-    "KeyValueMap<KvMapFlatten>": {
+    "KeyValueMap(KvMapFlatten)": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
