@@ -46,6 +46,11 @@ macro_rules! declare_snapshot_test {
             }
 
             let schema = schemars::schema_for!($name);
+            let _ = jsonschema::Validator::new(
+                &serde_json::to_value(&schema).expect("generated schema is not valid json"),
+            )
+            .expect("generated schema is not valid");
+
             let mut schema = serde_json::to_string_pretty(&schema)
                 .expect("schema could not be serialized");
             schema.push('\n');
@@ -422,6 +427,14 @@ mod snapshots {
             struct Test {
                 #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
                 value: u32
+            }
+        }
+
+        pickfirst_nested {
+            #[serde(transparent)]
+            struct Test {
+                #[serde_as(as = "OneOrMany<PickFirst<(_, DisplayFromStr)>>")]
+                optional_value: Vec<u32>
             }
         }
 

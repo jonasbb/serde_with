@@ -7,11 +7,11 @@
   ],
   "properties": {
     "data": {
-      "$ref": "#/definitions/KeyValueMap<KvMapEnum>"
+      "$ref": "#/definitions/KeyValueMap(KvMapEnum)"
     }
   },
   "definitions": {
-    "KeyValueMap<KvMapEnum>": {
+    "KeyValueMap(KvMapEnum)": {
       "type": "object",
       "additionalProperties": {
         "oneOf": [
