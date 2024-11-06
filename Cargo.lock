@@ -1032,6 +1032,7 @@ dependencies = [
  "indexmap 2.1.0",
  "jsonschema",
  "mime",
+ "num-traits",
  "pretty_assertions",
  "regex",
  "rmp-serde",
