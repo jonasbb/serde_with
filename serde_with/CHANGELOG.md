@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add `with_suffix!` macro, which puts a suffix on every struct field
+
 ## [3.11.0] - 2024-10-05
 
 ### Added

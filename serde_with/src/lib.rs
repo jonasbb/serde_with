@@ -42,7 +42,7 @@
 //!     With `serde_as` large arrays are supported, even if they are nested in other types.
 //!     `[bool; 64]`, `Option<[u8; M]>`, and `Box<[[u8; 64]; N]>` are all supported, as [this examples shows](#large-and-const-generic-arrays).
 //! * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
-//! * Apply a prefix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][].
+//! * Apply a prefix / suffix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][] / [`with_suffix!`][].
 //! * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
 //!      Check the documentation for [`serde_with::StringWithSeparator::<CommaSeparator, T>`][StringWithSeparator].
 //!
@@ -259,6 +259,7 @@
 //!
 //! [`DisplayFromStr`]: https://docs.rs/serde_with/3.11.0/serde_with/struct.DisplayFromStr.html
 //! [`with_prefix!`]: https://docs.rs/serde_with/3.11.0/serde_with/macro.with_prefix.html
+//! [`with_suffix!`]: https://docs.rs/serde_with/3.11.0/serde_with/macro.with_suffix.html
 //! [feature flags]: https://docs.rs/serde_with/3.11.0/serde_with/guide/feature_flags/index.html
 //! [skip_serializing_none]: https://docs.rs/serde_with/3.11.0/serde_with/attr.skip_serializing_none.html
 //! [StringWithSeparator]: https://docs.rs/serde_with/3.11.0/serde_with/struct.StringWithSeparator.html
@@ -321,6 +322,9 @@ mod utils;
 #[cfg(feature = "std")]
 #[doc(hidden)]
 pub mod with_prefix;
+#[cfg(feature = "std")]
+#[doc(hidden)]
+pub mod with_suffix;
 
 // Taken from shepmaster/snafu
 // Originally licensed as MIT+Apache 2
