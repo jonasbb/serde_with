@@ -116,7 +116,7 @@ jobs:
           # https://github.com/xd009642/tarpaulin/issues/1499
           CARGO_PROFILE_DEV_DEBUG: 1
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
 
   # Added to summarize the matrix (otherwise we would need to list every single
