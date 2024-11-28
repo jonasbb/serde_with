@@ -23,7 +23,7 @@ version.workspace = true
 include = ["src/**/*", "tests/**/*", "LICENSE-*", "README.md", "CHANGELOG.md"]
 
 [badges]
-maintenance = {status = "actively-developed"}
+maintenance = { status = "actively-developed" }
 
 # When adding new features update the documentation in feature-flags.md
 # The features are documented using https://docs.rs/document-features
@@ -127,21 +127,21 @@ time_0_3 = ["dep:time_0_3"]
 
 # When adding new optional dependencies, update the documentation in feature-flags.md
 [dependencies]
-base64 = {version = "0.22.1", optional = true, default-features = false}
-chrono_0_4 = {package = "chrono", version = "0.4.20", optional = true, default-features = false, features = ["serde"]}
-doc-comment = {version = "0.3.3", optional = true}
-document-features = {version = "0.2.7", optional = true}
-hashbrown_0_14 = {package = "hashbrown", version = "0.14.0", optional = true, default-features = false, features = ["serde"]}
-hashbrown_0_15 = {package = "hashbrown", version = "0.15.0", optional = true, default-features = false, features = ["serde"]}
-hex = {version = "0.4.3", optional = true, default-features = false}
-indexmap_1 = {package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"]}
-indexmap_2 = {package = "indexmap", version = "2.0", optional = true, default-features = false, features = ["serde"]}
-schemars_0_8 = {package = "schemars", version = "0.8.16", optional = true, default-features = false}
-serde = {version = "1.0.152", default-features = false}
+base64 = { version = "0.22.1", optional = true, default-features = false }
+chrono_0_4 = { package = "chrono", version = "0.4.20", optional = true, default-features = false, features = ["serde"] }
+doc-comment = { version = "0.3.3", optional = true }
+document-features = { version = "0.2.7", optional = true }
+hashbrown_0_14 = { package = "hashbrown", version = "0.14.0", optional = true, default-features = false, features = ["serde"] }
+hashbrown_0_15 = { package = "hashbrown", version = "0.15.0", optional = true, default-features = false, features = ["serde"] }
+hex = { version = "0.4.3", optional = true, default-features = false }
+indexmap_1 = { package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"] }
+indexmap_2 = { package = "indexmap", version = "2.0", optional = true, default-features = false, features = ["serde"] }
+schemars_0_8 = { package = "schemars", version = "0.8.16", optional = true, default-features = false }
+serde = { version = "1.0.152", default-features = false }
 serde_derive = "1.0.152"
-serde_json = {version = "1.0.45", optional = true, default-features = false}
-serde_with_macros = {path = "../serde_with_macros", version = "=3.11.0", optional = true}
-time_0_3 = {package = "time", version = "~0.3.36", optional = true, default-features = false}
+serde_json = { version = "1.0.45", optional = true, default-features = false }
+serde_with_macros = { path = "../serde_with_macros", version = "=3.11.0", optional = true }
+time_0_3 = { package = "time", version = "~0.3.36", optional = true, default-features = false }
 
 [dev-dependencies]
 expect-test = "1.5.0"
@@ -150,13 +150,13 @@ glob = "0.3.0"
 jsonschema = { version = "0.26.1", default-features = false, features = ["resolve-file"] }
 mime = "0.3.16"
 pretty_assertions = "1.4.0"
-regex = {version = "1.11.0", default-features = false, features = ["std"]}
+regex = { version = "1.11.0", default-features = false, features = ["std"] }
 rmp-serde = "1.3.0"
 ron = "0.8"
 rustversion = "1.0.0"
-schemars_0_8 = {package = "schemars", version = "0.8.16"}
-serde = {version = "1.0.152", default-features = false, features = ["derive"]}
-serde_json = {version = "1.0.25", features = ["preserve_order"]}
+schemars_0_8 = { package = "schemars", version = "0.8.16" }
+serde = { version = "1.0.152", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.25", features = ["preserve_order"] }
 serde_test = "1.0.124"
 serde_yaml = "0.9.2"
 serde-xml-rs = "0.6.0"
@@ -244,9 +244,9 @@ rustdoc-args = [
 
 [package.metadata.release]
 pre-release-replacements = [
-    {file = "CHANGELOG.md", search = "\\[Unreleased\\]", replace = "[Unreleased]\n\n## [{{version}}] - {{date}}"},
-    {file = "src/lib.rs", search = "https://docs\\.rs/serde_with/[\\d.]+/", replace = "https://docs.rs/serde_with/{{version}}/"},
-    {file = "README.md", search = "https://docs\\.rs/serde_with/[\\d.]+/", replace = "https://docs.rs/serde_with/{{version}}/"},
+    { file = "CHANGELOG.md", search = "\\[Unreleased\\]", replace = "[Unreleased]\n\n## [{{version}}] - {{date}}" },
+    { file = "src/lib.rs", search = "https://docs\\.rs/serde_with/[\\d.]+/", replace = "https://docs.rs/serde_with/{{version}}/" },
+    { file = "README.md", search = "https://docs\\.rs/serde_with/[\\d.]+/", replace = "https://docs.rs/serde_with/{{version}}/" },
 ]
 tag = true
 tag-message = "{{crate_name}} v{{version}}"

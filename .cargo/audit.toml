@@ -17,7 +17,7 @@ informational_warnings = [
 
 # Output Configuration
 [output]
- # exit on error if unmaintained dependencies are found
+# exit on error if unmaintained dependencies are found
 deny = [
     "unmaintained",
     "unsound",
