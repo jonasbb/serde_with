@@ -4,6 +4,10 @@ ignore = [
     # Inactionable, since this is a transitive dependency of serde-xml-rs
     # Only used in test code.
     "RUSTSEC-2022-0048",
+
+    # hashbrown: Borsh serialization of HashMap is non-canonical
+    # Borsh is unused
+    "RUSTSEC-2024-0402",
 ]
 # warn for categories of informational advisories
 informational_warnings = [
