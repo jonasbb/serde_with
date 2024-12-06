@@ -57,6 +57,7 @@ fn unix_epoch_naive() -> NaiveDateTime {
 #[cfg(feature = "std")]
 pub mod datetime_utc_ts_seconds_from_any {
     use super::*;
+    use num_traits::ToPrimitive as _;
 
     /// Deserialize a Unix timestamp with optional subsecond precision into a `DateTime<Utc>`.
     pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
@@ -87,20 +88,26 @@ pub mod datetime_utc_ts_seconds_from_any {
             where
                 E: DeError,
             {
-                DateTime::from_timestamp(value as i64, 0).ok_or_else(|| {
-                    DeError::custom(format_args!(
+                i64::try_from(value)
+                    .ok()
+                    .and_then(|value| DateTime::from_timestamp(value, 0))
+                    .ok_or_else(|| {
+                        DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{value}'"
                     ))
-                })
+                    })
             }
 
             fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
-                let seconds = value.trunc() as i64;
-                let nsecs = (value.fract() * 1_000_000_000_f64).abs() as u32;
-                DateTime::from_timestamp(seconds, nsecs).ok_or_else(|| {
+                fn f64_to_value(value: f64) -> Option<DateTime<Utc>> {
+                    let seconds = value.trunc().to_i64()?;
+                    let nsecs = (value.fract() * 1_000_000_000_f64).abs().to_u32()?;
+                    DateTime::from_timestamp(seconds, nsecs)
+                }
+                f64_to_value(value).ok_or_else(|| {
                     DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{value}'"
                     ))
@@ -127,12 +134,13 @@ pub mod datetime_utc_ts_seconds_from_any {
                     }
                     [seconds, subseconds] => {
                         if let Ok(seconds) = seconds.parse() {
-                            let subseclen = subseconds.chars().count() as u32;
-                            if subseclen > 9 {
-                                return Err(DeError::custom(format_args!(
+                            let subseclen =
+                            match u32::try_from(subseconds.chars().count()) {
+                                Ok(subseclen) if subseclen <= 9 => subseclen,
+                                _ =>    return Err(DeError::custom(format_args!(
                                     "DateTimes only support nanosecond precision but '{value}' has more than 9 digits."
-                                )));
-                            }
+                                ))),
+                            };
 
                             if let Ok(mut subseconds) = subseconds.parse() {
                                 // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds
