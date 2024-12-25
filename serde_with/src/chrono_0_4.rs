@@ -92,13 +92,20 @@ pub mod datetime_utc_ts_seconds_from_any {
             where
                 E: DeError,
             {
-                DateTime::from_timestamp(value as i64, 0).ok_or_else(|| {
+                let value = i64::try_from(value).map_err(|_| {
+                    DeError::custom(format_args!(
+                        "a timestamp which can be represented in a DateTime but received '{value}'"
+                    ))
+                })?;
+                DateTime::from_timestamp(value, 0).ok_or_else(|| {
                     DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{value}'"
                     ))
                 })
             }
 
+            // as conversions are necessary for floats
+            #[allow(clippy::as_conversions)]
             fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E>
             where
                 E: DeError,

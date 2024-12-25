@@ -161,7 +161,11 @@ where
     where
         S: Serializer,
     {
-        let mut secs = source.sign.apply(source.duration.as_secs() as i64);
+        let mut secs = source
+            .sign
+            .apply(i64::try_from(source.duration.as_secs()).map_err(|_| {
+                SerError::custom("The Duration of Timestamp is outside the supported range.")
+            })?);
 
         // Properly round the value
         if source.duration.subsec_millis() >= 500 {
@@ -183,6 +187,8 @@ where
     where
         S: Serializer,
     {
+        // as conversions are necessary for floats
+        #[allow(clippy::as_conversions)]
         let mut secs = source.sign.apply(source.duration.as_secs() as f64);
 
         // Properly round the value
@@ -206,7 +212,11 @@ where
     where
         S: Serializer,
     {
-        let mut secs = source.sign.apply(source.duration.as_secs() as i64);
+        let mut secs = source
+            .sign
+            .apply(i64::try_from(source.duration.as_secs()).map_err(|_| {
+                SerError::custom("The Duration of Timestamp is outside the supported range.")
+            })?);
 
         // Properly round the value
         if source.duration.subsec_millis() >= 500 {
@@ -509,7 +519,16 @@ fn parse_float_into_time_parts(mut value: &str) -> Result<(Sign, u64, u32), Pars
             let seconds = parts.next().expect("Float contains exactly one part");
             if let Ok(seconds) = seconds.parse() {
                 let subseconds = parts.next().expect("Float contains exactly one part");
-                let subseclen = subseconds.chars().count() as u32;
+                let subseclen = u32::try_from(subseconds.chars().count()).map_err(|_| {
+                    #[cfg(feature = "alloc")]
+                    return ParseFloatError::Custom(alloc::format!(
+                        "Duration and Timestamps with no more than 9 digits precision, but '{value}' has more"
+                    ));
+                    #[cfg(not(feature = "alloc"))]
+                    return ParseFloatError::Custom(
+                        "Duration and Timestamps with no more than 9 digits precision",
+                    );
+                })?;
                 if subseclen > 9 {
                     #[cfg(feature = "alloc")]
                     return Err(ParseFloatError::Custom(alloc::format!(
