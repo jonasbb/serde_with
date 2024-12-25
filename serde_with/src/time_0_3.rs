@@ -7,6 +7,11 @@
 //!
 //! [time]: https://docs.rs/time/0.3/
 
+// Serialization of large numbers can result in overflows
+// The time calculations are prone to this, so lint here extra
+// https://github.com/jonasbb/serde_with/issues/771
+#![warn(clippy::as_conversions)]
+
 use crate::{
     formats::{Flexible, Format, Strict, Strictness},
     prelude::*,
