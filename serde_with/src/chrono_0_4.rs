@@ -4,6 +4,11 @@
 //!
 //! [chrono]: https://docs.rs/chrono/
 
+// Serialization of large numbers can result in overflows
+// The time calculations are prone to this, so lint here extra
+// https://github.com/jonasbb/serde_with/issues/771
+#![warn(clippy::as_conversions)]
+
 use crate::{
     formats::{Flexible, Format, Strict, Strictness},
     prelude::*,
@@ -87,13 +92,20 @@ pub mod datetime_utc_ts_seconds_from_any {
             where
                 E: DeError,
             {
-                DateTime::from_timestamp(value as i64, 0).ok_or_else(|| {
+                let value = i64::try_from(value).map_err(|_| {
+                    DeError::custom(format_args!(
+                        "a timestamp which can be represented in a DateTime but received '{value}'"
+                    ))
+                })?;
+                DateTime::from_timestamp(value, 0).ok_or_else(|| {
                     DeError::custom(format_args!(
                         "a timestamp which can be represented in a DateTime but received '{value}'"
                     ))
                 })
             }
 
+            // as conversions are necessary for floats
+            #[allow(clippy::as_conversions)]
             fn visit_f64<E>(self, value: f64) -> Result<Self::Value, E>
             where
                 E: DeError,
@@ -127,12 +139,13 @@ pub mod datetime_utc_ts_seconds_from_any {
                     }
                     [seconds, subseconds] => {
                         if let Ok(seconds) = seconds.parse() {
-                            let subseclen = subseconds.chars().count() as u32;
-                            if subseclen > 9 {
-                                return Err(DeError::custom(format_args!(
+                            let subseclen =
+                            match u32::try_from(subseconds.chars().count()) {
+                                Ok(subseclen) if subseclen <= 9 => subseclen,
+                                _ =>    return Err(DeError::custom(format_args!(
                                     "DateTimes only support nanosecond precision but '{value}' has more than 9 digits."
-                                )));
-                            }
+                                ))),
+                            };
 
                             if let Ok(mut subseconds) = subseconds.parse() {
                                 // convert subseconds to nanoseconds (10^-9), require 9 places for nanoseconds

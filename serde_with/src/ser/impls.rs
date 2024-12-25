@@ -1024,7 +1024,7 @@ impl<STRICTNESS: Strictness> SerializeAs<bool> for BoolFromInt<STRICTNESS> {
     where
         S: Serializer,
     {
-        serializer.serialize_u8(*source as u8)
+        serializer.serialize_u8(u8::from(*source))
     }
 }
 
