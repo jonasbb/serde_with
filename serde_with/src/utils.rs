@@ -196,3 +196,47 @@ where
     // https://github.com/rust-lang/rust/issues/61956
     Ok(unsafe { core::mem::transmute_copy::<_, [T; N]>(&arr) })
 }
+
+/// Writer that writes into a `&mut [u8]` while checking the length of the buffer
+struct BufWriter<'a> {
+    bytes: &'a mut [u8],
+    offset: usize,
+}
+
+impl<'a> BufWriter<'a> {
+    fn new(bytes: &'a mut [u8]) -> Self {
+        BufWriter { bytes, offset: 0 }
+    }
+
+    fn into_str(self) -> &'a str {
+        let slice = &self.bytes[..self.offset];
+        core::str::from_utf8(slice)
+            .unwrap_or("Failed to extract valid string from BufWriter. This should never happen.")
+    }
+}
+
+impl core::fmt::Write for BufWriter<'_> {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        if s.len() > self.bytes.len() - self.offset {
+            Err(fmt::Error)
+        } else {
+            self.bytes[self.offset..self.offset + s.len()].copy_from_slice(s.as_bytes());
+            self.offset += s.len();
+            Ok(())
+        }
+    }
+}
+
+// 58 chars is long enough for any i128 and u128 value
+pub(crate) fn get_unexpected_i128(value: i128, buf: &mut [u8; 58]) -> Unexpected<'_> {
+    let mut writer = BufWriter::new(buf);
+    fmt::Write::write_fmt(&mut writer, format_args!("integer `{value}` as i128")).unwrap();
+    Unexpected::Other(writer.into_str())
+}
+
+// 58 chars is long enough for any i128 and u128 value
+pub(crate) fn get_unexpected_u128(value: u128, buf: &mut [u8; 58]) -> Unexpected<'_> {
+    let mut writer = BufWriter::new(buf);
+    fmt::Write::write_fmt(&mut writer, format_args!("integer `{value}` as u128")).unwrap();
+    Unexpected::Other(writer.into_str())
+}
