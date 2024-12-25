@@ -11,7 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* Add `with_suffix!` macro, which puts a suffix on every struct field
+* Add `with_suffix!` macro, which puts a suffix on every struct field by @fgardt (#381/#797)
+
+### Changed
+
+* Reformat all `Cargo.toml` files by @nyurik (#803)
+* Better handle internal arithmetic and improve error messages (#809/#810/#811)
+
+### Fixed
+
+* Generated schemas are not valid when using rust style names in ref by @waltronix (#798/#799)
 
 ## [3.11.0] - 2024-10-05
 
