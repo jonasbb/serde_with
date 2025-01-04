@@ -107,19 +107,27 @@ jobs:
       - name: "Test Run (All Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --all-features --no-default-features --no-fail-fast
 
-      - name: Run cargo-tarpaulin
-        if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
+  coverage:
+    name: Test Coverage
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Install/Update the Rust version"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: "nightly"
+          components: "llvm-tools"
+      - name: Run cargo llvm-cov
+        continue-on-error: true
         run: |
-          cargo install cargo-tarpaulin
-          # Exclude proc-macro crate as this does not work on Rust 1.83
-          # https://github.com/xd009642/tarpaulin/issues/1642#issuecomment-2517795748
-          cargo tarpaulin --exclude serde_with_macros --out xml --workspace --all-features -- --test-threads=1
-        env:
-          # https://github.com/xd009642/tarpaulin/issues/1499
-          CARGO_PROFILE_DEV_DEBUG: 1
+          cargo install cargo-llvm-cov
+          cargo llvm-cov --all-features --workspace --doctests --lcov --output-path lcov.info
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v5
-        if: matrix.rust == 'stable' && matrix.os == 'ubuntu-latest'
+        continue-on-error: true
+        with:
+          disable_search: true
+          files: lcov.info
 
   # Added to summarize the matrix (otherwise we would need to list every single
   # job in bors.toml)
@@ -131,11 +139,12 @@ jobs:
       - rustfmt
       - clippy_check
       - build_and_test
+      - coverage
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
-        if: "needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success'"
+        if: "needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success' && needs.coverage.result == 'success'"
         run: exit 0
       - name: Mark the job as a failure
-        if: "!(needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success')"
+        if: "!(needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success' && needs.coverage.result == 'success')"
         run: exit 1
