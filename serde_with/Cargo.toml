@@ -147,7 +147,7 @@ time_0_3 = { package = "time", version = "~0.3.36", optional = true, default-fea
 expect-test = "1.5.0"
 fnv = "1.0.6"
 glob = "0.3.0"
-jsonschema = { version = "0.26.1", default-features = false, features = ["resolve-file"] }
+jsonschema = { version = "0.28.3", default-features = false, features = ["resolve-file"] }
 mime = "0.3.16"
 pretty_assertions = "1.4.0"
 regex = { version = "1.11.0", default-features = false, features = ["std"] }
