@@ -620,7 +620,7 @@ pub mod maps_first_key_wins {
 ///
 /// 1. It is useful for instance to create an enum with a catch-all variant that will accept any incoming data.
 /// 2. [`untagged`] enum representations do not allow the `other` annotation as the fallback enum variant.
-///     With this function you can emulate an `other` variant, which can deserialize any data carrying enum.
+///    With this function you can emulate an `other` variant, which can deserialize any data carrying enum.
 ///
 /// **Note:** Using this function will prevent deserializing data-less enum variants.
 /// If this is a problem depends on the data format.
