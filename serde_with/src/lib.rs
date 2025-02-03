@@ -37,14 +37,14 @@
 //! Some common use cases are:
 //!
 //! * De/Serializing a type using the `Display` and `FromStr` traits, e.g., for `u8`, `url::Url`, or `mime::Mime`.
-//!      Check [`DisplayFromStr`] for details.
+//!   Check [`DisplayFromStr`] for details.
 //! * Support for arrays larger than 32 elements or using const generics.
-//!     With `serde_as` large arrays are supported, even if they are nested in other types.
-//!     `[bool; 64]`, `Option<[u8; M]>`, and `Box<[[u8; 64]; N]>` are all supported, as [this examples shows](#large-and-const-generic-arrays).
+//!   With `serde_as` large arrays are supported, even if they are nested in other types.
+//!   `[bool; 64]`, `Option<[u8; M]>`, and `Box<[[u8; 64]; N]>` are all supported, as [this examples shows](#large-and-const-generic-arrays).
 //! * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
 //! * Apply a prefix / suffix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][] / [`with_suffix!`][].
 //! * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
-//!      Check the documentation for [`serde_with::StringWithSeparator::<CommaSeparator, T>`][StringWithSeparator].
+//!   Check the documentation for [`serde_with::StringWithSeparator::<CommaSeparator, T>`][StringWithSeparator].
 //!
 //! ## Getting Help
 //!

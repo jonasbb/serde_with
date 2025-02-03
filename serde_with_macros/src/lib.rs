@@ -130,10 +130,7 @@ where
                     .iter_mut()
                     .map(|field| function(field).map_err(|err| err.with_span(&field)))
                     // turn the Err variant into the Some, such that we only collect errors
-                    .filter_map(|res| match res {
-                        Err(e) => Some(e),
-                        Ok(()) => None,
-                    })
+                    .filter_map(std::result::Result::err)
                     .collect();
                 if errors.is_empty() {
                     Ok(())
@@ -147,10 +144,7 @@ where
                     .iter_mut()
                     .map(|field| function(field).map_err(|err| err.with_span(&field)))
                     // turn the Err variant into the Some, such that we only collect errors
-                    .filter_map(|res| match res {
-                        Err(e) => Some(e),
-                        Ok(()) => None,
-                    })
+                    .filter_map(std::result::Result::err)
                     .collect();
                 if errors.is_empty() {
                     Ok(())
@@ -199,10 +193,7 @@ where
                 .iter_mut()
                 .map(|variant| apply_on_fields(&mut variant.fields, function))
                 // turn the Err variant into the Some, such that we only collect errors
-                .filter_map(|res| match res {
-                    Err(e) => Some(e),
-                    Ok(()) => None,
-                }),
+                .filter_map(std::result::Result::err),
         );
 
         if errors.is_empty() {
@@ -517,53 +508,53 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// ```
 ///
 /// 1. All the placeholder type `_` will be replaced with `::serde_with::Same`.
-///     The placeholder type `_` marks all the places where the type's `Serialize` implementation
-///     should be used. In the example, it means that the `u32` values will serialize with the
-///     `Serialize` implementation of `u32`. The `Same` type implements `SerializeAs` whenever the
-///     underlying type implements `Serialize` and is used to make the two traits compatible.
+///    The placeholder type `_` marks all the places where the type's `Serialize` implementation
+///    should be used. In the example, it means that the `u32` values will serialize with the
+///    `Serialize` implementation of `u32`. The `Same` type implements `SerializeAs` whenever the
+///    underlying type implements `Serialize` and is used to make the two traits compatible.
 ///
-///     If you specify a custom path for `serde_with` via the `crate` attribute, the path to the
-///     `Same` type will be altered accordingly.
+///    If you specify a custom path for `serde_with` via the `crate` attribute, the path to the
+///    `Same` type will be altered accordingly.
 ///
 /// 2. Wrap the type from the annotation inside a `::serde_with::As`.
-///     In the above example we now have something like `::serde_with::As::<Vec<::serde_with::Same>>`.
-///     The `As` type acts as the opposite of the `Same` type.
-///     It allows using a `SerializeAs` type whenever a `Serialize` is required.
+///    In the above example we now have something like `::serde_with::As::<Vec<::serde_with::Same>>`.
+///    The `As` type acts as the opposite of the `Same` type.
+///    It allows using a `SerializeAs` type whenever a `Serialize` is required.
 ///
 /// 3. Translate the `*as` attributes into the serde equivalent ones.
-///     `#[serde_as(as = ...)]` will become `#[serde(with = ...)]`.
-///     Similarly, `serialize_as` is translated to `serialize_with`.
+///    `#[serde_as(as = ...)]` will become `#[serde(with = ...)]`.
+///    Similarly, `serialize_as` is translated to `serialize_with`.
 ///
-///     The field attributes will be kept on the struct/enum such that other macros can use them
-///     too.
+///    The field attributes will be kept on the struct/enum such that other macros can use them
+///    too.
 ///
 /// 4. It searches `#[serde_as(as = ...)]` if there is a type named `BorrowCow` under any path.
-///     If `BorrowCow` is found, the attribute `#[serde(borrow)]` is added to the field.
-///     If `#[serde(borrow)]` or `#[serde(borrow = "...")]` is already present, this step will be
-///     skipped.
+///    If `BorrowCow` is found, the attribute `#[serde(borrow)]` is added to the field.
+///    If `#[serde(borrow)]` or `#[serde(borrow = "...")]` is already present, this step will be
+///    skipped.
 ///
 /// 5. Restore the ability of accepting missing fields if both the field and the transformation are `Option`.
 ///
-///     An `Option` is detected by an exact text match.
-///     Renaming an import or type aliases can cause confusion here.
-///     The following variants are supported.
-///     * `Option`
-///     * `std::option::Option`, with or without leading `::`
-///     * `core::option::Option`, with or without leading `::`
+///    An `Option` is detected by an exact text match.
+///    Renaming an import or type aliases can cause confusion here.
+///    The following variants are supported.
+///    * `Option`
+///    * `std::option::Option`, with or without leading `::`
+///    * `core::option::Option`, with or without leading `::`
 ///
-///     If the field is of type `Option<T>` and the attribute `#[serde_as(as = "Option<S>")]` (also
-///     `deserialize_as`; for any `T`/`S`) then `#[serde(default)]` is applied to the field.
+///    If the field is of type `Option<T>` and the attribute `#[serde_as(as = "Option<S>")]` (also
+///    `deserialize_as`; for any `T`/`S`) then `#[serde(default)]` is applied to the field.
 ///
-///     This restores the ability of accepting missing fields, which otherwise often leads to confusing [serde_with#185](https://github.com/jonasbb/serde_with/issues/185).
-///     `#[serde(default)]` is not applied, if it already exists.
-///     It only triggers if both field and transformation are `Option`s.
-///     For example, using `#[serde_as(as = "NoneAsEmptyString")]` on `Option<String>` will not see
-///     any change.
+///    This restores the ability of accepting missing fields, which otherwise often leads to confusing [serde_with#185](https://github.com/jonasbb/serde_with/issues/185).
+///    `#[serde(default)]` is not applied, if it already exists.
+///    It only triggers if both field and transformation are `Option`s.
+///    For example, using `#[serde_as(as = "NoneAsEmptyString")]` on `Option<String>` will not see
+///    any change.
 ///
-///     If the automatically applied attribute is undesired, the behavior can be suppressed by adding
-///     `#[serde_as(no_default)]`.
+///    If the automatically applied attribute is undesired, the behavior can be suppressed by adding
+///    `#[serde_as(no_default)]`.
 ///
-///      This can be combined like `#[serde_as(as = "Option<S>", no_default)]`.
+///     This can be combined like `#[serde_as(as = "Option<S>", no_default)]`.
 ///
 /// After all these steps, the code snippet will have transformed into roughly this.
 ///
@@ -1017,11 +1008,11 @@ fn has_type_embedded(type_: &Type, embedded_type: &syn::Ident) -> bool {
 /// or enum. Currently, these arguments to the attribute are possible:
 ///
 /// * **`#[serde_with(crate = "...")]`**: This allows using `DeserializeFromStr` when `serde_with`
-///     is not available from the crate root. This happens while [renaming dependencies in
-///     Cargo.toml][cargo-toml-rename] or when re-exporting the macro from a different crate.
+///   is not available from the crate root. This happens while [renaming dependencies in
+///   Cargo.toml][cargo-toml-rename] or when re-exporting the macro from a different crate.
 ///
-///     This argument is analogue to [serde's crate argument][serde-crate] and the [crate argument
-///     to `serde_as`][serde-as-crate].
+///   This argument is analogue to [serde's crate argument][serde-crate] and the [crate argument
+///   to `serde_as`][serde-as-crate].
 ///
 /// # Example
 ///
@@ -1151,11 +1142,11 @@ fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> T
 /// or enum. Currently, these arguments to the attribute are possible:
 ///
 /// * **`#[serde_with(crate = "...")]`**: This allows using `SerializeDisplay` when `serde_with` is
-///     not available from the crate root. This happens while [renaming dependencies in
-///     Cargo.toml][cargo-toml-rename] or when re-exporting the macro from a different crate.
+///   not available from the crate root. This happens while [renaming dependencies in
+///   Cargo.toml][cargo-toml-rename] or when re-exporting the macro from a different crate.
 ///
-///     This argument is analogue to [serde's crate argument][serde-crate] and the [crate argument
-///     to `serde_as`][serde-as-crate].
+///   This argument is analogue to [serde's crate argument][serde-crate] and the [crate argument
+///   to `serde_as`][serde-as-crate].
 ///
 /// # Example
 ///
