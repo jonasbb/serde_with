@@ -136,6 +136,7 @@ hashbrown_0_15 = { package = "hashbrown", version = "0.15.0", optional = true, d
 hex = { version = "0.4.3", optional = true, default-features = false }
 indexmap_1 = { package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"] }
 indexmap_2 = { package = "indexmap", version = "2.0", optional = true, default-features = false, features = ["serde"] }
+num-traits = { version = "0.2.19", features = ["std"] }
 schemars_0_8 = { package = "schemars", version = "0.8.16", optional = true, default-features = false }
 serde = { version = "1.0.152", default-features = false }
 serde_derive = "1.0.152"
