@@ -238,7 +238,14 @@ rustdoc-args = [
     "--cfg=docsrs",
     # Generate links to definition in rustdoc source code pages
     # https://github.com/rust-lang/rust/pull/84176
-    "-Zunstable-options", "--generate-link-to-definition"
+    "-Zunstable-options",
+    "--generate-link-to-definition",
+    # Link to the stable documentation for core/alloc/std/proc_macro even though docs.rs uses nightly.
+    # https://github.com/rust-lang/docs.rs/issues/506#issuecomment-2670501688
+    "--extern-html-root-url=core=https://doc.rust-lang.org",
+    "--extern-html-root-url=alloc=https://doc.rust-lang.org",
+    "--extern-html-root-url=std=https://doc.rust-lang.org",
+    "--extern-html-root-url=proc_macro=https://doc.rust-lang.org",
 ]
 
 [package.metadata.release]
