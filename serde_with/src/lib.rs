@@ -328,13 +328,10 @@ pub mod with_suffix;
 
 // Taken from shepmaster/snafu
 // Originally licensed as MIT+Apache 2
-// https://github.com/shepmaster/snafu/blob/fd37d79d4531ed1d3eebffad0d658928eb860cfe/src/lib.rs#L121-L165
+// https://github.com/shepmaster/snafu/blob/90991b609e8928ceebf7df1b040408539d21adda/src/lib.rs#L343-L376
 #[cfg(feature = "guide")]
 #[allow(unused_macro_rules)]
 macro_rules! generate_guide {
-    (pub mod $name:ident; $($rest:tt)*) => {
-        generate_guide!(@gen ".", pub mod $name { } $($rest)*);
-    };
     (pub mod $name:ident { $($children:tt)* } $($rest:tt)*) => {
         generate_guide!(@gen ".", pub mod $name { $($children)* } $($rest)*);
     };
@@ -343,16 +340,27 @@ macro_rules! generate_guide {
         generate_guide!(@gen $prefix, pub mod $name { } $($rest)*);
     };
     (@gen $prefix:expr, @code pub mod $name:ident; $($rest:tt)*) => {
+        #[cfg(feature = "guide")]
         pub mod $name;
+
+        #[cfg(not(feature = "guide"))]
+        /// Not currently built; please add the `guide` feature flag.
+        pub mod $name {}
+
         generate_guide!(@gen $prefix, $($rest)*);
     };
     (@gen $prefix:expr, pub mod $name:ident { $($children:tt)* } $($rest:tt)*) => {
-        doc_comment::doc_comment! {
-            include_str!(concat!($prefix, "/", stringify!($name), ".md")),
-            pub mod $name {
-                generate_guide!(@gen concat!($prefix, "/", stringify!($name)), $($children)*);
-            }
+        #[cfg(feature = "guide")]
+        #[doc = include_str!(concat!($prefix, "/", stringify!($name), ".md"))]
+        pub mod $name {
+            generate_guide!(@gen concat!($prefix, "/", stringify!($name)), $($children)*);
         }
+        #[cfg(not(feature = "guide"))]
+        /// Not currently built; please add the `guide` feature flag.
+        pub mod $name {
+            generate_guide!(@gen concat!($prefix, "/", stringify!($name)), $($children)*);
+        }
+
         generate_guide!(@gen $prefix, $($rest)*);
     };
 }
