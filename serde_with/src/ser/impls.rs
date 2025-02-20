@@ -182,8 +182,8 @@ where
     {
         match source {
             Bound::Unbounded => Bound::Unbounded,
-            Bound::Included(ref v) => Bound::Included(SerializeAsWrap::<T, U>::new(v)),
-            Bound::Excluded(ref v) => Bound::Excluded(SerializeAsWrap::<T, U>::new(v)),
+            Bound::Included(v) => Bound::Included(SerializeAsWrap::<T, U>::new(v)),
+            Bound::Excluded(v) => Bound::Excluded(SerializeAsWrap::<T, U>::new(v)),
         }
         .serialize(serializer)
     }
