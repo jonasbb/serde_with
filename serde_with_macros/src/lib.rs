@@ -73,12 +73,12 @@ where
         match fields {
             // simple, no fields, do nothing
             Fields::Unit => Ok(()),
-            Fields::Named(ref mut fields) => fields
+            Fields::Named(fields) => fields
                 .named
                 .iter_mut()
                 .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
                 .collect_error(),
-            Fields::Unnamed(ref mut fields) => fields
+            Fields::Unnamed(fields) => fields
                 .unnamed
                 .iter_mut()
                 .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
@@ -138,7 +138,7 @@ where
                     Err(DarlingError::multiple(errors))
                 }
             }
-            Fields::Unnamed(ref mut fields) => {
+            Fields::Unnamed(fields) => {
                 let errors: Vec<DarlingError> = fields
                     .unnamed
                     .iter_mut()
