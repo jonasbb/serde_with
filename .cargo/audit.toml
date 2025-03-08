@@ -8,6 +8,10 @@ ignore = [
     # hashbrown: Borsh serialization of HashMap is non-canonical
     # Borsh is unused
     "RUSTSEC-2024-0402",
+
+    # paste - no longer maintained
+    # Transitive dev-dependency of rmp-serde
+    "RUSTSEC-2024-0436",
 ]
 # warn for categories of informational advisories
 informational_warnings = [
