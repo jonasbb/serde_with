@@ -378,3 +378,114 @@ fn duplicate_value_last_wins_btreeset() {
     assert_eq!(2, entries[1].0);
     assert!(!entries[1].1);
 }
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+struct UnwrapOrSkipRef<'a> {
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "::serde_with::rust::unwrap_or_skip"
+    )]
+    option_field: Option<&'a str>,
+
+    field: &'a str,
+}
+
+#[test]
+fn unwrap_or_skip_ref_some() {
+    let s0 = String::from("g1_&");
+    let s1 = String::from("3&t");
+    let value = UnwrapOrSkipRef {
+        option_field: Some(s0.as_ref()),
+        field: s1.as_ref(),
+    };
+    let expected = expect![[r#"
+        {
+          "option_field": "g1_&",
+          "field": "3&t"
+        }"#]];
+
+    // I can't make the following check abstract over [`UnwrapOrSkipRef`]
+    // because of incompatible lifetimes.
+    let serialized = serde_json::to_string_pretty(&value).unwrap();
+    expected.assert_eq(&serialized);
+    assert_eq!(
+        value,
+        serde_json::from_str::<UnwrapOrSkipRef<'_>>(&serialized).unwrap(),
+        "Deserialization differs from expected value."
+    );
+}
+
+#[test]
+fn unwrap_or_skip_ref_none() {
+    let s1 = String::from("3&t");
+    let value = UnwrapOrSkipRef {
+        option_field: None,
+        field: s1.as_ref(),
+    };
+    let expected = expect![[r#"
+        {
+          "field": "3&t"
+        }"#]];
+
+    let serialized = serde_json::to_string_pretty(&value).unwrap();
+    expected.assert_eq(&serialized);
+    assert_eq!(
+        value,
+        serde_json::from_str::<UnwrapOrSkipRef<'_>>(&serialized).unwrap(),
+        "Deserialization differs from expected value."
+    );
+}
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+struct UnwrapOrSkip {
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        with = "::serde_with::rust::unwrap_or_skip"
+    )]
+    option_field: Option<String>,
+
+    field: String,
+}
+
+#[test]
+fn unwrap_or_skip_some() {
+    let value = UnwrapOrSkip {
+        option_field: Some(String::from("g1_&")),
+        field: String::from("3&t"),
+    };
+    let expected = expect![[r#"
+        {
+          "option_field": "g1_&",
+          "field": "3&t"
+        }"#]];
+
+    let serialized = serde_json::to_string_pretty(&value).unwrap();
+    expected.assert_eq(&serialized);
+    assert_eq!(
+        value,
+        serde_json::from_str::<UnwrapOrSkip>(&serialized).unwrap(),
+        "Deserialization differs from expected value."
+    );
+}
+
+#[test]
+fn unwrap_or_skip_none() {
+    let value = UnwrapOrSkip {
+        option_field: None,
+        field: String::from("3&t"),
+    };
+    let expected = expect![[r#"
+        {
+          "field": "3&t"
+        }"#]];
+
+    let serialized = serde_json::to_string_pretty(&value).unwrap();
+    expected.assert_eq(&serialized);
+    assert_eq!(
+        value,
+        serde_json::from_str::<UnwrapOrSkip>(&serialized).unwrap(),
+        "Deserialization differs from expected value."
+    );
+}

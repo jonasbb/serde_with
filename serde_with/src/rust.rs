@@ -149,7 +149,7 @@ pub mod unwrap_or_skip {
     pub fn deserialize<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
     where
         D: Deserializer<'de>,
-        T: DeserializeOwned,
+        T: Deserialize<'de>,
     {
         T::deserialize(deserializer).map(Some)
     }
