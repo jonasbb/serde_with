@@ -1213,7 +1213,7 @@ pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
 /// * `#[serde_with(crate = "...")]`  
 ///   When your workspace renames or re-exports `serde_with`, use this to point at the correct path.
 ///   For example:  
-///   ```rust
+///   ```rust,ignore
 ///   #[derive(SerializeDisplayAlt)]
 ///   #[serde_with(crate = "my_forked_serde_with")]
 ///   pub struct Foo(/* … */);
