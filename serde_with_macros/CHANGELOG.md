@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+* Introduce `SerializeDisplayAlt` derive macro
+    An alternative to the `SerializeDisplay` macro except instead of using the
+    plain formatting like `format!("{}", ...)`, it serializes with the
+    `Formatter::alternate` flag set to true, like `format!("{:#}", ...)`
+
 ## [3.12.0] - 2024-12-25
 
 No changes.
