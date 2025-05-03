@@ -1551,11 +1551,11 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     vec: vec![0x41, 0x61, 0x21],
 /// };
 /// let expected = r#"(
-///     array: "MDEyMzQ1Njc4OUFCQ0RF",
-///     boxed: "Li4u",
-///     cow: "Rm9vQmFy",
-///     cow_array: "KioqKioqKioqKioqKioq",
-///     vec: "QWEh",
+///     array: b"0123456789ABCDE",
+///     boxed: b"...",
+///     cow: b"FooBar",
+///     cow_array: b"***************",
+///     vec: b"Aa!",
 /// )"#;
 ///
 /// # let pretty_config = ron::ser::PrettyConfig::new().new_line("\n");
@@ -1589,8 +1589,8 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     buf: &[20u8, 21u8, 22u8],
 /// };
 /// let expected = r#"(
-///     array_buf: "CgoKCgoKCgoKCgoKCgoK",
-///     buf: "FBUW",
+///     array_buf: b"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+///     buf: b"\x14\x15\x16",
 /// )"#;
 ///
 /// # let pretty_config = ron::ser::PrettyConfig::new().new_line("\n");
