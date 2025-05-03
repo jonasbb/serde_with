@@ -1185,11 +1185,91 @@ pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
     };
     TokenStream::from(serialize_display(
         input,
+        false,
         derive_options.get_serde_with_path(),
     ))
 }
 
-fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> TokenStream2 {
+/// Serialize value by using its [`Display`] implementation with the “alternate” (`#`) format flag
+///
+/// This derive implements `serde::Serialize` for any type that already implements
+/// [`std::fmt::Display`], emitting its string form using the alternate formatting specifier
+/// (`{:#}`) instead of the normal `{}`.  In other words, rather than calling
+/// `format!("{}", self)`, it calls `format!("{:#}", self)`.
+///
+/// Ensure that your type implements [`Display`], or you will get a compile‐error such as:
+/// ```text
+/// error[E0277]: `MyType` doesn't implement `std::fmt::Display`
+/// ```
+///
+/// Deserialization from strings via [`std::str::FromStr`] is handled by the companion
+/// [`DeserializeFromStr`] derive.
+///
+/// # Attributes
+///
+/// You may customize which `serde_with` crate is used (for renamed or re-exported crates)
+/// via the same attribute namespace:
+///
+/// * `#[serde_with(crate = "...")]`  
+///   When your workspace renames or re-exports `serde_with`, use this to point at the correct path.
+///   For example:  
+///   ```rust,ignore
+///   #[derive(SerializeDisplayAlt)]
+///   #[serde_with(crate = "my_forked_serde_with")]
+///   pub struct Foo(/* … */);
+///   ```
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use std::fmt;
+/// use serde_with::{SerializeDisplayAlt, DeserializeFromStr};
+///
+/// #[derive(Debug, Clone, SerializeDisplayAlt, DeserializeFromStr)]
+/// #[serde(transparent)]
+/// pub struct MyType(u32);
+///
+/// impl fmt::Display for MyType {
+///     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+///         if f.alternate() {
+///             // Alternate formatting: hex with 0x prefix
+///             write!(f, "0x{:X}", self.0)
+///         } else {
+///             // Standard formatting: decimal
+///             write!(f, "{}", self.0)
+///         }
+///     }
+/// }
+///
+/// let v = MyType(15);
+/// // SerializeDisplayAlt always uses `{:#}`, so this yields `"0xF"`
+/// assert_eq!(r#""0xF""#, serde_json::to_string(&v).unwrap());
+/// ```
+///
+/// [`Display`]: std::fmt::Display  
+/// [`FromStr`]: std::str::FromStr  
+/// [`DeserializeFromStr`]: crate::DeserializeFromStr
+#[proc_macro_derive(SerializeDisplayAlt, attributes(serde_with))]
+pub fn derive_serialize_display_alt(item: TokenStream) -> TokenStream {
+    let input: DeriveInput = parse_macro_input!(item);
+    let derive_options = match DeriveOptions::from_derive_input(&input) {
+        Ok(opt) => opt,
+        Err(err) => {
+            return err;
+        }
+    };
+    TokenStream::from(serialize_display(
+        input,
+        true,
+        derive_options.get_serde_with_path(),
+    ))
+}
+
+fn serialize_display(
+    mut input: DeriveInput,
+    alternate: bool,
+    serde_with_crate_path: Path,
+) -> TokenStream2 {
     let ident = input.ident;
     input
         .generics
@@ -1197,6 +1277,13 @@ fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> Tok
         .predicates
         .push(parse_quote!(Self: #serde_with_crate_path::__private__::Display));
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
+
+    let collect_str_param = if alternate {
+        quote! { &format_args!("{self:#}") }
+    } else {
+        quote! { &self }
+    };
+
     quote! {
         #[automatically_derived]
         impl #impl_generics #serde_with_crate_path::serde::Serialize for #ident #ty_generics #where_clause {
@@ -1207,7 +1294,7 @@ fn serialize_display(mut input: DeriveInput, serde_with_crate_path: Path) -> Tok
             where
                 __S: #serde_with_crate_path::serde::Serializer,
             {
-                serializer.collect_str(&self)
+                serializer.collect_str(#collect_str_param)
             }
         }
     }
