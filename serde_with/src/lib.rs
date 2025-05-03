@@ -1558,8 +1558,7 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     vec: "QWEh",
 /// )"#;
 ///
-/// # let pretty_config = ron::ser::PrettyConfig::new()
-/// #     .new_line("\n".into());
+/// # let pretty_config = ron::ser::PrettyConfig::new().new_line("\n");
 /// assert_eq!(expected, ron::ser::to_string_pretty(&value, pretty_config).unwrap());
 /// assert_eq!(value, ron::from_str(expected).unwrap());
 /// # }
@@ -1594,8 +1593,7 @@ pub struct TimestampNanoSecondsWithFrac<
 ///     buf: "FBUW",
 /// )"#;
 ///
-/// # let pretty_config = ron::ser::PrettyConfig::new()
-/// #     .new_line("\n".into());
+/// # let pretty_config = ron::ser::PrettyConfig::new().new_line("\n");
 /// assert_eq!(expected, ron::ser::to_string_pretty(&value, pretty_config).unwrap());
 /// // RON doesn't support borrowed deserialization of byte arrays
 /// # }
