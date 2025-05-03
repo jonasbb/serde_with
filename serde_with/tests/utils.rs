@@ -102,7 +102,7 @@ where
                 "Object was not valid according to its own schema:"
             );
 
-            let _ = writeln!(&mut message, "  -> {}", err);
+            let _ = writeln!(&mut message, "  -> {err}");
             let _ = writeln!(&mut message);
             let _ = writeln!(&mut message, "Object Value:");
             let _ = writeln!(

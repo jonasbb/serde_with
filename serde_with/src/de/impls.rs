@@ -1563,8 +1563,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "OneOrMany could not deserialize any variant:\n  One: {}\n  Many: {}",
-            one_err, many_err
+            "OneOrMany could not deserialize any variant:\n  One: {one_err}\n  Many: {many_err}"
         )))
     }
 }
@@ -1608,8 +1607,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}",
-            first_err, second_err
+            "PickFirst could not deserialize any variant:\n  First: {first_err}\n  Second: {second_err}"
         )))
     }
 }
@@ -1647,8 +1645,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}\n  Third: {}",
-            first_err, second_err, third_err,
+            "PickFirst could not deserialize any variant:\n  First: {first_err}\n  Second: {second_err}\n  Third: {third_err}",
         )))
     }
 }
@@ -1693,8 +1690,7 @@ where
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
-            "PickFirst could not deserialize any variant:\n  First: {}\n  Second: {}\n  Third: {}\n  Fourth: {}",
-            first_err, second_err, third_err, fourth_err,
+            "PickFirst could not deserialize any variant:\n  First: {first_err}\n  Second: {second_err}\n  Third: {third_err}\n  Fourth: {fourth_err}",
         )))
     }
 }

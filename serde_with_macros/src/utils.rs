@@ -126,7 +126,7 @@ pub(crate) fn has_derive_jsonschema(input: TokenStream) -> syn::Result<SchemaFie
                 Ok(eval_metas(&metas)? & SchemaFieldConfig::Lazy(condition.into()))
             }
             path if path.is_ident("derive") => {
-                let config = meta
+                let config = if meta
                     .require_list()?
                     .parse_args_with(parse_derive_args)?
                     .into_iter()
@@ -139,10 +139,11 @@ pub(crate) fn has_derive_jsonschema(input: TokenStream) -> syn::Result<SchemaFie
                             Some(PathSegment { ident, .. }) => ident == "JsonSchema",
                             _ => false,
                         }
-                    })
-                    .then_some(SchemaFieldConfig::True)
-                    .unwrap_or_default();
-
+                    }) {
+                    SchemaFieldConfig::True
+                } else {
+                    LazyBool::default()
+                };
                 Ok(config)
             }
             _ => Ok(SchemaFieldConfig::False),
@@ -237,16 +238,18 @@ pub(crate) fn schemars_with_attr_if(
                 Ok(eval_metas(filter, &metas)? & SchemaFieldConfig::from(condition))
             }
             path if path.is_ident("schemars") => {
-                let config = meta
+                let config = if meta
                     .require_list()?
                     .parse_args_with(<Punctuated<Meta, Token![,]>>::parse_terminated)?
                     .into_iter()
                     .any(|meta| match meta.path().get_ident() {
                         Some(ident) => filter.iter().any(|relevant| ident == relevant),
                         _ => false,
-                    })
-                    .then_some(SchemaFieldConfig::True)
-                    .unwrap_or_default();
+                    }) {
+                    SchemaFieldConfig::True
+                } else {
+                    LazyBool::default()
+                };
                 Ok(config)
             }
             _ => Ok(SchemaFieldConfig::False),
