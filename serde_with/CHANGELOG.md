@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Generalize `serde_with::rust::unwrap_or_skip` to support deserializing references by @beroal (#832)
+
 ## [3.12.0] - 2024-12-25
 
 ### Added
