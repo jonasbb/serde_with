@@ -313,7 +313,6 @@ pub mod rust;
 #[cfg_attr(docsrs, doc(cfg(feature = "schemars_0_8")))]
 pub mod schemars_0_8;
 pub mod ser;
-#[cfg(feature = "std")]
 mod serde_conv;
 #[cfg(feature = "time_0_3")]
 #[cfg_attr(docsrs, doc(cfg(feature = "time_0_3")))]
