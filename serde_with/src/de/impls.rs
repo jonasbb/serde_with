@@ -1082,7 +1082,6 @@ where
     }
 }
 
-#[cfg(feature = "std")]
 macro_rules! use_signed_duration {
     (
         $main_trait:ident $internal_trait:ident =>
@@ -1116,7 +1115,6 @@ macro_rules! use_signed_duration {
     };
 }
 
-#[cfg(feature = "std")]
 use_signed_duration!(
     DurationSeconds DurationSeconds,
     DurationMilliSeconds DurationMilliSeconds,
@@ -1125,12 +1123,32 @@ use_signed_duration!(
     => {
         Duration; to_std_duration =>
         {u64, Strict =>}
-        {f64, Strict =>}
-        {String, Strict =>}
         {FORMAT, Flexible => FORMAT: Format}
     }
 );
+#[cfg(feature = "alloc")]
+use_signed_duration!(
+    DurationSeconds DurationSeconds,
+    DurationMilliSeconds DurationMilliSeconds,
+    DurationMicroSeconds DurationMicroSeconds,
+    DurationNanoSeconds DurationNanoSeconds,
+    => {
+        Duration; to_std_duration =>
+        {String, Strict =>}
+    }
+);
 #[cfg(feature = "std")]
+use_signed_duration!(
+    DurationSeconds DurationSeconds,
+    DurationMilliSeconds DurationMilliSeconds,
+    DurationMicroSeconds DurationMicroSeconds,
+    DurationNanoSeconds DurationNanoSeconds,
+    => {
+        Duration; to_std_duration =>
+        // round() only works on std
+        {f64, Strict =>}
+    }
+);
 use_signed_duration!(
     DurationSecondsWithFrac DurationSecondsWithFrac,
     DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
@@ -1139,8 +1157,18 @@ use_signed_duration!(
     => {
         Duration; to_std_duration =>
         {f64, Strict =>}
-        {String, Strict =>}
         {FORMAT, Flexible => FORMAT: Format}
+    }
+);
+#[cfg(feature = "alloc")]
+use_signed_duration!(
+    DurationSecondsWithFrac DurationSecondsWithFrac,
+    DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
+    DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
+    DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
+    => {
+        Duration; to_std_duration =>
+        {String, Strict =>}
     }
 );
 

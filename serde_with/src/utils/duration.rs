@@ -84,7 +84,6 @@ impl DurationSigned {
         .ok_or_else(|| DeError::custom("timestamp is outside the range for std::time::SystemTime"))
     }
 
-    #[cfg(feature = "std")]
     pub(crate) fn to_std_duration<'de, D>(self) -> Result<Duration, D::Error>
     where
         D: Deserializer<'de>,
