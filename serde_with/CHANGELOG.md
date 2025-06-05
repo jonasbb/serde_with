@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Generalize `serde_with::rust::unwrap_or_skip` to support deserializing references by @beroal (#832)
 * Bump MSRV to 1.71, since that is required for the `jsonschema` dev-dependency.
+* Make `serde_conv` available without the `std` feature by @arilou (#839)
 
 ### Fixed
 
