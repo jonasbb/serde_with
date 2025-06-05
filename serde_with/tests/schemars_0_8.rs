@@ -73,11 +73,11 @@ fn schemars_basic() {
         /// Basic field, no attribute
         bare_field: u32,
 
-        /// Field that directly uses DisplayFromStr
+        /// Field that directly uses `DisplayFromStr`
         #[serde_as(as = "DisplayFromStr")]
         display_from_str: u32,
 
-        /// Same does not implement JsonSchema directly so this checks that the
+        /// Same does not implement `JsonSchema` directly so this checks that the
         /// correct schemars attribute was injected.
         #[serde_as(as = "Same")]
         same: u32,
@@ -153,16 +153,16 @@ fn schemars_deserialize_only_bug_735() {
         #[serde_as(as = "PickFirst<(_, DisplayFromStr)>")]
         both: u32,
 
-        /// Can emit schemars with serialize_as, but it will be ignored
+        /// Can emit schemars with `serialize_as`, but it will be ignored
         #[serde_as(serialize_as = "PickFirst<(_, DisplayFromStr)>")]
         serialize_only: u32,
 
-        /// schemars doesn't support deserialize_as
+        /// schemars doesn't support `deserialize_as`
         #[serde_as(deserialize_as = "PickFirst<(_, DisplayFromStr)>")]
         deserialize_only: u32,
 
-        /// Can emit schemars with serialize_as, but it will be ignored
-        /// schemars doesn't support deserialize_as
+        /// Can emit schemars with `serialize_as`, but it will be ignored
+        /// schemars doesn't support `deserialize_as`
         #[serde_as(
             serialize_as = "PickFirst<(_, DisplayFromStr)>",
             deserialize_as = "PickFirst<(_, DisplayFromStr)>"
