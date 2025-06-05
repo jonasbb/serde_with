@@ -573,7 +573,8 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// ```
 ///
 /// # A note on `schemars` integration
-/// When the `schemars_0_8` feature is enabled this macro will scan for
+/// When the `schemars_0_8` or `schemars_0_9` features are enabled this macro
+/// will scan for
 /// `#[derive(JsonSchema)]` attributes and, if found, will add
 /// `#[schemars(with = "Schema<T, ...>")]` annotations to any fields with a
 /// `#[serde_as(as = ...)]` annotation. If you wish to override the default
@@ -614,7 +615,9 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
                 .unwrap_or_else(|| syn::parse_quote!(::serde_with));
 
             let schemars_config = match container_options.enable_schemars_support {
-                _ if cfg!(not(feature = "schemars_0_8")) => SchemaFieldConfig::False,
+                _ if cfg!(not(any(feature = "schemars_0_8", feature = "schemars_0_9"))) => {
+                    SchemaFieldConfig::False
+                }
                 Some(condition) => condition.into(),
                 None => utils::has_derive_jsonschema(input.clone()).unwrap_or_default(),
             };

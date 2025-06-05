@@ -41,7 +41,7 @@ alloc = ["serde/alloc", "base64?/alloc", "chrono_0_4?/alloc", "hex?/alloc", "ser
 ## Enables support for various types from the std library.
 ## This will enable `std` support in all dependencies too.
 ## The feature enabled by default and also enables `alloc`.
-std = ["alloc", "serde/std", "chrono_0_4?/clock", "chrono_0_4?/std", "indexmap_1?/std", "indexmap_2?/std", "time_0_3?/serde-well-known", "time_0_3?/std"]
+std = ["alloc", "serde/std", "chrono_0_4?/clock", "chrono_0_4?/std", "indexmap_1?/std", "indexmap_2?/std", "time_0_3?/serde-well-known", "time_0_3?/std", "schemars_0_9?/std"]
 
 #! # Documentation
 #!
@@ -118,6 +118,13 @@ macros = ["dep:serde_with_macros"]
 ## This pulls in `schemars` v0.8 as a dependency. It will also implicitly enable
 ## the `std` feature as `schemars` is not `#[no_std]`.
 schemars_0_8 = ["dep:schemars_0_8", "std", "serde_with_macros?/schemars_0_8"]
+## This feature enables integration with `schemars` 0.9
+## This makes `#[derive(JsonSchema)]` pick up the correct schema for the type
+## used within `#[serde_as(as = ...)]`.
+##
+## This pulls in `schemars` v0.9 as a dependency. It will also implicitly enable
+## the `alloc` feature.
+schemars_0_9 = ["dep:schemars_0_9", "alloc", "serde_with_macros?/schemars_0_9", "dep:serde_json"]
 ## The feature enables integration of `time` v0.3 specific conversions.
 ## This includes support for the timestamp and duration types.
 ##
@@ -136,6 +143,7 @@ hex = { version = "0.4.3", optional = true, default-features = false }
 indexmap_1 = { package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"] }
 indexmap_2 = { package = "indexmap", version = "2.0", optional = true, default-features = false, features = ["serde"] }
 schemars_0_8 = { package = "schemars", version = "0.8.16", optional = true, default-features = false }
+schemars_0_9 = { package = "schemars", version = "0.9.0", optional = true, default-features = false }
 serde = { version = "1.0.152", default-features = false }
 serde_derive = "1.0.152"
 serde_json = { version = "1.0.45", optional = true, default-features = false }
@@ -154,6 +162,7 @@ rmp-serde = "1.3.0"
 ron = "0.10"
 rustversion = "1.0.0"
 schemars_0_8 = { package = "schemars", version = "0.8.16" }
+schemars_0_9 = { package = "schemars", version = "0.9.0" }
 serde = { version = "1.0.152", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.25", features = ["preserve_order"] }
 serde_test = "1.0.124"
@@ -230,6 +239,11 @@ required-features = ["alloc"]
 name = "schemars_0_8"
 path = "tests/schemars_0_8.rs"
 required-features = ["schemars_0_8"]
+
+[[test]]
+name = "schemars_0_9"
+path = "tests/schemars_0_9/main.rs"
+required-features = ["schemars_0_9", "std"]
 
 [package.metadata.docs.rs]
 all-features = true

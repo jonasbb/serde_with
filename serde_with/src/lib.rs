@@ -312,6 +312,9 @@ pub mod rust;
 #[cfg(feature = "schemars_0_8")]
 #[cfg_attr(docsrs, doc(cfg(feature = "schemars_0_8")))]
 pub mod schemars_0_8;
+#[cfg(feature = "schemars_0_9")]
+#[cfg_attr(docsrs, doc(cfg(feature = "schemars_0_9")))]
+pub mod schemars_0_9;
 pub mod ser;
 mod serde_conv;
 #[cfg(feature = "time_0_3")]
@@ -2595,5 +2598,5 @@ pub struct SetLastValueWins<T>(PhantomData<T>);
 /// feature is enabled.
 ///
 /// [`JsonSchema`]: ::schemars_0_8::JsonSchema
-#[cfg(feature = "schemars_0_8")]
+#[cfg(any(feature = "schemars_0_8", feature = "schemars_0_9"))]
 pub struct Schema<T: ?Sized, TA>(PhantomData<T>, PhantomData<TA>);
