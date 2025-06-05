@@ -113,6 +113,7 @@ const PAD_INDIFFERENT: ::base64::engine::GeneralPurposeConfig =
 impl<'de, T, ALPHABET, FORMAT> DeserializeAs<'de, T> for Base64<ALPHABET, FORMAT>
 where
     T: TryFrom<Vec<u8>>,
+    T::Error: Display,
     ALPHABET: Alphabet,
     FORMAT: formats::Format,
 {
@@ -125,6 +126,7 @@ where
         impl<T, ALPHABET> Visitor<'_> for Helper<T, ALPHABET>
         where
             T: TryFrom<Vec<u8>>,
+            T::Error: Display,
             ALPHABET: Alphabet,
         {
             type Value = T;
@@ -145,9 +147,9 @@ where
                         .map_err(DeError::custom)?;
 
                 let length = bytes.len();
-                bytes.try_into().map_err(|_e: T::Error| {
+                bytes.try_into().map_err(|e: T::Error| {
                     DeError::custom(format_args!(
-                        "Can't convert a Byte Vector of length {length} to the output type."
+                        "Can't convert a Byte Vector of length {length} to the output type: {e}"
                     ))
                 })
             }
