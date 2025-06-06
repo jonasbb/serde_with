@@ -544,7 +544,7 @@ where
 
         let one_of = match inner.get_mut("oneOf") {
             Some(Value::Array(one_of)) => one_of,
-            _ => return inner_schema.into(),
+            _ => return inner_schema,
         };
 
         let mut properties = serde_json::Map::new();
@@ -680,7 +680,7 @@ where
                         done = true;
                         false
                     }
-                    _ => return true,
+                    _ => true,
                 });
             }
 
