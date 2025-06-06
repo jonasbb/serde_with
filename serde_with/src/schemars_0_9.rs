@@ -46,7 +46,8 @@ use serde_json::Value;
 /// # use serde::{Serialize, Serializer, Deserialize, Deserializer};
 /// # use serde_with::{SerializeAs, DeserializeAs};
 /// use serde_with::schemars_0_9::JsonSchemaAs;
-/// use schemars::{json_schema, SchemaGenerator, Schema, JsonSchema};
+/// use schemars::{json_schema, SchemaGenerator, Schema};
+/// use std::borrow::Cow;
 ///
 /// # #[allow(dead_code)]
 /// struct PositiveInt;
@@ -87,7 +88,7 @@ use serde_json::Value;
 ///         "PositiveInt".into()
 ///     }
 ///
-///     fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+///     fn json_schema(_: &mut SchemaGenerator) -> Schema {
 ///         json_schema!({
 ///             "type": "integer",
 ///             "minimum": 0
