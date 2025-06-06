@@ -12,10 +12,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Generalize `serde_with::rust::unwrap_or_skip` to support deserializing references by @beroal (#832)
 * Bump MSRV to 1.71, since that is required for the `jsonschema` dev-dependency.
 * Make `serde_conv` available without the `std` feature by @arilou (#839)
+* Bump MSRV to 1.74, since that is required for `schemars` v0.9.0 by @swlynch99 (#849)
 
 ### Fixed
 
 * Make the `DurationSeconds` types and other variants more accessible even without `std` (#845)
+
+### Added
+
+* Added support for `schemars` v0.9.0 under the `schemars_0_9` feature flag by @swlynch99 (#849)
 
 ## [3.12.0] - 2024-12-25
 
