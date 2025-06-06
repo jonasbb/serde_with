@@ -688,7 +688,7 @@ where
                 *max = max.saturating_sub(1);
             }
 
-            if let Some(Value::Number(min)) = schema.get_mut("maxProperties") {
+            if let Some(Value::Number(min)) = schema.get_mut("minProperties") {
                 *min = min.saturating_sub(1);
             }
         }
