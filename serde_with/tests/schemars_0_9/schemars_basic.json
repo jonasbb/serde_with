@@ -10,11 +10,11 @@
       "minimum": 0
     },
     "display_from_str": {
-      "description": "Field that directly uses DisplayFromStr",
+      "description": "Field that directly uses `DisplayFromStr`",
       "type": "string"
     },
     "same": {
-      "description": "Same does not implement JsonSchema directly so this checks that the\n correct schemars attribute was injected.",
+      "description": "Same does not implement `JsonSchema` directly so this checks that the\n correct schemars attribute was injected.",
       "type": "integer",
       "format": "uint32",
       "minimum": 0

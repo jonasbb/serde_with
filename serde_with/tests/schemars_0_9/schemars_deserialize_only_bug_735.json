@@ -14,19 +14,19 @@
       "$ref": "#/$defs/PickFirst(uint32string)"
     },
     "serialize_only": {
-      "description": "Can emit schemars with serialize_as, but it will be ignored",
+      "description": "Can emit schemars with `serialize_as`, but it will be ignored",
       "type": "integer",
       "format": "uint32",
       "minimum": 0
     },
     "deserialize_only": {
-      "description": "schemars doesn't support deserialize_as",
+      "description": "schemars doesn't support `deserialize_as`",
       "type": "integer",
       "format": "uint32",
       "minimum": 0
     },
     "serialize_and_deserialize": {
-      "description": "Can emit schemars with serialize_as, but it will be ignored\n schemars doesn't support deserialize_as",
+      "description": "Can emit schemars with `serialize_as`, but it will be ignored\n schemars doesn't support `deserialize_as`",
       "type": "integer",
       "format": "uint32",
       "minimum": 0
