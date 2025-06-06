@@ -124,12 +124,12 @@ where
             &mut message,
             "Object was not valid according to its own schema:"
         );
-        let _ = writeln!(&mut message, "  -> {}", err);
+        let _ = writeln!(&mut message, "  -> {err}");
         let _ = writeln!(&mut message);
 
-        panic!("{} {}", message, output);
+        panic!("{message} {output}");
     } else {
-        eprint!("{}", output);
+        eprint!("{output}");
     }
 }
 
