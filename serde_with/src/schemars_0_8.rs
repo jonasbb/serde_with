@@ -668,7 +668,7 @@ where
                 *max = max.saturating_sub(1);
             }
 
-            if let Some(min) = &mut object.max_properties {
+            if let Some(min) = &mut object.min_properties {
                 *min = min.saturating_sub(1);
             }
         }

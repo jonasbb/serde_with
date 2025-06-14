@@ -890,7 +890,8 @@ fn test_set_prevent_duplicates_with_duplicates() {
 
 mod key_value_map {
     use super::*;
-    use std::collections::BTreeMap;
+    use schemars::schema::ObjectValidation;
+    use std::{collections::BTreeMap, vec};
 
     #[serde_as]
     #[derive(Clone, Debug, JsonSchema, Serialize)]
@@ -936,6 +937,35 @@ mod key_value_map {
         },
     }
 
+    #[derive(Clone, Debug, Serialize)]
+    #[serde(transparent)]
+    struct LimitedProperties(serde_json::Value);
+
+    impl JsonSchema for LimitedProperties {
+        fn schema_name() -> String {
+            "LimitedProperties".into()
+        }
+
+        fn json_schema(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+            schemars::schema::Schema::Object(schemars::schema::SchemaObject {
+                instance_type: Some(schemars::schema::InstanceType::Object.into()),
+                object: Some(Box::new(ObjectValidation {
+                    max_properties: Some(5),
+                    min_properties: Some(1),
+                    additional_properties: Some(Box::new(schemars::schema::Schema::Object(
+                        schemars::schema::SchemaObject {
+                            instance_type: Some(schemars::schema::InstanceType::String.into()),
+                            ..Default::default()
+                        },
+                    ))),
+                    ..Default::default()
+                })),
+
+                ..Default::default()
+            })
+        }
+    }
+
     #[test]
     fn test_untagged_nested_enum() {
         let value = KVMap(vec![
@@ -958,6 +988,25 @@ mod key_value_map {
         let value = KVMap(vec![
             BTreeMap::from_iter([("$key$", "a"), ("value", "b")]),
             BTreeMap::from_iter([("$key$", "b"), ("value", "d")]),
+        ]);
+
+        check_valid_json_schema(&value);
+    }
+
+    #[test]
+    fn test_num_properties() {
+        let value = KVMap(vec![
+            LimitedProperties(serde_json::json!({
+                "$key$": "A",
+                "a": "b",
+                "c": "d",
+                "e": "f",
+                "g": "h",
+            })),
+            LimitedProperties(serde_json::json!({
+                "$key$": "B",
+                "a": "b",
+            })),
         ]);
 
         check_valid_json_schema(&value);
