@@ -81,6 +81,6 @@ For example, the derives [`DeserializeFromStr`] and [`SerializeDisplay`] require
 
 [`Display`]: std::fmt::Display
 [`FromStr`]: std::str::FromStr
-[`serde_with_macros`]: serde_with_macros
-[serde_with_chrono]: crate::chrono
+[`serde_with_macros`]: ::serde_with_macros
+[serde_with_chrono]: ::chrono_0_4
 [with-annotation]: https://serde.rs/field-attrs.html#with

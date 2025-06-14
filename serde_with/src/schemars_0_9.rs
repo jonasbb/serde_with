@@ -134,7 +134,7 @@ pub trait JsonSchemaAs<T: ?Sized> {
 
     /// Generates a JSON Schema for this type.
     ///
-    /// If the returned schema depends on any [referenceable](JsonSchema::is_referenceable) schemas, then this method will
+    /// If the returned schema depends on any [inlineable](JsonSchema::inline_schema) schemas, then this method will
     /// add them to the [`SchemaGenerator`]'s schema definitions.
     ///
     /// This should not return a `$ref` schema.
