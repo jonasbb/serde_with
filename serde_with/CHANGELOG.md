@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.13.0] - 2025-06-14
+
+### Added
+
+* Added support for `schemars` v0.9.0 under the `schemars_0_9` feature flag by @swlynch99 (#849)
+* Introduce `SerializeDisplayAlt` derive macro (#833)
+    An alternative to the `SerializeDisplay` macro except instead of using the
+    plain formatting like `format!("{}", ...)`, it serializes with the
+    `Formatter::alternate` flag set to true, like `format!("{:#}", ...)`
+
 ### Changed
 
 * Generalize `serde_with::rust::unwrap_or_skip` to support deserializing references by @beroal (#832)
@@ -17,10 +27,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 * Make the `DurationSeconds` types and other variants more accessible even without `std` (#845)
-
-### Added
-
-* Added support for `schemars` v0.9.0 under the `schemars_0_9` feature flag by @swlynch99 (#849)
 
 ## [3.12.0] - 2024-12-25
 
