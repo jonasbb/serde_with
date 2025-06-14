@@ -288,6 +288,7 @@ pub mod chrono_0_4;
 #[cfg(feature = "chrono")]
 #[cfg_attr(docsrs, doc(cfg(feature = "chrono")))]
 pub mod chrono {
+    pub use crate::chrono_0_4::*;
     pub use chrono_0_4::*;
 }
 #[cfg(feature = "alloc")]

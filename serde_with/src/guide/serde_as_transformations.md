@@ -602,10 +602,10 @@ value: u128,
 [`BoolFromInt<Flexible>`]: crate::BoolFromInt
 [`BoolFromInt<Strict>`]: crate::BoolFromInt
 [`Bytes`]: crate::Bytes
-[`chrono::DateTime<Local>`]: chrono::DateTime
-[`chrono::DateTime<Utc>`]: chrono::DateTime
-[`chrono::Duration`]: chrono::Duration
-[`chrono::NaiveDateTime`]: chrono::NaiveDateTime
+[`chrono::DateTime<Local>`]: chrono_0_4::DateTime
+[`chrono::DateTime<Utc>`]: chrono_0_4::DateTime
+[`chrono::Duration`]: chrono_0_4::Duration
+[`chrono::NaiveDateTime`]: chrono_0_4::NaiveDateTime
 [`DefaultOnError`]: crate::DefaultOnError
 [`DefaultOnNull`]: crate::DefaultOnNull
 [`DisplayFromStr`]: crate::DisplayFromStr
