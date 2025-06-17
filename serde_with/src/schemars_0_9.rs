@@ -100,7 +100,7 @@ use serde_json::Value;
 /// [0]: crate::serde_as
 /// [1]: crate::Schema
 pub trait JsonSchemaAs<T: ?Sized> {
-    /// Whether JSON schemas generated for this type should be inluded directly
+    /// Whether JSON schemas generated for this type should be included directly
     /// in arent schemas, rather than being re-used where possible using the `$ref`
     /// keyword.
     ///
