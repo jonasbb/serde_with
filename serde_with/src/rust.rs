@@ -640,6 +640,12 @@ pub mod maps_first_key_wins {
 ///
 /// # #[derive(Debug, PartialEq)]
 /// #[derive(Deserialize)]
+/// struct Root {
+///     values: Vec<Item>,
+/// }
+///
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize)]
 /// #[serde(rename_all = "lowercase")]
 /// enum Item {
 ///     Foo(String),
@@ -649,23 +655,34 @@ pub mod maps_first_key_wins {
 /// }
 ///
 /// // Deserialize this XML
-/// # let items: Vec<Item> = serde_xml_rs::from_str(
-/// r"
-/// <foo>a</foo>
-/// <bar>b</bar>
-/// <foo>c</foo>
-/// <unknown>d</unknown>
-/// "
+/// # let items: Root = serde_xml_rs::from_str(
+/// r#"<?xml version="1.0" encoding="UTF-8"?>
+/// <Root>
+///     <values>
+///         <foo>a</foo>
+///     </values>
+///     <values>
+///         <bar>b</bar>
+///     </values>
+///     <values>
+///         <foo>c</foo>
+///     </values>
+///     <values>
+///         <unknown>d</unknown>
+///     </values>
+/// </Root>"#
 /// # ).unwrap();
 ///
 /// // into these Items
 /// # let expected =
-/// vec![
-///     Item::Foo(String::from("a")),
-///     Item::Bar(String::from("b")),
-///     Item::Foo(String::from("c")),
-///     Item::Other,
-/// ]
+/// Root {
+///     values: vec![
+///         Item::Foo(String::from("a")),
+///         Item::Bar(String::from("b")),
+///         Item::Foo(String::from("c")),
+///         Item::Other,
+///     ]
+/// }
 /// # ;
 /// # assert_eq!(expected, items);
 /// ```
