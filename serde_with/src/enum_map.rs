@@ -131,7 +131,7 @@ use crate::{
 /// // into this XML document
 /// // Duplicate keys are emitted for identical enum variants.
 /// let expected = r#"
-/// <?xml version="1.0" encoding="UTF-8"?>
+/// <?xml version="1.0" encoding="utf-8"?>
 /// <VecEnumValues>
 ///     <vec>
 ///         <Int>123</Int>
