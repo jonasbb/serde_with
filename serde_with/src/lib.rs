@@ -29,7 +29,6 @@
 //! [![Build Status](https://github.com/jonasbb/serde_with/actions/workflows/ci.yaml/badge.svg)](https://github.com/jonasbb/serde_with)
 //! [![codecov](https://codecov.io/gh/jonasbb/serde_with/branch/master/graph/badge.svg)](https://codecov.io/gh/jonasbb/serde_with)
 //! [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4322/badge)](https://bestpractices.coreinfrastructure.org/projects/4322)
-//! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/py7ida)
 //!
 //! ---
 //!
@@ -75,7 +74,6 @@
 //!
 //! ## `DisplayFromStr`
 //!
-//! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/py7ida)
 //! ```rust
 //! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! # use serde::{Deserialize, Serialize};
@@ -110,7 +108,6 @@
 //!
 //! On top of it, `[u8; N]` (aka, bytes) can use the specialized `"Bytes"` for efficiency much like the `serde_bytes` crate.
 //!
-//! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/um0xyi)
 //! ```rust
 //! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! # use serde::{Deserialize, Serialize};
@@ -149,7 +146,6 @@
 //! If many fields are optional, putting the annotations on the structs can become tedious.
 //! The `#[skip_serializing_none]` attribute must be placed *before* the `#[derive]`.
 //!
-//! [![Rustexplorer](https://img.shields.io/badge/Try%20on-rustexplorer-lightgrey?logo=rust&logoColor=orange)](https://www.rustexplorer.com/b/xr1tm0)
 //! ```rust
 //! # #[cfg(all(feature = "macros", feature = "json"))] {
 //! # use serde::{Deserialize, Serialize};
