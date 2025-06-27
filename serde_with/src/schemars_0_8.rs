@@ -17,10 +17,6 @@ use ::schemars_0_8::{
     },
     JsonSchema,
 };
-use core::{
-    mem::ManuallyDrop,
-    ops::{Deref, DerefMut},
-};
 
 //===================================================================
 // Trait Definition
@@ -688,9 +684,9 @@ where
             };
 
             parents.push(name);
-            DropGuard::new(parents, |parents| drop(parents.pop()))
+            utils::DropGuard::new(parents, |parents| drop(parents.pop()))
         } else {
-            DropGuard::unguarded(parents)
+            utils::DropGuard::unguarded(parents)
         };
 
         if let Some(object) = &mut schema.object {
@@ -1290,52 +1286,3 @@ forward_duration_schema!(TimestampSecondsWithFrac);
 forward_duration_schema!(TimestampMilliSecondsWithFrac);
 forward_duration_schema!(TimestampMicroSecondsWithFrac);
 forward_duration_schema!(TimestampNanoSecondsWithFrac);
-
-//===================================================================
-// Extra internal helper structs
-
-struct DropGuard<T, F: FnOnce(T)> {
-    value: ManuallyDrop<T>,
-    guard: Option<F>,
-}
-
-impl<T, F: FnOnce(T)> DropGuard<T, F> {
-    pub fn new(value: T, guard: F) -> Self {
-        Self {
-            value: ManuallyDrop::new(value),
-            guard: Some(guard),
-        }
-    }
-
-    pub fn unguarded(value: T) -> Self {
-        Self {
-            value: ManuallyDrop::new(value),
-            guard: None,
-        }
-    }
-}
-
-impl<T, F: FnOnce(T)> Deref for DropGuard<T, F> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-impl<T, F: FnOnce(T)> DerefMut for DropGuard<T, F> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value
-    }
-}
-
-impl<T, F: FnOnce(T)> Drop for DropGuard<T, F> {
-    fn drop(&mut self) {
-        // SAFETY: value is known to be initialized since we only ever remove it here.
-        let value = unsafe { ManuallyDrop::take(&mut self.value) };
-
-        if let Some(guard) = self.guard.take() {
-            guard(value);
-        }
-    }
-}

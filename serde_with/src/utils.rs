@@ -240,3 +240,101 @@ pub(crate) fn get_unexpected_u128(value: u128, buf: &mut [u8; 58]) -> Unexpected
     fmt::Write::write_fmt(&mut writer, format_args!("integer `{value}` as u128")).unwrap();
     Unexpected::Other(writer.into_str())
 }
+
+#[cfg(any(
+    feature = "schemars_0_8",
+    feature = "schemars_0_9",
+    feature = "schemars_1"
+))]
+pub(crate) struct DropGuard<T, F: FnOnce(T)> {
+    value: core::mem::ManuallyDrop<T>,
+    guard: Option<F>,
+}
+
+#[cfg(any(
+    feature = "schemars_0_8",
+    feature = "schemars_0_9",
+    feature = "schemars_1"
+))]
+impl<T, F: FnOnce(T)> DropGuard<T, F> {
+    pub fn new(value: T, guard: F) -> Self {
+        Self {
+            value: core::mem::ManuallyDrop::new(value),
+            guard: Some(guard),
+        }
+    }
+
+    pub fn unguarded(value: T) -> Self {
+        Self {
+            value: core::mem::ManuallyDrop::new(value),
+            guard: None,
+        }
+    }
+}
+
+#[cfg(any(
+    feature = "schemars_0_8",
+    feature = "schemars_0_9",
+    feature = "schemars_1"
+))]
+impl<T, F: FnOnce(T)> core::ops::Deref for DropGuard<T, F> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+#[cfg(any(
+    feature = "schemars_0_8",
+    feature = "schemars_0_9",
+    feature = "schemars_1"
+))]
+impl<T, F: FnOnce(T)> core::ops::DerefMut for DropGuard<T, F> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value
+    }
+}
+
+#[cfg(any(
+    feature = "schemars_0_8",
+    feature = "schemars_0_9",
+    feature = "schemars_1"
+))]
+impl<T, F: FnOnce(T)> Drop for DropGuard<T, F> {
+    fn drop(&mut self) {
+        // SAFETY: value is known to be initialized since we only ever remove it here.
+        let value = unsafe { core::mem::ManuallyDrop::take(&mut self.value) };
+
+        if let Some(guard) = self.guard.take() {
+            guard(value);
+        }
+    }
+}
+
+#[cfg(any(feature = "schemars_0_9", feature = "schemars_1"))]
+pub(crate) trait NumberExt: Sized {
+    fn saturating_sub(&self, count: u64) -> Self;
+}
+
+#[cfg(any(feature = "schemars_0_9", feature = "schemars_1"))]
+impl NumberExt for serde_json::Number {
+    fn saturating_sub(&self, count: u64) -> Self {
+        if let Some(v) = self.as_u64() {
+            return v.saturating_sub(count).into();
+        }
+
+        if let Some(v) = self.as_i64() {
+            if count < i64::MAX as u64 {
+                return v.saturating_sub(count as _).into();
+            }
+        }
+
+        if let Some(v) = self.as_f64() {
+            return serde_json::Number::from_f64(v - (count as f64))
+                .expect("saturating_sub resulted in NaN");
+        }
+
+        unreachable!()
+    }
+}
