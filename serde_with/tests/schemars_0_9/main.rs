@@ -1,6 +1,7 @@
 //! Test Cases
 
 use crate::utils::{check_matches_schema, check_valid_json_schema};
+use core::ops;
 use expect_test::expect_file;
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -1073,4 +1074,57 @@ fn test_pickfirst() {
 
     check_matches_schema::<IntOrDisplay>(&json!(7));
     check_matches_schema::<IntOrDisplay>(&json!("17"));
+}
+
+#[test]
+fn test_bound() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(#[serde_as(as = "ops::Bound<DisplayFromStr>")] ops::Bound<u32>);
+
+    check_valid_json_schema(&S(ops::Bound::Unbounded));
+    check_valid_json_schema(&S(ops::Bound::Included(42)));
+    check_valid_json_schema(&S(ops::Bound::Excluded(42)));
+}
+
+#[test]
+fn test_range() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(#[serde_as(as = "ops::Range<DisplayFromStr>")] ops::Range<u32>);
+
+    check_valid_json_schema(&S(3..7));
+}
+
+// Note: Not included in `schemars`
+// #[test]
+// fn test_rangefrom() {
+//     #[serde_as]
+//     #[derive(JsonSchema, Serialize)]
+//     #[serde(transparent)]
+//     struct S(#[serde_as(as = "ops::RangeFrom<DisplayFromStr>")] ops::RangeFrom<u32>);
+
+//     check_valid_json_schema(&S(3..));
+// }
+
+// #[test]
+// fn test_rangeto() {
+//     #[serde_as]
+//     #[derive(JsonSchema, Serialize)]
+//     #[serde(transparent)]
+//     struct S(#[serde_as(as = "ops::RangeTo<DisplayFromStr>")] ops::RangeTo<u32>);
+
+//     check_valid_json_schema(&S(..7));
+// }
+
+#[test]
+fn test_rangeinclusive() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(#[serde_as(as = "ops::RangeInclusive<DisplayFromStr>")] ops::RangeInclusive<u32>);
+
+    check_valid_json_schema(&S(3..=7));
 }

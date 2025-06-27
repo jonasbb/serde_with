@@ -282,6 +282,42 @@ where
     forward_schema!(HashSet<WrapSchema<T, TA>, S>);
 }
 
+impl<T, TA> JsonSchemaAs<Bound<T>> for Bound<TA>
+where
+    TA: JsonSchemaAs<T>,
+{
+    forward_schema!(Bound<WrapSchema<T, TA>>);
+}
+
+impl<T, TA> JsonSchemaAs<Range<T>> for Range<TA>
+where
+    TA: JsonSchemaAs<T>,
+{
+    forward_schema!(Range<WrapSchema<T, TA>>);
+}
+
+// Note: Not included in `schemars`
+// impl<T, TA> JsonSchemaAs<RangeFrom<T>> for RangeFrom<TA>
+// where
+//     TA: JsonSchemaAs<T>,
+// {
+//     forward_schema!(RangeFrom<WrapSchema<T, TA>>);
+// }
+
+// impl<T, TA> JsonSchemaAs<RangeTo<T>> for RangeTo<TA>
+// where
+//     TA: JsonSchemaAs<T>,
+// {
+//     forward_schema!(RangeTo<WrapSchema<T, TA>>);
+// }
+
+impl<T, TA> JsonSchemaAs<RangeInclusive<T>> for RangeInclusive<TA>
+where
+    TA: JsonSchemaAs<T>,
+{
+    forward_schema!(RangeInclusive<WrapSchema<T, TA>>);
+}
+
 impl<T, TA, const N: usize> JsonSchemaAs<[T; N]> for [TA; N]
 where
     TA: JsonSchemaAs<T>,

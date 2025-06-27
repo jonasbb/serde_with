@@ -395,7 +395,7 @@ pub(crate) mod prelude {
         fmt::{self, Display},
         hash::{BuildHasher, Hash},
         marker::PhantomData,
-        ops::Bound,
+        ops::{Bound, Range, RangeFrom, RangeInclusive, RangeTo},
         option::Option,
         pin::Pin,
         result::Result,
