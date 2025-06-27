@@ -1059,18 +1059,11 @@ mod timespan {
     // #[non_exhaustive] is not actually necessary here but it should
     // help avoid warnings about semver breakage if this ever changes.
     #[non_exhaustive]
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub enum TimespanTargetType {
         String,
         F64,
         U64,
         I64,
-    }
-
-    impl TimespanTargetType {
-        pub const fn is_signed(self) -> bool {
-            !matches!(self, Self::U64)
-        }
     }
 
     /// Internal helper trait used to constrain which types we implement
@@ -1194,7 +1187,7 @@ impl TimespanTargetType {
             ..Default::default()
         };
 
-        if self == Self::String {
+        if matches!(self, Self::String) {
             number.metadata().write_only = true;
         } else {
             string.metadata().write_only = true;
