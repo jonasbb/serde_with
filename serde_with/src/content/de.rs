@@ -22,9 +22,6 @@ use crate::{
 
 /// Used from generated code to buffer the contents of the Deserializer when
 /// deserializing untagged enums and internally tagged enums.
-///
-/// Not public API. Use serde-value instead.
-#[derive(Debug, Clone)]
 pub(crate) enum Content<'de> {
     Bool(bool),
 

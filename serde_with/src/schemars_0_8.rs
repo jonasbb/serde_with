@@ -17,10 +17,6 @@ use ::schemars_0_8::{
     },
     JsonSchema,
 };
-use core::{
-    mem::ManuallyDrop,
-    ops::{Deref, DerefMut},
-};
 
 //===================================================================
 // Trait Definition
@@ -688,9 +684,9 @@ where
             };
 
             parents.push(name);
-            DropGuard::new(parents, |parents| drop(parents.pop()))
+            utils::DropGuard::new(parents, |parents| drop(parents.pop()))
         } else {
-            DropGuard::unguarded(parents)
+            utils::DropGuard::unguarded(parents)
         };
 
         if let Some(object) = &mut schema.object {
@@ -1063,18 +1059,11 @@ mod timespan {
     // #[non_exhaustive] is not actually necessary here but it should
     // help avoid warnings about semver breakage if this ever changes.
     #[non_exhaustive]
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub enum TimespanTargetType {
         String,
         F64,
         U64,
         I64,
-    }
-
-    impl TimespanTargetType {
-        pub const fn is_signed(self) -> bool {
-            !matches!(self, Self::U64)
-        }
     }
 
     /// Internal helper trait used to constrain which types we implement
@@ -1168,7 +1157,7 @@ where
 }
 
 impl TimespanTargetType {
-    pub(crate) fn to_flexible_schema(self, signed: bool) -> Schema {
+    pub(crate) fn into_flexible_schema(self, signed: bool) -> Schema {
         use ::schemars_0_8::schema::StringValidation;
 
         let mut number = SchemaObject {
@@ -1198,7 +1187,7 @@ impl TimespanTargetType {
             ..Default::default()
         };
 
-        if self == Self::String {
+        if matches!(self, Self::String) {
             number.metadata().write_only = true;
         } else {
             string.metadata().write_only = true;
@@ -1243,7 +1232,7 @@ where
 
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         <T as TimespanSchemaTarget<F>>::TYPE
-            .to_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
+            .into_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
     }
 
     fn is_referenceable() -> bool {
@@ -1290,52 +1279,3 @@ forward_duration_schema!(TimestampSecondsWithFrac);
 forward_duration_schema!(TimestampMilliSecondsWithFrac);
 forward_duration_schema!(TimestampMicroSecondsWithFrac);
 forward_duration_schema!(TimestampNanoSecondsWithFrac);
-
-//===================================================================
-// Extra internal helper structs
-
-struct DropGuard<T, F: FnOnce(T)> {
-    value: ManuallyDrop<T>,
-    guard: Option<F>,
-}
-
-impl<T, F: FnOnce(T)> DropGuard<T, F> {
-    pub fn new(value: T, guard: F) -> Self {
-        Self {
-            value: ManuallyDrop::new(value),
-            guard: Some(guard),
-        }
-    }
-
-    pub fn unguarded(value: T) -> Self {
-        Self {
-            value: ManuallyDrop::new(value),
-            guard: None,
-        }
-    }
-}
-
-impl<T, F: FnOnce(T)> Deref for DropGuard<T, F> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-impl<T, F: FnOnce(T)> DerefMut for DropGuard<T, F> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value
-    }
-}
-
-impl<T, F: FnOnce(T)> Drop for DropGuard<T, F> {
-    fn drop(&mut self) {
-        // SAFETY: value is known to be initialized since we only ever remove it here.
-        let value = unsafe { ManuallyDrop::take(&mut self.value) };
-
-        if let Some(guard) = self.guard.take() {
-            guard(value);
-        }
-    }
-}

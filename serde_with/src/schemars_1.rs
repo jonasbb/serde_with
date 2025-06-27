@@ -8,6 +8,7 @@
 use crate::{
     formats::{Flexible, Format, PreferMany, PreferOne, Separator, Strict},
     prelude::{Schema as WrapSchema, *},
+    utils::NumberExt as _,
 };
 use ::schemars_1::{json_schema, JsonSchema, Schema, SchemaGenerator};
 use alloc::{
@@ -16,10 +17,6 @@ use alloc::{
     format,
     rc::Rc,
     vec::Vec,
-};
-use core::{
-    mem::ManuallyDrop,
-    ops::{Deref, DerefMut},
 };
 use serde_json::Value;
 
@@ -694,9 +691,9 @@ where
             };
 
             parents.push(name);
-            DropGuard::new(parents, |parents| drop(parents.pop()))
+            utils::DropGuard::new(parents, |parents| drop(parents.pop()))
         } else {
-            DropGuard::unguarded(parents)
+            utils::DropGuard::unguarded(parents)
         };
 
         // We do comparisons here to avoid lifetime conflicts below
@@ -1071,18 +1068,11 @@ mod timespan {
     // #[non_exhaustive] is not actually necessary here but it should
     // help avoid warnings about semver breakage if this ever changes.
     #[non_exhaustive]
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub enum TimespanTargetType {
         String,
         F64,
         U64,
         I64,
-    }
-
-    impl TimespanTargetType {
-        pub const fn is_signed(self) -> bool {
-            !matches!(self, Self::U64)
-        }
     }
 
     /// Internal helper trait used to constrain which types we implement
@@ -1179,7 +1169,7 @@ where
 }
 
 impl TimespanTargetType {
-    pub(crate) fn to_flexible_schema(self, signed: bool) -> Schema {
+    pub(crate) fn into_flexible_schema(self, signed: bool) -> Schema {
         let mut number = json_schema!({
             "type": "number"
         });
@@ -1202,7 +1192,7 @@ impl TimespanTargetType {
             }
         });
 
-        if self == Self::String {
+        if matches!(self, Self::String) {
             number
                 .ensure_object()
                 .insert("writeOnly".into(), true.into());
@@ -1246,7 +1236,7 @@ where
 
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         <T as TimespanSchemaTarget<F>>::TYPE
-            .to_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
+            .into_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
     }
 
     fn inline_schema() -> bool {
@@ -1293,77 +1283,3 @@ forward_duration_schema!(TimestampSecondsWithFrac);
 forward_duration_schema!(TimestampMilliSecondsWithFrac);
 forward_duration_schema!(TimestampMicroSecondsWithFrac);
 forward_duration_schema!(TimestampNanoSecondsWithFrac);
-
-//===================================================================
-// Extra internal helper structs
-
-struct DropGuard<T, F: FnOnce(T)> {
-    value: ManuallyDrop<T>,
-    guard: Option<F>,
-}
-
-impl<T, F: FnOnce(T)> DropGuard<T, F> {
-    pub fn new(value: T, guard: F) -> Self {
-        Self {
-            value: ManuallyDrop::new(value),
-            guard: Some(guard),
-        }
-    }
-
-    pub fn unguarded(value: T) -> Self {
-        Self {
-            value: ManuallyDrop::new(value),
-            guard: None,
-        }
-    }
-}
-
-impl<T, F: FnOnce(T)> Deref for DropGuard<T, F> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-impl<T, F: FnOnce(T)> DerefMut for DropGuard<T, F> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value
-    }
-}
-
-impl<T, F: FnOnce(T)> Drop for DropGuard<T, F> {
-    fn drop(&mut self) {
-        // SAFETY: value is known to be initialized since we only ever remove it here.
-        let value = unsafe { ManuallyDrop::take(&mut self.value) };
-
-        if let Some(guard) = self.guard.take() {
-            guard(value);
-        }
-    }
-}
-
-trait NumberExt: Sized {
-    fn saturating_sub(&self, count: u64) -> Self;
-}
-
-impl NumberExt for serde_json::Number {
-    fn saturating_sub(&self, count: u64) -> Self {
-        if let Some(v) = self.as_u64() {
-            return v.saturating_sub(count).into();
-        }
-
-        if let Some(v) = self.as_i64() {
-            if count < i64::MAX as u64 {
-                return v.saturating_sub(count as _).into();
-            }
-        }
-
-        if let Some(v) = self.as_f64() {
-            return serde_json::Number::from_f64(v - (count as f64))
-                .expect("saturating_sub resulted in NaN");
-        }
-
-        unreachable!()
-    }
-}
