@@ -1157,7 +1157,7 @@ where
 }
 
 impl TimespanTargetType {
-    pub(crate) fn to_flexible_schema(self, signed: bool) -> Schema {
+    pub(crate) fn into_flexible_schema(self, signed: bool) -> Schema {
         use ::schemars_0_8::schema::StringValidation;
 
         let mut number = SchemaObject {
@@ -1232,7 +1232,7 @@ where
 
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         <T as TimespanSchemaTarget<F>>::TYPE
-            .to_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
+            .into_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
     }
 
     fn is_referenceable() -> bool {

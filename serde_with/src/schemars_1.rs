@@ -1169,7 +1169,7 @@ where
 }
 
 impl TimespanTargetType {
-    pub(crate) fn to_flexible_schema(self, signed: bool) -> Schema {
+    pub(crate) fn into_flexible_schema(self, signed: bool) -> Schema {
         let mut number = json_schema!({
             "type": "number"
         });
@@ -1236,7 +1236,7 @@ where
 
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         <T as TimespanSchemaTarget<F>>::TYPE
-            .to_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
+            .into_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
     }
 
     fn inline_schema() -> bool {
