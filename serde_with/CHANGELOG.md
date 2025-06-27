@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add support for `Range`, `RangeFrom`, `RangeTo`, `RangeInclusive` (#851)
+    `RangeToInclusive` is currently unsupported by serde.
+* Add `schemars` implementations for `Bound`, `Range`, `RangeFrom`, `RangeTo`, `RangeInclusive`.
+
 ## [3.13.0] - 2025-06-14
 
 ### Added

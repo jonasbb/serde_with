@@ -24,7 +24,7 @@ use alloc::{
 };
 use core::{
     cell::{Cell, RefCell},
-    ops::Bound,
+    ops::{Bound, Range, RangeFrom, RangeInclusive, RangeTo},
     pin::Pin,
 };
 use expect_test::expect;
@@ -181,16 +181,83 @@ fn test_bound() {
         }"#]],
     );
     check_error_deserialization::<S>(r#"{}"#, expect![[r#"expected value at line 1 column 2"#]]);
+}
 
+#[test]
+fn test_range() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    struct Struct {
-        #[serde_as(as = "Bound<DisplayFromStr>")]
-        value: Bound<u32>,
-    }
-    check_error_deserialization::<Struct>(
-        r#"{}"#,
-        expect![[r#"missing field `value` at line 1 column 2"#]],
+    struct S(#[serde_as(as = "Range<DisplayFromStr>")] Range<u32>);
+
+    is_equal(
+        S(3..7),
+        expect![[r#"
+        {
+          "start": "3",
+          "end": "7"
+        }"#]],
+    );
+    check_error_deserialization::<S>(
+        r#"{"start": false}"#,
+        expect!["invalid type: boolean `false`, expected a string at line 1 column 15"],
+    );
+}
+
+#[test]
+fn test_rangefrom() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "RangeFrom<DisplayFromStr>")] RangeFrom<u32>);
+
+    is_equal(
+        S(3..),
+        expect![[r#"
+        {
+          "start": "3"
+        }"#]],
+    );
+    check_error_deserialization::<S>(
+        r#"{"start": false}"#,
+        expect!["invalid type: boolean `false`, expected a string at line 1 column 15"],
+    );
+}
+
+#[test]
+fn test_rangeto() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "RangeTo<DisplayFromStr>")] RangeTo<u32>);
+
+    is_equal(
+        S(..7),
+        expect![[r#"
+        {
+          "end": "7"
+        }"#]],
+    );
+    check_error_deserialization::<S>(
+        r#"{"end": false}"#,
+        expect!["invalid type: boolean `false`, expected a string at line 1 column 13"],
+    );
+}
+
+#[test]
+fn test_rangeinclusive() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "RangeInclusive<DisplayFromStr>")] RangeInclusive<u32>);
+
+    is_equal(
+        S(3..=7),
+        expect![[r#"
+        {
+          "start": "3",
+          "end": "7"
+        }"#]],
+    );
+    check_error_deserialization::<S>(
+        r#"{"start": false}"#,
+        expect!["invalid type: boolean `false`, expected a string at line 1 column 15"],
     );
 }
 

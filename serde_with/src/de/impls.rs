@@ -410,6 +410,78 @@ where
 
 // endregion
 ///////////////////////////////////////////////////////////////////////////////
+// region: More complex wrappers that are not just a single value
+
+impl<'de, Idx, IdxAs> DeserializeAs<'de, Range<Idx>> for Range<IdxAs>
+where
+    IdxAs: DeserializeAs<'de, Idx>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<Range<Idx>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let Range::<DeserializeAsWrap<Idx, IdxAs>> { start, end } =
+            Deserialize::deserialize(deserializer)?;
+
+        Ok(Range {
+            start: start.into_inner(),
+            end: end.into_inner(),
+        })
+    }
+}
+
+impl<'de, Idx, IdxAs> DeserializeAs<'de, RangeFrom<Idx>> for RangeFrom<IdxAs>
+where
+    IdxAs: DeserializeAs<'de, Idx>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<RangeFrom<Idx>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let RangeFrom::<DeserializeAsWrap<Idx, IdxAs>> { start } =
+            Deserialize::deserialize(deserializer)?;
+
+        Ok(RangeFrom {
+            start: start.into_inner(),
+        })
+    }
+}
+
+impl<'de, Idx, IdxAs> DeserializeAs<'de, RangeInclusive<Idx>> for RangeInclusive<IdxAs>
+where
+    IdxAs: DeserializeAs<'de, Idx>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<RangeInclusive<Idx>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let (start, end) =
+            RangeInclusive::<DeserializeAsWrap<Idx, IdxAs>>::deserialize(deserializer)?
+                .into_inner();
+
+        Ok(RangeInclusive::new(start.into_inner(), end.into_inner()))
+    }
+}
+
+impl<'de, Idx, IdxAs> DeserializeAs<'de, RangeTo<Idx>> for RangeTo<IdxAs>
+where
+    IdxAs: DeserializeAs<'de, Idx>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<RangeTo<Idx>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let RangeTo::<DeserializeAsWrap<Idx, IdxAs>> { end } =
+            Deserialize::deserialize(deserializer)?;
+
+        Ok(RangeTo {
+            end: end.into_inner(),
+        })
+    }
+}
+
+// endregion
+///////////////////////////////////////////////////////////////////////////////
 // region: Collection Types (e.g., Maps, Sets, Vec)
 
 #[cfg(feature = "alloc")]
