@@ -239,7 +239,7 @@ required-features = ["alloc"]
 
 [[test]]
 name = "schemars_0_8"
-path = "tests/schemars_0_8.rs"
+path = "tests/schemars_0_8/main.rs"
 required-features = ["schemars_0_8"]
 
 [[test]]

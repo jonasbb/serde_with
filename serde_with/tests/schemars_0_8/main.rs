@@ -56,7 +56,8 @@ macro_rules! declare_snapshot_test {
             schema.push('\n');
 
             let filename = concat!("./", module_path!(), "::", stringify!($test), ".json")
-                .replace("::", "/");
+                .replace("::", "/")
+                .replace("schemars_0_8/", "");
 
             let expected = expect_file![filename];
             expected.assert_eq(&schema);
@@ -95,7 +96,7 @@ fn schemars_basic() {
     let mut schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
     schema.push('\n');
 
-    let expected = expect_file!["./schemars_0_8/schemars_basic.json"];
+    let expected = expect_file!["./schemars_basic.json"];
     expected.assert_eq(&schema);
 }
 
@@ -174,7 +175,7 @@ fn schemars_deserialize_only_bug_735() {
     let mut schema = serde_json::to_string_pretty(&schema).expect("schema could not be serialized");
     schema.push('\n');
 
-    let expected = expect_file!["./schemars_0_8/schemars_deserialize_only_bug_735.json"];
+    let expected = expect_file!["./schemars_deserialize_only_bug_735.json"];
     expected.assert_eq(&schema);
 }
 
