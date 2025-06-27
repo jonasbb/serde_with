@@ -312,6 +312,9 @@ pub mod schemars_0_8;
 #[cfg(feature = "schemars_0_9")]
 #[cfg_attr(docsrs, doc(cfg(feature = "schemars_0_9")))]
 pub mod schemars_0_9;
+#[cfg(feature = "schemars_1")]
+#[cfg_attr(docsrs, doc(cfg(feature = "schemars_1")))]
+pub mod schemars_1;
 pub mod ser;
 mod serde_conv;
 #[cfg(feature = "time_0_3")]
@@ -2594,6 +2597,10 @@ pub struct SetLastValueWins<T>(PhantomData<T>);
 /// It is added implicitly by the [`#[serde_as]`](crate::serde_as) macro when any `schemars`
 /// feature is enabled.
 ///
-/// [`JsonSchema`]: ::schemars_0_8::JsonSchema
-#[cfg(any(feature = "schemars_0_8", feature = "schemars_0_9"))]
+/// [`JsonSchema`]: ::schemars_1::JsonSchema
+#[cfg(any(
+    feature = "schemars_0_8",
+    feature = "schemars_0_9",
+    feature = "schemars_1"
+))]
 pub struct Schema<T: ?Sized, TA>(PhantomData<T>, PhantomData<TA>);
