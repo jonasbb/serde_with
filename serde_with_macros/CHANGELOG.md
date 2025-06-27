@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Added support for `schemars` v1 under the `schemars_1` feature flag
+
 ## [3.13.0] - 2025-06-14
 
 ### Added

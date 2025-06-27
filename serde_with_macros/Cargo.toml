@@ -35,6 +35,7 @@ maintenance = { status = "actively-developed" }
 [features]
 schemars_0_8 = []
 schemars_0_9 = []
+schemars_1 = []
 
 [dependencies]
 darling = "0.20.0"
