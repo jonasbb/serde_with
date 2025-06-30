@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/jonasbb/serde_with/"
 rust-version = "1.74"
-version = "3.13.0"
+version = "3.14.0"
 
 [workspace.metadata.release]
 consolidate-commits = true
