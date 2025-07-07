@@ -408,6 +408,50 @@ impl<T> JsonSchemaAs<T> for DisplayFromStr {
     forward_schema!(String);
 }
 
+#[cfg(feature = "hex")]
+impl<T> JsonSchemaAs<T> for hex::Hex<formats::Lowercase> {
+    fn schema_name() -> Cow<'static, str> {
+        "Hex<Lowercase>".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::hex::Hex<Lowercase>".into()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        json_schema!({
+            "type": "string",
+            "pattern": r"^(?:[0-9a-f]{2})*$",
+        })
+    }
+
+    fn inline_schema() -> bool {
+        true
+    }
+}
+
+#[cfg(feature = "hex")]
+impl<T> JsonSchemaAs<T> for hex::Hex<formats::Uppercase> {
+    fn schema_name() -> Cow<'static, str> {
+        "Hex<Uppercase>".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::hex::Hex<Uppercase>".into()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        json_schema!({
+            "type": "string",
+            "pattern": r"^(?:[0-9A-F]{2})*$",
+        })
+    }
+
+    fn inline_schema() -> bool {
+        true
+    }
+}
+
 impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
     fn schema_name() -> Cow<'static, str> {
         "BoolFromInt<Strict>".into()
