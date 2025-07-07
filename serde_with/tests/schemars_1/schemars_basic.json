@@ -37,12 +37,12 @@
     "lowercase_hex": {
       "description": "A vector of bytes that's serialized as a lowercase hex string.",
       "type": "string",
-      "pattern": "^(?:[0-9a-f]{2})*$"
+      "pattern": "^(?:[0-9A-Fa-f]{2})*$"
     },
     "uppercase_hex": {
       "description": "A vector of bytes that's serialized as an uppercase hex string.",
       "type": "string",
-      "pattern": "^(?:[0-9A-F]{2})*$"
+      "pattern": "^(?:[0-9A-Fa-f]{2})*$"
     }
   },
   "required": [

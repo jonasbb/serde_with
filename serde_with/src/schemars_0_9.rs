@@ -419,7 +419,7 @@ impl<T> JsonSchemaAs<T> for hex::Hex<formats::Lowercase> {
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         json_schema!({
             "type": "string",
-            "pattern": r"^(?:[0-9a-f]{2})*$",
+            "pattern": r"^(?:[0-9A-Fa-f]{2})*$",
         })
     }
 
@@ -441,7 +441,7 @@ impl<T> JsonSchemaAs<T> for hex::Hex<formats::Uppercase> {
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         json_schema!({
             "type": "string",
-            "pattern": r"^(?:[0-9A-F]{2})*$",
+            "pattern": r"^(?:[0-9A-Fa-f]{2})*$",
         })
     }
 

@@ -420,7 +420,7 @@ impl<T> JsonSchemaAs<T> for hex::Hex<formats::Lowercase> {
         SchemaObject {
             instance_type: Some(InstanceType::String.into()),
             string: Some(Box::new(StringValidation {
-                pattern: Some(r"^(?:[0-9a-f]{2})*$".to_owned()),
+                pattern: Some(r"^(?:[0-9A-Fa-f]{2})*$".to_owned()),
                 ..Default::default()
             })),
             ..Default::default()
@@ -449,7 +449,7 @@ impl<T> JsonSchemaAs<T> for hex::Hex<formats::Uppercase> {
         SchemaObject {
             instance_type: Some(InstanceType::String.into()),
             string: Some(Box::new(StringValidation {
-                pattern: Some(r"^(?:[0-9A-F]{2})*$".to_owned()),
+                pattern: Some(r"^(?:[0-9A-Fa-f]{2})*$".to_owned()),
                 ..Default::default()
             })),
             ..Default::default()
