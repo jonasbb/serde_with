@@ -407,35 +407,13 @@ impl<T> JsonSchemaAs<T> for DisplayFromStr {
 }
 
 #[cfg(feature = "hex")]
-impl<T> JsonSchemaAs<T> for hex::Hex<formats::Lowercase> {
+impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
     fn schema_name() -> Cow<'static, str> {
-        "Hex<Lowercase>".into()
+        "Hex<F>".into()
     }
 
     fn schema_id() -> Cow<'static, str> {
-        "serde_with::hex::Hex<Lowercase>".into()
-    }
-
-    fn json_schema(_: &mut SchemaGenerator) -> Schema {
-        json_schema!({
-            "type": "string",
-            "pattern": r"^(?:[0-9A-Fa-f]{2})*$",
-        })
-    }
-
-    fn inline_schema() -> bool {
-        true
-    }
-}
-
-#[cfg(feature = "hex")]
-impl<T> JsonSchemaAs<T> for hex::Hex<formats::Uppercase> {
-    fn schema_name() -> Cow<'static, str> {
-        "Hex<Uppercase>".into()
-    }
-
-    fn schema_id() -> Cow<'static, str> {
-        "serde_with::hex::Hex<Uppercase>".into()
+        "serde_with::hex::Hex<F>".into()
     }
 
     fn json_schema(_: &mut SchemaGenerator) -> Schema {

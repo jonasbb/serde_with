@@ -405,42 +405,13 @@ impl<T> JsonSchemaAs<T> for DisplayFromStr {
 }
 
 #[cfg(feature = "hex")]
-impl<T> JsonSchemaAs<T> for hex::Hex<formats::Lowercase> {
+impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
     fn schema_name() -> String {
-        "Hex<Lowercase>".into()
+        "Hex<F>".into()
     }
 
     fn schema_id() -> Cow<'static, str> {
-        "serde_with::hex::Hex<Lowercase>".into()
-    }
-
-    fn json_schema(_: &mut SchemaGenerator) -> Schema {
-        use ::schemars_0_8::schema::StringValidation;
-
-        SchemaObject {
-            instance_type: Some(InstanceType::String.into()),
-            string: Some(Box::new(StringValidation {
-                pattern: Some(r"^(?:[0-9A-Fa-f]{2})*$".to_owned()),
-                ..Default::default()
-            })),
-            ..Default::default()
-        }
-        .into()
-    }
-
-    fn is_referenceable() -> bool {
-        false
-    }
-}
-
-#[cfg(feature = "hex")]
-impl<T> JsonSchemaAs<T> for hex::Hex<formats::Uppercase> {
-    fn schema_name() -> String {
-        "Hex<Uppercase>".into()
-    }
-
-    fn schema_id() -> Cow<'static, str> {
-        "serde_with::hex::Hex<Uppercase>".into()
+        "serde_with::hex::Hex<F>".into()
     }
 
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
