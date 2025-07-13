@@ -94,7 +94,7 @@ error: Unknown literal value `123`
 67 |     #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
    |                               ^^^^^
 
-error: Unexpected literal type `path`
+error: Unexpected type `path`
   --> tests/compile-fail/serde_as.rs:67:55
    |
 67 |     #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
