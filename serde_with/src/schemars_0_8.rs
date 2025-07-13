@@ -404,6 +404,35 @@ impl<T> JsonSchemaAs<T> for DisplayFromStr {
     forward_schema!(String);
 }
 
+#[cfg(feature = "hex")]
+impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
+    fn schema_name() -> String {
+        "Hex<F>".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::hex::Hex<F>".into()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        use ::schemars_0_8::schema::StringValidation;
+
+        SchemaObject {
+            instance_type: Some(InstanceType::String.into()),
+            string: Some(Box::new(StringValidation {
+                pattern: Some(r"^(?:[0-9A-Fa-f]{2})*$".to_owned()),
+                ..Default::default()
+            })),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
+}
+
 impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
     fn schema_name() -> String {
         "BoolFromInt<Strict>".into()
