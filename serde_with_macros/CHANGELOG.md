@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Show macro expansion in the docs.rs generated rustdoc.
+    Since macros are used to generate trait implementations, this is useful to understand the exact generated code.
+
 ## [3.14.0] - 2025-06-30
 
 ### Added
