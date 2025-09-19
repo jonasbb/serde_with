@@ -5,8 +5,7 @@ use expect_test::expect_file;
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::json;
-use serde_with::hex::*;
-use serde_with::*;
+use serde_with::{hex::*, *};
 use std::collections::BTreeSet;
 
 // This avoids us having to add `#[schemars(crate = "::schemars_0_8")]` all
