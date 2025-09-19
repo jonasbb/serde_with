@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.14.1] - 2025-09-19
+
 ### Fixed
 
 * Show macro expansion in the docs.rs generated rustdoc.
