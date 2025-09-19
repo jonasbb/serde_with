@@ -34,6 +34,7 @@
 /// }
 ///
 /// serde_with::serde_conv!(
+///     #[doc = "Serialize and deserialize `Rgb` as `[u8; 3]`."]
 ///     RgbAsArray,
 ///     Rgb,
 ///     |rgb: &Rgb| [rgb.red, rgb.green, rgb.blue],
@@ -105,9 +106,10 @@
 /// ```
 #[macro_export]
 macro_rules! serde_conv {
-    ($m:ident, $t:ty, $ser:expr, $de:expr) => {$crate::serde_conv!(pub(self) $m, $t, $ser, $de);};
-    ($vis:vis $m:ident, $t:ty, $ser:expr, $de:expr) => {
+    ($(#[$attr:meta])* $m:ident, $t:ty, $ser:expr, $de:expr) => {$crate::serde_conv!($(#[$attr])* pub(self) $m, $t, $ser, $de);};
+    ($(#[$attr:meta])* $vis:vis $m:ident, $t:ty, $ser:expr, $de:expr) => {
         #[allow(non_camel_case_types)]
+        $(#[$attr])*
         $vis struct $m;
 
         // Prevent clippy lints triggering because of the template here

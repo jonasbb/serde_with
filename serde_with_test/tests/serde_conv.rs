@@ -47,3 +47,21 @@ serde_conv!(
 ::std::result::Result::Ok(string)
     }
 );
+
+// Test the support of attributes
+serde_conv!(
+    #[doc = "Convert number to string"]
+    attr1,
+    u32,
+    u32_to_string,
+    string_to_u32
+);
+serde_conv!(
+    #[doc = "Convert number to string"]
+    #[allow(dead_code)]
+    attr2,
+    u32,
+    u32_to_string,
+    string_to_u32
+);
+serde_conv!(#[doc = "Convert number to string"] pub attr3, u32, u32_to_string, string_to_u32);
