@@ -266,10 +266,13 @@ all-features = true
 rustdoc-args = [
     # Enable doc_cfg showing the required features.
     "--cfg=docsrs",
+    "-Zunstable-options",
     # Generate links to definition in rustdoc source code pages
     # https://github.com/rust-lang/rust/pull/84176
-    "-Zunstable-options",
     "--generate-link-to-definition",
+    # Generate buttons to show macro expansions in the rustdoc output.
+    # https://github.com/rust-lang/rust/pull/137229
+    "--generate-macro-expansion",
     # Link to the stable documentation for core/alloc/std/proc_macro even though docs.rs uses nightly.
     # https://github.com/rust-lang/docs.rs/issues/506#issuecomment-2670501688
     "--extern-html-root-url=core=https://doc.rust-lang.org",
