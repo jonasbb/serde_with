@@ -9,15 +9,16 @@ use indexmap_1::IndexMap;
 #[cfg(feature = "indexmap_2")]
 use indexmap_2::IndexMap as IndexMap2;
 
-enum GoodOrError<T, TAs> {
+enum GoodOrError<T, TAs, I> {
     Good(T),
-    // Only here to consume the TAs generic
-    Error(PhantomData<TAs>),
+    // Only here to consume the TAs,I generics
+    Error(PhantomData<(TAs, I)>),
 }
 
-impl<'de, T, TAs> Deserialize<'de> for GoodOrError<T, TAs>
+impl<'de, T, TAs, I> Deserialize<'de> for GoodOrError<T, TAs, I>
 where
     TAs: DeserializeAs<'de, T>,
+    I: InspectError,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -32,27 +33,29 @@ where
             >::new(content, is_hr))
             {
                 Ok(elem) => GoodOrError::Good(elem.into_inner()),
-                Err(_) => GoodOrError::Error(PhantomData),
+                Err(e) => {
+                    I::inspect_error(e);
+                    GoodOrError::Error(PhantomData)
+                }
             },
         )
     }
 }
 
-impl<'de, T, U> DeserializeAs<'de, Vec<T>> for VecSkipError<U>
+impl<'de, T, U, I> DeserializeAs<'de, Vec<T>> for VecSkipError<U, I>
 where
     U: DeserializeAs<'de, T>,
+    I: InspectError,
 {
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<T>, D::Error>
     where
         D: Deserializer<'de>,
     {
-        struct SeqVisitor<T, U> {
-            marker: PhantomData<T>,
-            marker2: PhantomData<U>,
-        }
+        struct SeqVisitor<T, U, I>(PhantomData<(T, U, I)>);
 
-        impl<'de, T, TAs> Visitor<'de> for SeqVisitor<T, TAs>
+        impl<'de, T, TAs, I> Visitor<'de> for SeqVisitor<T, TAs, I>
         where
+            I: InspectError,
             TAs: DeserializeAs<'de, T>,
         {
             type Value = Vec<T>;
@@ -66,7 +69,7 @@ where
                 A: SeqAccess<'de>,
             {
                 utils::SeqIter::new(seq)
-                    .filter_map(|res: Result<GoodOrError<T, TAs>, A::Error>| match res {
+                    .filter_map(|res: Result<GoodOrError<T, TAs, I>, A::Error>| match res {
                         Ok(GoodOrError::Good(value)) => Some(Ok(value)),
                         Ok(GoodOrError::Error(_)) => None,
                         Err(err) => Some(Err(err)),
@@ -75,21 +78,19 @@ where
             }
         }
 
-        let visitor = SeqVisitor::<T, U> {
-            marker: PhantomData,
-            marker2: PhantomData,
-        };
+        let visitor = SeqVisitor::<T, U, I>(PhantomData);
         deserializer.deserialize_seq(visitor)
     }
 }
 
-struct MapSkipErrorVisitor<MAP, K, KAs, V, VAs>(PhantomData<(MAP, K, KAs, V, VAs)>);
+struct MapSkipErrorVisitor<MAP, K, KAs, V, VAs, I>(PhantomData<(MAP, K, KAs, V, VAs, I)>);
 
-impl<'de, MAP, K, KAs, V, VAs> Visitor<'de> for MapSkipErrorVisitor<MAP, K, KAs, V, VAs>
+impl<'de, MAP, K, KAs, V, VAs, I> Visitor<'de> for MapSkipErrorVisitor<MAP, K, KAs, V, VAs, I>
 where
     MAP: FromIterator<(K, V)>,
     KAs: DeserializeAs<'de, K>,
     VAs: DeserializeAs<'de, V>,
+    I: InspectError,
 {
     type Value = MAP;
 
@@ -102,13 +103,17 @@ where
     where
         A: MapAccess<'de>,
     {
-        type KVPair<K, KAs, V, VAs> = (GoodOrError<K, KAs>, GoodOrError<V, VAs>);
+        type KVPair<K, KAs, V, VAs, I> = (GoodOrError<K, KAs, I>, GoodOrError<V, VAs, I>);
         utils::MapIter::new(access)
-            .filter_map(|res: Result<KVPair<K, KAs, V, VAs>, A::Error>| match res {
-                Ok((GoodOrError::Good(key), GoodOrError::Good(value))) => Some(Ok((key, value))),
-                Ok(_) => None,
-                Err(err) => Some(Err(err)),
-            })
+            .filter_map(
+                |res: Result<KVPair<K, KAs, V, VAs, I>, A::Error>| match res {
+                    Ok((GoodOrError::Good(key), GoodOrError::Good(value))) => {
+                        Some(Ok((key, value)))
+                    }
+                    Ok(_) => None,
+                    Err(err) => Some(Err(err)),
+                },
+            )
             .collect()
     }
 }
@@ -119,11 +124,12 @@ macro_rules! map_impl {
         $ty:ident < K $(: $kbound1:ident $(+ $kbound2:ident)*)?, V $(, $typaram:ident : $bound1:ident $(+ $bound2:ident)*)* >,
         $with_capacity:expr
     ) => {
-        impl<'de, K, V, KAs, VAs $(, $typaram)*> DeserializeAs<'de, $ty<K, V $(, $typaram)*>>
-            for MapSkipError<KAs, VAs>
+        impl<'de, K, V, KAs, VAs, I $(, $typaram)*> DeserializeAs<'de, $ty<K, V $(, $typaram)*>>
+            for MapSkipError<KAs, VAs, I>
         where
             KAs: DeserializeAs<'de, K>,
             VAs: DeserializeAs<'de, V>,
+            I: InspectError,
             $(K: $kbound1 $(+ $kbound2)*,)?
             $($typaram: $bound1 $(+ $bound2)*),*
         {
@@ -137,6 +143,7 @@ macro_rules! map_impl {
                     KAs,
                     V,
                     VAs,
+                    I,
                 >(PhantomData))
             }
         }

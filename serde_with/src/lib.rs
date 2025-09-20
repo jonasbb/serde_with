@@ -2180,12 +2180,37 @@ pub struct TryFromIntoRef<T>(PhantomData<T>);
 #[cfg(feature = "alloc")]
 pub struct BorrowCow;
 
+/// A trait to inspect skipped deserialization errors
+///
+/// The [`VecSkipError`] and [`MapSkipError`] adapters allow to skip values which fail to deserialize.
+/// This trait allows inspecting these errors, for example for logging purposes.
+///
+/// The trait has a single method [`inspect_error`][InspectError::inspect_error], which will be called for each deserialization error.
+/// The default implementation for `()` does nothing.
+///
+/// See the documentation of [`VecSkipError`] and [`MapSkipError`] for usage examples.
+#[cfg(feature = "alloc")]
+pub trait InspectError {
+    /// Inspect a deserialization error which was skipped.
+    fn inspect_error(error: impl serde::de::Error);
+}
+
+#[cfg(feature = "alloc")]
+impl InspectError for () {
+    fn inspect_error(_error: impl serde::de::Error) {}
+}
+
 /// Deserialize a sequence into `Vec<T>`, skipping elements which fail to deserialize.
 ///
 /// The serialization behavior is identical to `Vec<T>`. This is an alternative to `Vec<T>`
 /// which is resilient against unexpected data.
 ///
+/// You can be notified of skipped elements by providing a type that implements the [`InspectError`] trait.
+/// The second generic argument `I` defaults to `()`, which does nothing.
+///
 /// # Examples
+///
+/// ## Basic Usage
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
@@ -2214,14 +2239,60 @@ pub struct BorrowCow;
 /// assert_eq!(data, serde_json::from_str(source_json).unwrap());
 /// # }
 /// ```
+///
+/// ## Using [`InspectError`](`crate::InspectError`) to log skipped elements
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros", feature = "alloc"))] {
+/// # use serde::{Serialize, Deserialize};
+/// # use serde_with::{serde_as, InspectError, VecSkipError};
+/// # use std::cell::RefCell;
+///
+/// struct ErrorInspector;
+///
+/// thread_local! {
+///     static ERRORS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+/// }
+///
+/// impl InspectError for ErrorInspector {
+///     fn inspect_error(error: impl serde::de::Error) {
+///         ERRORS.with(|errors| errors.borrow_mut().push(error.to_string()));
+///     }
+/// }
+///
+/// #[serde_as]
+/// #[derive(Debug, PartialEq, Deserialize, Serialize)]
+/// struct S {
+///     tag: String,
+///     #[serde_as(as = "VecSkipError<_, ErrorInspector>")]
+///     values: Vec<u8>,
+/// }
+///
+/// let json = r#"{"tag":"type","values":[0, "str", 1, [10, 11], -2, {}, 300]}"#;
+/// let s: S = serde_json::from_str(json).unwrap();
+/// assert_eq!(s.values, vec![0, 1]);
+///
+/// let errors = ERRORS.with(|errors| errors.borrow().clone());
+/// eprintln!("Errors: {errors:#?}");
+/// assert_eq!(errors.len(), 5);
+/// assert!(errors[0].contains("invalid type: string \"str\", expected u8"));
+/// assert!(errors[1].contains("invalid type: sequence, expected u8"));
+/// assert!(errors[2].contains("invalid value: integer `-2`, expected u8"));
+/// assert!(errors[3].contains("invalid type: map, expected u8"));
+/// assert!(errors[4].contains("invalid value: integer `300`, expected u8"));
+/// # }
+/// ```
 #[cfg(feature = "alloc")]
-pub struct VecSkipError<T>(PhantomData<T>);
+pub struct VecSkipError<T, I = ()>(PhantomData<(T, I)>);
 
 /// Deserialize a map, skipping keys and values which fail to deserialize.
 ///
 /// By default serde terminates if it fails to deserialize a key or a value when deserializing
 /// a map. Sometimes a map has heterogeneous keys or values but we only care about some specific
 /// types, and it is desirable to skip entries on errors.
+///
+/// You can be notified of skipped elements by providing a type that implements the [`InspectError`] trait.
+/// The third generic argument `I` defaults to `()`, which does nothing.
 ///
 /// It is especially useful in conjunction to `#[serde(flatten)]` to capture a map mixed in with
 /// other entries which we don't want to exhaust in the type definition.
@@ -2234,6 +2305,8 @@ pub struct VecSkipError<T>(PhantomData<T>);
 /// [`HashMap`]: std::collections::HashMap
 ///
 /// # Examples
+///
+/// ## Basic Usage
 ///
 /// ```rust
 /// # #[cfg(feature = "macros")] {
@@ -2272,8 +2345,51 @@ pub struct VecSkipError<T>(PhantomData<T>);
 /// assert_eq!(data, serde_json::from_str(source_json).unwrap());
 /// # }
 /// ```
+///
+/// ## Using [`InspectError`](`crate::InspectError`) to log skipped elements
+///
+/// ```rust
+/// # #[cfg(all(feature = "macros", feature = "alloc"))] {
+/// # use serde::{Serialize, Deserialize};
+/// # use serde_with::{serde_as, InspectError, MapSkipError};
+/// # use std::collections::BTreeMap;
+/// # use std::cell::RefCell;
+///
+/// struct ErrorInspector;
+///
+/// thread_local! {
+///     static ERRORS: RefCell<Vec<String>> = RefCell::new(Vec::new());
+/// }
+///
+/// impl InspectError for ErrorInspector {
+///     fn inspect_error(error: impl serde::de::Error) {
+///         ERRORS.with(|errors| errors.borrow_mut().push(error.to_string()));
+///     }
+/// }
+///
+/// #[serde_as]
+/// #[derive(Debug, PartialEq, Deserialize, Serialize)]
+/// struct S {
+///     tag: String,
+///     #[serde_as(as = "MapSkipError<_, _, ErrorInspector>")]
+///     values: BTreeMap<String, u8>,
+/// }
+///
+/// let json = r#"{"tag":"type","values":{"valid":42,"invalid": null,"another":"str","nested":[1,2,3]}}"#;
+/// let s: S = serde_json::from_str(json).unwrap();
+/// assert_eq!(s.values.len(), 1);
+/// assert_eq!(s.values.get("valid"), Some(&42));
+///
+/// let errors = ERRORS.with(|errors| errors.borrow().clone());
+/// assert_eq!(errors.len(), 3);
+/// eprintln!("Errors: {errors:#?}");
+/// assert!(errors[0].contains("invalid type: null, expected u8"));
+/// assert!(errors[1].contains("invalid type: string \"str\", expected u8"));
+/// assert!(errors[2].contains("invalid type: sequence, expected u8"));
+/// # }
+/// ```
 #[cfg(feature = "alloc")]
-pub struct MapSkipError<K, V>(PhantomData<(K, V)>);
+pub struct MapSkipError<K, V, I = ()>(PhantomData<(K, V, I)>);
 
 /// Deserialize a boolean from a number
 ///

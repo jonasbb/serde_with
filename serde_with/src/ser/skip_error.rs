@@ -9,7 +9,7 @@ use indexmap_1::IndexMap;
 #[cfg(feature = "indexmap_2")]
 use indexmap_2::IndexMap as IndexMap2;
 
-impl<T, U> SerializeAs<Vec<T>> for VecSkipError<U>
+impl<T, U, I> SerializeAs<Vec<T>> for VecSkipError<U, I>
 where
     U: SerializeAs<T>,
 {
@@ -23,7 +23,7 @@ where
 
 macro_rules! map_skip_error_handling {
     ($tyorig:ident < K, V $(, $typaram:ident : $bound:ident)* >) => {
-        impl<K, KAs, V, VAs $(, $typaram)*> SerializeAs<$tyorig<K, V $(, $typaram)*>> for MapSkipError<KAs, VAs>
+        impl<K, KAs, V, VAs, I $(, $typaram)*> SerializeAs<$tyorig<K, V $(, $typaram)*>> for MapSkipError<KAs, VAs, I>
         where
             KAs: SerializeAs<K>,
             VAs: SerializeAs<V>,
