@@ -10,6 +10,8 @@ use crate::{
 use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};
 #[cfg(feature = "hashbrown_0_15")]
 use hashbrown_0_15::{HashMap as HashbrownMap015, HashSet as HashbrownSet015};
+#[cfg(feature = "hashbrown_0_16")]
+use hashbrown_0_16::{HashMap as HashbrownMap016, HashSet as HashbrownSet016};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]
