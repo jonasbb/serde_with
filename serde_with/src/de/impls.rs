@@ -1079,7 +1079,10 @@ where
 }
 
 #[cfg(feature = "alloc")]
-impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
+impl<'de, PREFERENCE> DeserializeAs<'de, Vec<u8>> for BytesOrString<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
     where
         D: Deserializer<'de>,
@@ -1298,7 +1301,10 @@ where
     }
 }
 
-impl<'de> DeserializeAs<'de, &'de [u8]> for Bytes {
+impl<'de, PREFERENCE> DeserializeAs<'de, &'de [u8]> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<&'de [u8], D::Error>
     where
         D: Deserializer<'de>,
@@ -1317,7 +1323,10 @@ impl<'de> DeserializeAs<'de, &'de [u8]> for Bytes {
 // * visit_str
 // * visit_string
 #[cfg(feature = "alloc")]
-impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
+impl<'de, PREFERENCE> DeserializeAs<'de, Vec<u8>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
     where
         D: Deserializer<'de>,
@@ -1372,12 +1381,15 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
 }
 
 #[cfg(feature = "alloc")]
-impl<'de> DeserializeAs<'de, Box<[u8]>> for Bytes {
+impl<'de, PREFERENCE> DeserializeAs<'de, Box<[u8]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Box<[u8]>, D::Error>
     where
         D: Deserializer<'de>,
     {
-        <Bytes as DeserializeAs<'de, Vec<u8>>>::deserialize_as(deserializer)
+        <Bytes<PREFERENCE> as DeserializeAs<'de, Vec<u8>>>::deserialize_as(deserializer)
             .map(Vec::into_boxed_slice)
     }
 }
@@ -1394,7 +1406,10 @@ impl<'de> DeserializeAs<'de, Box<[u8]>> for Bytes {
 // * visit_string
 // * visit_seq
 #[cfg(feature = "alloc")]
-impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
+impl<'de, PREFERENCE> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8]>, D::Error>
     where
         D: Deserializer<'de>,
@@ -1464,7 +1479,10 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
     }
 }
 
-impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
+impl<'de, const N: usize, PREFERENCE> DeserializeAs<'de, [u8; N]> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<[u8; N], D::Error>
     where
         D: Deserializer<'de>,
@@ -1507,7 +1525,10 @@ impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
     }
 }
 
-impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
+impl<'de, const N: usize, PREFERENCE> DeserializeAs<'de, &'de [u8; N]> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<&'de [u8; N], D::Error>
     where
         D: Deserializer<'de>,
@@ -1544,7 +1565,10 @@ impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
 }
 
 #[cfg(feature = "alloc")]
-impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
+impl<'de, const N: usize, PREFERENCE> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Cow<'de, [u8; N]>, D::Error>
     where
         D: Deserializer<'de>,
@@ -1641,12 +1665,15 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
 }
 
 #[cfg(feature = "alloc")]
-impl<'de, const N: usize> DeserializeAs<'de, Box<[u8; N]>> for Bytes {
+impl<'de, const N: usize, PREFERENCE> DeserializeAs<'de, Box<[u8; N]>> for Bytes<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Box<[u8; N]>, D::Error>
     where
         D: Deserializer<'de>,
     {
-        Bytes::deserialize_as(deserializer).map(Box::new)
+        <Bytes<PREFERENCE>>::deserialize_as(deserializer).map(Box::new)
     }
 }
 
@@ -1913,7 +1940,7 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for BorrowCow {
     where
         D: Deserializer<'de>,
     {
-        Bytes::deserialize_as(deserializer)
+        <Bytes<formats::PreferBytes>>::deserialize_as(deserializer)
     }
 }
 
@@ -1923,7 +1950,7 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for BorrowCow {
     where
         D: Deserializer<'de>,
     {
-        Bytes::deserialize_as(deserializer)
+        <Bytes<formats::PreferBytes>>::deserialize_as(deserializer)
     }
 }
 
