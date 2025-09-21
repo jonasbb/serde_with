@@ -467,7 +467,6 @@ macro_rules! tuple_impl {
             where
                 S: Serializer,
             {
-                use serde::ser::SerializeTuple;
                 let mut tup = serializer.serialize_tuple($len)?;
                 $(
                     tup.serialize_element(&SerializeAsWrap::<$t, $tas>::new(&tuple.$n))?;

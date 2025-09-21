@@ -266,11 +266,9 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 #[doc(hidden)]
-pub extern crate core;
+extern crate core;
 #[doc(hidden)]
-pub extern crate serde;
-#[doc(hidden)]
-pub extern crate serde_derive;
+extern crate serde_core;
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -295,7 +293,9 @@ mod duplicate_key_impls;
 #[cfg(feature = "alloc")]
 mod enum_map;
 #[cfg(feature = "std")]
-mod flatten_maybe;
+/// NOT PUBLIC API
+#[doc(hidden)]
+pub mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
 #[cfg_attr(docsrs, doc(cfg(feature = "hex")))]
@@ -402,10 +402,10 @@ pub(crate) mod prelude {
         option::Option,
         pin::Pin,
         result::Result,
-        str::FromStr,
+        str::{self, FromStr},
         time::Duration,
     };
-    pub use serde::{
+    pub use serde_core::{
         de::{
             Deserialize, DeserializeOwned, DeserializeSeed, Deserializer, EnumAccess,
             Error as DeError, Expected, IgnoredAny, IntoDeserializer, MapAccess, SeqAccess,
@@ -2192,12 +2192,12 @@ pub struct BorrowCow;
 #[cfg(feature = "alloc")]
 pub trait InspectError {
     /// Inspect a deserialization error which was skipped.
-    fn inspect_error(error: impl serde::de::Error);
+    fn inspect_error(error: impl serde_core::de::Error);
 }
 
 #[cfg(feature = "alloc")]
 impl InspectError for () {
-    fn inspect_error(_error: impl serde::de::Error) {}
+    fn inspect_error(_error: impl serde_core::de::Error) {}
 }
 
 /// Deserialize a sequence into `Vec<T>`, skipping elements which fail to deserialize.

@@ -105,7 +105,7 @@ macro_rules! with_prefix {
     ($module:ident $prefix:expr) => {$crate::with_prefix!(pub(self) $module $prefix);};
     ($vis:vis $module:ident $prefix:expr) => {
         $vis mod $module {
-            use $crate::serde::{Deserialize, Deserializer, Serialize, Serializer};
+            use $crate::__private__::{Deserialize, Deserializer, Serialize, Serializer};
             use $crate::with_prefix::WithPrefix;
 
             #[allow(dead_code)]

@@ -1087,21 +1087,21 @@ fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> T
     let (de_impl_generics, ty_generics, where_clause) = split_with_de_lifetime(&input.generics);
     quote! {
         #[automatically_derived]
-        impl #de_impl_generics #serde_with_crate_path::serde::Deserialize<'de> for #ident #ty_generics #where_clause {
+        impl #de_impl_generics #serde_with_crate_path::__private__::Deserialize<'de> for #ident #ty_generics #where_clause {
             fn deserialize<__D>(deserializer: __D) -> #serde_with_crate_path::__private__::Result<Self, __D::Error>
             where
-                __D: #serde_with_crate_path::serde::Deserializer<'de>,
+                __D: #serde_with_crate_path::__private__::Deserializer<'de>,
             {
                 struct Helper<__S>(#serde_with_crate_path::__private__::PhantomData<__S>);
 
-                impl<'de, __S> #serde_with_crate_path::serde::de::Visitor<'de> for Helper<__S>
+                impl<'de, __S> #serde_with_crate_path::__private__::Visitor<'de> for Helper<__S>
                 where
                     __S: #serde_with_crate_path::__private__::FromStr,
                     <__S as #serde_with_crate_path::__private__::FromStr>::Err: #serde_with_crate_path::__private__::Display,
                 {
                     type Value = __S;
 
-                    fn expecting(&self, formatter: &mut #serde_with_crate_path::core::fmt::Formatter<'_>) -> #serde_with_crate_path::core::fmt::Result {
+                    fn expecting(&self, formatter: &mut #serde_with_crate_path::__private__::fmt::Formatter<'_>) -> #serde_with_crate_path::__private__::fmt::Result {
                         #serde_with_crate_path::__private__::Display::fmt("a string", formatter)
                     }
 
@@ -1110,9 +1110,9 @@ fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> T
                         value: &str
                     ) -> #serde_with_crate_path::__private__::Result<Self::Value, __E>
                     where
-                        __E: #serde_with_crate_path::serde::de::Error,
+                        __E: #serde_with_crate_path::__private__::DeError,
                     {
-                        value.parse::<Self::Value>().map_err(#serde_with_crate_path::serde::de::Error::custom)
+                        value.parse::<Self::Value>().map_err(#serde_with_crate_path::__private__::DeError::custom)
                     }
 
                     fn visit_bytes<__E>(
@@ -1120,9 +1120,9 @@ fn deserialize_fromstr(mut input: DeriveInput, serde_with_crate_path: Path) -> T
                         value: &[u8]
                     ) -> #serde_with_crate_path::__private__::Result<Self::Value, __E>
                     where
-                        __E: #serde_with_crate_path::serde::de::Error,
+                        __E: #serde_with_crate_path::__private__::DeError,
                     {
-                        let utf8 = #serde_with_crate_path::core::str::from_utf8(value).map_err(#serde_with_crate_path::serde::de::Error::custom)?;
+                        let utf8 = #serde_with_crate_path::__private__::str::from_utf8(value).map_err(#serde_with_crate_path::__private__::DeError::custom)?;
                         self.visit_str(utf8)
                     }
                 }
@@ -1294,13 +1294,13 @@ fn serialize_display(
 
     quote! {
         #[automatically_derived]
-        impl #impl_generics #serde_with_crate_path::serde::Serialize for #ident #ty_generics #where_clause {
+        impl #impl_generics #serde_with_crate_path::__private__::Serialize for #ident #ty_generics #where_clause {
             fn serialize<__S>(
                 &self,
                 serializer: __S
             ) -> #serde_with_crate_path::__private__::Result<__S::Ok, __S::Error>
             where
-                __S: #serde_with_crate_path::serde::Serializer,
+                __S: #serde_with_crate_path::__private__::Serializer,
             {
                 serializer.collect_str(#collect_str_param)
             }
