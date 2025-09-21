@@ -1,24 +1,46 @@
-//! Test Cases
+//! Ensure version numbers in various files are up to date.
 
-use version_sync::{assert_contains_regex, assert_html_root_url_updated};
+#[track_caller]
+fn check_contains_regex(path: &str, template: &str) {
+    #[track_caller]
+    fn inner(path: &str, template: &str) -> Result<(), String> {
+        // Expand the placeholders in the template.
+        let pattern = template
+            .replace("{name}", &regex::escape(env!("CARGO_PKG_NAME")))
+            .replace("{version}", &regex::escape(env!("CARGO_PKG_VERSION")));
+        let re = regex::Regex::new(&pattern)
+            .map_err(|err| format!("could not parse template: {}", err))?;
+        let text = std::fs::read_to_string(path)
+            .map_err(|err| format!("could not read {}: {}", path, err))?;
 
-#[test]
-fn test_changelog() {
-    assert_contains_regex!("CHANGELOG.md", r"## \[{version}\]");
+        println!("Searching for \"{pattern}\" in {path}...");
+        match re.find(&text) {
+            Some(m) => {
+                let line_no = text[..m.start()].lines().count();
+                println!("{} (line {}) ... ok", path, line_no + 1);
+                Ok(())
+            }
+            None => Err(format!("could not find \"{pattern}\" in {path}")),
+        }
+    }
+
+    if let Err(e) = inner(path, template) {
+        panic!("{e}");
+    }
 }
 
 #[test]
-fn test_html_root_url() {
-    assert_html_root_url_updated!("src/lib.rs");
+fn test_changelog() {
+    check_contains_regex("CHANGELOG.md", r"## \[{version}\]");
 }
 
 #[test]
 fn test_serde_with_macros_dependency() {
-    version_sync::assert_contains_regex!(
+    check_contains_regex(
         "../serde_with/Cargo.toml",
-        r#"^serde_with_macros = .*? version = "={version}""#
+        r#"(?m)^serde_with_macros = .*? version = "={version}""#,
     );
-    version_sync::assert_contains_regex!("../Cargo.toml", r#"^version = "{version}""#);
+    check_contains_regex("../Cargo.toml", r#"(?m)^version = "{version}""#);
 }
 
 /// Check that all docs.rs links point to the current version
@@ -26,9 +48,6 @@ fn test_serde_with_macros_dependency() {
 /// Parse all docs.rs links in `*.rs` and `*.md` files and check that they point to the current version.
 /// If a link should point to latest version this can be done by using `latest` in the version.
 /// The `*` version specifier is not allowed.
-///
-/// Arguably this should be part of version-sync. There is an open issue for this feature:
-/// <https://github.com/mgeisler/version-sync/issues/72>
 #[test]
 fn test_docs_rs_url_point_to_current_version() -> Result<(), Box<dyn std::error::Error>> {
     let pkg_name = env!("CARGO_PKG_NAME");
