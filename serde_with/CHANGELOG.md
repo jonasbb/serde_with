@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
     This extends the existing support for `hashbrown` v0.14 and v0.15 to the newly released version.
 
+### Changed
+
+* Bump MSRV to 1.76, since that is required for `toml` dev-dependency.
+
 ## [3.14.1] - 2025-09-19
 
 ### Fixed

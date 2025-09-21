@@ -61,7 +61,7 @@ jobs:
         # It is good to test more than the MSRV and stable since sometimes
         # breakage occurs in intermediate versions.
         # IMPORTANT: Synchronize the MSRV with the Cargo.toml values.
-        rust: ["1.74", "1.75", "1.80", "1.85", "1.90", "stable", "beta", "nightly"]
+        rust: ["1.76", "1.80", "1.85", "1.90", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
