@@ -1926,3 +1926,294 @@ where
         self
     }
 }
+
+// Copied from serde, licensed under MIT OR Apache-2.0
+// https://github.com/serde-rs/serde/blob/179954784683f35942ac2e1f076e0361b47f8178/serde/src/private/de.rs#L3183-L3447
+#[cfg(feature = "std")]
+pub(crate) struct FlatMapDeserializer<'a, 'de, E>(
+    pub &'a mut Vec<Option<(Content<'de>, Content<'de>)>>,
+    pub PhantomData<E>,
+    pub bool, // is_human_readable
+);
+
+#[cfg(feature = "std")]
+impl<'a, 'de, E> FlatMapDeserializer<'a, 'de, E>
+where
+    E: DeError,
+{
+    fn deserialize_other<V>() -> Result<V, E> {
+        Err(DeError::custom("can only flatten structs and maps"))
+    }
+}
+
+#[cfg(feature = "std")]
+macro_rules! forward_to_deserialize_other {
+    ($($func:ident ($($arg:ty),*))*) => {
+        $(
+            fn $func<V>(self, $(_: $arg,)* _visitor: V) -> Result<V::Value, Self::Error>
+            where
+                V: Visitor<'de>,
+            {
+                Self::deserialize_other()
+            }
+        )*
+    }
+}
+
+#[cfg(feature = "std")]
+impl<'a, 'de, E> Deserializer<'de> for FlatMapDeserializer<'a, 'de, E>
+where
+    E: DeError,
+{
+    type Error = E;
+
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        self.deserialize_map(visitor)
+    }
+
+    fn deserialize_enum<V>(
+        self,
+        name: &'static str,
+        variants: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        for entry in self.0 {
+            if let Some((key, value)) = flat_map_take_entry(entry, variants) {
+                return visitor.visit_enum(EnumDeserializer::new(key, Some(value), self.2));
+            }
+        }
+
+        Err(DeError::custom(format_args!(
+            "no variant of enum {} found in flattened data",
+            name
+        )))
+    }
+
+    fn deserialize_map<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_map(FlatMapAccess {
+            is_human_readable: self.2,
+            iter: self.0.iter(),
+            pending_content: None,
+            _marker: PhantomData,
+        })
+    }
+
+    fn deserialize_struct<V>(
+        self,
+        _: &'static str,
+        fields: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_map(FlatStructAccess {
+            is_human_readable: self.2,
+            iter: self.0.iter_mut(),
+            pending_content: None,
+            fields,
+            _marker: PhantomData,
+        })
+    }
+
+    fn deserialize_newtype_struct<V>(self, _name: &str, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_newtype_struct(self)
+    }
+
+    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match visitor.__private_visit_untagged_option(self) {
+            Ok(value) => Ok(value),
+            Err(()) => Self::deserialize_other(),
+        }
+    }
+
+    fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_unit()
+    }
+
+    fn deserialize_unit_struct<V>(
+        self,
+        _name: &'static str,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_unit()
+    }
+
+    fn deserialize_ignored_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_unit()
+    }
+
+    forward_to_deserialize_other! {
+        deserialize_bool()
+        deserialize_i8()
+        deserialize_i16()
+        deserialize_i32()
+        deserialize_i64()
+        deserialize_u8()
+        deserialize_u16()
+        deserialize_u32()
+        deserialize_u64()
+        deserialize_f32()
+        deserialize_f64()
+        deserialize_char()
+        deserialize_str()
+        deserialize_string()
+        deserialize_bytes()
+        deserialize_byte_buf()
+        deserialize_seq()
+        deserialize_tuple(usize)
+        deserialize_tuple_struct(&'static str, usize)
+        deserialize_identifier()
+    }
+}
+
+#[cfg(feature = "std")]
+struct FlatMapAccess<'a, 'de, E> {
+    is_human_readable: bool,
+    iter: core::slice::Iter<'a, Option<(Content<'de>, Content<'de>)>>,
+    pending_content: Option<&'a Content<'de>>,
+    _marker: PhantomData<E>,
+}
+
+#[cfg(feature = "std")]
+impl<'a, 'de, E> MapAccess<'de> for FlatMapAccess<'a, 'de, E>
+where
+    E: DeError,
+{
+    type Error = E;
+
+    fn next_key_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
+    where
+        T: DeserializeSeed<'de>,
+    {
+        for item in &mut self.iter {
+            // Items in the vector are nulled out when used by a struct.
+            if let Some((ref key, ref content)) = *item {
+                // Do not take(), instead borrow this entry. The internally tagged
+                // enum does its own buffering so we can't tell whether this entry
+                // is going to be consumed. Borrowing here leaves the entry
+                // available for later flattened fields.
+                self.pending_content = Some(content);
+                return seed
+                    .deserialize(ContentRefDeserializer::new(key, self.is_human_readable))
+                    .map(Some);
+            }
+        }
+        Ok(None)
+    }
+
+    fn next_value_seed<T>(&mut self, seed: T) -> Result<T::Value, Self::Error>
+    where
+        T: DeserializeSeed<'de>,
+    {
+        match self.pending_content.take() {
+            Some(value) => {
+                seed.deserialize(ContentRefDeserializer::new(value, self.is_human_readable))
+            }
+            None => Err(DeError::custom("value is missing")),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+struct FlatStructAccess<'a, 'de, E> {
+    is_human_readable: bool,
+    iter: core::slice::IterMut<'a, Option<(Content<'de>, Content<'de>)>>,
+    pending_content: Option<Content<'de>>,
+    fields: &'static [&'static str],
+    _marker: PhantomData<E>,
+}
+
+#[cfg(feature = "std")]
+impl<'a, 'de, E> MapAccess<'de> for FlatStructAccess<'a, 'de, E>
+where
+    E: DeError,
+{
+    type Error = E;
+
+    fn next_key_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
+    where
+        T: DeserializeSeed<'de>,
+    {
+        for entry in self.iter.by_ref() {
+            if let Some((key, content)) = flat_map_take_entry(entry, self.fields) {
+                self.pending_content = Some(content);
+                return seed
+                    .deserialize(ContentDeserializer::new(key, self.is_human_readable))
+                    .map(Some);
+            }
+        }
+        Ok(None)
+    }
+
+    fn next_value_seed<T>(&mut self, seed: T) -> Result<T::Value, Self::Error>
+    where
+        T: DeserializeSeed<'de>,
+    {
+        match self.pending_content.take() {
+            Some(value) => {
+                seed.deserialize(ContentDeserializer::new(value, self.is_human_readable))
+            }
+            None => Err(DeError::custom("value is missing")),
+        }
+    }
+}
+
+/// Claims one key-value pair from a [`FlatMapDeserializer`]'s field buffer if the
+/// field name matches any of the recognized ones.
+#[cfg(feature = "std")]
+fn flat_map_take_entry<'de>(
+    entry: &mut Option<(Content<'de>, Content<'de>)>,
+    recognized: &[&str],
+) -> Option<(Content<'de>, Content<'de>)> {
+    // Entries in the FlatMapDeserializer buffer are nulled out as they get
+    // claimed for deserialization. We only use an entry if it is still present
+    // and if the field is one recognized by the current data structure.
+    let is_recognized = match entry {
+        None => false,
+        Some((k, _v)) => content_as_str(k).is_some_and(|name| recognized.contains(&name)),
+    };
+
+    if is_recognized {
+        entry.take()
+    } else {
+        None
+    }
+}
+
+// Copied from serde, licensed under MIT OR Apache-2.0
+// https://github.com/serde-rs/serde/blob/179954784683f35942ac2e1f076e0361b47f8178/serde/src/private/de.rs#L222-L230
+#[cfg(feature = "std")]
+fn content_as_str<'a, 'de>(content: &'a Content<'de>) -> Option<&'a str> {
+    match *content {
+        Content::Str(x) => Some(x),
+        Content::String(ref x) => Some(x),
+        Content::Bytes(x) => core::str::from_utf8(x).ok(),
+        Content::ByteBuf(ref x) => core::str::from_utf8(x).ok(),
+        _ => None,
+    }
+}

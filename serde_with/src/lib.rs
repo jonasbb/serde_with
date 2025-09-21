@@ -269,8 +269,6 @@ extern crate alloc;
 pub extern crate core;
 #[doc(hidden)]
 pub extern crate serde;
-#[doc(hidden)]
-pub extern crate serde_derive;
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -295,7 +293,9 @@ mod duplicate_key_impls;
 #[cfg(feature = "alloc")]
 mod enum_map;
 #[cfg(feature = "std")]
-mod flatten_maybe;
+/// NOT PUBLIC API
+#[doc(hidden)]
+pub mod flatten_maybe;
 pub mod formats;
 #[cfg(feature = "hex")]
 #[cfg_attr(docsrs, doc(cfg(feature = "hex")))]
