@@ -116,7 +116,7 @@ macro_rules! with_suffix {
     ($module:ident $suffix:expr) => {$crate::with_suffix!(pub(self) $module $suffix);};
     ($vis:vis $module:ident $suffix:expr) => {
         $vis mod $module {
-            use $crate::serde::{Deserialize, Deserializer, Serialize, Serializer};
+            use $crate::__private__::{Deserialize, Deserializer, Serialize, Serializer};
             use $crate::with_suffix::WithSuffix;
 
             #[allow(dead_code)]

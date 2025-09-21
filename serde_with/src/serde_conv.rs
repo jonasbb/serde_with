@@ -120,25 +120,25 @@ macro_rules! serde_conv {
             impl $m {
                 $vis fn serialize<S>(x: &$t, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
                 where
-                    S: $crate::serde::Serializer,
+                    S: $crate::__private__::Serializer,
                 {
                     let y = $ser(x);
-                    $crate::serde::Serialize::serialize(&y, serializer)
+                    $crate::__private__::Serialize::serialize(&y, serializer)
                 }
 
                 $vis fn deserialize<'de, D>(deserializer: D) -> $crate::__private__::Result<$t, D::Error>
                 where
-                    D: $crate::serde::Deserializer<'de>,
+                    D: $crate::__private__::Deserializer<'de>,
                 {
-                    let y = $crate::serde::Deserialize::deserialize(deserializer)?;
-                    $de(y).map_err($crate::serde::de::Error::custom)
+                    let y = $crate::__private__::Deserialize::deserialize(deserializer)?;
+                    $de(y).map_err($crate::__private__::DeError::custom)
                 }
             }
 
             impl $crate::SerializeAs<$t> for $m {
                 fn serialize_as<S>(x: &$t, serializer: S) -> $crate::__private__::Result<S::Ok, S::Error>
                 where
-                    S: $crate::serde::Serializer,
+                    S: $crate::__private__::Serializer,
                 {
                     Self::serialize(x, serializer)
                 }
@@ -147,7 +147,7 @@ macro_rules! serde_conv {
             impl<'de> $crate::DeserializeAs<'de, $t> for $m {
                 fn deserialize_as<D>(deserializer: D) -> $crate::__private__::Result<$t, D::Error>
                 where
-                    D: $crate::serde::Deserializer<'de>,
+                    D: $crate::__private__::Deserializer<'de>,
                 {
                     Self::deserialize(deserializer)
                 }

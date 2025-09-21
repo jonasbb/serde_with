@@ -380,7 +380,7 @@ where
     let seq = content
         .into_iter()
         .map(|x| ContentDeserializer::new(x, is_human_readable));
-    let mut seq_visitor = serde::de::value::SeqDeserializer::new(seq);
+    let mut seq_visitor = serde_core::de::value::SeqDeserializer::new(seq);
     let value = visitor.visit_seq(&mut seq_visitor)?;
     seq_visitor.end()?;
     Ok(value)
@@ -401,7 +401,7 @@ where
             ContentDeserializer::new(v, is_human_readable),
         )
     });
-    let mut map_visitor = serde::de::value::MapDeserializer::new(map);
+    let mut map_visitor = serde_core::de::value::MapDeserializer::new(map);
     let value = visitor.visit_map(&mut map_visitor)?;
     map_visitor.end()?;
     Ok(value)
@@ -1201,7 +1201,7 @@ where
     let seq = content
         .iter()
         .map(|x| ContentRefDeserializer::new(x, is_human_readable));
-    let mut seq_visitor = serde::de::value::SeqDeserializer::new(seq);
+    let mut seq_visitor = serde_core::de::value::SeqDeserializer::new(seq);
     let value = visitor.visit_seq(&mut seq_visitor)?;
     seq_visitor.end()?;
     Ok(value)
@@ -1222,7 +1222,7 @@ where
             ContentRefDeserializer::new(v, is_human_readable),
         )
     });
-    let mut map_visitor = serde::de::value::MapDeserializer::new(map);
+    let mut map_visitor = serde_core::de::value::MapDeserializer::new(map);
     let value = visitor.visit_map(&mut map_visitor)?;
     map_visitor.end()?;
     Ok(value)

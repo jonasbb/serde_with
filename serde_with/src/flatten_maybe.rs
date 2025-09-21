@@ -57,10 +57,10 @@ macro_rules! flattened_maybe {
     ($fn:ident, $field:tt) => {
         fn $fn<'de, T, D>(deserializer: D) -> $crate::__private__::Result<T, D::Error>
         where
-            T: $crate::serde::Deserialize<'de>,
-            D: $crate::serde::Deserializer<'de>,
+            T: $crate::__private__::Deserialize<'de>,
+            D: $crate::__private__::Deserializer<'de>,
         {
-            $crate::serde::de::DeserializeSeed::deserialize(
+            $crate::__private__::DeserializeSeed::deserialize(
                 $crate::flatten_maybe::FlattenedMaybe($field, $crate::__private__::PhantomData),
                 deserializer,
             )
@@ -73,7 +73,7 @@ macro_rules! flattened_maybe {
 /// Takes as first value the field name of the non-flattened field.
 pub struct FlattenedMaybe<T>(pub &'static str, pub PhantomData<T>);
 
-impl<'de, T> serde::de::DeserializeSeed<'de> for FlattenedMaybe<T>
+impl<'de, T> DeserializeSeed<'de> for FlattenedMaybe<T>
 where
     T: Deserialize<'de>,
 {
