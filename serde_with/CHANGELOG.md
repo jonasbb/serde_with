@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.15.0] - 2025-10-03
+
 ### Added
 
 * Added error inspection to `VecSkipError` and `MapSkipError` by @michelhe (#878)
