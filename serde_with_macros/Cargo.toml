@@ -54,7 +54,7 @@ version = "2.0.0"
 expect-test = "1.5.1"
 glob = "0.3.3"
 pretty_assertions = "1.4.0"
-regex = { version = "1.11.2", default-features = false, features = ["std"] }
+regex = { version = "1.12.1", default-features = false, features = ["std"] }
 rustversion = "1.0.22"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.25"
