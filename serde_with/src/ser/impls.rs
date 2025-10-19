@@ -10,6 +10,8 @@ use hashbrown_0_16::{HashMap as HashbrownMap016, HashSet as HashbrownSet016};
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]
 use indexmap_2::{IndexMap as IndexMap2, IndexSet as IndexSet2};
+#[cfg(feature = "smallvec_1")]
+use smallvec_1::SmallVec;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper macro used internally
@@ -436,6 +438,22 @@ macro_rules! seq_impl {
     }
 }
 foreach_seq!(seq_impl);
+
+// SmallVec implementation
+#[cfg(feature = "smallvec_1")]
+impl<A, B> SerializeAs<SmallVec<A>> for SmallVec<B>
+where
+    A: smallvec_1::Array,
+    B: smallvec_1::Array,
+    B::Item: SerializeAs<A::Item>,
+{
+    fn serialize_as<S>(source: &SmallVec<A>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_seq(source.iter().map(SerializeAsWrap::<A::Item, B::Item>::new))
+    }
+}
 
 #[cfg(feature = "alloc")]
 macro_rules! map_impl {

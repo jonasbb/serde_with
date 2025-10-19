@@ -1114,6 +1114,7 @@ dependencies = [
  "serde_test",
  "serde_with_macros",
  "serde_yaml",
+ "smallvec",
  "time",
 ]
 
