@@ -1,6 +1,6 @@
 # `serde_with` User Guide
 
-This crate provides helper functions to extend and change how [`serde`] serializes different data types.
+This crate provides helper functions to extend and change how [`serde`](::serde_core) serializes different data types.
 For example, you can serialize [a map as a sequence of tuples][crate::guide::serde_as#maps-to-vec-of-tuples], serialize [using the `Display` and `FromStr` traits][`DisplayFromStr`], or serialize [an empty `String` like `None`][NoneAsEmptyString].
 `serde_with` covers types from the Rust Standard Library and some common crates like [`chrono`][serde_with_chrono].
 
