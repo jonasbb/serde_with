@@ -279,7 +279,8 @@ rustdoc-args = [
     "-Zunstable-options",
     # Generate links to definition in rustdoc source code pages
     # https://github.com/rust-lang/rust/pull/84176
-    "--generate-link-to-definition",
+    # Disable until https://github.com/rust-lang/rust/issues/147882 is resolved.
+    # "--generate-link-to-definition",
     # Generate buttons to show macro expansions in the rustdoc output.
     # https://github.com/rust-lang/rust/pull/137229
     "--generate-macro-expansion",

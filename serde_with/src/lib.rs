@@ -500,7 +500,7 @@ pub struct As<T: ?Sized>(PhantomData<T>);
 /// Adapter to convert from `serde_as` to the serde traits.
 ///
 /// This is the counter-type to [`As`][].
-/// It can be used whenever a type implementing [`DeserializeAs`]/[`SerializeAs`] is required but the normal [`Deserialize`](::serde::Deserialize)/[`Serialize`](::serde::Serialize) traits should be used.
+/// It can be used whenever a type implementing [`DeserializeAs`]/[`SerializeAs`] is required but the normal [`Deserialize`](::serde_core::Deserialize)/[`Serialize`](::serde_core::Serialize) traits should be used.
 /// Check [`As`] for an example.
 pub struct Same;
 
@@ -514,7 +514,7 @@ pub struct Same;
 /// support, which can be found in some crates.
 ///
 /// If you control the type you want to de/serialize, you can instead use the two derive macros, [`SerializeDisplay`] and [`DeserializeFromStr`].
-/// They properly implement the traits [`serde::Serialize`] and [`serde::Deserialize`] such that user of the type no longer have to use the `serde_as` system.
+/// They properly implement the traits [`Serialize`](::serde_core::Serialize) and [`Deserialize`](::serde_core::Deserialize) such that user of the type no longer have to use the `serde_as` system.
 ///
 /// # Examples
 ///
@@ -555,7 +555,7 @@ pub struct DisplayFromStr;
 /// Use the first format if [`De/Serializer::is_human_readable`], otherwise use the second
 ///
 /// If the second format is not specified, the normal
-/// [`Deserialize`](::serde::Deserialize)/[`Serialize`](::serde::Serialize) traits are used.
+/// [`Deserialize`](::serde_core::Deserialize)/[`Serialize`](::serde_core::Serialize) traits are used.
 ///
 /// # Examples
 ///
@@ -591,8 +591,8 @@ pub struct DisplayFromStr;
 /// assert_eq!(vec![145, 2], rmp_serde::to_vec(&x).unwrap());
 /// # }
 /// ```
-/// [`De/Serializer::is_human_readable`]: serde::Serializer::is_human_readable
-/// [`is_human_readable`]: serde::Serializer::is_human_readable
+/// [`De/Serializer::is_human_readable`]: serde_core::Serializer::is_human_readable
+/// [`is_human_readable`]: serde_core::Serializer::is_human_readable
 pub struct IfIsHumanReadable<H, F = Same>(PhantomData<H>, PhantomData<F>);
 
 /// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
