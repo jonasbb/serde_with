@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.15.1] - 2025-10-21
+
+### Fixed
+
+* Fix building of the documentation by updating references to use `serde_core`.
+
 ## [3.15.0] - 2025-10-03
 
 ### Added
