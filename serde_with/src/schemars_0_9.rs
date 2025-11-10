@@ -1300,3 +1300,8 @@ forward_duration_schema!(TimestampSecondsWithFrac);
 forward_duration_schema!(TimestampMilliSecondsWithFrac);
 forward_duration_schema!(TimestampMicroSecondsWithFrac);
 forward_duration_schema!(TimestampNanoSecondsWithFrac);
+
+#[cfg(feature = "json")]
+impl<T> JsonSchemaAs<T> for json::JsonString {
+    forward_schema!(String);
+}
