@@ -10,6 +10,8 @@ use hashbrown_0_16::{HashMap as HashbrownMap016, HashSet as HashbrownSet016};
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]
 use indexmap_2::{IndexMap as IndexMap2, IndexSet as IndexSet2};
+#[cfg(feature = "smallvec_1")]
+use smallvec_1::SmallVec;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper macro used internally
@@ -557,6 +559,58 @@ macro_rules! seq_impl {
     };
 }
 foreach_seq!(seq_impl);
+
+// SmallVec implementation
+#[cfg(feature = "smallvec_1")]
+impl<'de, A, B> DeserializeAs<'de, SmallVec<A>> for SmallVec<B>
+where
+    A: smallvec_1::Array,
+    B: smallvec_1::Array,
+    B::Item: DeserializeAs<'de, A::Item>,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<SmallVec<A>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct SmallVecVisitor<A, B> {
+            marker: PhantomData<(A, B)>,
+        }
+
+        impl<'de, A, B> Visitor<'de> for SmallVecVisitor<A, B>
+        where
+            A: smallvec_1::Array,
+            B: smallvec_1::Array,
+            B::Item: DeserializeAs<'de, A::Item>,
+        {
+            type Value = SmallVec<A>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a sequence")
+            }
+
+            fn visit_seq<S>(self, mut seq: S) -> Result<Self::Value, S::Error>
+            where
+                S: SeqAccess<'de>,
+            {
+                let mut values = SmallVec::new();
+
+                while let Some(value) = seq
+                    .next_element()?
+                    .map(|v: DeserializeAsWrap<A::Item, B::Item>| v.into_inner())
+                {
+                    values.push(value);
+                }
+
+                Ok(values)
+            }
+        }
+
+        let visitor = SmallVecVisitor::<A, B> {
+            marker: PhantomData,
+        };
+        deserializer.deserialize_seq(visitor)
+    }
+}
 
 #[cfg(feature = "alloc")]
 macro_rules! map_impl {

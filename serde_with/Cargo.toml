@@ -140,6 +140,10 @@ schemars_0_9 = ["dep:schemars_0_9", "alloc", "serde_with_macros?/schemars_0_9", 
 ## This pulls in [`schemars` v1](::schemars_1) as a dependency. It will also implicitly enable
 ## the `alloc` feature.
 schemars_1 = ["dep:schemars_1", "alloc", "serde_with_macros?/schemars_1", "dep:serde_json"]
+## The feature enables `SmallVec` as a supported container.
+##
+## This pulls in [`smallvec` v1](::smallvec_1) as a dependency.
+smallvec_1 = ["dep:smallvec_1"]
 ## The feature enables integration of `time` v0.3 specific conversions.
 ## This includes support for the timestamp and duration types.
 ##
@@ -164,6 +168,7 @@ schemars_1 = { package = "schemars", version = "1.0.2", optional = true, default
 serde_core = { version = "1.0.225", default-features = false, features = ["result"] }
 serde_json = { version = "1.0.145", optional = true, default-features = false }
 serde_with_macros = { path = "../serde_with_macros", version = "=3.15.1", optional = true }
+smallvec_1 = { package = "smallvec", version = "1", optional = true, default-features = false }
 time_0_3 = { package = "time", version = "~0.3.36", optional = true, default-features = false }
 
 [dev-dependencies]
@@ -255,6 +260,11 @@ required-features = ["macros"]
 name = "rust"
 path = "tests/rust.rs"
 required-features = ["alloc"]
+
+[[test]]
+name = "smallvec_1"
+path = "tests/smallvec_1.rs"
+required-features = ["smallvec_1", "macros"]
 
 [[test]]
 name = "schemars_0_8"
