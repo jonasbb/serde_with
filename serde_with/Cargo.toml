@@ -92,11 +92,6 @@ hashbrown_0_16 = ["dep:hashbrown_0_16", "alloc"]
 ## This pulls in [`hex`] as a dependency.
 ## It enables the `alloc` feature.
 hex = ["dep:hex", "alloc"]
-## The feature enables `SmallVec` as a supported container.
-##
-## This pulls in [`smallvec` v1](::smallvec_1) as a dependency.
-## It enables the `alloc` feature.
-smallvec_1 = ["dep:smallvec_1", "alloc"]
 ## Deprecated feature name. Use `indexmap_1` instead.
 indexmap = ["indexmap_1"]
 ## The feature enables implementations of `indexmap` v1 specific checks.
@@ -145,6 +140,10 @@ schemars_0_9 = ["dep:schemars_0_9", "alloc", "serde_with_macros?/schemars_0_9", 
 ## This pulls in [`schemars` v1](::schemars_1) as a dependency. It will also implicitly enable
 ## the `alloc` feature.
 schemars_1 = ["dep:schemars_1", "alloc", "serde_with_macros?/schemars_1", "dep:serde_json"]
+## The feature enables `SmallVec` as a supported container.
+##
+## This pulls in [`smallvec` v1](::smallvec_1) as a dependency.
+smallvec_1 = ["dep:smallvec_1"]
 ## The feature enables integration of `time` v0.3 specific conversions.
 ## This includes support for the timestamp and duration types.
 ##
