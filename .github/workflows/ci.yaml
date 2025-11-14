@@ -130,6 +130,30 @@ jobs:
           disable_search: true
           files: lcov.info
 
+  semver_checks:
+    name: Semver checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check semver, no default features
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          release-type: minor
+          exclude: "serde_with_test"
+          feature-group: "only-explicit-features"
+      - name: Check semver, default features
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          release-type: minor
+          exclude: "serde_with_test"
+          feature-group: "default-features"
+      - name: Check semver, all features
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          release-type: minor
+          exclude: "serde_with_test"
+          feature-group: "all-features"
+
   # Added to summarize the matrix (otherwise we would need to list every single
   # job in bors.toml)
   # https://forum.bors.tech/t/bors-with-github-workflows/426
@@ -137,15 +161,16 @@ jobs:
     name: Tests result
     if: always()
     needs:
-      - rustfmt
       - clippy_check
+      - rustfmt
+      - semver_checks
       - build_and_test
       - coverage
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
-        if: "needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success' && needs.coverage.result == 'success'"
+        if: "needs.clippy_check.result == 'success' && needs.rustfmt.result == 'success' && needs.semver_checks.result == 'success' && needs.build_and_test.result == 'success' && needs.coverage.result == 'success'"
         run: exit 0
       - name: Mark the job as a failure
-        if: "!(needs.rustfmt.result == 'success' && needs.clippy_check.result == 'success' && needs.build_and_test.result == 'success' && needs.coverage.result == 'success')"
+        if: "!(needs.clippy_check.result == 'success' && needs.rustfmt.result == 'success' && needs.semver_checks.result == 'success' && needs.build_and_test.result == 'success' && needs.coverage.result == 'success')"
         run: exit 1
