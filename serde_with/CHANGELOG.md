@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.16.0] - 2025-11-14
+
+### Added
+
+* Added support for `smallvec` v1 under the `smallvec_1` feature flag by @isharma228 (#895)
+* Add `JsonSchemaAs` implementation for `json::JsonString` by @yogevm15 (#901)
+
 ## [3.15.1] - 2025-10-21
 
 ### Fixed

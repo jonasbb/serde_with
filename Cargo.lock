@@ -1083,7 +1083,7 @@ dependencies = [
 
 [[package]]
 name = "serde_with"
-version = "3.15.1"
+version = "3.16.0"
 dependencies = [
  "base64",
  "chrono",
@@ -1120,7 +1120,7 @@ dependencies = [
 
 [[package]]
 name = "serde_with_macros"
-version = "3.15.1"
+version = "3.16.0"
 dependencies = [
  "darling",
  "expect-test",
