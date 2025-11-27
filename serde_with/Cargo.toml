@@ -269,17 +269,17 @@ required-features = ["smallvec_1", "macros"]
 [[test]]
 name = "schemars_0_8"
 path = "tests/schemars_0_8/main.rs"
-required-features = ["schemars_0_8"]
+required-features = ["schemars_0_8", "hex"]
 
 [[test]]
 name = "schemars_0_9"
 path = "tests/schemars_0_9/main.rs"
-required-features = ["schemars_0_9", "std"]
+required-features = ["schemars_0_9", "std", "hex"]
 
 [[test]]
 name = "schemars_1"
 path = "tests/schemars_1/main.rs"
-required-features = ["schemars_1", "std"]
+required-features = ["schemars_1", "std", "hex"]
 
 [package.metadata.docs.rs]
 all-features = true
