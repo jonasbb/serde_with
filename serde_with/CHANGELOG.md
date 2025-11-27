@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.16.1] - 2025-11-27
+
+### Fixed
+
+* Fix `JsonSchemaAs` of `SetPreventDuplicates` and `SetLastValueWins`. (#906, #907)
+
 ## [3.16.0] - 2025-11-14
 
 ### Added
