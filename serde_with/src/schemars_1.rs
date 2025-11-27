@@ -1029,48 +1029,66 @@ schema_for_pickfirst!(A B);
 schema_for_pickfirst!(A B C);
 schema_for_pickfirst!(A B C D);
 
-impl<T, TA> JsonSchemaAs<T> for SetLastValueWins<TA>
-where
-    TA: JsonSchemaAs<T>,
-{
-    fn schema_id() -> Cow<'static, str> {
-        format!(
-            "serde_with::SetLastValueWins<{}>",
-            <WrapSchema<T, TA> as JsonSchema>::schema_id()
-        )
-        .into()
-    }
+macro_rules! map_first_last_wins_schema {
+    ($(=> $extra:ident)? $type:ty) => {
+        impl<V, $($extra,)? VA> JsonSchemaAs<$type> for SetLastValueWins<VA>
+        where
+            VA: JsonSchemaAs<V>,
+        {
+            fn schema_id() -> Cow<'static, str> {
+                format!(
+                    "serde_with::SetLastValueWins<{}>",
+                    <WrapSchema<V, VA> as JsonSchema>::schema_id()
+                )
+                .into()
+            }
 
-    fn schema_name() -> Cow<'static, str> {
-        format!(
-            "SetLastValueWins<{}>",
-            <WrapSchema<T, TA> as JsonSchema>::schema_name()
-        )
-        .into()
-    }
+            fn schema_name() -> Cow<'static, str> {
+                format!(
+                    "SetLastValueWins<{}>",
+                    <WrapSchema<V, VA> as JsonSchema>::schema_name()
+                )
+                .into()
+            }
 
-    fn json_schema(g: &mut SchemaGenerator) -> Schema {
-        let mut schema = <WrapSchema<T, TA> as JsonSchema>::json_schema(g);
-        let object = schema.ensure_object();
+            fn json_schema(g: &mut SchemaGenerator) -> Schema {
+                let mut schema = <BTreeSet<WrapSchema<V, VA>> as JsonSchema>::json_schema(g);
+                let object = schema.ensure_object();
 
-        // We explicitly allow duplicate items since the whole point of
-        // SetLastValueWins is to take the duplicate value.
-        object.remove("uniqueItems");
+                // We explicitly allow duplicate items since the whole point of
+                // SetLastValueWins is to take the duplicate value.
+                object.remove("uniqueItems");
 
-        schema
-    }
+                schema
+            }
 
-    fn inline_schema() -> bool {
-        <WrapSchema<T, TA> as JsonSchema>::inline_schema()
+            fn inline_schema() -> bool {
+                <WrapSchema<V, VA> as JsonSchema>::inline_schema()
+            }
+        }
+
+        impl<V, $($extra,)? VA> JsonSchemaAs<$type> for SetPreventDuplicates<VA>
+        where
+            VA: JsonSchemaAs<V>,
+        {
+            forward_schema!(BTreeSet<WrapSchema<V, VA>>);
+        }
     }
 }
 
-impl<T, TA> JsonSchemaAs<T> for SetPreventDuplicates<TA>
-where
-    TA: JsonSchemaAs<T>,
-{
-    forward_schema!(WrapSchema<T, TA>);
-}
+map_first_last_wins_schema!(BTreeSet<V>);
+#[cfg(feature = "std")]
+map_first_last_wins_schema!(=> S HashSet<V, S>);
+#[cfg(feature = "hashbrown_0_14")]
+map_first_last_wins_schema!(=> S hashbrown_0_14::HashSet<V, S>);
+#[cfg(feature = "hashbrown_0_15")]
+map_first_last_wins_schema!(=> S hashbrown_0_15::HashSet<V, S>);
+#[cfg(feature = "hashbrown_0_16")]
+map_first_last_wins_schema!(=> S hashbrown_0_16::HashSet<V, S>);
+#[cfg(feature = "indexmap_1")]
+map_first_last_wins_schema!(=> S indexmap_1::IndexSet<V, S>);
+#[cfg(feature = "indexmap_2")]
+map_first_last_wins_schema!(=> S indexmap_2::IndexSet<V, S>);
 
 impl<SEP, T, TA> JsonSchemaAs<T> for StringWithSeparator<SEP, TA>
 where

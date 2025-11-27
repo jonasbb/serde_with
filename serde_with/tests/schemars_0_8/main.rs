@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::json;
 use serde_with::{hex::*, *};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 // This avoids us having to add `#[schemars(crate = "::schemars_0_8")]` all
 // over the place. We're not testing that and it is inconvenient.
@@ -369,9 +369,23 @@ mod snapshots {
             }
         }
 
+        set_last_value_wins_displaysfromstr {
+            struct Test {
+                #[serde_as(as = "SetLastValueWins<DisplayFromStr>")]
+                data: BTreeSet<u32>,
+            }
+        }
+
         set_prevent_duplicates {
             struct Test {
                 #[serde_as(as = "SetPreventDuplicates<_>")]
+                data: BTreeSet<u32>,
+            }
+        }
+
+        set_prevent_duplicates_displaysfromstr {
+            struct Test {
+                #[serde_as(as = "SetPreventDuplicates<DisplayFromStr>")]
                 data: BTreeSet<u32>,
             }
         }
@@ -1094,4 +1108,66 @@ fn test_pickfirst() {
 
     check_matches_schema::<IntOrDisplay>(&json!(7));
     check_matches_schema::<IntOrDisplay>(&json!("17"));
+}
+
+#[cfg(feature = "json")]
+#[test]
+fn test_jsonstring() {
+    use serde_with::json::JsonString;
+
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(#[serde_as(as = "JsonString")] BTreeSet<u32>);
+
+    check_valid_json_schema(&S(BTreeSet::from_iter([1, 2, 3])));
+}
+
+#[test]
+fn test_map_first_key_wins() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(#[serde_as(as = "MapFirstKeyWins<DisplayFromStr,DisplayFromStr>")] BTreeMap<u32, u32>);
+
+    check_valid_json_schema(&S(BTreeMap::from_iter([(1, 10), (2, 20), (3, 30)])));
+}
+
+#[test]
+fn test_map_prevent_duplicates() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(
+        #[serde_as(as = "MapPreventDuplicates<DisplayFromStr,DisplayFromStr>")] BTreeMap<u32, u32>,
+    );
+
+    check_valid_json_schema(&S(BTreeMap::from_iter([(1, 10), (2, 20), (3, 30)])));
+}
+
+#[test]
+fn test_set_last_value_wins() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S1(#[serde_as(as = "SetLastValueWins<_>")] BTreeSet<u32>);
+
+    check_valid_json_schema(&S1(BTreeSet::from_iter([1, 2, 3])));
+
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S2(#[serde_as(as = "SetLastValueWins<DisplayFromStr>")] BTreeSet<u32>);
+
+    check_valid_json_schema(&S2(BTreeSet::from_iter([1, 2, 3])));
+}
+
+#[test]
+fn test_set_prevent_duplicates() {
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(#[serde_as(as = "SetPreventDuplicates<DisplayFromStr>")] BTreeSet<u32>);
+
+    check_valid_json_schema(&S(BTreeSet::from_iter([1, 2, 3])));
 }
