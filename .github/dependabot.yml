@@ -6,6 +6,8 @@ updates:
       interval: weekly
       day: saturday
       time: "01:00"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     ignore:
       - dependency-name: "*"
@@ -16,6 +18,8 @@ updates:
       interval: weekly
       day: saturday
       time: "01:00"
+    cooldown:
+      default-days: 7
     groups:
       github-actions:
         patterns:
@@ -26,6 +30,8 @@ updates:
       interval: weekly
       day: saturday
       time: "03:00"
+    cooldown:
+      default-days: 7
     groups:
       devcontainers:
         patterns:
