@@ -1234,7 +1234,6 @@ pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
 /// use serde_with::{SerializeDisplayAlt, DeserializeFromStr};
 ///
 /// #[derive(Debug, Clone, SerializeDisplayAlt, DeserializeFromStr)]
-/// #[serde(transparent)]
 /// pub struct MyType(u32);
 ///
 /// impl fmt::Display for MyType {
