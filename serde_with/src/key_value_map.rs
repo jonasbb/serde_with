@@ -148,9 +148,9 @@ use crate::{
 /// "#;
 ///
 /// // Both serialization and deserialization work flawlessly.
-/// let serialized = serde_yaml::to_string(&values).unwrap();
+/// let serialized = yaml_serde::to_string(&values).unwrap();
 /// assert_eq!(expected, serialized);
-/// let deserialized: KVMap = serde_yaml::from_str(&serialized).unwrap();
+/// let deserialized: KVMap = yaml_serde::from_str(&serialized).unwrap();
 /// assert_eq!(values, deserialized);
 /// # }
 /// ```

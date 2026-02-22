@@ -333,7 +333,7 @@ fn test_kvmap_complex_key_yaml() {
         ],
     };
 
-    let yaml = serde_yaml::to_string(&kvmap).unwrap();
+    let yaml = yaml_serde::to_string(&kvmap).unwrap();
     expect_test::expect![[r#"
         ? - 127.0.0.0
           - 24
@@ -345,6 +345,6 @@ fn test_kvmap_complex_key_yaml() {
           baz: 2
     "#]]
     .assert_eq(&yaml);
-    let deser_values = serde_yaml::from_str(&yaml).unwrap();
+    let deser_values = yaml_serde::from_str(&yaml).unwrap();
     assert_eq!(kvmap, deser_values);
 }

@@ -437,7 +437,7 @@ fn yaml_round_trip() {
         ],
     };
 
-    let yaml = serde_yaml::to_string(&values).unwrap();
+    let yaml = yaml_serde::to_string(&values).unwrap();
     expect_test::expect![[r#"
         vec:
           Int: 123
@@ -453,6 +453,6 @@ fn yaml_round_trip() {
             c: true
     "#]]
     .assert_eq(&yaml);
-    let deser_values: VecEnumValues = serde_yaml::from_str(&yaml).unwrap();
+    let deser_values: VecEnumValues = yaml_serde::from_str(&yaml).unwrap();
     assert_eq!(values, deser_values);
 }

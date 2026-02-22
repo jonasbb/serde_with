@@ -1114,7 +1114,7 @@ dependencies = [
  "serde_json",
  "serde_test",
  "serde_with_macros",
- "serde_yaml",
+ "yaml_serde",
  "smallvec",
  "time",
 ]
@@ -1148,7 +1148,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_yaml"
+name = "yaml_serde"
 version = "0.9.34+deprecated"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
