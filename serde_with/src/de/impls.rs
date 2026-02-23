@@ -1735,6 +1735,42 @@ where
     }
 }
 
+#[cfg(all(feature = "alloc", feature = "smallvec_1"))]
+impl<'de, T, TAs, FORMAT, A> DeserializeAs<'de, smallvec_1::SmallVec<A>> for OneOrMany<TAs, FORMAT>
+where
+    A: smallvec_1::Array<Item = T>,
+    TAs: DeserializeAs<'de, T>,
+    FORMAT: Format,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<smallvec_1::SmallVec<A>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
+
+        let one_err: D::Error = match <DeserializeAsWrap<T, TAs>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(one) => {
+                let mut res = smallvec_1::SmallVec::<A>::new();
+                res.push(one.into_inner());
+                return Ok(res);
+            }
+            Err(err) => err,
+        };
+        let many_err: D::Error = match <DeserializeAsWrap<Vec<T>, Vec<TAs>>>::deserialize(
+            content::de::ContentDeserializer::new(content, is_hr),
+        ) {
+            Ok(many) => return Ok(smallvec_1::SmallVec::from_vec(many.into_inner())),
+            Err(err) => err,
+        };
+        Err(DeError::custom(format_args!(
+            "OneOrMany could not deserialize any variant:\n  One: {one_err}\n  Many: {many_err}"
+        )))
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<'de, T, TAs1> DeserializeAs<'de, T> for PickFirst<(TAs1,)>
 where

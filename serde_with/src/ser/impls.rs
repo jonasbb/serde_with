@@ -965,6 +965,38 @@ where
     }
 }
 
+#[cfg(all(feature = "alloc", feature = "smallvec_1"))]
+impl<T, TAs, A> SerializeAs<smallvec_1::SmallVec<A>> for OneOrMany<TAs, formats::PreferOne>
+where
+    A: smallvec_1::Array<Item = T>,
+    TAs: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &smallvec_1::SmallVec<A>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match source.len() {
+            1 => SerializeAsWrap::<T, TAs>::new(source.iter().next().expect("Cannot be empty"))
+                .serialize(serializer),
+            _ => SerializeAsWrap::<&[T], &[TAs]>::new(&source.as_slice()).serialize(serializer),
+        }
+    }
+}
+
+#[cfg(all(feature = "alloc", feature = "smallvec_1"))]
+impl<T, TAs, A> SerializeAs<smallvec_1::SmallVec<A>> for OneOrMany<TAs, formats::PreferMany>
+where
+    A: smallvec_1::Array<Item = T>,
+    TAs: SerializeAs<T>,
+{
+    fn serialize_as<S>(source: &smallvec_1::SmallVec<A>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        SerializeAsWrap::<&[T], &[TAs]>::new(&source.as_slice()).serialize(serializer)
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<T, TAs1> SerializeAs<T> for PickFirst<(TAs1,)>
 where
