@@ -38,7 +38,7 @@ schemars_0_9 = []
 schemars_1 = []
 
 [dependencies]
-darling = "0.21.0"
+darling = "0.23.0"
 proc-macro2 = "1.0.1"
 quote = "1.0.0"
 
