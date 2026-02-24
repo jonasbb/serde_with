@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.17.0] - 2026-02-24
+
 ### Fixed
 
-* Fix example for SerializeDisplayAlt.
+* Fix example for `SerializeDisplayAlt`.
     Remove unsupported attributes from example.
 
 ## [3.16.1] - 2025-11-27

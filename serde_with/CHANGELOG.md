@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.17.0] - 2026-02-24
+
 ### Added
 
 * Support `OneOrMany` with `smallvec` v1 (#920, #922)
+
+### Changed
+
+* Switch to `yaml_serde` for a maintained yaml dependency by @kazan417 (#921)
+* Bump MSRV to 1.82, since that is required for `yaml_serde` dev-dependency.
 
 ## [3.16.1] - 2025-11-27
 
