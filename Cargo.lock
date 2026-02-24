@@ -1114,9 +1114,9 @@ dependencies = [
  "serde_json",
  "serde_test",
  "serde_with_macros",
- "serde_yaml",
  "smallvec",
  "time",
+ "yaml_serde",
 ]
 
 [[package]]
@@ -1145,19 +1145,6 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_with",
-]
-
-[[package]]
-name = "serde_yaml"
-version = "0.9.34+deprecated"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
-dependencies = [
- "indexmap 2.11.4",
- "itoa",
- "ryu",
- "serde",
- "unsafe-libyaml",
 ]
 
 [[package]]
@@ -1563,6 +1550,19 @@ name = "xml-rs"
 version = "0.8.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "791978798f0597cfc70478424c2b4fdc2b7a8024aaff78497ef00f24ef674193"
+
+[[package]]
+name = "yaml_serde"
+version = "0.10.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a7f5270edc6fab0529a772a772b3e505dfd883a8de5cc5b464e35fabe586411"
+dependencies = [
+ "indexmap 2.11.4",
+ "itoa",
+ "ryu",
+ "serde",
+ "unsafe-libyaml",
+]
 
 [[package]]
 name = "yansi"
