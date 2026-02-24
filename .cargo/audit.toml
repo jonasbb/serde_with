@@ -12,6 +12,11 @@ ignore = [
     # paste - no longer maintained
     # Transitive dev-dependency of rmp-serde
     "RUSTSEC-2024-0436",
+
+    # Ignore the time "Denial of Service via Stack Exhaustion" advisory
+    # During tests no untrusted input is parsed.
+    # For downstream users they should use a more recent version of time, which has this issue fixed.
+    "RUSTSEC-2026-0009",
 ]
 # warn for categories of informational advisories
 informational_warnings = [
