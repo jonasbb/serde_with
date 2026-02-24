@@ -5,7 +5,8 @@ extern crate alloc;
 mod utils;
 
 use crate::utils::{
-    check_deserialization, check_error_deserialization, check_serialization, is_equal,
+    check_deserialization, check_error_deserialization, check_error_serialization,
+    check_serialization, is_equal,
 };
 use alloc::collections::BTreeMap;
 use chrono_0_4::{DateTime, Duration, Local, NaiveDateTime, Utc};
@@ -742,4 +743,56 @@ fn test_naive_datetime_smoketest() {
         NaiveDateTime, "TimestampSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
         NaiveDateTime, "TimestampSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
     };
+}
+
+#[test]
+fn bug771_extreme_nanoseconds() {
+    #[serde_as]
+    #[derive(Debug, Serialize)]
+    struct S(#[serde_as(as = "serde_with::TimestampNanoSeconds")] DateTime<Utc>);
+
+    check_error_serialization(
+        S(DateTime::<Utc>::MIN_UTC),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_error_serialization(
+        S("1385-06-12T00:25:26.290448384Z".parse().unwrap()),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_error_serialization(
+        S("1385-06-12T00:25:26.290448385Z".parse().unwrap()),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_error_serialization(
+        S("1677-09-21T00:12:43.145224191Z".parse().unwrap()),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_error_serialization(
+        S("1677-09-21T00:12:43.145224192Z".parse().unwrap()),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_serialization(
+        S("1677-09-21T00:12:43.145224193Z".parse().unwrap()),
+        expect!["-9223372036854775807"],
+    );
+    check_serialization(
+        S("2262-04-11T23:47:16.854775807Z".parse().unwrap()),
+        expect!["9223372036854775807"],
+    );
+    check_error_serialization(
+        S("2262-04-11T23:47:16.854775808Z".parse().unwrap()),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_error_serialization(
+        S("2554-07-21T23:34:33.709551615Z".parse().unwrap()),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_error_serialization(
+        S("2554-07-21T23:34:33.709551616Z".parse().unwrap()),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
+    check_error_serialization(
+        S(DateTime::<Utc>::MAX_UTC),
+        expect!["Failed to serialize value as the value cannot be represented."],
+    );
 }
