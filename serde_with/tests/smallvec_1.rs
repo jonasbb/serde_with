@@ -5,7 +5,10 @@ mod utils;
 use crate::utils::is_equal;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{
+    formats::{PreferMany, PreferOne},
+    serde_as, DisplayFromStr, OneOrMany,
+};
 use smallvec_1::SmallVec;
 
 #[test]
@@ -106,5 +109,54 @@ fn test_smallvec_string() {
             "foo",
             "bar"
           ]"#]],
+    );
+}
+
+#[test]
+fn test_smallvec_oneormany_preferone() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "OneOrMany<_, PreferOne>")] SmallVec<[String; 4]>);
+
+    is_equal(
+        S(SmallVec::from_vec(vec!["foo".to_string()])),
+        expect![[r#""foo""#]],
+    );
+    is_equal(
+        S(SmallVec::from_vec(vec![
+            "foo".to_string(),
+            "bar".to_string(),
+        ])),
+        expect![[r#"
+            [
+              "foo",
+              "bar"
+            ]"#]],
+    );
+}
+
+#[test]
+fn test_smallvec_oneormany_prefermany() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "OneOrMany<_, PreferMany>")] SmallVec<[String; 4]>);
+
+    is_equal(
+        S(SmallVec::from_vec(vec!["foo".to_string()])),
+        expect![[r#"
+            [
+              "foo"
+            ]"#]],
+    );
+    is_equal(
+        S(SmallVec::from_vec(vec![
+            "foo".to_string(),
+            "bar".to_string(),
+        ])),
+        expect![[r#"
+            [
+              "foo",
+              "bar"
+            ]"#]],
     );
 }

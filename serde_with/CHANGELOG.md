@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Support `OneOrMany` with `smallvec` v1 (#920, #922)
+
 ## [3.16.1] - 2025-11-27
 
 ### Fixed
