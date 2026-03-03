@@ -632,7 +632,7 @@ where
         let properties = &mut object.object().properties;
         for schema in one_of {
             if let Some(object) = schema.into_object().object {
-                properties.extend(object.properties.into_iter());
+                properties.extend(object.properties);
             }
         }
 
