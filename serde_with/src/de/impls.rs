@@ -1811,6 +1811,44 @@ where
 }
 
 #[cfg(feature = "alloc")]
+impl<'de, T, TAs, FORMAT> DeserializeAs<'de, alloc::collections::BTreeSet<T>>
+    for OneOrMany<TAs, FORMAT>
+where
+    T: Ord,
+    TAs: DeserializeAs<'de, T>,
+    FORMAT: Format,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<alloc::collections::BTreeSet<T>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
+
+        let one_err: D::Error = match <DeserializeAsWrap<T, TAs>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(one) => {
+                return Ok(alloc::collections::BTreeSet::from([one.into_inner()]));
+            }
+            Err(err) => err,
+        };
+        let many_err: D::Error = match <DeserializeAsWrap<
+            alloc::collections::BTreeSet<T>,
+            alloc::collections::BTreeSet<TAs>,
+        >>::deserialize(
+            content::de::ContentDeserializer::new(content, is_hr)
+        ) {
+            Ok(many) => return Ok(many.into_inner()),
+            Err(err) => err,
+        };
+        Err(DeError::custom(format_args!(
+            "OneOrMany could not deserialize any variant:\n  One: {one_err}\n  Many: {many_err}"
+        )))
+    }
+}
+
+#[cfg(feature = "alloc")]
 impl<'de, T, TAs1> DeserializeAs<'de, T> for PickFirst<(TAs1,)>
 where
     TAs1: DeserializeAs<'de, T>,

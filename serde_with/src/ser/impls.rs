@@ -1038,6 +1038,46 @@ where
 }
 
 #[cfg(feature = "alloc")]
+impl<T, U> SerializeAs<alloc::collections::BTreeSet<T>> for OneOrMany<U, formats::PreferOne>
+where
+    T: Clone + Ord,
+    U: SerializeAs<T>,
+{
+    fn serialize_as<Ser>(
+        source: &alloc::collections::BTreeSet<T>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
+    where
+        Ser: Serializer,
+    {
+        match source.len() {
+            1 => SerializeAsWrap::<T, U>::new(source.first().expect("Cannot be empty")).serialize(serializer),
+            _ => SerializeAsWrap::<alloc::collections::BTreeSet<T>, alloc::collections::BTreeSet<U>>::new(source).serialize(serializer),
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<T, U> SerializeAs<alloc::collections::BTreeSet<T>> for OneOrMany<U, formats::PreferMany>
+where
+    T: Ord,
+    U: SerializeAs<T>,
+{
+    fn serialize_as<Ser>(
+        source: &alloc::collections::BTreeSet<T>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
+    where
+        Ser: Serializer,
+    {
+        SerializeAsWrap::<alloc::collections::BTreeSet<T>, alloc::collections::BTreeSet<U>>::new(
+            source,
+        )
+        .serialize(serializer)
+    }
+}
+
+#[cfg(feature = "alloc")]
 impl<T, TAs1> SerializeAs<T> for PickFirst<(TAs1,)>
 where
     TAs1: SerializeAs<T>,
