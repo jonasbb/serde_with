@@ -1771,6 +1771,45 @@ where
     }
 }
 
+#[cfg(all(feature = "alloc", feature = "std"))]
+impl<'de, T, TAs, FORMAT, S> DeserializeAs<'de, std::collections::HashSet<T, S>>
+    for OneOrMany<TAs, FORMAT>
+where
+    T: Eq + std::hash::Hash,
+    S: BuildHasher + Default,
+    TAs: DeserializeAs<'de, T>,
+    FORMAT: Format,
+{
+    fn deserialize_as<D>(deserializer: D) -> Result<std::collections::HashSet<T, S>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let is_hr = deserializer.is_human_readable();
+        let content: content::de::Content<'de> = Deserialize::deserialize(deserializer)?;
+
+        let one_err: D::Error = match <DeserializeAsWrap<T, TAs>>::deserialize(
+            content::de::ContentRefDeserializer::new(&content, is_hr),
+        ) {
+            Ok(one) => {
+                let mut hashset = std::collections::HashSet::default();
+                hashset.insert(one.into_inner());
+                return Ok(hashset);
+            }
+            Err(err) => err,
+        };
+        let many_err: D::Error =
+            match <DeserializeAsWrap<HashSet<T, S>, HashSet<TAs, S>>>::deserialize(
+                content::de::ContentDeserializer::new(content, is_hr),
+            ) {
+                Ok(many) => return Ok(many.into_inner()),
+                Err(err) => err,
+            };
+        Err(DeError::custom(format_args!(
+            "OneOrMany could not deserialize any variant:\n  One: {one_err}\n  Many: {many_err}"
+        )))
+    }
+}
+
 #[cfg(feature = "alloc")]
 impl<'de, T, TAs1> DeserializeAs<'de, T> for PickFirst<(TAs1,)>
 where
