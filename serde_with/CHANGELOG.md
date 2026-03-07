@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Support `OneOrMany` with `HashSet`
+* Support `OneOrMany` with `BTreeSet`
+
 ## [3.17.0] - 2026-02-24
 
 ### Added

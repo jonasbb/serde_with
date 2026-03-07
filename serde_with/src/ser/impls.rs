@@ -945,7 +945,7 @@ where
         S: Serializer,
     {
         match source.len() {
-            1 => SerializeAsWrap::<T, U>::new(source.iter().next().expect("Cannot be empty"))
+            1 => SerializeAsWrap::<T, U>::new(source.first().expect("Cannot be empty"))
                 .serialize(serializer),
             _ => SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer),
         }
@@ -976,7 +976,7 @@ where
         S: Serializer,
     {
         match source.len() {
-            1 => SerializeAsWrap::<T, TAs>::new(source.iter().next().expect("Cannot be empty"))
+            1 => SerializeAsWrap::<T, TAs>::new(source.first().expect("Cannot be empty"))
                 .serialize(serializer),
             _ => SerializeAsWrap::<&[T], &[TAs]>::new(&source.as_slice()).serialize(serializer),
         }
@@ -994,6 +994,86 @@ where
         S: Serializer,
     {
         SerializeAsWrap::<&[T], &[TAs]>::new(&source.as_slice()).serialize(serializer)
+    }
+}
+
+#[cfg(all(feature = "alloc", feature = "std"))]
+impl<T, U, S> SerializeAs<std::collections::HashSet<T, S>> for OneOrMany<U, formats::PreferOne>
+where
+    T: Eq + core::hash::Hash,
+    U: SerializeAs<T>,
+{
+    fn serialize_as<Ser>(
+        source: &std::collections::HashSet<T, S>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
+    where
+        Ser: Serializer,
+    {
+        match source.len() {
+            1 => SerializeAsWrap::<T, U>::new(source.iter().next().expect("Cannot be empty")).serialize(serializer),
+            _ => SerializeAsWrap::<std::collections::HashSet<T, S>, std::collections::HashSet<U, S>>::new(source).serialize(serializer),
+        }
+    }
+}
+
+#[cfg(all(feature = "alloc", feature = "std"))]
+impl<T, U, S> SerializeAs<std::collections::HashSet<T, S>> for OneOrMany<U, formats::PreferMany>
+where
+    T: Eq + core::hash::Hash,
+    U: SerializeAs<T>,
+{
+    fn serialize_as<Ser>(
+        source: &std::collections::HashSet<T, S>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
+    where
+        Ser: Serializer,
+    {
+        SerializeAsWrap::<std::collections::HashSet<T, S>, std::collections::HashSet<U, S>>::new(
+            source,
+        )
+        .serialize(serializer)
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<T, U> SerializeAs<alloc::collections::BTreeSet<T>> for OneOrMany<U, formats::PreferOne>
+where
+    T: Clone + Ord,
+    U: SerializeAs<T>,
+{
+    fn serialize_as<Ser>(
+        source: &alloc::collections::BTreeSet<T>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
+    where
+        Ser: Serializer,
+    {
+        match source.len() {
+            1 => SerializeAsWrap::<T, U>::new(source.first().expect("Cannot be empty")).serialize(serializer),
+            _ => SerializeAsWrap::<alloc::collections::BTreeSet<T>, alloc::collections::BTreeSet<U>>::new(source).serialize(serializer),
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<T, U> SerializeAs<alloc::collections::BTreeSet<T>> for OneOrMany<U, formats::PreferMany>
+where
+    T: Ord,
+    U: SerializeAs<T>,
+{
+    fn serialize_as<Ser>(
+        source: &alloc::collections::BTreeSet<T>,
+        serializer: Ser,
+    ) -> Result<Ser::Ok, Ser::Error>
+    where
+        Ser: Serializer,
+    {
+        SerializeAsWrap::<alloc::collections::BTreeSet<T>, alloc::collections::BTreeSet<U>>::new(
+            source,
+        )
+        .serialize(serializer)
     }
 }
 
