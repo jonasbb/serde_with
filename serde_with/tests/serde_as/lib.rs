@@ -35,7 +35,7 @@ use serde_with::{
     NoneAsEmptyString, OneOrMany, Same, Seq, StringWithSeparator,
 };
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     sync::{Mutex, RwLock},
 };
 
@@ -1321,6 +1321,122 @@ fn test_one_or_many_prefer_many() {
           One: invalid digit found in string
           Many: invalid type: string "xx", expected a sequence"#]],
     );
+}
+
+#[test]
+fn test_one_or_many_hashset_prefer_one() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1(#[serde_as(as = "OneOrMany<_>")] HashSet<u32>);
+
+    is_equal(S1(HashSet::new()), expect![[r#"[]"#]]);
+    is_equal(S1(HashSet::from([1])), expect![[r#"1"#]]);
+    check_deserialization(S1(HashSet::from([1])), r#"1"#);
+    check_deserialization(S1(HashSet::from([1])), r#"[1]"#);
+    check_deserialization(S1(HashSet::from([1, 2, 3])), r#"[1, 2, 3]"#);
+    check_deserialization(S1(HashSet::from([1, 2, 3])), r#"[3, 2, 1]"#);
+    check_error_deserialization::<S1>(
+        r#""xx""#,
+        expect![[r#"
+        OneOrMany could not deserialize any variant:
+          One: invalid type: string "xx", expected u32
+          Many: invalid type: string "xx", expected a sequence"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S2(#[serde_as(as = "OneOrMany<DisplayFromStr>")] HashSet<u32>);
+
+    is_equal(S2(HashSet::from([1])), expect![[r#""1""#]]);
+    check_deserialization(S2(HashSet::from([1])), r#""1""#);
+    check_deserialization(S2(HashSet::from([1])), r#"["1"]"#);
+    check_deserialization(S2(HashSet::from([1, 2, 3])), r#"["1", "2", "3"]"#);
+    check_error_deserialization::<S2>(
+        r#"{}"#,
+        expect![[r#"
+        OneOrMany could not deserialize any variant:
+          One: invalid type: map, expected a string
+          Many: invalid type: map, expected a sequence"#]],
+    );
+}
+
+#[test]
+fn test_one_or_many_hashset_prefer_many() {
+    use serde_with::formats::PreferMany;
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1(#[serde_as(as = "OneOrMany<_, PreferMany>")] HashSet<u32>);
+
+    is_equal(S1(HashSet::new()), expect![[r#"[]"#]]);
+    is_equal(
+        S1(HashSet::from([1])),
+        expect![[r#"
+            [
+              1
+            ]"#]],
+    );
+    check_deserialization(S1(HashSet::from([1])), r#"1"#);
+    check_deserialization(S1(HashSet::from([1])), r#"[1]"#);
+    check_deserialization(S1(HashSet::from([1, 2, 3])), r#"[1, 2, 3]"#);
+}
+
+#[test]
+fn test_one_or_many_btreeset_prefer_one() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1(#[serde_as(as = "OneOrMany<_>")] BTreeSet<u32>);
+
+    is_equal(S1(BTreeSet::new()), expect![[r#"[]"#]]);
+    is_equal(S1(BTreeSet::from([1])), expect![[r#"1"#]]);
+    check_deserialization(S1(BTreeSet::from([1])), r#"1"#);
+    check_deserialization(S1(BTreeSet::from([1])), r#"[1]"#);
+    check_deserialization(S1(BTreeSet::from([1, 2, 3])), r#"[1, 2, 3]"#);
+    check_deserialization(S1(BTreeSet::from([1, 2, 3])), r#"[3, 2, 1]"#);
+    check_error_deserialization::<S1>(
+        r#""xx""#,
+        expect![[r#"
+        OneOrMany could not deserialize any variant:
+          One: invalid type: string "xx", expected u32
+          Many: invalid type: string "xx", expected a sequence"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S2(#[serde_as(as = "OneOrMany<DisplayFromStr>")] BTreeSet<u32>);
+
+    is_equal(S2(BTreeSet::from([1])), expect![[r#""1""#]]);
+    check_deserialization(S2(BTreeSet::from([1])), r#""1""#);
+    check_deserialization(S2(BTreeSet::from([1])), r#"["1"]"#);
+    check_deserialization(S2(BTreeSet::from([1, 2, 3])), r#"["1", "2", "3"]"#);
+    check_error_deserialization::<S2>(
+        r#"{}"#,
+        expect![[r#"
+        OneOrMany could not deserialize any variant:
+          One: invalid type: map, expected a string
+          Many: invalid type: map, expected a sequence"#]],
+    );
+}
+
+#[test]
+fn test_one_or_many_btreeset_prefer_many() {
+    use serde_with::formats::PreferMany;
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S1(#[serde_as(as = "OneOrMany<_, PreferMany>")] BTreeSet<u32>);
+
+    is_equal(S1(BTreeSet::new()), expect![[r#"[]"#]]);
+    is_equal(
+        S1(BTreeSet::from([1])),
+        expect![[r#"
+            [
+              1
+            ]"#]],
+    );
+    check_deserialization(S1(BTreeSet::from([1])), r#"1"#);
+    check_deserialization(S1(BTreeSet::from([1])), r#"[1]"#);
+    check_deserialization(S1(BTreeSet::from([1, 2, 3])), r#"[1, 2, 3]"#);
 }
 
 /// Test that Cow borrows from the input
