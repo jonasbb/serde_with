@@ -70,25 +70,25 @@ error: Cannot combine `serde_as` with serde's `with`, `deserialize_with`, or `se
 46 |     #[serde_as(serialize_as = "_")]
    |     ^
 
-error: Unknown field: `does_not_exist`
+error: Unknown field: `does_not_exist`. Available values: `deserialize_as`, `no_default`, `r#as`, `serialize_as`
   --> tests/compile-fail/serde_as.rs:57:16
    |
 57 |     #[serde_as(does_not_exist = "123")]
    |                ^^^^^^^^^^^^^^
 
-error: Unknown field: `unknown1`
+error: Unknown field: `unknown1`. Available values: `deserialize_as`, `no_default`, `r#as`, `serialize_as`
   --> tests/compile-fail/serde_as.rs:59:16
    |
 59 |     #[serde_as(unknown1 = "Hello", unknown2 = "World")]
    |                ^^^^^^^^
 
-error: Unknown field: `unknown2`
+error: Unknown field: `unknown2`. Available values: `deserialize_as`, `no_default`, `r#as`, `serialize_as`
   --> tests/compile-fail/serde_as.rs:59:36
    |
 59 |     #[serde_as(unknown1 = "Hello", unknown2 = "World")]
    |                                    ^^^^^^^^
 
-error: Unknown literal value `123`
+error: Unknown value: `123`
   --> tests/compile-fail/serde_as.rs:67:31
    |
 67 |     #[serde_as(serialize_as = "123", deserialize_as = DisplayFromStr)]
