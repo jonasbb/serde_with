@@ -1707,8 +1707,9 @@ pub struct Bytes;
 /// assert_eq!(serde_json::to_value(data).unwrap(), j);
 /// # }
 /// ```
-#[cfg(feature = "alloc")]
-pub struct OneOrMany<T, FORMAT: formats::Format = formats::PreferOne>(PhantomData<(T, FORMAT)>);
+pub struct OneOrMany<T: ?Sized, FORMAT: formats::Format = formats::PreferOne>(
+    PhantomData<(FORMAT, T)>,
+);
 
 /// Try multiple deserialization options until one succeeds.
 ///

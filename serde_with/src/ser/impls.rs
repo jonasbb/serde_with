@@ -936,34 +936,43 @@ impl<'a, const N: usize> SerializeAs<Cow<'a, [u8; N]>> for Bytes {
 }
 
 #[cfg(feature = "alloc")]
-impl<T, U> SerializeAs<Vec<T>> for OneOrMany<U, formats::PreferOne>
-where
-    U: SerializeAs<T>,
-{
-    fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        match source.len() {
-            1 => SerializeAsWrap::<T, U>::new(source.iter().next().expect("Cannot be empty"))
-                .serialize(serializer),
-            _ => SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer),
+macro_rules! one_or_many_impl {
+    ($ty:ident < T $(: $tbound1:ident $(+ $tbound2:ident)*)* $(, $typaram:ident : $bound:ident )* >) => {
+        impl<T, U $(, $typaram)*> SerializeAs<$ty<T $(, $typaram)*>> for OneOrMany<U, formats::PreferOne>
+        where
+            U: SerializeAs<T>,
+            $(T: ?Sized + $tbound1 $(+ $tbound2)*,)*
+            $($typaram: ?Sized + $bound,)*
+        {
+            fn serialize_as<S>(source: &$ty<T $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                match source.len() {
+                    1 => SerializeAsWrap::<T, U>::new(source.iter().next().expect("Cannot be empty"))
+                        .serialize(serializer),
+                    _ => serializer.collect_seq(source.iter().map(|item| SerializeAsWrap::<T, U>::new(item))),
+                }
+            }
+        }
+
+        impl<T, U $(, $typaram)*> SerializeAs<$ty<T $(, $typaram)*>> for OneOrMany<U, formats::PreferMany>
+        where
+            U: SerializeAs<T>,
+            $(T: ?Sized + $tbound1 $(+ $tbound2)*,)*
+            $($typaram: ?Sized + $bound,)*
+        {
+            fn serialize_as<S>(source: &$ty<T $(, $typaram)*>, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                serializer.collect_seq(source.iter().map(|item| SerializeAsWrap::<T, U>::new(item)))
+            }
         }
     }
 }
-
 #[cfg(feature = "alloc")]
-impl<T, U> SerializeAs<Vec<T>> for OneOrMany<U, formats::PreferMany>
-where
-    U: SerializeAs<T>,
-{
-    fn serialize_as<S>(source: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        SerializeAsWrap::<Vec<T>, Vec<U>>::new(source).serialize(serializer)
-    }
-}
+foreach_seq!(one_or_many_impl);
 
 #[cfg(all(feature = "alloc", feature = "smallvec_1"))]
 impl<T, TAs, A> SerializeAs<smallvec_1::SmallVec<A>> for OneOrMany<TAs, formats::PreferOne>
