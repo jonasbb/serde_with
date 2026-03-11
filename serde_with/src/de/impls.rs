@@ -1133,7 +1133,10 @@ where
 }
 
 #[cfg(feature = "alloc")]
-impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
+impl<'de, PREFERENCE> DeserializeAs<'de, Vec<u8>> for BytesOrString<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn deserialize_as<D>(deserializer: D) -> Result<Vec<u8>, D::Error>
     where
         D: Deserializer<'de>,
