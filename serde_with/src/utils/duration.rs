@@ -9,6 +9,7 @@ use crate::{
     formats::{Flexible, Format, Strict, Strictness},
     prelude::*,
 };
+use num_traits::ToPrimitive as _;
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[cfg_attr(test, derive(Debug))]
@@ -211,7 +212,7 @@ where
     where
         S: Serializer,
     {
-        let mut secs = source
+        let mut secs: i64 = source
             .sign
             .apply_i64(i64::try_from(source.duration.as_secs()).map_err(|_| {
                 SerError::custom("The Duration of Timestamp is outside the supported range.")
