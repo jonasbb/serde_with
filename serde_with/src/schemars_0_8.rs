@@ -494,7 +494,10 @@ impl<T> JsonSchemaAs<T> for Bytes {
     forward_schema!(Vec<u8>);
 }
 
-impl JsonSchemaAs<Vec<u8>> for BytesOrString {
+impl<PREFERENCE> JsonSchemaAs<Vec<u8>> for BytesOrString<PREFERENCE>
+where
+    PREFERENCE: formats::TypePreference,
+{
     fn schema_name() -> String {
         "BytesOrString".into()
     }
