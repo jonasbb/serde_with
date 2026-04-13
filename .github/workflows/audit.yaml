@@ -21,5 +21,7 @@ jobs:
       # Allow the action to post about found problems
       issues: write
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions-rust-lang/audit@v1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/audit@72c09e02f132669d52284a3323acdb503cfc1a24 # v1
