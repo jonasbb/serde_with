@@ -1,23 +1,40 @@
 repos:
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v3.1.0
-      hooks:
-          - id: trailing-whitespace
-            args: [--markdown-linebreak-ext=md]
-          - id: no-commit-to-branch
-            args: [--branch, staging, --branch, master]
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+        exclude_types:
+          - rust
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: forbid-submodules
+      - id: no-commit-to-branch
+        args: [--branch, master]
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.37.1
+    hooks:
+      - id: check-dependabot
+      - id: check-github-workflows
 
-    - repo: local
-      hooks:
-          - id: rustfmt
-            name: rustfmt
-            description: Check if all files follow the rustfmt style
-            entry: cargo +nightly fmt --all -- --check --color always
-            language: system
-            pass_filenames: false
-          - id: use-serde-as-with-import
-            name: Use serde_as with import
-            description: 'Prevent attributes of the form #[serde_with::serde_as]'
-            language: pygrep
-            entry: '#\[serde_with::serde_as\]'
-            types: ["rust"]
+  - repo: local
+    hooks:
+      - id: rustfmt
+        name: rustfmt
+        description: Check if all files follow the rustfmt style
+        entry: cargo +nightly fmt --all -- --check --color always
+        language: system
+        pass_filenames: false
+      - id: use-serde-as-with-import
+        name: Use serde_as with import
+        description: "Prevent attributes of the form #[serde_with::serde_as]"
+        language: pygrep
+        entry: '#\[serde_with::serde_as\]'
+        types: ["rust"]
