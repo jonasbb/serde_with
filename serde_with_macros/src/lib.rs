@@ -46,13 +46,13 @@ use darling::{
 };
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{
     parse::Parser,
     parse_macro_input, parse_quote,
     punctuated::{Pair, Punctuated},
     spanned::Spanned,
-    DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, Path,
+    DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, LitStr, Meta, Path,
     PathArguments, ReturnType, Token, Type,
 };
 
@@ -310,6 +310,130 @@ pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStr
     TokenStream::from(res)
 }
 
+/// Add `skip_serializing_if` annotations to fields, which check if the value matches
+/// [`Default::default`].
+///
+/// The attribute can be added to structs and enums.
+/// The `#[skip_serializing_default]` attribute must be placed *before* the `#[derive]` attribute.
+///
+/// # Example
+///
+/// ```rust
+/// # use serde::Serialize;
+/// # use serde_with_macros::skip_serializing_default;
+/// #
+/// # #[allow(dead_code)]
+/// #[skip_serializing_default]
+/// #[derive(Serialize)]
+/// struct Data {
+///     a: String,
+///     b: u64,
+///     c: bool,
+/// }
+/// ```
+///
+/// Existing `skip_serializing_if` annotations will not be altered.
+///
+/// Each annotated field needs to implement [`Default`] and [`PartialEq`], as the generated
+/// predicate checks `value == Default::default()`.
+#[proc_macro_attribute]
+pub fn skip_serializing_default(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let res = skip_serializing_default_impl(input).unwrap_or_else(|err| err.to_compile_error());
+    TokenStream::from(res)
+}
+
+fn skip_serializing_default_impl(input: TokenStream) -> Result<TokenStream2, Error> {
+    if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
+        let helper = skip_serializing_default_helper(&input.ident);
+        let helper_path = LitStr::new(&format!("{helper}::is_default"), Span::call_site());
+        let cfg_attrs: Vec<_> = input
+            .attrs
+            .iter()
+            .filter(|attr| attr.path().is_ident("cfg"))
+            .cloned()
+            .collect();
+        apply_on_fields(&mut input.fields, |field| {
+            skip_serializing_default_add_attr_to_field(field, &helper_path)
+        })?;
+        Ok(quote! {
+            #(#cfg_attrs)*
+            #[doc(hidden)]
+            #[allow(non_snake_case)]
+            mod #helper {
+                pub fn is_default<T>(value: &T) -> bool
+                where
+                    T: ::core::default::Default + ::core::cmp::PartialEq,
+                {
+                    value == &<T as ::core::default::Default>::default()
+                }
+            }
+
+            #input
+        })
+    } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
+        let helper = skip_serializing_default_helper(&input.ident);
+        let helper_path = LitStr::new(&format!("{helper}::is_default"), Span::call_site());
+        let cfg_attrs: Vec<_> = input
+            .attrs
+            .iter()
+            .filter(|attr| attr.path().is_ident("cfg"))
+            .cloned()
+            .collect();
+        input
+            .variants
+            .iter_mut()
+            .map(|variant| {
+                apply_on_fields(&mut variant.fields, |field| {
+                    skip_serializing_default_add_attr_to_field(field, &helper_path)
+                })
+            })
+            .collect_error()?;
+        Ok(quote! {
+            #(#cfg_attrs)*
+            #[doc(hidden)]
+            #[allow(non_snake_case)]
+            mod #helper {
+                pub fn is_default<T>(value: &T) -> bool
+                where
+                    T: ::core::default::Default + ::core::cmp::PartialEq,
+                {
+                    value == &<T as ::core::default::Default>::default()
+                }
+            }
+
+            #input
+        })
+    } else {
+        Err(Error::new(
+            Span::call_site(),
+            "The attribute can only be applied to struct or enum definitions.",
+        ))
+    }
+}
+
+fn skip_serializing_default_helper(ident: &syn::Ident) -> syn::Ident {
+    format_ident!("__serde_with_skip_serializing_default_for_{ident}")
+}
+
+fn apply_on_fields<F>(fields: &mut Fields, function: F) -> Result<(), Error>
+where
+    F: Fn(&mut Field) -> Result<(), String>,
+{
+    match fields {
+        Fields::Unit => Ok(()),
+        Fields::Named(fields) => fields
+            .named
+            .iter_mut()
+            .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
+            .collect_error(),
+        Fields::Unnamed(fields) => fields
+            .unnamed
+            .iter_mut()
+            .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
+            .collect_error(),
+    }
+}
+
 /// Add the `skip_serializing_if` annotation to each field of the struct
 fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), String> {
     if is_std_option(&field.ty) {
@@ -355,6 +479,44 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
             return Err("`serialize_always` may only be used on fields of type `Option`.".into());
         }
     }
+    Ok(())
+}
+
+fn skip_serializing_default_add_attr_to_field(
+    field: &mut Field,
+    helper_path: &LitStr,
+) -> Result<(), String> {
+    let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
+
+    // Remove the `serialize_always` attribute
+    let mut has_always_attr = false;
+    field.attrs.retain(|attr| {
+        let has_attr = attr.path().is_ident("serialize_always");
+        has_always_attr |= has_attr;
+        !has_attr
+    });
+
+    // Error on conflicting attributes
+    if has_always_attr && has_skip_serializing_if {
+        let mut msg = r#"The attributes `serialize_always` and `serde(skip_serializing_if = "...")` cannot be used on the same field"#.to_string();
+        if let Some(ident) = &field.ident {
+            msg += ": `";
+            msg += &ident.to_string();
+            msg += "`";
+        }
+        msg += ".";
+        return Err(msg);
+    }
+
+    // Do nothing if `skip_serializing_if` or `serialize_always` is already present
+    if has_skip_serializing_if || has_always_attr {
+        return Ok(());
+    }
+
+    let attr = parse_quote!(
+        #[serde(skip_serializing_if = #helper_path)]
+    );
+    field.attrs.push(attr);
     Ok(())
 }
 

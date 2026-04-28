@@ -41,6 +41,7 @@
 //!   With `serde_as` large arrays are supported, even if they are nested in other types.
 //!   `[bool; 64]`, `Option<[u8; M]>`, and `Box<[[u8; 64]; N]>` are all supported, as [this examples shows](#large-and-const-generic-arrays).
 //! * Skip serializing all empty `Option` types with [`#[skip_serializing_none]`][skip_serializing_none].
+//! * Skip serializing all fields equal to their default value with [`#[skip_serializing_default]`][skip_serializing_default].
 //! * Apply a prefix / suffix to each field name of a struct, without changing the de/serialize implementations of the struct using [`with_prefix!`][] / [`with_suffix!`][].
 //! * Deserialize a comma separated list like `#hash,#tags,#are,#great` into a `Vec<String>`.
 //!   Check the documentation for [`serde_with::StringWithSeparator::<CommaSeparator, T>`][StringWithSeparator].
@@ -177,6 +178,38 @@
 //! # }
 //! ```
 //!
+//! ## `skip_serializing_default`
+//!
+//! If many fields should be omitted whenever they equal their default value, putting the
+//! annotations on each field can become tedious. The `#[skip_serializing_default]` attribute must
+//! be placed *before* the `#[derive]`.
+//!
+//! ```rust
+//! # #[cfg(all(feature = "macros", feature = "json"))] {
+//! # use serde::Serialize;
+//! # use serde_with::skip_serializing_default;
+//! #[skip_serializing_default]
+//! # #[derive(Debug, Eq, PartialEq)]
+//! #[derive(Serialize)]
+//! struct Foo {
+//!     a: String,
+//!     b: usize,
+//!     c: bool,
+//! }
+//!
+//! // This will serialize
+//! # let foo =
+//! Foo {a: String::new(), b: 0, c: true}
+//! # ;
+//!
+//! // into this JSON
+//! # let json = r#"
+//! {"c": true}
+//! # "#;
+//! # assert_eq!(json.replace(" ", "").replace("\n", ""), serde_json::to_string(&foo).unwrap());
+//! # }
+//! ```
+//!
 //! ## Advanced `serde_as` usage
 //!
 //! This example is mainly supposed to highlight the flexibility of the `serde_as` annotation compared to [serde's `with` annotation][with-annotation].
@@ -258,6 +291,7 @@
 //! [`with_suffix!`]: https://docs.rs/serde_with/3.18.0/serde_with/macro.with_suffix.html
 //! [feature flags]: https://docs.rs/serde_with/3.18.0/serde_with/guide/feature_flags/index.html
 //! [skip_serializing_none]: https://docs.rs/serde_with/3.18.0/serde_with/attr.skip_serializing_none.html
+//! [skip_serializing_default]: https://docs.rs/serde_with/3.18.0/serde_with/attr.skip_serializing_default.html
 //! [StringWithSeparator]: https://docs.rs/serde_with/3.18.0/serde_with/struct.StringWithSeparator.html
 //! [user guide]: https://docs.rs/serde_with/3.18.0/serde_with/guide/index.html
 //! [with-annotation]: https://serde.rs/field-attrs.html#with
