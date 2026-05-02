@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.19.0] - 2026-05-02
+
+### Added
+
+* Add support for `hashbrown` v0.17 (#940)
+
+    This extends the existing support for `hashbrown` to the newly released version.
+
 ## [3.18.0] - 2026-03-13
 
 ### Added

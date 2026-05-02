@@ -6,6 +6,8 @@ use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};
 use hashbrown_0_15::{HashMap as HashbrownMap015, HashSet as HashbrownSet015};
 #[cfg(feature = "hashbrown_0_16")]
 use hashbrown_0_16::{HashMap as HashbrownMap016, HashSet as HashbrownSet016};
+#[cfg(feature = "hashbrown_0_17")]
+use hashbrown_0_17::{HashMap as HashbrownMap017, HashSet as HashbrownSet017};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]
@@ -39,6 +41,8 @@ pub(crate) mod macros {
         $m!(HashbrownMap015<K, V, H: Sized>);
         #[cfg(feature = "hashbrown_0_16")]
         $m!(HashbrownMap016<K, V, H: Sized>);
+        #[cfg(feature = "hashbrown_0_17")]
+        $m!(HashbrownMap017<K, V, H: Sized>);
         #[cfg(feature = "indexmap_1")]
         $m!(IndexMap<K, V, H: Sized>);
         #[cfg(feature = "indexmap_2")]
@@ -58,6 +62,8 @@ pub(crate) mod macros {
         $m!(HashbrownSet015<$T, H: Sized>);
         #[cfg(feature = "hashbrown_0_16")]
         $m!(HashbrownSet016<$T, H: Sized>);
+        #[cfg(feature = "hashbrown_0_17")]
+        $m!(HashbrownSet017<$T, H: Sized>);
         #[cfg(feature = "indexmap_1")]
         $m!(IndexSet<$T, H: Sized>);
         #[cfg(feature = "indexmap_2")]

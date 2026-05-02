@@ -6,6 +6,8 @@ use hashbrown_0_14::{HashMap as HashbrownMap014, HashSet as HashbrownSet014};
 use hashbrown_0_15::{HashMap as HashbrownMap015, HashSet as HashbrownSet015};
 #[cfg(feature = "hashbrown_0_16")]
 use hashbrown_0_16::{HashMap as HashbrownMap016, HashSet as HashbrownSet016};
+#[cfg(feature = "hashbrown_0_17")]
+use hashbrown_0_17::{HashMap as HashbrownMap017, HashSet as HashbrownSet017};
 #[cfg(feature = "indexmap_1")]
 use indexmap_1::{IndexMap, IndexSet};
 #[cfg(feature = "indexmap_2")]
@@ -48,6 +50,11 @@ pub(crate) mod macros {
                 HashbrownMap016<K: Eq + Hash, V, S: BuildHasher + Default>,
                 (|size| HashbrownMap016::with_capacity_and_hasher(size, Default::default()))
             );
+            #[cfg(feature = "hashbrown_0_17")]
+            $m!(
+                HashbrownMap017<K: Eq + Hash, V, S: BuildHasher + Default>,
+                (|size| HashbrownMap017::with_capacity_and_hasher(size, Default::default()))
+            );
             #[cfg(feature = "indexmap_1")]
             $m!(
                 IndexMap<K: Eq + Hash, V, S: BuildHasher + Default>,
@@ -87,6 +94,12 @@ pub(crate) mod macros {
             $m!(
                 HashbrownSet016<T: Eq + Hash, S: BuildHasher + Default>,
                 (|size| HashbrownSet016::with_capacity_and_hasher(size, S::default())),
+                insert
+            );
+            #[cfg(feature = "hashbrown_0_17")]
+            $m!(
+                HashbrownSet017<T: Eq + Hash, S: BuildHasher + Default>,
+                (|size| HashbrownSet017::with_capacity_and_hasher(size, S::default())),
                 insert
             );
             #[cfg(feature = "indexmap_1")]
