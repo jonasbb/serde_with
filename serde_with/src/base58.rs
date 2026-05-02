@@ -123,7 +123,7 @@ pub trait Alphabet: sealed::Sealed {
 /// [`Bitcoin`] alphabet.
 pub type Standard = Bitcoin;
 
-/// Bitcoin's alphabet as defined in their Base58Check encoding.
+/// Bitcoin's alphabet as defined in their `Base58Check` encoding.
 ///
 /// See <https://en.bitcoin.it/wiki/Base58Check_encoding#Base58_symbol_chart>
 pub struct Bitcoin;
