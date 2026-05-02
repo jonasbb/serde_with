@@ -27,7 +27,7 @@ use crate::prelude::*;
 ///     // The default is the same as Standard character set
 ///     #[serde_as(as = "Base58")]
 ///     default: Vec<u8>,
-///     // Only change the character set
+///     // Change the character set
 ///     #[serde_as(as = "Base58<Flickr>")]
 ///     charset_flickr: Vec<u8>,
 /// }
