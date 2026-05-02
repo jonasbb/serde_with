@@ -272,6 +272,9 @@ extern crate serde_core;
 #[cfg(feature = "std")]
 extern crate std;
 
+#[cfg(feature = "base58")]
+#[cfg_attr(docsrs, doc(cfg(feature = "base58")))]
+pub mod base58;
 #[cfg(feature = "base64")]
 #[cfg_attr(docsrs, doc(cfg(feature = "base64")))]
 pub mod base64;
