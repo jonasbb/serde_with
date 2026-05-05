@@ -163,43 +163,58 @@ fn ty_pattern_matches_ty(ty_pattern: &Type, ty: &Type) -> bool {
             /// If the pattern has no argument, it can match with everything.
             /// If the pattern does have an argument, the other side must be equal.
             fn path_pattern_matches_path(path_pattern: &Path, path: &Path) -> bool {
+                fn segment_pattern_matches_segment(
+                    path_pattern_segment: &syn::PathSegment,
+                    path_segment: &syn::PathSegment,
+                ) -> bool {
+                    let ident_equal = path_pattern_segment.ident == path_segment.ident;
+                    let args_match =
+                        match (&path_pattern_segment.arguments, &path_segment.arguments) {
+                            (syn::PathArguments::None, _) => true,
+                            (
+                                syn::PathArguments::AngleBracketed(
+                                    syn::AngleBracketedGenericArguments {
+                                        args: args_pattern, ..
+                                    },
+                                ),
+                                syn::PathArguments::AngleBracketed(
+                                    syn::AngleBracketedGenericArguments { args, .. },
+                                ),
+                            ) => {
+                                args_pattern.len() == args.len()
+                                    && std::iter::zip(args_pattern, args).all(|(a, b)| {
+                                        match (a, b) {
+                                            (
+                                                syn::GenericArgument::Type(ty_pattern),
+                                                syn::GenericArgument::Type(ty),
+                                            ) => ty_pattern_matches_ty(ty_pattern, ty),
+                                            (a, b) => a == b,
+                                        }
+                                    })
+                            }
+                            (args_pattern, args) => args_pattern == args,
+                        };
+                    ident_equal && args_match
+                }
+
+                if path_pattern.leading_colon.is_none() && path_pattern.segments.len() == 1 {
+                    if let (Some(path_pattern_segment), Some(path_segment)) =
+                        (path_pattern.segments.first(), path.segments.last())
+                    {
+                        return segment_pattern_matches_segment(path_pattern_segment, path_segment);
+                    }
+                    return false;
+                }
+
                 if path_pattern.leading_colon != path.leading_colon
                     || path_pattern.segments.len() != path.segments.len()
                 {
                     return false;
                 }
-                // Both parts are equal length
+
                 std::iter::zip(&path_pattern.segments, &path.segments).all(
                     |(path_pattern_segment, path_segment)| {
-                        let ident_equal = path_pattern_segment.ident == path_segment.ident;
-                        let args_match =
-                            match (&path_pattern_segment.arguments, &path_segment.arguments) {
-                                (syn::PathArguments::None, _) => true,
-                                (
-                                    syn::PathArguments::AngleBracketed(
-                                        syn::AngleBracketedGenericArguments {
-                                            args: args_pattern,
-                                            ..
-                                        },
-                                    ),
-                                    syn::PathArguments::AngleBracketed(
-                                        syn::AngleBracketedGenericArguments { args, .. },
-                                    ),
-                                ) => {
-                                    args_pattern.len() == args.len()
-                                        && std::iter::zip(args_pattern, args).all(|(a, b)| {
-                                            match (a, b) {
-                                                (
-                                                    syn::GenericArgument::Type(ty_pattern),
-                                                    syn::GenericArgument::Type(ty),
-                                                ) => ty_pattern_matches_ty(ty_pattern, ty),
-                                                (a, b) => a == b,
-                                            }
-                                        })
-                                }
-                                (args_pattern, args) => args_pattern == args,
-                            };
-                        ident_equal && args_match
+                        segment_pattern_matches_segment(path_pattern_segment, path_segment)
                     },
                 )
             }
@@ -273,7 +288,10 @@ mod test {
     fn test_ty_generic() {
         assert!(matches("Option<u8>", "Option<u8>"));
         assert!(matches("Option", "Option<u8>"));
+        assert!(matches("Option", "std::option::Option<u8>"));
+        assert!(matches("Option<u8>", "std::option::Option<u8>"));
         assert!(!matches("Option<u8>", "Option<String>"));
+        assert!(!matches("Option<u8>", "std::option::Option<String>"));
 
         assert!(matches("BTreeMap<u8, u8>", "BTreeMap<u8, u8>"));
         assert!(matches("BTreeMap", "BTreeMap<u8, u8>"));
@@ -281,6 +299,12 @@ mod test {
         assert!(matches("BTreeMap<_, _>", "BTreeMap<u8, u8>"));
         assert!(matches("BTreeMap<_, u8>", "BTreeMap<u8, u8>"));
         assert!(!matches("BTreeMap<String, _>", "BTreeMap<u8, u8>"));
+        assert!(matches("String", "std::string::String"));
+        assert!(matches("String", "alloc::string::String"));
+        assert!(!matches("std::string::String", "String"));
+        assert!(matches("String", "::std::string::String"));
+        assert!(matches("String", "std::string::String<u8>"));
+        assert!(matches("Option<_>", "std::option::Option<u8>"));
     }
 
     #[test]

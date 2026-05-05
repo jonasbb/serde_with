@@ -128,3 +128,24 @@ fn test_default_on_null() {
         expect![[r#"invalid type: integer `3`, expected a string at line 1 column 7"#]],
     );
 }
+
+#[test]
+fn test_default_on_null_with_apply_for_string() {
+    #[serde_with::apply(
+        String => #[serde_as(deserialize_as = "DefaultOnNull")],
+    )]
+    #[serde_with::serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S {
+        plain: String,
+        num: u32,
+    }
+
+    check_deserialization(
+        S {
+            plain: String::new(),
+            num: 7,
+        },
+        r#"{"plain":null,"num":7}"#,
+    );
+}
