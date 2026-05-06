@@ -1,13 +1,24 @@
 //! Test Cases
 
 use pretty_assertions::assert_eq;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_with_macros::skip_serializing_default;
 
 fn never<T>(_t: &T) -> bool {
     false
 }
+
+fn custom_default() -> u64 {
+    42
+}
+
+fn custom_no_default() -> NoDefault {
+    NoDefault(1)
+}
+
+#[derive(Debug, Eq, PartialEq, Serialize)]
+struct NoDefault(u64);
 
 #[skip_serializing_default]
 #[derive(Debug, Eq, PartialEq, Serialize)]
@@ -65,6 +76,47 @@ fn test_existing_annotation() {
         b: 0,
         c: false,
     };
+    let res = serde_json::to_value(&data).unwrap();
+    assert_eq!(expected, res);
+}
+
+#[skip_serializing_default]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+struct DataSerdeDefaultFunction {
+    #[serde(default = "custom_default")]
+    a: u64,
+}
+
+#[test]
+fn test_serde_default_function() {
+    let expected = json!({});
+    let data = DataSerdeDefaultFunction { a: 42 };
+    let res = serde_json::to_value(&data).unwrap();
+    assert_eq!(expected, res);
+    assert_eq!(data, serde_json::from_value(res).unwrap());
+
+    let expected = json!({ "a": 0 });
+    let data = DataSerdeDefaultFunction { a: 0 };
+    let res = serde_json::to_value(&data).unwrap();
+    assert_eq!(expected, res);
+}
+
+#[skip_serializing_default]
+#[derive(Debug, Eq, PartialEq, Serialize)]
+struct DataSerdeDefaultFunctionNoDefault {
+    #[serde(default = "custom_no_default")]
+    a: NoDefault,
+}
+
+#[test]
+fn test_serde_default_function_does_not_require_default() {
+    let expected = json!({});
+    let data = DataSerdeDefaultFunctionNoDefault { a: NoDefault(1) };
+    let res = serde_json::to_value(&data).unwrap();
+    assert_eq!(expected, res);
+
+    let expected = json!({ "a": 2 });
+    let data = DataSerdeDefaultFunctionNoDefault { a: NoDefault(2) };
     let res = serde_json::to_value(&data).unwrap();
     assert_eq!(expected, res);
 }

@@ -130,6 +130,7 @@ Foo {a: None, b: None, c: None, d: Some(4), e: None, f: None, g: Some(7)}
 
 If many fields should be omitted whenever they equal their default value, putting the annotations on each field can become tedious.
 The `#[skip_serializing_default]` attribute must be placed *before* the `#[derive]`.
+Fields with `#[serde(default = "...")]` are compared against that custom default function, making serialization and deserialization symmetric for that field.
 
 ```rust
 #[skip_serializing_default]
@@ -146,6 +147,11 @@ Foo {a: String::new(), b: 0, c: true}
 // into this JSON
 {"c": true}
 ```
+
+This macro relies on `PartialEq` for default values.
+Rust does not guarantee that two values returned by `Default::default()` compare equal.
+If that does not hold for a field type, use a manual `skip_serializing_if` or opt out with `#[serialize_always]`.
+Struct-level `#[serde(default)]` is not inspected; fields without their own custom default function are compared against their type's default value.
 
 ### Advanced `serde_as` usage
 

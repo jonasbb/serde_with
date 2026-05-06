@@ -52,8 +52,8 @@ use syn::{
     parse_macro_input, parse_quote,
     punctuated::{Pair, Punctuated},
     spanned::Spanned,
-    DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, LitStr, Meta, Path,
-    PathArguments, ReturnType, Token, Type,
+    DeriveInput, Error, Expr, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Lit, LitStr,
+    Meta, Path, PathArguments, ReturnType, Token, Type,
 };
 
 /// Apply function on every field of structs or enums
@@ -334,8 +334,15 @@ pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStr
 ///
 /// Existing `skip_serializing_if` annotations will not be altered.
 ///
-/// Each annotated field needs to implement [`Default`] and [`PartialEq`], as the generated
-/// predicate checks `value == Default::default()`.
+/// Each annotated field without a field-level `#[serde(default = "...")]` needs to implement
+/// [`Default`] and [`PartialEq`], as the generated predicate checks
+/// `value == Default::default()`. Rust does not guarantee that two values returned by
+/// [`Default::default`] compare equal. If that does not hold for a field type, use a manual
+/// `skip_serializing_if` or opt out with `#[serialize_always]`.
+///
+/// Fields with `#[serde(default = "some_func")]` are compared against `some_func()` instead.
+/// Struct-level `#[serde(default)]` is not inspected; fields without their own custom default
+/// function are compared against their type's default value.
 #[proc_macro_attribute]
 pub fn skip_serializing_default(_args: TokenStream, input: TokenStream) -> TokenStream {
     let res = skip_serializing_default_impl(input).unwrap_or_else(|err| err.to_compile_error());
@@ -345,61 +352,68 @@ pub fn skip_serializing_default(_args: TokenStream, input: TokenStream) -> Token
 fn skip_serializing_default_impl(input: TokenStream) -> Result<TokenStream2, Error> {
     if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
         let helper = skip_serializing_default_helper(&input.ident);
-        let helper_path = LitStr::new(&format!("{helper}::is_default"), Span::call_site());
+        let helper_path = LitStr::new(&helper.to_string(), Span::call_site());
         let cfg_attrs: Vec<_> = input
             .attrs
             .iter()
             .filter(|attr| attr.path().is_ident("cfg"))
             .cloned()
             .collect();
-        apply_on_fields(&mut input.fields, |field| {
-            skip_serializing_default_add_attr_to_field(field, &helper_path)
-        })?;
+        let mut helper_fns = Vec::new();
+        apply_skip_serializing_default_on_fields(
+            &mut input.fields,
+            &helper,
+            &helper_path,
+            &cfg_attrs,
+            &mut helper_fns,
+        )?;
         Ok(quote! {
             #(#cfg_attrs)*
             #[doc(hidden)]
             #[allow(non_snake_case)]
-            mod #helper {
-                pub fn is_default<T>(value: &T) -> bool
-                where
-                    T: ::core::default::Default + ::core::cmp::PartialEq,
-                {
-                    value == &<T as ::core::default::Default>::default()
-                }
+            fn #helper<T>(value: &T) -> bool
+            where
+                T: ::core::default::Default + ::core::cmp::PartialEq,
+            {
+                value == &<T as ::core::default::Default>::default()
             }
+
+            #(#helper_fns)*
 
             #input
         })
     } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
         let helper = skip_serializing_default_helper(&input.ident);
-        let helper_path = LitStr::new(&format!("{helper}::is_default"), Span::call_site());
+        let helper_path = LitStr::new(&helper.to_string(), Span::call_site());
         let cfg_attrs: Vec<_> = input
             .attrs
             .iter()
             .filter(|attr| attr.path().is_ident("cfg"))
             .cloned()
             .collect();
-        input
-            .variants
-            .iter_mut()
-            .map(|variant| {
-                apply_on_fields(&mut variant.fields, |field| {
-                    skip_serializing_default_add_attr_to_field(field, &helper_path)
-                })
-            })
-            .collect_error()?;
+        let mut helper_fns = Vec::new();
+        for (variant_idx, variant) in input.variants.iter_mut().enumerate() {
+            let variant_helper = format_ident!("{helper}_variant_{variant_idx}");
+            apply_skip_serializing_default_on_fields(
+                &mut variant.fields,
+                &variant_helper,
+                &helper_path,
+                &cfg_attrs,
+                &mut helper_fns,
+            )?;
+        }
         Ok(quote! {
             #(#cfg_attrs)*
             #[doc(hidden)]
             #[allow(non_snake_case)]
-            mod #helper {
-                pub fn is_default<T>(value: &T) -> bool
-                where
-                    T: ::core::default::Default + ::core::cmp::PartialEq,
-                {
-                    value == &<T as ::core::default::Default>::default()
-                }
+            fn #helper<T>(value: &T) -> bool
+            where
+                T: ::core::default::Default + ::core::cmp::PartialEq,
+            {
+                value == &<T as ::core::default::Default>::default()
             }
+
+            #(#helper_fns)*
 
             #input
         })
@@ -415,21 +429,46 @@ fn skip_serializing_default_helper(ident: &syn::Ident) -> syn::Ident {
     format_ident!("__serde_with_skip_serializing_default_for_{ident}")
 }
 
-fn apply_on_fields<F>(fields: &mut Fields, function: F) -> Result<(), Error>
-where
-    F: Fn(&mut Field) -> Result<(), String>,
-{
+fn apply_skip_serializing_default_on_fields(
+    fields: &mut Fields,
+    helper: &syn::Ident,
+    type_default_helper_path: &LitStr,
+    item_cfg_attrs: &[syn::Attribute],
+    helper_fns: &mut Vec<TokenStream2>,
+) -> Result<(), Error> {
     match fields {
         Fields::Unit => Ok(()),
         Fields::Named(fields) => fields
             .named
             .iter_mut()
-            .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
+            .enumerate()
+            .map(|(idx, field)| {
+                skip_serializing_default_add_attr_to_field(
+                    field,
+                    idx,
+                    helper,
+                    type_default_helper_path,
+                    item_cfg_attrs,
+                    helper_fns,
+                )
+                .map_err(|err| Error::new(field.span(), err))
+            })
             .collect_error(),
         Fields::Unnamed(fields) => fields
             .unnamed
             .iter_mut()
-            .map(|field| function(field).map_err(|err| Error::new(field.span(), err)))
+            .enumerate()
+            .map(|(idx, field)| {
+                skip_serializing_default_add_attr_to_field(
+                    field,
+                    idx,
+                    helper,
+                    type_default_helper_path,
+                    item_cfg_attrs,
+                    helper_fns,
+                )
+                .map_err(|err| Error::new(field.span(), err))
+            })
             .collect_error(),
     }
 }
@@ -484,9 +523,14 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
 
 fn skip_serializing_default_add_attr_to_field(
     field: &mut Field,
-    helper_path: &LitStr,
+    field_idx: usize,
+    helper: &syn::Ident,
+    type_default_helper_path: &LitStr,
+    item_cfg_attrs: &[syn::Attribute],
+    helper_fns: &mut Vec<TokenStream2>,
 ) -> Result<(), String> {
     let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
+    let serde_default = field_serde_default(field)?;
 
     // Remove the `serialize_always` attribute
     let mut has_always_attr = false;
@@ -513,11 +557,84 @@ fn skip_serializing_default_add_attr_to_field(
         return Ok(());
     }
 
+    let helper_path = match serde_default {
+        Some(SerdeDefault::Function(default_fn)) => {
+            let helper_fn = format_ident!("{helper}_field_{field_idx}");
+            let helper_path = LitStr::new(&helper_fn.to_string(), Span::call_site());
+            let field_cfg_attrs: Vec<_> = field
+                .attrs
+                .iter()
+                .filter(|attr| attr.path().is_ident("cfg"))
+                .cloned()
+                .collect();
+            let ty = &field.ty;
+            helper_fns.push(quote! {
+                #(#item_cfg_attrs)*
+                #(#field_cfg_attrs)*
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                fn #helper_fn(value: &#ty) -> bool {
+                    value == &#default_fn()
+                }
+            });
+            helper_path
+        }
+        Some(SerdeDefault::Type) | None => type_default_helper_path.clone(),
+    };
+
     let attr = parse_quote!(
         #[serde(skip_serializing_if = #helper_path)]
     );
     field.attrs.push(attr);
     Ok(())
+}
+
+enum SerdeDefault {
+    Type,
+    Function(Path),
+}
+
+fn field_serde_default(field: &Field) -> Result<Option<SerdeDefault>, String> {
+    for attr in &field.attrs {
+        if !attr.path().is_ident("serde") {
+            continue;
+        }
+        let Meta::List(expr) = &attr.meta else {
+            continue;
+        };
+        let nested =
+            match Punctuated::<Meta, Token![,]>::parse_terminated.parse2(expr.tokens.clone()) {
+                Ok(nested) => nested,
+                Err(_) => continue,
+            };
+        for expr in nested {
+            match expr {
+                Meta::Path(path) if path.is_ident("default") => {
+                    return Ok(Some(SerdeDefault::Type));
+                }
+                Meta::NameValue(expr) if expr.path.is_ident("default") => {
+                    let Expr::Lit(expr) = expr.value else {
+                        return Err(
+                            r#"Expected `serde(default = "...")` to use a string literal path."#
+                                .into(),
+                        );
+                    };
+                    let Lit::Str(default_fn) = expr.lit else {
+                        return Err(
+                            r#"Expected `serde(default = "...")` to use a string literal path."#
+                                .into(),
+                        );
+                    };
+                    let default_fn = default_fn
+                        .parse::<Path>()
+                        .map_err(|err| format!("Could not parse serde default path: {err}."))?;
+                    return Ok(Some(SerdeDefault::Function(default_fn)));
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(None)
 }
 
 /// Return `true`, if the type path refers to `std::option::Option`
