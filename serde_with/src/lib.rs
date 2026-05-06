@@ -1890,7 +1890,7 @@ pub struct FromInto<T>(PhantomData<T>);
 ///
 /// # /*
 /// impl From<(u8, u8, u8)> for Rgb { ... }
-/// impl From<Rgb> for (u8, u8, u8) { ... }
+/// impl<'a> From<&'a Rgb> for (u8, u8, u8) { ... }
 /// # */
 /// #
 /// # impl From<(u8, u8, u8)> for Rgb {
@@ -2061,7 +2061,7 @@ pub struct TryFromInto<T>(PhantomData<T>);
 /// }
 ///
 /// # /*
-/// impl From<Boollike> for u8 { ... }
+/// impl<'a> From<&'a Boollike> for u8 { ... }
 /// # */
 /// #
 /// impl TryFrom<u8> for Boollike {
