@@ -5,6 +5,18 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_with_macros::skip_serializing_default;
 
+extern crate self as serde_with;
+
+#[allow(missing_docs)]
+pub mod __private__ {
+    pub fn is_default<T>(value: &T) -> bool
+    where
+        T: Default + PartialEq,
+    {
+        value == &T::default()
+    }
+}
+
 fn never<T>(_t: &T) -> bool {
     false
 }

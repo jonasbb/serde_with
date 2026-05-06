@@ -474,6 +474,13 @@ pub(crate) mod prelude {
 #[doc(hidden)]
 pub mod __private__ {
     pub use crate::prelude::*;
+
+    pub fn is_default<T>(value: &T) -> bool
+    where
+        T: Default + PartialEq,
+    {
+        value == &T::default()
+    }
 }
 
 #[cfg(feature = "alloc")]

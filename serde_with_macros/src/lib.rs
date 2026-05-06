@@ -352,7 +352,7 @@ pub fn skip_serializing_default(_args: TokenStream, input: TokenStream) -> Token
 fn skip_serializing_default_impl(input: TokenStream) -> Result<TokenStream2, Error> {
     if let Ok(mut input) = syn::parse::<ItemStruct>(input.clone()) {
         let helper = skip_serializing_default_helper(&input.ident);
-        let helper_path = LitStr::new(&helper.to_string(), Span::call_site());
+        let helper_path = serde_with_is_default_path();
         let cfg_attrs: Vec<_> = input
             .attrs
             .iter()
@@ -368,23 +368,13 @@ fn skip_serializing_default_impl(input: TokenStream) -> Result<TokenStream2, Err
             &mut helper_fns,
         )?;
         Ok(quote! {
-            #(#cfg_attrs)*
-            #[doc(hidden)]
-            #[allow(non_snake_case)]
-            fn #helper<T>(value: &T) -> bool
-            where
-                T: ::core::default::Default + ::core::cmp::PartialEq,
-            {
-                value == &<T as ::core::default::Default>::default()
-            }
-
             #(#helper_fns)*
 
             #input
         })
     } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
         let helper = skip_serializing_default_helper(&input.ident);
-        let helper_path = LitStr::new(&helper.to_string(), Span::call_site());
+        let helper_path = serde_with_is_default_path();
         let cfg_attrs: Vec<_> = input
             .attrs
             .iter()
@@ -403,16 +393,6 @@ fn skip_serializing_default_impl(input: TokenStream) -> Result<TokenStream2, Err
             )?;
         }
         Ok(quote! {
-            #(#cfg_attrs)*
-            #[doc(hidden)]
-            #[allow(non_snake_case)]
-            fn #helper<T>(value: &T) -> bool
-            where
-                T: ::core::default::Default + ::core::cmp::PartialEq,
-            {
-                value == &<T as ::core::default::Default>::default()
-            }
-
             #(#helper_fns)*
 
             #input
@@ -427,6 +407,10 @@ fn skip_serializing_default_impl(input: TokenStream) -> Result<TokenStream2, Err
 
 fn skip_serializing_default_helper(ident: &syn::Ident) -> syn::Ident {
     format_ident!("__serde_with_skip_serializing_default_for_{ident}")
+}
+
+fn serde_with_is_default_path() -> LitStr {
+    LitStr::new("::serde_with::__private__::is_default", Span::call_site())
 }
 
 fn apply_skip_serializing_default_on_fields(
