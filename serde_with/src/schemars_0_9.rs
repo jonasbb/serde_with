@@ -406,6 +406,28 @@ impl<T> JsonSchemaAs<T> for DisplayFromStr {
     forward_schema!(String);
 }
 
+#[cfg(feature = "base58")]
+impl<T, A: base58::Alphabet> JsonSchemaAs<T> for base58::Base58<A> {
+    fn schema_name() -> Cow<'static, str> {
+        "Base58<A>".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::base58::Base58<A>".into()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        json_schema!({
+            "type": "string",
+            // no regex pattern here, since it varies depending on the alphabet
+        })
+    }
+
+    fn inline_schema() -> bool {
+        true
+    }
+}
+
 #[cfg(feature = "hex")]
 impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
     fn schema_name() -> Cow<'static, str> {

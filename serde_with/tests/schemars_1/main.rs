@@ -6,7 +6,7 @@ use expect_test::expect_file;
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::json;
-use serde_with::{hex::*, *};
+use serde_with::{base58::*, hex::*, *};
 use std::collections::{BTreeMap, BTreeSet};
 
 // This avoids us having to add `#[schemars(crate = "::schemars_1")]` all
@@ -99,6 +99,15 @@ fn schemars_basic() {
         /// A vector of bytes that's serialized as an uppercase hex string.
         #[serde_as(as = "Hex<formats::Uppercase>")]
         uppercase_hex: Vec<u8>,
+
+        /// A vector of bytes that's serialized as a base58 string.
+        #[serde_as(as = "Base58")]
+        base58: Vec<u8>,
+
+        /// A vector of bytes that's serialized as a base58 string in `Flickr`
+        /// charset.
+        #[serde_as(as = "Base58<Flickr>")]
+        base58_flickr: Vec<u8>,
     }
 
     let schema = schemars::schema_for!(Basic);
