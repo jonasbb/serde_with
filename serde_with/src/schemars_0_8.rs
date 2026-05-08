@@ -428,6 +428,31 @@ impl<T, A: base58::Alphabet> JsonSchemaAs<T> for base58::Base58<A> {
     }
 }
 
+#[cfg(feature = "base64")]
+impl<T, A: base64::Alphabet, F: formats::Format> JsonSchemaAs<T> for base64::Base64<A, F> {
+    fn schema_name() -> String {
+        "Base64<A, F>".into()
+    }
+
+    fn schema_id() -> Cow<'static, str> {
+        "serde_with::base64::Base64<A, F>".into()
+    }
+
+    fn json_schema(_: &mut SchemaGenerator) -> Schema {
+        SchemaObject {
+            instance_type: Some(InstanceType::String.into()),
+            // See <https://json-schema.org/draft/2020-12/draft-bhutton-json-schema-validation-00#rfc.section.8.3>
+            extensions: [("contentEncoding".to_string(), serde_json::json!("base64"))].into(),
+            ..Default::default()
+        }
+        .into()
+    }
+
+    fn is_referenceable() -> bool {
+        false
+    }
+}
+
 #[cfg(feature = "hex")]
 impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
     fn schema_name() -> String {

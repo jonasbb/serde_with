@@ -51,6 +51,16 @@
     "base58_flickr": {
       "description": "A vector of bytes that's serialized as a base58 string in `Flickr`\ncharset.",
       "type": "string"
+    },
+    "base64": {
+      "description": "A vector of bytes that's serialized as a base64 string.",
+      "type": "string",
+      "contentEncoding": "base64"
+    },
+    "base64_urlsafe": {
+      "description": "A vector of bytes that's serialized as a base64 string in URL-safe\ncharset.",
+      "type": "string",
+      "contentEncoding": "base64"
     }
   },
   "required": [
@@ -62,6 +72,8 @@
     "lowercase_hex",
     "uppercase_hex",
     "base58",
-    "base58_flickr"
+    "base58_flickr",
+    "base64",
+    "base64_urlsafe"
   ]
 }
