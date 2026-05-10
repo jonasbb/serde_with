@@ -135,7 +135,7 @@ macros = ["dep:serde_with_macros"]
 ##
 ## This pulls in [`schemars` v0.8](::schemars_0_8) as a dependency. It will also implicitly enable
 ## the `std` feature as `schemars` is not `#[no_std]`.
-schemars_0_8 = ["dep:schemars_0_8", "std", "serde_with_macros?/schemars_0_8"]
+schemars_0_8 = ["dep:schemars_0_8", "std", "serde_with_macros?/schemars_0_8", "dep:serde_json"]
 ## This feature enables integration with `schemars` v0.9
 ## This makes `#[derive(JsonSchema)]` pick up the correct schema for the type
 ## used within `#[serde_as(as = ...)]`.
@@ -291,17 +291,17 @@ required-features = ["smallvec_1", "macros"]
 [[test]]
 name = "schemars_0_8"
 path = "tests/schemars_0_8/main.rs"
-required-features = ["schemars_0_8", "base58", "hex"]
+required-features = ["schemars_0_8", "base58", "base64", "hex"]
 
 [[test]]
 name = "schemars_0_9"
 path = "tests/schemars_0_9/main.rs"
-required-features = ["schemars_0_9", "std", "base58", "hex"]
+required-features = ["schemars_0_9", "std", "base58", "base64", "hex"]
 
 [[test]]
 name = "schemars_1"
 path = "tests/schemars_1/main.rs"
-required-features = ["schemars_1", "std", "base58", "hex"]
+required-features = ["schemars_1", "std", "base58", "base64", "hex"]
 
 [package.metadata.docs.rs]
 all-features = true

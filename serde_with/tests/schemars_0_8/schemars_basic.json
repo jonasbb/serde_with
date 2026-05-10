@@ -6,6 +6,8 @@
     "bare_field",
     "base58",
     "base58_flickr",
+    "base64",
+    "base64_urlsafe",
     "box_same",
     "display_from_str",
     "lowercase_hex",
@@ -27,6 +29,16 @@
     "base58_flickr": {
       "description": "A vector of bytes that's serialized as a base58 string in `Flickr` charset.",
       "type": "string"
+    },
+    "base64": {
+      "description": "A vector of bytes that's serialized as a base64 string.",
+      "type": "string",
+      "contentEncoding": "base64"
+    },
+    "base64_urlsafe": {
+      "description": "A vector of bytes that's serialized as a base64 string in URL-safe charset.",
+      "type": "string",
+      "contentEncoding": "base64"
     },
     "box_same": {
       "description": "This checks that Same still works when wrapped in a box.",
