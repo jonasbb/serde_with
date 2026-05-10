@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.20.0] - 2026-05-10
+
+### Added
+
+* Add support for `base58` encoding, similar to the existing `base64` setup by @mitinarseny (#943)
+
+### Fixed
+
+* Extend `base64` with `schemars` support by @mitinarseny (#9949)
+
 ## [3.19.0] - 2026-05-02
 
 ### Added
