@@ -1117,6 +1117,39 @@ where
     }
 }
 
+macro_rules! none_as_zero_deserialize {
+    ($($nonzero:ident => $primitive:ident),* $(,)?) => {
+        $(
+            impl<'de> DeserializeAs<'de, Option<core::num::$nonzero>> for NoneAsZero {
+                fn deserialize_as<D>(
+                    deserializer: D,
+                ) -> Result<Option<core::num::$nonzero>, D::Error>
+                where
+                    D: Deserializer<'de>,
+                {
+                    let value = <$primitive>::deserialize(deserializer)?;
+                    Ok(core::num::$nonzero::new(value))
+                }
+            }
+        )*
+    };
+}
+
+none_as_zero_deserialize! {
+    NonZeroU8    => u8,
+    NonZeroU16   => u16,
+    NonZeroU32   => u32,
+    NonZeroU64   => u64,
+    NonZeroU128  => u128,
+    NonZeroUsize => usize,
+    NonZeroI8    => i8,
+    NonZeroI16   => i16,
+    NonZeroI32   => i32,
+    NonZeroI64   => i64,
+    NonZeroI128  => i128,
+    NonZeroIsize => isize,
+}
+
 #[cfg(feature = "alloc")]
 impl<'de, T, TAs> DeserializeAs<'de, T> for DefaultOnError<TAs>
 where
