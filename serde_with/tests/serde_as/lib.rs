@@ -30,8 +30,8 @@ use core::{
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::{
-    formats::{CommaSeparator, Flexible, Strict},
-    serde_as, BoolFromInt, BytesOrString, DisplayFromStr, IfIsHumanReadable, Map,
+    formats::{CommaSeparator, Flexible, PreferAsciiString, PreferString, Strict},
+    serde_as, BoolFromInt, Bytes, BytesOrString, DisplayFromStr, IfIsHumanReadable, Map,
     NoneAsEmptyString, OneOrMany, Same, Seq, StringWithSeparator,
 };
 use std::{
@@ -544,7 +544,7 @@ fn test_none_as_empty_string() {
 }
 
 #[test]
-fn test_bytes_or_string() {
+fn test_bytes_or_string_as_bytes() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct S(#[serde_as(as = "BytesOrString")] Vec<u8>);
@@ -558,8 +558,64 @@ fn test_bytes_or_string() {
               3
             ]"#]],
     );
-    check_deserialization(S(vec![72, 101, 108, 108, 111]), r#""Hello""#);
+    check_deserialization(S(vec![70, 111, 111, 98, 97, 114]), r#""Foobar""#);
+}
 
+#[test]
+fn test_bytes_or_string_as_string() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "BytesOrString<PreferString>")] Vec<u8>);
+
+    is_equal(S(vec![72, 101, 108, 108, 111]), expect![[r#""Hello""#]]);
+
+    check_deserialization(S(vec![0xf0, 0x9f, 0xa6, 0xa6]), r#""🦦""#);
+    is_equal(S(vec![0xf0, 0x9f, 0xa6, 0xa6]), expect![[r#""🦦""#]]);
+
+    is_equal(
+        S(vec![0, 255]),
+        expect![[r#"
+            [
+              0,
+              255
+            ]"#]],
+    );
+    check_deserialization(S(vec![87, 111, 114, 108, 100]), r#""World""#);
+}
+
+#[test]
+fn test_bytes_or_string_as_ascii_string() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "BytesOrString<PreferAsciiString>")] Vec<u8>);
+
+    is_equal(S(vec![72, 101, 108, 108, 111]), expect![[r#""Hello""#]]);
+
+    check_deserialization(S(vec![0xf0, 0x9f, 0xa6, 0xa6]), r#""🦦""#);
+    is_equal(
+        S(vec![0xf0, 0x9f, 0xa6, 0xa6]),
+        expect![[r#"
+            [
+              240,
+              159,
+              166,
+              166
+            ]"#]],
+    );
+
+    is_equal(
+        S(vec![0, 255]),
+        expect![[r#"
+            [
+              0,
+              255
+            ]"#]],
+    );
+    check_deserialization(S(vec![87, 111, 114, 108, 100]), r#""World""#);
+}
+
+#[test]
+fn test_bytes_or_string_nested() {
     #[serde_as]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct SVec(#[serde_as(as = "Vec<BytesOrString>")] Vec<Vec<u8>>);
@@ -1169,6 +1225,77 @@ fn test_bytes() {
             Token::StructEnd,
         ],
     );
+}
+
+#[test]
+fn test_bytes_as_bytes() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "Bytes")] Vec<u8>);
+
+    is_equal(
+        S(vec![1, 2, 3]),
+        expect![[r#"
+            [
+              1,
+              2,
+              3
+            ]"#]],
+    );
+    check_deserialization(S(vec![70, 111, 111, 98, 97, 114]), r#""Foobar""#);
+}
+
+#[test]
+fn test_bytes_as_string() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "Bytes<PreferString>")] Vec<u8>);
+
+    is_equal(S(vec![72, 101, 108, 108, 111]), expect![[r#""Hello""#]]);
+
+    check_deserialization(S(vec![0xf0, 0x9f, 0xa6, 0xa6]), r#""🦦""#);
+    is_equal(S(vec![0xf0, 0x9f, 0xa6, 0xa6]), expect![[r#""🦦""#]]);
+
+    is_equal(
+        S(vec![0, 255]),
+        expect![[r#"
+            [
+              0,
+              255
+            ]"#]],
+    );
+    check_deserialization(S(vec![87, 111, 114, 108, 100]), r#""World""#);
+}
+
+#[test]
+fn test_bytes_as_ascii_string() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct S(#[serde_as(as = "Bytes<PreferAsciiString>")] Vec<u8>);
+
+    is_equal(S(vec![72, 101, 108, 108, 111]), expect![[r#""Hello""#]]);
+
+    check_deserialization(S(vec![0xf0, 0x9f, 0xa6, 0xa6]), r#""🦦""#);
+    is_equal(
+        S(vec![0xf0, 0x9f, 0xa6, 0xa6]),
+        expect![[r#"
+            [
+              240,
+              159,
+              166,
+              166
+            ]"#]],
+    );
+
+    is_equal(
+        S(vec![0, 255]),
+        expect![[r#"
+            [
+              0,
+              255
+            ]"#]],
+    );
+    check_deserialization(S(vec![87, 111, 114, 108, 100]), r#""World""#);
 }
 
 #[test]
