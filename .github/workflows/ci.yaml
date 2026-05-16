@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy
@@ -51,7 +51,7 @@ jobs:
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
         with:
           components: rustfmt
           cache: false
@@ -74,7 +74,7 @@ jobs:
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
         with:
           toolchain: ${{ matrix.rust }}
           # Extra toolchain to test no_std
@@ -124,7 +124,7 @@ jobs:
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@2b1f5e9b395427c92ee4e3331786ca3c37afe2d7 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
         with:
           toolchain: "nightly"
           components: "llvm-tools"
