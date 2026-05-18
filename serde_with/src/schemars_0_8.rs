@@ -1386,3 +1386,28 @@ forward_duration_schema!(TimestampNanoSecondsWithFrac);
 impl<T> JsonSchemaAs<T> for json::JsonString {
     forward_schema!(String);
 }
+
+macro_rules! none_as_zero {
+    ($($nonzero:ident => $primitive:ident),* $(,)?) => {
+        $(
+            impl JsonSchemaAs<Option<core::num::$nonzero>> for NoneAsZero {
+                forward_schema!($primitive);
+            }
+        )*
+    };
+}
+
+none_as_zero! {
+    NonZeroU8    => u8,
+    NonZeroU16   => u16,
+    NonZeroU32   => u32,
+    NonZeroU64   => u64,
+    NonZeroU128  => u128,
+    NonZeroUsize => usize,
+    NonZeroI8    => i8,
+    NonZeroI16   => i16,
+    NonZeroI32   => i32,
+    NonZeroI64   => i64,
+    NonZeroI128  => i128,
+    NonZeroIsize => isize,
+}
