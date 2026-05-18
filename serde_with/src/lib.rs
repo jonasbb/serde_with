@@ -639,6 +639,59 @@ pub struct IfIsHumanReadable<H, F = Same>(PhantomData<H>, PhantomData<F>);
 /// [`FromStr`]: std::str::FromStr
 pub struct NoneAsEmptyString;
 
+/// De/Serialize an [`Option<NonZero*>`] losslessly as the inner integer
+///
+/// Serde natively supports [`NonZeroU8`] and friends, but rejects `0` during deserialization.
+/// This adapter treats `0` as [`None`] and any other value as [`Some`], allowing the wire format
+/// to always be a plain integer.
+///
+/// Supported in-memory types are [`Option<NonZeroU8>`], [`Option<NonZeroU16>`], [`Option<NonZeroU32>`],
+/// [`Option<NonZeroU64>`], [`Option<NonZeroU128>`], [`Option<NonZeroUsize>`], [`Option<NonZeroI8>`],
+/// [`Option<NonZeroI16>`], [`Option<NonZeroI32>`], [`Option<NonZeroI64>`], [`Option<NonZeroI128>`],
+/// and [`Option<NonZeroIsize>`].
+///
+/// # Examples
+///
+/// ```
+/// # #[cfg(feature = "macros")] {
+/// # use core::num::NonZeroU32;
+/// # use serde::{Deserialize, Serialize};
+/// # use serde_json::json;
+/// # use serde_with::{serde_as, NoneAsZero};
+/// #
+/// #[serde_as]
+/// # #[derive(Debug, PartialEq)]
+/// #[derive(Deserialize, Serialize)]
+/// struct Data {
+///     #[serde_as(as = "NoneAsZero")]
+///     value: Option<NonZeroU32>,
+/// }
+///
+/// let data = Data { value: NonZeroU32::new(7) };
+/// assert_eq!(json!({"value": 7}), serde_json::to_value(&data).unwrap());
+/// assert_eq!(data, serde_json::from_value(json!({"value": 7})).unwrap());
+///
+/// let none = Data { value: None };
+/// assert_eq!(json!({"value": 0}), serde_json::to_value(&none).unwrap());
+/// assert_eq!(none, serde_json::from_value(json!({"value": 0})).unwrap());
+/// # }
+/// ```
+///
+/// [`NonZeroU8`]: core::num::NonZeroU8
+/// [`Option<NonZeroU8>`]: core::num::NonZeroU8
+/// [`Option<NonZeroU16>`]: core::num::NonZeroU16
+/// [`Option<NonZeroU32>`]: core::num::NonZeroU32
+/// [`Option<NonZeroU64>`]: core::num::NonZeroU64
+/// [`Option<NonZeroU128>`]: core::num::NonZeroU128
+/// [`Option<NonZeroUsize>`]: core::num::NonZeroUsize
+/// [`Option<NonZeroI8>`]: core::num::NonZeroI8
+/// [`Option<NonZeroI16>`]: core::num::NonZeroI16
+/// [`Option<NonZeroI32>`]: core::num::NonZeroI32
+/// [`Option<NonZeroI64>`]: core::num::NonZeroI64
+/// [`Option<NonZeroI128>`]: core::num::NonZeroI128
+/// [`Option<NonZeroIsize>`]: core::num::NonZeroIsize
+pub struct NoneAsZero;
+
 /// Deserialize value and return [`Default`] on error
 ///
 /// The main use case is ignoring error while deserializing.

@@ -402,6 +402,21 @@ value: Option<String>,
 "value": "Hello World!", // converts to Some
 ```
 
+## `None` as zero for `Option<NonZero*>`
+
+[`NoneAsZero`]
+
+```ignore
+// Rust
+#[serde_as(as = "serde_with::NoneAsZero")]
+value: Option<core::num::NonZeroU32>,
+
+// JSON
+"value": 0, // converts to None
+
+"value": 42, // converts to Some(NonZeroU32::new(42).unwrap())
+```
+
 ## One or many elements into `Vec`
 
 [`OneOrMany`]
@@ -641,6 +656,7 @@ value: u128,
 [`MapFirstKeyWins`]: crate::MapFirstKeyWins
 [`MapPreventDuplicates`]: crate::MapPreventDuplicates
 [`NoneAsEmptyString`]: crate::NoneAsEmptyString
+[`NoneAsZero`]: crate::NoneAsZero
 [`OneOrMany`]: crate::OneOrMany
 [`PickFirst`]: crate::PickFirst
 [`SetLastValueWins`]: crate::SetLastValueWins
