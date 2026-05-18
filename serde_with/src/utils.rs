@@ -1,6 +1,7 @@
 pub(crate) mod duration;
 
 use crate::prelude::*;
+use num_traits::ToPrimitive as _;
 
 /// Re-Implementation of `serde::private::de::size_hint::cautious`
 #[cfg(feature = "alloc")]
@@ -40,7 +41,10 @@ pub(crate) const NANOS_PER_SEC_F64: f64 = 1_000_000_000.0;
 // pub(crate) const NANOS_PER_MICRO: u32 = 1_000;
 // pub(crate) const MILLIS_PER_SEC: u64 = 1_000;
 // pub(crate) const MICROS_PER_SEC: u64 = 1_000_000;
+#[expect(clippy::as_conversions)]
 pub(crate) const U64_MAX: u128 = u64::MAX as u128;
+#[expect(clippy::as_conversions)]
+pub(crate) const U64_MAX_FLOAT: f64 = u64::MAX as f64;
 
 pub(crate) struct MapIter<'de, A, K, V> {
     pub(crate) access: A,
@@ -115,27 +119,22 @@ where
     }
 }
 
-pub(crate) fn duration_signed_from_secs_f64(secs: f64) -> Result<DurationSigned, &'static str> {
-    const MAX_NANOS_F64: f64 = ((U64_MAX + 1) * NANOS_PER_SEC) as f64;
-    // TODO why are the seconds converted to nanoseconds first?
-    // Does it make sense to just truncate the value?
-    let mut nanos = secs * NANOS_PER_SEC_F64;
-    if !nanos.is_finite() {
+pub(crate) fn duration_signed_from_secs_f64(mut secs: f64) -> Result<DurationSigned, &'static str> {
+    if !secs.is_finite() {
         return Err("got non-finite value when converting float to duration");
     }
-    if nanos >= MAX_NANOS_F64 {
+    if secs.trunc() > U64_MAX_FLOAT {
         return Err("overflow when converting float to duration");
     }
     let mut sign = Sign::Positive;
-    if nanos < 0.0 {
-        nanos = -nanos;
+    if secs < 0.0 {
+        secs = -secs;
         sign = Sign::Negative;
     }
-    let nanos = nanos as u128;
     Ok(DurationSigned::new(
         sign,
-        (nanos / NANOS_PER_SEC) as u64,
-        (nanos % NANOS_PER_SEC) as u32,
+        secs.trunc() as u64,
+        (secs.fract() * NANOS_PER_SEC_F64) as u32,
     ))
 }
 
