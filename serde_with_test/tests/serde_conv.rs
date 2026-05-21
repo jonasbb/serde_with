@@ -5,12 +5,18 @@
 #![allow(dead_code)]
 
 use ::s_with::serde_conv;
+use ::std::borrow::ToOwned;
+use ::std::convert::Infallible;
+use ::std::num::ParseIntError;
+use ::std::result::Result;
+use ::std::result::Result::Ok;
+use ::std::string::{String, ToString};
 
 serde_conv!(
     BoolAsString,
     bool,
-    |x: &bool| ::std::string::ToString::to_string(x),
-    |x: ::std::string::String| x.parse()
+    |x: &bool| ToString::to_string(x),
+    |x: String| x.parse()
 );
 
 #[derive(::s::Serialize, ::s::Deserialize)]
@@ -21,13 +27,11 @@ struct S(#[serde(with = "BoolAsString")] bool);
 // This makes it look more like a module.
 serde_conv!(number, u32, u32_to_string, string_to_u32);
 
-fn u32_to_string(x: &u32) -> ::std::string::String {
-    ::std::string::ToString::to_string(x)
+fn u32_to_string(x: &u32) -> String {
+    ToString::to_string(x)
 }
 
-fn string_to_u32(
-    s: ::std::string::String,
-) -> ::std::result::Result<u32, ::std::num::ParseIntError> {
+fn string_to_u32(s: String) -> Result<u32, ParseIntError> {
     s.parse()
 }
 
@@ -41,10 +45,10 @@ struct S2(#[serde(with = "number")] u32);
 // https://github.com/jonasbb/serde_with/pull/729
 serde_conv!(
     pub StringAsHtml,
-    ::std::string::String,
-    |string: &str| ::std::borrow::ToOwned::to_owned(string),
-    |string: ::std::string::String| -> ::std::result::Result<_, ::std::convert::Infallible> {
-::std::result::Result::Ok(string)
+    String,
+    |string: &str| ToOwned::to_owned(string),
+    |string: String| -> Result<_, Infallible> {
+Ok(string)
     }
 );
 

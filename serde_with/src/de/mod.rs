@@ -103,11 +103,11 @@ use crate::prelude::*;
 /// # assert!(!serde_json::from_str::<S>(r#""false""#).unwrap().0);
 /// # }
 /// ```
-/// [`Box`]: std::boxed::Box
-/// [`BTreeMap`]: std::collections::BTreeMap
-/// [`Duration`]: std::time::Duration
-/// [`FromStr`]: std::str::FromStr
-/// [`Vec`]: std::vec::Vec
+/// [`Box`]: Box
+/// [`BTreeMap`]: BTreeMap
+/// [`Duration`]: Duration
+/// [`FromStr`]: FromStr
+/// [`Vec`]: Vec
 /// [impl-deserialize]: https://serde.rs/impl-deserialize.html
 pub trait DeserializeAs<'de, T>: Sized {
     /// Deserialize this value from the given Serde deserializer.

@@ -4,8 +4,14 @@
 #![no_implicit_prelude]
 #![allow(dead_code)]
 
-#[cfg_attr(test, ::cfg_eval::cfg_eval, ::s_with::serde_as(crate = "::s_with"))]
-#[cfg_attr(test, derive(::s::Serialize, ::s::Deserialize))]
+use ::cfg_eval::cfg_eval;
+use ::s::{Deserialize, Serialize};
+use ::s_json::{from_str, to_string};
+use ::s_with::serde_as;
+use ::std::assert_eq;
+
+#[cfg_attr(test, cfg_eval, serde_as(crate = "::s_with"))]
+#[cfg_attr(test, derive(Serialize, Deserialize))]
 #[derive(Debug)]
 #[serde(crate = "::s")]
 struct S {
@@ -17,8 +23,8 @@ struct S {
 fn serde_as_cfg_gated() {
     let s = S { int: 42 };
     // Check serialization
-    let s = ::s_json::to_string(&s).unwrap();
-    ::std::assert_eq!(s, r#"{"int":"42"}"#);
-    let s: S = ::s_json::from_str(&s).unwrap();
-    ::std::assert_eq!(s.int, 42);
+    let s = to_string(&s).unwrap();
+    assert_eq!(s, r#"{"int":"42"}"#);
+    let s: S = from_str(&s).unwrap();
+    assert_eq!(s.int, 42);
 }

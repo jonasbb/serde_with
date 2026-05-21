@@ -249,13 +249,6 @@ impl<'de> Visitor<'de> for ContentVisitor<'de> {
         Ok(Content::ByteBuf(value))
     }
 
-    fn visit_unit<F>(self) -> Result<Self::Value, F>
-    where
-        F: DeError,
-    {
-        Ok(Content::Unit)
-    }
-
     fn visit_none<F>(self) -> Result<Self::Value, F>
     where
         F: DeError,
@@ -268,6 +261,13 @@ impl<'de> Visitor<'de> for ContentVisitor<'de> {
         D: Deserializer<'de>,
     {
         Deserialize::deserialize(deserializer).map(|v| Content::Some(Box::new(v)))
+    }
+
+    fn visit_unit<F>(self) -> Result<Self::Value, F>
+    where
+        F: DeError,
+    {
+        Ok(Content::Unit)
     }
 
     fn visit_newtype_struct<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
@@ -414,11 +414,6 @@ where
     E: DeError,
 {
     type Error = E;
-
-    #[inline]
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
@@ -803,6 +798,11 @@ where
         drop(self);
         visitor.visit_unit()
     }
+
+    #[inline]
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
+    }
 }
 
 impl<'de, E> ContentDeserializer<'de, E> {
@@ -991,11 +991,6 @@ where
     type Error = E;
 
     #[inline]
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
-
-    #[inline]
     fn deserialize_any<V>(mut self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -1012,6 +1007,11 @@ where
                 Err(DeError::invalid_length(len, &"fewer elements in array"))
             }
         }
+    }
+
+    #[inline]
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
     }
 
     forward_to_deserialize_any! {
@@ -1112,16 +1112,16 @@ where
     type Error = E;
 
     #[inline]
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
-
-    #[inline]
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
         visitor.visit_map(self)
+    }
+
+    #[inline]
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
     }
 
     forward_to_deserialize_any! {
@@ -1235,11 +1235,6 @@ where
     E: DeError,
 {
     type Error = E;
-
-    #[inline]
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, E>
     where
@@ -1595,6 +1590,11 @@ where
     {
         visitor.visit_unit()
     }
+
+    #[inline]
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
+    }
 }
 
 impl<'a, 'de, E> ContentRefDeserializer<'a, 'de, E> {
@@ -1765,11 +1765,6 @@ where
     type Error = E;
 
     #[inline]
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
-
-    #[inline]
     fn deserialize_any<V>(mut self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
@@ -1786,6 +1781,11 @@ where
                 Err(DeError::invalid_length(len, &"fewer elements in array"))
             }
         }
+    }
+
+    #[inline]
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
     }
 
     forward_to_deserialize_any! {
@@ -1886,16 +1886,16 @@ where
     type Error = E;
 
     #[inline]
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
-
-    #[inline]
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
         visitor.visit_map(self)
+    }
+
+    #[inline]
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
     }
 
     forward_to_deserialize_any! {
@@ -1974,25 +1974,39 @@ where
         self.deserialize_map(visitor)
     }
 
-    fn deserialize_enum<V>(
+    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        match visitor.__private_visit_untagged_option(self) {
+            Ok(value) => Ok(value),
+            Err(()) => Self::deserialize_other(),
+        }
+    }
+
+    fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_unit()
+    }
+
+    fn deserialize_unit_struct<V>(
         self,
-        name: &'static str,
-        variants: &'static [&'static str],
+        _name: &'static str,
         visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        for entry in self.0 {
-            if let Some((key, value)) = flat_map_take_entry(entry, variants) {
-                return visitor.visit_enum(EnumDeserializer::new(key, Some(value), self.2));
-            }
-        }
+        visitor.visit_unit()
+    }
 
-        Err(DeError::custom(format_args!(
-            "no variant of enum {} found in flattened data",
-            name
-        )))
+    fn deserialize_newtype_struct<V>(self, _name: &str, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        visitor.visit_newtype_struct(self)
     }
 
     fn deserialize_map<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -2025,39 +2039,25 @@ where
         })
     }
 
-    fn deserialize_newtype_struct<V>(self, _name: &str, visitor: V) -> Result<V::Value, Self::Error>
-    where
-        V: Visitor<'de>,
-    {
-        visitor.visit_newtype_struct(self)
-    }
-
-    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value, Self::Error>
-    where
-        V: Visitor<'de>,
-    {
-        match visitor.__private_visit_untagged_option(self) {
-            Ok(value) => Ok(value),
-            Err(()) => Self::deserialize_other(),
-        }
-    }
-
-    fn deserialize_unit<V>(self, visitor: V) -> Result<V::Value, Self::Error>
-    where
-        V: Visitor<'de>,
-    {
-        visitor.visit_unit()
-    }
-
-    fn deserialize_unit_struct<V>(
+    fn deserialize_enum<V>(
         self,
-        _name: &'static str,
+        name: &'static str,
+        variants: &'static [&'static str],
         visitor: V,
     ) -> Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        visitor.visit_unit()
+        for entry in self.0 {
+            if let Some((key, value)) = flat_map_take_entry(entry, variants) {
+                return visitor.visit_enum(EnumDeserializer::new(key, Some(value), self.2));
+            }
+        }
+
+        Err(DeError::custom(format_args!(
+            "no variant of enum {} found in flattened data",
+            name
+        )))
     }
 
     fn deserialize_ignored_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -2212,8 +2212,8 @@ fn content_as_str<'a, 'de>(content: &'a Content<'de>) -> Option<&'a str> {
     match *content {
         Content::Str(x) => Some(x),
         Content::String(ref x) => Some(x),
-        Content::Bytes(x) => core::str::from_utf8(x).ok(),
-        Content::ByteBuf(ref x) => core::str::from_utf8(x).ok(),
+        Content::Bytes(x) => str::from_utf8(x).ok(),
+        Content::ByteBuf(ref x) => str::from_utf8(x).ok(),
         _ => None,
     }
 }

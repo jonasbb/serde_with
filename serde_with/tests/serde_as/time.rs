@@ -477,7 +477,7 @@ fn test_duration_smoketest() {
         Duration, "DurationMicroSeconds<f64>", one_second, {expect![[r#"1000000.0"#]]};
         Duration, "DurationNanoSeconds<u64>", one_second, {expect![[r#"1000000000"#]]};
         Duration, "DurationNanoSeconds<f64>", one_second, {expect![[r#"1000000000.0"#]]};
-    };
+    }
 
     smoketest! {
         Duration, "DurationSecondsWithFrac", one_second, {expect![[r#"1.0"#]]};
@@ -488,7 +488,7 @@ fn test_duration_smoketest() {
         Duration, "DurationMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
         Duration, "DurationNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         Duration, "DurationNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
-    };
+    }
 }
 
 #[test]
@@ -506,7 +506,7 @@ fn test_timestamp_systemtime_smoketest() {
         SystemTime, "TimestampMicroSeconds<f64>", one_second, {expect![[r#"1000000.0"#]]};
         SystemTime, "TimestampNanoSeconds<i64>", one_second, {expect![[r#"1000000000"#]]};
         SystemTime, "TimestampNanoSeconds<f64>", one_second, {expect![[r#"1000000000.0"#]]};
-    };
+    }
 
     smoketest! {
         SystemTime, "TimestampSecondsWithFrac", one_second, {expect![[r#"1.0"#]]};
@@ -517,5 +517,5 @@ fn test_timestamp_systemtime_smoketest() {
         SystemTime, "TimestampMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
         SystemTime, "TimestampNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         SystemTime, "TimestampNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
-    };
+    }
 }

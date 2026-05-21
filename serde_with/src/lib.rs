@@ -503,7 +503,7 @@ pub struct As<T: ?Sized>(PhantomData<T>);
 /// Adapter to convert from `serde_as` to the serde traits.
 ///
 /// This is the counter-type to [`As`][].
-/// It can be used whenever a type implementing [`DeserializeAs`]/[`SerializeAs`] is required but the normal [`Deserialize`](::serde_core::Deserialize)/[`Serialize`](::serde_core::Serialize) traits should be used.
+/// It can be used whenever a type implementing [`DeserializeAs`]/[`SerializeAs`] is required but the normal [`Deserialize`](serde_core::Deserialize)/[`Serialize`](serde_core::Serialize) traits should be used.
 /// Check [`As`] for an example.
 pub struct Same;
 
@@ -517,7 +517,7 @@ pub struct Same;
 /// support, which can be found in some crates.
 ///
 /// If you control the type you want to de/serialize, you can instead use the two derive macros, [`SerializeDisplay`] and [`DeserializeFromStr`].
-/// They properly implement the traits [`Serialize`](::serde_core::Serialize) and [`Deserialize`](::serde_core::Deserialize) such that user of the type no longer have to use the `serde_as` system.
+/// They properly implement the traits [`Serialize`](serde_core::Serialize) and [`Deserialize`](serde_core::Deserialize) such that user of the type no longer have to use the `serde_as` system.
 ///
 /// # Examples
 ///
@@ -558,7 +558,7 @@ pub struct DisplayFromStr;
 /// Use the first format if [`De/Serializer::is_human_readable`], otherwise use the second
 ///
 /// If the second format is not specified, the normal
-/// [`Deserialize`](::serde_core::Deserialize)/[`Serialize`](::serde_core::Serialize) traits are used.
+/// [`Deserialize`](serde_core::Deserialize)/[`Serialize`](serde_core::Serialize) traits are used.
 ///
 /// # Examples
 ///
@@ -600,7 +600,7 @@ pub struct IfIsHumanReadable<H, F = Same>(PhantomData<H>, PhantomData<F>);
 
 /// De/Serialize a [`Option<String>`] type while transforming the empty string to [`None`]
 ///
-/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`](::core::fmt::Display) implementations.
+/// Convert an [`Option<T>`] from/to string using [`FromStr`] and [`Display`](core::fmt::Display) implementations.
 /// An empty string is deserialized as [`None`] and a [`None`] vice versa.
 ///
 /// # Examples
@@ -639,7 +639,7 @@ pub struct IfIsHumanReadable<H, F = Same>(PhantomData<H>, PhantomData<F>);
 /// [`FromStr`]: std::str::FromStr
 pub struct NoneAsEmptyString;
 
-/// De/Serialize an [`Option<NonZero*>`] losslessly as the inner integer
+/// De/Serialize [`Option`] of a non-zero integer losslessly as the inner integer
 ///
 /// Serde natively supports [`NonZeroU8`] and friends, but rejects `0` during deserialization.
 /// This adapter treats `0` as [`None`] and any other value as [`Some`], allowing the wire format
@@ -1357,8 +1357,8 @@ pub struct DurationNanoSecondsWithFrac<
 /// ```
 ///
 /// [`SystemTime`]: std::time::SystemTime
-/// [`chrono::DateTime<Local>`]: ::chrono_0_4::DateTime
-/// [`chrono::DateTime<Utc>`]: ::chrono_0_4::DateTime
+/// [`chrono::DateTime<Local>`]: chrono_0_4::DateTime
+/// [`chrono::DateTime<Utc>`]: chrono_0_4::DateTime
 /// [feature flag]: https://docs.rs/serde_with/3.20.0/serde_with/guide/feature_flags/index.html
 pub struct TimestampSeconds<
     FORMAT: formats::Format = i64,
@@ -1497,10 +1497,10 @@ pub struct TimestampSeconds<
 /// ```
 ///
 /// [`SystemTime`]: std::time::SystemTime
-/// [`chrono::DateTime`]: ::chrono_0_4::DateTime
-/// [`chrono::DateTime<Local>`]: ::chrono_0_4::DateTime
-/// [`chrono::DateTime<Utc>`]: ::chrono_0_4::DateTime
-/// [NaiveDateTime]: ::chrono_0_4::NaiveDateTime
+/// [`chrono::DateTime`]: chrono_0_4::DateTime
+/// [`chrono::DateTime<Local>`]: chrono_0_4::DateTime
+/// [`chrono::DateTime<Utc>`]: chrono_0_4::DateTime
+/// [NaiveDateTime]: chrono_0_4::NaiveDateTime
 /// [feature flag]: https://docs.rs/serde_with/3.20.0/serde_with/guide/feature_flags/index.html
 pub struct TimestampSecondsWithFrac<
     FORMAT: formats::Format = f64,
@@ -1713,8 +1713,8 @@ pub struct Bytes;
 /// The serialization behavior can be tweaked to either always serialize as a list using [`PreferMany`] or to serialize as the inner element if possible using [`PreferOne`].
 /// By default, [`PreferOne`] is assumed, which can also be omitted like `OneOrMany<_>`.
 ///
-/// [`PreferMany`]: crate::formats::PreferMany
-/// [`PreferOne`]: crate::formats::PreferOne
+/// [`PreferMany`]: formats::PreferMany
+/// [`PreferOne`]: formats::PreferOne
 ///
 /// # Examples
 ///
@@ -2451,7 +2451,7 @@ pub struct MapSkipError<K, V, I = ()>(PhantomData<(K, V, I)>);
 /// Deserialize a boolean from a number
 ///
 /// Deserialize a number (of `u8`) and turn it into a boolean.
-/// The adapter supports a [`Strict`](crate::formats::Strict) and [`Flexible`](crate::formats::Flexible) format.
+/// The adapter supports a [`Strict`](formats::Strict) and [`Flexible`](formats::Flexible) format.
 /// In `Strict` mode, the number must be `0` or `1`.
 /// All other values produce an error.
 /// In `Flexible` mode, the number any non-zero value is converted to `true`.
@@ -2543,7 +2543,7 @@ pub struct BoolFromInt<S: formats::Strictness = formats::Strict>(PhantomData<S>)
 ///
 /// [`Display`]: core::fmt::Display
 /// [`FromStr`]: core::str::FromStr
-/// [`Separator`]: crate::formats::Separator
+/// [`Separator`]: formats::Separator
 /// [`serde_as`]: crate::guide::serde_as
 pub struct StringWithSeparator<Sep, T>(PhantomData<(Sep, T)>);
 
@@ -2767,7 +2767,7 @@ pub struct SetLastValueWins<T>(PhantomData<T>);
 /// Helper for implementing [`JsonSchema`] on serializers whose output depends
 /// on the type of the concrete field.
 ///
-/// It is added implicitly by the [`#[serde_as]`](crate::serde_as) macro when any `schemars`
+/// It is added implicitly by the [`#[serde_as]`](serde_as) macro when any `schemars`
 /// feature is enabled.
 ///
 /// [`JsonSchema`]: ::schemars_1::JsonSchema

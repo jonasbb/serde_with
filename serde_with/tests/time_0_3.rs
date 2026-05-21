@@ -48,7 +48,7 @@ fn test_duration_smoketest() {
         Duration, "DurationMicroSeconds<f64>", one_second, {expect![[r#"1000000.0"#]]};
         Duration, "DurationNanoSeconds<i64>", one_second, {expect![[r#"1000000000"#]]};
         Duration, "DurationNanoSeconds<f64>", one_second, {expect![[r#"1000000000.0"#]]};
-    };
+    }
 
     smoketest! {
         Duration, "DurationSecondsWithFrac", one_second, {expect![[r#"1.0"#]]};
@@ -59,7 +59,7 @@ fn test_duration_smoketest() {
         Duration, "DurationMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
         Duration, "DurationNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         Duration, "DurationNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
-    };
+    }
 
     smoketest! {
         Duration, "DurationSecondsWithFrac", zero, {expect![[r#"0.0"#]]};
@@ -67,7 +67,7 @@ fn test_duration_smoketest() {
         Duration, "DurationSecondsWithFrac", zero + Duration::seconds(1), {expect![[r#"1.0"#]]};
         Duration, "DurationSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
         Duration, "DurationSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
-    };
+    }
 }
 
 #[test]
@@ -84,7 +84,7 @@ fn test_datetime_utc_smoketest() {
         OffsetDateTime, "TimestampMicroSeconds<f64>", one_second, {expect![[r#"1000000.0"#]]};
         OffsetDateTime, "TimestampNanoSeconds<i64>", one_second, {expect![[r#"1000000000"#]]};
         OffsetDateTime, "TimestampNanoSeconds<f64>", one_second, {expect![[r#"1000000000.0"#]]};
-    };
+    }
 
     smoketest! {
         OffsetDateTime, "TimestampSecondsWithFrac", one_second, {expect![[r#"1.0"#]]};
@@ -95,7 +95,7 @@ fn test_datetime_utc_smoketest() {
         OffsetDateTime, "TimestampMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
         OffsetDateTime, "TimestampNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         OffsetDateTime, "TimestampNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
-    };
+    }
 
     smoketest! {
         OffsetDateTime, "TimestampSecondsWithFrac", zero, {expect![[r#"0.0"#]]};
@@ -103,7 +103,7 @@ fn test_datetime_utc_smoketest() {
         OffsetDateTime, "TimestampSecondsWithFrac", zero + Duration::seconds(1), {expect![[r#"1.0"#]]};
         OffsetDateTime, "TimestampSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
         OffsetDateTime, "TimestampSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
-    };
+    }
 }
 
 #[test]
@@ -120,7 +120,7 @@ fn test_naive_datetime_smoketest() {
         PrimitiveDateTime, "TimestampMicroSeconds<f64>", one_second, {expect![[r#"1000000.0"#]]};
         PrimitiveDateTime, "TimestampNanoSeconds<i64>", one_second, {expect![[r#"1000000000"#]]};
         PrimitiveDateTime, "TimestampNanoSeconds<f64>", one_second, {expect![[r#"1000000000.0"#]]};
-    };
+    }
 
     smoketest! {
         PrimitiveDateTime, "TimestampSecondsWithFrac", one_second, {expect![[r#"1.0"#]]};
@@ -131,7 +131,7 @@ fn test_naive_datetime_smoketest() {
         PrimitiveDateTime, "TimestampMicroSecondsWithFrac<String>", one_second, {expect![[r#""1000000""#]]};
         PrimitiveDateTime, "TimestampNanoSecondsWithFrac", one_second, {expect![[r#"1000000000.0"#]]};
         PrimitiveDateTime, "TimestampNanoSecondsWithFrac<String>", one_second, {expect![[r#""1000000000""#]]};
-    };
+    }
 
     smoketest! {
         PrimitiveDateTime, "TimestampSecondsWithFrac", zero, {expect![[r#"0.0"#]]};
@@ -139,7 +139,7 @@ fn test_naive_datetime_smoketest() {
         PrimitiveDateTime, "TimestampSecondsWithFrac", zero + Duration::seconds(1), {expect![[r#"1.0"#]]};
         PrimitiveDateTime, "TimestampSecondsWithFrac", zero - Duration::nanoseconds(500_000_000), {expect![[r#"-0.5"#]]};
         PrimitiveDateTime, "TimestampSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
-    };
+    }
 }
 
 #[test]

@@ -207,6 +207,7 @@ fn schemars_deserialize_only_bug_735() {
 }
 
 #[test]
+#[allow(unused_qualifications)]
 fn schemars_custom_schema_with() {
     fn custom_int(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
         use schemars::json_schema;
@@ -1025,14 +1026,14 @@ mod key_value_map {
     #[test]
     fn test_num_properties() {
         let value = KVMap(vec![
-            LimitedProperties(serde_json::json!({
+            LimitedProperties(json!({
                 "$key$": "A",
                 "a": "b",
                 "c": "d",
                 "e": "f",
                 "g": "h",
             })),
-            LimitedProperties(serde_json::json!({
+            LimitedProperties(json!({
                 "$key$": "B",
                 "a": "b",
             })),

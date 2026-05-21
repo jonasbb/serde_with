@@ -77,14 +77,12 @@ pub fn apply(args: TokenStream, input: TokenStream) -> TokenStream {
         .alt_crate_path
         .unwrap_or_else(|| syn::parse_quote!(::serde_with));
 
-    let res = match super::apply_function_to_struct_and_enum_fields_darling(
+    let res = super::apply_function_to_struct_and_enum_fields_darling(
         input,
         &serde_with_crate_path,
         &prepare_apply_attribute_to_field(args),
-    ) {
-        Ok(res) => res,
-        Err(err) => err.write_errors(),
-    };
+    )
+    .unwrap_or_else(DarlingError::write_errors);
     TokenStream::from(res)
 }
 

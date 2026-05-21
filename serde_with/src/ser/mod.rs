@@ -100,11 +100,11 @@ use crate::prelude::*;
 /// # }
 /// ```
 ///
-/// [`Box`]: std::boxed::Box
-/// [`BTreeMap`]: std::collections::BTreeMap
-/// [`Display`]: std::fmt::Display
-/// [`Duration`]: std::time::Duration
-/// [`Vec`]: std::vec::Vec
+/// [`Box`]: Box
+/// [`BTreeMap`]: BTreeMap
+/// [`Display`]: Display
+/// [`Duration`]: Duration
+/// [`Vec`]: Vec
 /// [impl-serialize]: https://serde.rs/impl-serialize.html
 pub trait SerializeAs<T: ?Sized> {
     /// Serialize this value into the given Serde serializer.

@@ -92,7 +92,7 @@ use ::schemars_0_8::{
 /// }
 /// ```
 ///
-/// [0]: crate::serde_as
+/// [0]: serde_as
 /// [1]: crate::Schema
 pub trait JsonSchemaAs<T: ?Sized> {
     /// Whether JSON Schemas generated for this type should be re-used where possible using the `$ref` keyword.
@@ -138,6 +138,10 @@ where
     T: ?Sized,
     TA: JsonSchemaAs<T>,
 {
+    fn is_referenceable() -> bool {
+        TA::is_referenceable()
+    }
+
     fn schema_name() -> String {
         TA::schema_name()
     }
@@ -148,10 +152,6 @@ where
 
     fn json_schema(gen: &mut SchemaGenerator) -> Schema {
         TA::json_schema(gen)
-    }
-
-    fn is_referenceable() -> bool {
-        TA::is_referenceable()
     }
 }
 
@@ -312,6 +312,10 @@ impl<T, TA, const N: usize> JsonSchemaAs<[T; N]> for [TA; N]
 where
     TA: JsonSchemaAs<T>,
 {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         std::format!("[{}; {}]", <WrapSchema<T, TA>>::schema_name(), N)
     }
@@ -337,10 +341,6 @@ where
             ..Default::default()
         }
         .into()
-    }
-
-    fn is_referenceable() -> bool {
-        false
     }
 }
 
@@ -406,6 +406,10 @@ impl<T> JsonSchemaAs<T> for DisplayFromStr {
 
 #[cfg(feature = "base58")]
 impl<T, A: base58::Alphabet> JsonSchemaAs<T> for base58::Base58<A> {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         "Base58<A>".into()
     }
@@ -422,14 +426,14 @@ impl<T, A: base58::Alphabet> JsonSchemaAs<T> for base58::Base58<A> {
         }
         .into()
     }
-
-    fn is_referenceable() -> bool {
-        false
-    }
 }
 
 #[cfg(feature = "base64")]
-impl<T, A: base64::Alphabet, F: formats::Format> JsonSchemaAs<T> for base64::Base64<A, F> {
+impl<T, A: base64::Alphabet, F: Format> JsonSchemaAs<T> for base64::Base64<A, F> {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         "Base64<A, F>".into()
     }
@@ -447,14 +451,14 @@ impl<T, A: base64::Alphabet, F: formats::Format> JsonSchemaAs<T> for base64::Bas
         }
         .into()
     }
-
-    fn is_referenceable() -> bool {
-        false
-    }
 }
 
 #[cfg(feature = "hex")]
-impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
+impl<T, F: Format> JsonSchemaAs<T> for hex::Hex<F> {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         "Hex<F>".into()
     }
@@ -476,13 +480,13 @@ impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
         }
         .into()
     }
-
-    fn is_referenceable() -> bool {
-        false
-    }
 }
 
 impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         "BoolFromInt<Strict>".into()
     }
@@ -503,13 +507,13 @@ impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
         }
         .into()
     }
-
-    fn is_referenceable() -> bool {
-        false
-    }
 }
 
 impl JsonSchemaAs<bool> for BoolFromInt<Flexible> {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         "BoolFromInt<Flexible>".into()
     }
@@ -524,10 +528,6 @@ impl JsonSchemaAs<bool> for BoolFromInt<Flexible> {
             ..Default::default()
         }
         .into()
-    }
-
-    fn is_referenceable() -> bool {
-        false
     }
 }
 
@@ -544,6 +544,10 @@ impl<T> JsonSchemaAs<T> for Bytes {
 }
 
 impl JsonSchemaAs<Vec<u8>> for BytesOrString {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         "BytesOrString".into()
     }
@@ -572,10 +576,6 @@ impl JsonSchemaAs<Vec<u8>> for BytesOrString {
             ..Default::default()
         }
         .into()
-    }
-
-    fn is_referenceable() -> bool {
-        false
     }
 }
 
@@ -648,6 +648,10 @@ impl<T> JsonSchemaAs<Vec<T>> for EnumMap
 where
     T: JsonSchema,
 {
+    fn is_referenceable() -> bool {
+        true
+    }
+
     fn schema_name() -> String {
         std::format!("EnumMap({})", T::schema_name())
     }
@@ -687,10 +691,6 @@ where
 
         object.object().additional_properties = Some(Box::new(Schema::Bool(false)));
         object.into()
-    }
-
-    fn is_referenceable() -> bool {
-        true
     }
 }
 
@@ -839,6 +839,10 @@ impl<T, TA> JsonSchemaAs<Vec<T>> for KeyValueMap<TA>
 where
     TA: JsonSchemaAs<T>,
 {
+    fn is_referenceable() -> bool {
+        true
+    }
+
     fn schema_name() -> String {
         std::format!("KeyValueMap({})", <WrapSchema<T, TA>>::schema_name())
     }
@@ -864,10 +868,6 @@ where
             ..Default::default()
         }
         .into()
-    }
-
-    fn is_referenceable() -> bool {
-        true
     }
 }
 
@@ -1320,6 +1320,10 @@ where
     T: TimespanSchemaTarget<F>,
     F: Format + JsonSchema,
 {
+    fn is_referenceable() -> bool {
+        false
+    }
+
     fn schema_name() -> String {
         <T as TimespanSchemaTarget<F>>::TYPE
             .schema_id()
@@ -1335,10 +1339,6 @@ where
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         <T as TimespanSchemaTarget<F>>::TYPE
             .into_flexible_schema(<T as TimespanSchemaTarget<F>>::SIGNED)
-    }
-
-    fn is_referenceable() -> bool {
-        false
     }
 }
 

@@ -192,8 +192,8 @@ pub mod unwrap_or_skip {
 /// # }
 /// ```
 ///
-/// [`HashSet`]: std::collections::HashSet
-/// [`BTreeSet`]: std::collections::HashSet
+/// [`HashSet`]: HashSet
+/// [`BTreeSet`]: HashSet
 ///
 /// # Example
 ///
@@ -308,8 +308,8 @@ pub mod sets_duplicate_value_is_error {
 /// # }
 /// ```
 ///
-/// [`HashMap`]: std::collections::HashMap
-/// [`BTreeMap`]: std::collections::HashMap
+/// [`HashMap`]: HashMap
+/// [`BTreeMap`]: HashMap
 ///
 /// # Example
 ///
@@ -428,8 +428,8 @@ pub mod maps_duplicate_key_is_error {
 /// # }
 /// ```
 ///
-/// [`HashSet`]: std::collections::HashSet
-/// [`BTreeSet`]: std::collections::HashSet
+/// [`HashSet`]: HashSet
+/// [`BTreeSet`]: HashSet
 #[cfg(feature = "alloc")]
 pub mod sets_last_value_wins {
     use super::*;
@@ -497,8 +497,8 @@ pub mod sets_last_value_wins {
 ///
 /// The implementation supports both the [`HashMap`] and the [`BTreeMap`] from the standard library.
 ///
-/// [`HashMap`]: std::collections::HashMap
-/// [`BTreeMap`]: std::collections::HashMap
+/// [`HashMap`]: HashMap
+/// [`BTreeMap`]: HashMap
 ///
 /// # Converting to `serde_as`
 ///

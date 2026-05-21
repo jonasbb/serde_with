@@ -209,14 +209,6 @@ where
             }
 
             #[inline]
-            fn visit_unit<E>(self) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                Ok(None)
-            }
-
-            #[inline]
             fn visit_none<E>(self) -> Result<Self::Value, E>
             where
                 E: DeError,
@@ -230,6 +222,14 @@ where
                 D: Deserializer<'de>,
             {
                 U::deserialize_as(deserializer).map(Some)
+            }
+
+            #[inline]
+            fn visit_unit<E>(self) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                Ok(None)
             }
         }
 
@@ -1192,15 +1192,6 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
                 formatter.write_str("a list of bytes or a string")
             }
 
-            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E> {
-                Ok(v.to_vec())
-            }
-
-            #[cfg(feature = "alloc")]
-            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E> {
-                Ok(v)
-            }
-
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> {
                 Ok(v.as_bytes().to_vec())
             }
@@ -1208,6 +1199,15 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for BytesOrString {
             #[cfg(feature = "alloc")]
             fn visit_string<E>(self, v: String) -> Result<Self::Value, E> {
                 Ok(v.into_bytes())
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E> {
+                Ok(v.to_vec())
+            }
+
+            #[cfg(feature = "alloc")]
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E> {
+                Ok(v)
             }
 
             fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
@@ -1431,11 +1431,18 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
                 formatter.write_str("a byte array")
             }
 
-            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
-                A: SeqAccess<'de>,
+                E: DeError,
             {
-                utils::SeqIter::new(seq).collect::<Result<_, _>>()
+                Ok(v.as_bytes().to_vec())
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                Ok(v.into_bytes())
             }
 
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
@@ -1452,18 +1459,11 @@ impl<'de> DeserializeAs<'de, Vec<u8>> for Bytes {
                 Ok(v)
             }
 
-            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
             where
-                E: DeError,
+                A: SeqAccess<'de>,
             {
-                Ok(v.as_bytes().to_vec())
-            }
-
-            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                Ok(v.into_bytes())
+                utils::SeqIter::new(seq).collect::<Result<_, _>>()
             }
         }
 
@@ -1508,11 +1508,11 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
                 formatter.write_str("a byte array")
             }
 
-            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
-                Ok(Cow::Borrowed(v))
+                Ok(Cow::Owned(v.as_bytes().to_vec()))
             }
 
             fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
@@ -1522,6 +1522,13 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
                 Ok(Cow::Borrowed(v.as_bytes()))
             }
 
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                Ok(Cow::Owned(v.into_bytes()))
+            }
+
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
                 E: DeError,
@@ -1529,11 +1536,11 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
                 Ok(Cow::Owned(v.to_vec()))
             }
 
-            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
-                Ok(Cow::Owned(v.as_bytes().to_vec()))
+                Ok(Cow::Borrowed(v))
             }
 
             fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
@@ -1541,13 +1548,6 @@ impl<'de> DeserializeAs<'de, Cow<'de, [u8]>> for Bytes {
                 E: DeError,
             {
                 Ok(Cow::Owned(v))
-            }
-
-            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                Ok(Cow::Owned(v.into_bytes()))
             }
 
             fn visit_seq<V>(self, seq: V) -> Result<Self::Value, V::Error>
@@ -1578,11 +1578,13 @@ impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
                 formatter.write_fmt(format_args!("an byte array of size {M}"))
             }
 
-            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
-                A: SeqAccess<'de>,
+                E: DeError,
             {
-                utils::array_from_iterator(utils::SeqIter::new(seq), &self)
+                v.as_bytes()
+                    .try_into()
+                    .map_err(|_| DeError::invalid_length(v.len(), &self))
             }
 
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
@@ -1593,13 +1595,11 @@ impl<'de, const N: usize> DeserializeAs<'de, [u8; N]> for Bytes {
                     .map_err(|_| DeError::invalid_length(v.len(), &self))
             }
 
-            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
             where
-                E: DeError,
+                A: SeqAccess<'de>,
             {
-                v.as_bytes()
-                    .try_into()
-                    .map_err(|_| DeError::invalid_length(v.len(), &self))
+                utils::array_from_iterator(utils::SeqIter::new(seq), &self)
             }
         }
 
@@ -1621,20 +1621,20 @@ impl<'de, const N: usize> DeserializeAs<'de, &'de [u8; N]> for Bytes {
                 formatter.write_fmt(format_args!("a borrowed byte array of size {M}"))
             }
 
-            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                v.try_into()
-                    .map_err(|_| DeError::invalid_length(v.len(), &self))
-            }
-
             fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
                 v.as_bytes()
                     .try_into()
+                    .map_err(|_| DeError::invalid_length(v.len(), &self))
+            }
+
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                v.try_into()
                     .map_err(|_| DeError::invalid_length(v.len(), &self))
             }
         }
@@ -1658,12 +1658,14 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
                 formatter.write_str("a byte array")
             }
 
-            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
-                Ok(Cow::Borrowed(
-                    v.try_into()
+                Ok(Cow::Owned(
+                    v.as_bytes()
+                        .to_vec()
+                        .try_into()
                         .map_err(|_| DeError::invalid_length(v.len(), &self))?,
                 ))
             }
@@ -1679,6 +1681,18 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
                 ))
             }
 
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                let len = v.len();
+                Ok(Cow::Owned(
+                    v.into_bytes()
+                        .try_into()
+                        .map_err(|_| DeError::invalid_length(len, &self))?,
+                ))
+            }
+
             fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
             where
                 E: DeError,
@@ -1690,14 +1704,12 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
                 ))
             }
 
-            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
-                Ok(Cow::Owned(
-                    v.as_bytes()
-                        .to_vec()
-                        .try_into()
+                Ok(Cow::Borrowed(
+                    v.try_into()
                         .map_err(|_| DeError::invalid_length(v.len(), &self))?,
                 ))
             }
@@ -1709,18 +1721,6 @@ impl<'de, const N: usize> DeserializeAs<'de, Cow<'de, [u8; N]>> for Bytes {
                 let len = v.len();
                 Ok(Cow::Owned(
                     v.try_into()
-                        .map_err(|_| DeError::invalid_length(len, &self))?,
-                ))
-            }
-
-            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                let len = v.len();
-                Ok(Cow::Owned(
-                    v.into_bytes()
-                        .try_into()
                         .map_err(|_| DeError::invalid_length(len, &self))?,
                 ))
             }
@@ -1799,13 +1799,13 @@ macro_rules! one_or_many_impl {
 foreach_seq!(one_or_many_impl);
 
 #[cfg(all(feature = "alloc", feature = "smallvec_1"))]
-impl<'de, T, TAs, FORMAT, A> DeserializeAs<'de, smallvec_1::SmallVec<A>> for OneOrMany<TAs, FORMAT>
+impl<'de, T, TAs, FORMAT, A> DeserializeAs<'de, SmallVec<A>> for OneOrMany<TAs, FORMAT>
 where
     A: smallvec_1::Array<Item = T>,
     TAs: DeserializeAs<'de, T>,
     FORMAT: Format,
 {
-    fn deserialize_as<D>(deserializer: D) -> Result<smallvec_1::SmallVec<A>, D::Error>
+    fn deserialize_as<D>(deserializer: D) -> Result<SmallVec<A>, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -1816,7 +1816,7 @@ where
             content::de::ContentRefDeserializer::new(&content, is_hr),
         ) {
             Ok(one) => {
-                let mut res = smallvec_1::SmallVec::<A>::new();
+                let mut res = SmallVec::<A>::new();
                 res.push(one.into_inner());
                 return Ok(res);
             }
@@ -1825,7 +1825,7 @@ where
         let many_err: D::Error = match <DeserializeAsWrap<Vec<T>, Vec<TAs>>>::deserialize(
             content::de::ContentDeserializer::new(content, is_hr),
         ) {
-            Ok(many) => return Ok(smallvec_1::SmallVec::from_vec(many.into_inner())),
+            Ok(many) => return Ok(SmallVec::from_vec(many.into_inner())),
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
@@ -2034,18 +2034,18 @@ impl<'de> DeserializeAs<'de, Cow<'de, str>> for BorrowCow {
                 formatter.write_str("an optionally borrowed string")
             }
 
-            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                Ok(Cow::Borrowed(v))
-            }
-
             fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
                 Ok(Cow::Owned(v.to_owned()))
+            }
+
+            fn visit_borrowed_str<E>(self, v: &'de str) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                Ok(Cow::Borrowed(v))
             }
 
             fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
@@ -2093,20 +2093,6 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                 formatter.write_str("an integer 0 or 1")
             }
 
-            fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                match v {
-                    0 => Ok(false),
-                    1 => Ok(true),
-                    unexp => Err(DeError::invalid_value(
-                        Unexpected::Unsigned(u64::from(unexp)),
-                        &"0 or 1",
-                    )),
-                }
-            }
-
             fn visit_i8<E>(self, v: i8) -> Result<Self::Value, E>
             where
                 E: DeError,
@@ -2116,6 +2102,48 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                     1 => Ok(true),
                     unexp => Err(DeError::invalid_value(
                         Unexpected::Signed(i64::from(unexp)),
+                        &"0 or 1",
+                    )),
+                }
+            }
+
+            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(DeError::invalid_value(Unexpected::Signed(unexp), &"0 or 1")),
+                }
+            }
+
+            fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => {
+                        let mut buf: [u8; 58] = [0u8; 58];
+                        Err(DeError::invalid_value(
+                            utils::get_unexpected_i128(unexp, &mut buf),
+                            &"0 or 1",
+                        ))
+                    }
+                }
+            }
+
+            fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                match v {
+                    0 => Ok(false),
+                    1 => Ok(true),
+                    unexp => Err(DeError::invalid_value(
+                        Unexpected::Unsigned(u64::from(unexp)),
                         &"0 or 1",
                     )),
                 }
@@ -2135,17 +2163,6 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                 }
             }
 
-            fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                match v {
-                    0 => Ok(false),
-                    1 => Ok(true),
-                    unexp => Err(DeError::invalid_value(Unexpected::Signed(unexp), &"0 or 1")),
-                }
-            }
-
             fn visit_u128<E>(self, v: u128) -> Result<Self::Value, E>
             where
                 E: DeError,
@@ -2156,25 +2173,8 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                     unexp => {
                         let mut buf: [u8; 58] = [0u8; 58];
                         Err(DeError::invalid_value(
-                            crate::utils::get_unexpected_u128(unexp, &mut buf),
+                            utils::get_unexpected_u128(unexp, &mut buf),
                             &self,
-                        ))
-                    }
-                }
-            }
-
-            fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                match v {
-                    0 => Ok(false),
-                    1 => Ok(true),
-                    unexp => {
-                        let mut buf: [u8; 58] = [0u8; 58];
-                        Err(DeError::invalid_value(
-                            crate::utils::get_unexpected_i128(unexp, &mut buf),
-                            &"0 or 1",
                         ))
                     }
                 }
@@ -2198,21 +2198,7 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Flexible> {
                 formatter.write_str("an integer")
             }
 
-            fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                Ok(v != 0)
-            }
-
             fn visit_i8<E>(self, v: i8) -> Result<Self::Value, E>
-            where
-                E: DeError,
-            {
-                Ok(v != 0)
-            }
-
-            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
@@ -2226,14 +2212,28 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Flexible> {
                 Ok(v != 0)
             }
 
-            fn visit_u128<E>(self, v: u128) -> Result<Self::Value, E>
+            fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
             where
                 E: DeError,
             {
                 Ok(v != 0)
             }
 
-            fn visit_i128<E>(self, v: i128) -> Result<Self::Value, E>
+            fn visit_u8<E>(self, v: u8) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                Ok(v != 0)
+            }
+
+            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+            where
+                E: DeError,
+            {
+                Ok(v != 0)
+            }
+
+            fn visit_u128<E>(self, v: u128) -> Result<Self::Value, E>
             where
                 E: DeError,
             {

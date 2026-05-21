@@ -334,7 +334,7 @@ fn test_kvmap_complex_key_yaml() {
     };
 
     let yaml = yaml_serde::to_string(&kvmap).unwrap();
-    expect_test::expect![[r#"
+    expect![[r#"
         ? - 127.0.0.0
           - 24
         : bar: b

@@ -94,7 +94,7 @@ use serde_json::Value;
 /// }
 /// ```
 ///
-/// [0]: crate::serde_as
+/// [0]: serde_as
 /// [1]: crate::Schema
 pub trait JsonSchemaAs<T: ?Sized> {
     /// Whether JSON schemas generated for this type should be included directly
@@ -143,6 +143,10 @@ where
     T: ?Sized,
     TA: JsonSchemaAs<T>,
 {
+    fn inline_schema() -> bool {
+        TA::inline_schema()
+    }
+
     fn schema_name() -> Cow<'static, str> {
         TA::schema_name()
     }
@@ -153,10 +157,6 @@ where
 
     fn json_schema(generator: &mut SchemaGenerator) -> Schema {
         TA::json_schema(generator)
-    }
-
-    fn inline_schema() -> bool {
-        TA::inline_schema()
     }
 }
 
@@ -319,6 +319,10 @@ impl<T, TA, const N: usize> JsonSchemaAs<[T; N]> for [TA; N]
 where
     TA: JsonSchemaAs<T>,
 {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> Cow<'static, str> {
         format!("[{}; {}]", <WrapSchema<T, TA>>::schema_name(), N).into()
     }
@@ -339,10 +343,6 @@ where
             "maxItems": max,
             "minItems": min
         })
-    }
-
-    fn inline_schema() -> bool {
-        true
     }
 }
 
@@ -408,6 +408,10 @@ impl<T> JsonSchemaAs<T> for DisplayFromStr {
 
 #[cfg(feature = "base58")]
 impl<T, A: base58::Alphabet> JsonSchemaAs<T> for base58::Base58<A> {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> Cow<'static, str> {
         "Base58<A>".into()
     }
@@ -422,14 +426,14 @@ impl<T, A: base58::Alphabet> JsonSchemaAs<T> for base58::Base58<A> {
             // no regex pattern here, since it varies depending on the alphabet
         })
     }
-
-    fn inline_schema() -> bool {
-        true
-    }
 }
 
 #[cfg(feature = "base64")]
-impl<T, A: base64::Alphabet, F: formats::Format> JsonSchemaAs<T> for base64::Base64<A, F> {
+impl<T, A: base64::Alphabet, F: Format> JsonSchemaAs<T> for base64::Base64<A, F> {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> Cow<'static, str> {
         "Base64<A, F>".into()
     }
@@ -445,14 +449,14 @@ impl<T, A: base64::Alphabet, F: formats::Format> JsonSchemaAs<T> for base64::Bas
             "contentEncoding": "base64",
         })
     }
-
-    fn inline_schema() -> bool {
-        true
-    }
 }
 
 #[cfg(feature = "hex")]
-impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
+impl<T, F: Format> JsonSchemaAs<T> for hex::Hex<F> {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> Cow<'static, str> {
         "Hex<F>".into()
     }
@@ -467,13 +471,13 @@ impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
             "pattern": r"^(?:[0-9A-Fa-f]{2})*$",
         })
     }
-
-    fn inline_schema() -> bool {
-        true
-    }
 }
 
 impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> Cow<'static, str> {
         "BoolFromInt<Strict>".into()
     }
@@ -489,13 +493,13 @@ impl JsonSchemaAs<bool> for BoolFromInt<Strict> {
             "maximum": 1.0
         })
     }
-
-    fn inline_schema() -> bool {
-        true
-    }
 }
 
 impl JsonSchemaAs<bool> for BoolFromInt<Flexible> {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> Cow<'static, str> {
         "BoolFromInt<Flexible>".into()
     }
@@ -508,10 +512,6 @@ impl JsonSchemaAs<bool> for BoolFromInt<Flexible> {
         json_schema!({
             "type": "integer",
         })
-    }
-
-    fn inline_schema() -> bool {
-        true
     }
 }
 
@@ -528,6 +528,10 @@ impl<T> JsonSchemaAs<T> for Bytes {
 }
 
 impl JsonSchemaAs<Vec<u8>> for BytesOrString {
+    fn inline_schema() -> bool {
+        true
+    }
+
     fn schema_name() -> Cow<'static, str> {
         "BytesOrString".into()
     }
@@ -546,10 +550,6 @@ impl JsonSchemaAs<Vec<u8>> for BytesOrString {
                 }
             ]
         })
-    }
-
-    fn inline_schema() -> bool {
-        true
     }
 }
 
@@ -623,6 +623,10 @@ impl<T> JsonSchemaAs<Vec<T>> for EnumMap
 where
     T: JsonSchema,
 {
+    fn inline_schema() -> bool {
+        false
+    }
+
     fn schema_name() -> Cow<'static, str> {
         format!("EnumMap({})", T::schema_name()).into()
     }
@@ -664,10 +668,6 @@ where
             "properties": properties,
             "additionalProperties": false
         })
-    }
-
-    fn inline_schema() -> bool {
-        false
     }
 }
 

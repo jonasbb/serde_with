@@ -31,7 +31,7 @@ trivial_numeric_casts = "warn"
 unused_extern_crates = "warn"
 unused_import_braces = "warn"
 # Causes problems with the darling derives in the serde_with_macros crate.
-# unused_qualifications = "warn"
+unused_qualifications = "warn"
 variant_size_differences = "warn"
 # Unsafe code is needed for array initialization using MaybeUninit.
 # unsafe_code = "forbid"

@@ -62,7 +62,7 @@ impl Content {
     pub(crate) fn as_str(&self) -> Option<&str> {
         match self {
             Self::String(x) => Some(x),
-            Self::Bytes(x) => core::str::from_utf8(x).ok(),
+            Self::Bytes(x) => str::from_utf8(x).ok(),
             _ => None,
         }
     }
@@ -180,10 +180,6 @@ where
     type SerializeMap = MapSerialize<E>;
     type SerializeStruct = StructSerialize<E>;
     type SerializeStructVariant = StructVariantSerialize<E>;
-
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
 
     fn serialize_bool(self, v: bool) -> Result<Content, E> {
         Ok(Content::Bool(v))
@@ -385,6 +381,10 @@ where
             error: PhantomData,
         })
     }
+
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
+    }
 }
 
 pub(crate) struct SeqSerialize<E> {
@@ -540,10 +540,6 @@ where
         Ok(())
     }
 
-    fn end(self) -> Result<Content, E> {
-        Ok(Content::Map(self.entries))
-    }
-
     fn serialize_entry<K, V>(&mut self, key: &K, value: &V) -> Result<(), E>
     where
         K: Serialize + ?Sized,
@@ -553,6 +549,10 @@ where
         let value = value.serialize(ContentSerializer::<E>::new(self.is_human_readable))?;
         self.entries.push((key, value));
         Ok(())
+    }
+
+    fn end(self) -> Result<Content, E> {
+        Ok(Content::Map(self.entries))
     }
 }
 

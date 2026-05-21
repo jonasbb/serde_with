@@ -130,7 +130,7 @@ where
                     .iter_mut()
                     .map(|field| function(field).map_err(|err| err.with_span(&field)))
                     // turn the Err variant into the Some, such that we only collect errors
-                    .filter_map(std::result::Result::err)
+                    .filter_map(Result::err)
                     .collect();
                 if errors.is_empty() {
                     Ok(())
@@ -144,7 +144,7 @@ where
                     .iter_mut()
                     .map(|field| function(field).map_err(|err| err.with_span(&field)))
                     // turn the Err variant into the Some, such that we only collect errors
-                    .filter_map(std::result::Result::err)
+                    .filter_map(Result::err)
                     .collect();
                 if errors.is_empty() {
                     Ok(())
@@ -193,7 +193,7 @@ where
                 .iter_mut()
                 .map(|variant| apply_on_fields(&mut variant.fields, function))
                 // turn the Err variant into the Some, such that we only collect errors
-                .filter_map(std::result::Result::err),
+                .filter_map(Result::err),
         );
 
         if errors.is_empty() {
@@ -387,7 +387,7 @@ fn is_std_option(type_: &Type) -> bool {
             ..
         }) => is_std_option(elem),
 
-        Type::Path(syn::TypePath { qself: None, path }) => {
+        Type::Path(syn::TypePath { qself: _none, path }) => {
             (path.leading_colon.is_none()
                 && path.segments.len() == 1
                 && path.segments[0].ident == "Option")
@@ -1255,7 +1255,7 @@ pub fn derive_serialize_display(item: TokenStream) -> TokenStream {
 ///
 /// [`Display`]: std::fmt::Display
 /// [`FromStr`]: std::str::FromStr
-/// [`DeserializeFromStr`]: crate::DeserializeFromStr
+/// [`DeserializeFromStr`]: DeserializeFromStr
 #[proc_macro_derive(SerializeDisplayAlt, attributes(serde_with))]
 pub fn derive_serialize_display_alt(item: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(item);
