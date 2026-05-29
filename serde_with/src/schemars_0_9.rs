@@ -429,7 +429,7 @@ impl<T, A: base58::Alphabet> JsonSchemaAs<T> for base58::Base58<A> {
 }
 
 #[cfg(feature = "base64")]
-impl<T, A: base64::Alphabet, F: formats::Format> JsonSchemaAs<T> for base64::Base64<A, F> {
+impl<T, A: base64::Alphabet, F: Format> JsonSchemaAs<T> for base64::Base64<A, F> {
     fn schema_name() -> Cow<'static, str> {
         "Base64<A, F>".into()
     }
@@ -452,7 +452,7 @@ impl<T, A: base64::Alphabet, F: formats::Format> JsonSchemaAs<T> for base64::Bas
 }
 
 #[cfg(feature = "hex")]
-impl<T, F: formats::Format> JsonSchemaAs<T> for hex::Hex<F> {
+impl<T, F: Format> JsonSchemaAs<T> for hex::Hex<F> {
     fn schema_name() -> Cow<'static, str> {
         "Hex<F>".into()
     }

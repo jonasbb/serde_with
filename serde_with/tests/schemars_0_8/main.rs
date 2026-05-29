@@ -206,6 +206,7 @@ fn schemars_deserialize_only_bug_735() {
 }
 
 #[test]
+#[allow(unused_qualifications)]
 fn schemars_custom_schema_with() {
     fn custom_int(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         use schemars::schema::*;

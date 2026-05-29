@@ -1799,13 +1799,13 @@ macro_rules! one_or_many_impl {
 foreach_seq!(one_or_many_impl);
 
 #[cfg(all(feature = "alloc", feature = "smallvec_1"))]
-impl<'de, T, TAs, FORMAT, A> DeserializeAs<'de, smallvec_1::SmallVec<A>> for OneOrMany<TAs, FORMAT>
+impl<'de, T, TAs, FORMAT, A> DeserializeAs<'de, SmallVec<A>> for OneOrMany<TAs, FORMAT>
 where
     A: smallvec_1::Array<Item = T>,
     TAs: DeserializeAs<'de, T>,
     FORMAT: Format,
 {
-    fn deserialize_as<D>(deserializer: D) -> Result<smallvec_1::SmallVec<A>, D::Error>
+    fn deserialize_as<D>(deserializer: D) -> Result<SmallVec<A>, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -1816,7 +1816,7 @@ where
             content::de::ContentRefDeserializer::new(&content, is_hr),
         ) {
             Ok(one) => {
-                let mut res = smallvec_1::SmallVec::<A>::new();
+                let mut res = SmallVec::<A>::new();
                 res.push(one.into_inner());
                 return Ok(res);
             }
@@ -1825,7 +1825,7 @@ where
         let many_err: D::Error = match <DeserializeAsWrap<Vec<T>, Vec<TAs>>>::deserialize(
             content::de::ContentDeserializer::new(content, is_hr),
         ) {
-            Ok(many) => return Ok(smallvec_1::SmallVec::from_vec(many.into_inner())),
+            Ok(many) => return Ok(SmallVec::from_vec(many.into_inner())),
             Err(err) => err,
         };
         Err(DeError::custom(format_args!(
@@ -2156,7 +2156,7 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                     unexp => {
                         let mut buf: [u8; 58] = [0u8; 58];
                         Err(DeError::invalid_value(
-                            crate::utils::get_unexpected_u128(unexp, &mut buf),
+                            utils::get_unexpected_u128(unexp, &mut buf),
                             &self,
                         ))
                     }
@@ -2173,7 +2173,7 @@ impl<'de> DeserializeAs<'de, bool> for BoolFromInt<Strict> {
                     unexp => {
                         let mut buf: [u8; 58] = [0u8; 58];
                         Err(DeError::invalid_value(
-                            crate::utils::get_unexpected_i128(unexp, &mut buf),
+                            utils::get_unexpected_i128(unexp, &mut buf),
                             &"0 or 1",
                         ))
                     }

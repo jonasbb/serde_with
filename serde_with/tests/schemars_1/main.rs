@@ -207,15 +207,8 @@ fn schemars_deserialize_only_bug_735() {
 }
 
 #[test]
+#[allow(unused_qualifications)]
 fn schemars_custom_schema_with() {
-    fn custom_int(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        use schemars::json_schema;
-
-        json_schema!({
-            "type": "integer"
-        })
-    }
-
     #[serde_as]
     #[derive(JsonSchema, Serialize)]
     struct Test {
@@ -237,6 +230,13 @@ fn schemars_custom_schema_with() {
         "with_disabled": "5",
         "always_enabled": 7,
     }));
+    fn custom_int(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        use schemars::json_schema;
+
+        json_schema!({
+            "type": "integer"
+        })
+    }
 }
 
 mod test_std {

@@ -62,7 +62,7 @@ impl Content {
     pub(crate) fn as_str(&self) -> Option<&str> {
         match self {
             Self::String(x) => Some(x),
-            Self::Bytes(x) => core::str::from_utf8(x).ok(),
+            Self::Bytes(x) => str::from_utf8(x).ok(),
             _ => None,
         }
     }

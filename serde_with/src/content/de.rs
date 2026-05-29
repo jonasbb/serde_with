@@ -2212,8 +2212,8 @@ fn content_as_str<'a, 'de>(content: &'a Content<'de>) -> Option<&'a str> {
     match *content {
         Content::Str(x) => Some(x),
         Content::String(ref x) => Some(x),
-        Content::Bytes(x) => core::str::from_utf8(x).ok(),
-        Content::ByteBuf(ref x) => core::str::from_utf8(x).ok(),
+        Content::Bytes(x) => str::from_utf8(x).ok(),
+        Content::ByteBuf(ref x) => str::from_utf8(x).ok(),
         _ => None,
     }
 }

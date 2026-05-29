@@ -130,7 +130,7 @@ where
                     .iter_mut()
                     .map(|field| function(field).map_err(|err| err.with_span(&field)))
                     // turn the Err variant into the Some, such that we only collect errors
-                    .filter_map(std::result::Result::err)
+                    .filter_map(Result::err)
                     .collect();
                 if errors.is_empty() {
                     Ok(())
@@ -144,7 +144,7 @@ where
                     .iter_mut()
                     .map(|field| function(field).map_err(|err| err.with_span(&field)))
                     // turn the Err variant into the Some, such that we only collect errors
-                    .filter_map(std::result::Result::err)
+                    .filter_map(Result::err)
                     .collect();
                 if errors.is_empty() {
                     Ok(())
@@ -193,7 +193,7 @@ where
                 .iter_mut()
                 .map(|variant| apply_on_fields(&mut variant.fields, function))
                 // turn the Err variant into the Some, such that we only collect errors
-                .filter_map(std::result::Result::err),
+                .filter_map(Result::err),
         );
 
         if errors.is_empty() {
