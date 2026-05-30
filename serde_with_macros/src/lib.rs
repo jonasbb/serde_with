@@ -456,7 +456,7 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// # Example
 ///
 /// ```rust,ignore
-/// use serde_with::{serde_as, DisplayFromStr, Map};
+/// use serde_with::{serde_as, BytesOrString, DisplayFromStr, Map};
 ///
 /// #[serde_as]
 /// #[derive(Serialize, Deserialize)]
@@ -465,8 +465,11 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 ///     #[serde_as(as = "_")]
 ///     a: u32,
 ///
-///     /// Serialize into String
-///     #[serde_as(as = "DisplayFromStr")]
+///     /// Serialize into String, deserialize from Bytes or String
+///     #[serde_as(
+///         serialize_as = "DisplayFromStr",
+///         deserialize_as = "BytesOrString"
+///     )]
 ///     b: u32,
 ///
 ///     /// Serialize into a map from String to String
