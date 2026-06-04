@@ -15,10 +15,7 @@
 //! <https://github.com/serde-rs/serde/pull/2348>
 
 use self::utils::{get_unexpected_i128, get_unexpected_u128};
-use crate::{
-    prelude::*,
-    utils::{size_hint_cautious, size_hint_from_bounds},
-};
+use crate::{prelude::*, utils::size_hint_from_bounds};
 
 /// Used from generated code to buffer the contents of the Deserializer when
 /// deserializing untagged enums and internally tagged enums.
@@ -281,7 +278,7 @@ impl<'de> Visitor<'de> for ContentVisitor<'de> {
     where
         V: SeqAccess<'de>,
     {
-        let mut vec = Vec::with_capacity(size_hint_cautious::<Content<'_>>(visitor.size_hint()));
+        let mut vec = utils::vec_with_capacity_cautious(visitor.size_hint());
         while let Some(e) = visitor.next_element()? {
             vec.push(e);
         }
@@ -292,9 +289,7 @@ impl<'de> Visitor<'de> for ContentVisitor<'de> {
     where
         V: MapAccess<'de>,
     {
-        let mut vec = Vec::with_capacity(size_hint_cautious::<(Content<'_>, Content<'_>)>(
-            visitor.size_hint(),
-        ));
+        let mut vec = utils::vec_with_capacity_cautious(visitor.size_hint());
         while let Some(kv) = visitor.next_entry()? {
             vec.push(kv);
         }

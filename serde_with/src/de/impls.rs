@@ -33,37 +33,37 @@ pub(crate) mod macros {
             #[cfg(feature = "std")]
             $m!(
                 HashMap<K: Eq + Hash, V, S: BuildHasher + Default>,
-                (|size| HashMap::with_capacity_and_hasher(size, Default::default()))
+                (|size| HashMap::with_capacity_and_hasher(crate::utils::size_hint_cautious::<(K,V)>(Some(size)), Default::default()))
             );
             #[cfg(feature = "hashbrown_0_14")]
             $m!(
                 HashbrownMap014<K: Eq + Hash, V, S: BuildHasher + Default>,
-                (|size| HashbrownMap014::with_capacity_and_hasher(size, Default::default()))
+                (|size| HashbrownMap014::with_capacity_and_hasher(crate::utils::size_hint_cautious::<(K,V)>(Some(size)), Default::default()))
             );
             #[cfg(feature = "hashbrown_0_15")]
             $m!(
                 HashbrownMap015<K: Eq + Hash, V, S: BuildHasher + Default>,
-                (|size| HashbrownMap015::with_capacity_and_hasher(size, Default::default()))
+                (|size| HashbrownMap015::with_capacity_and_hasher(crate::utils::size_hint_cautious::<(K,V)>(Some(size)), Default::default()))
             );
             #[cfg(feature = "hashbrown_0_16")]
             $m!(
                 HashbrownMap016<K: Eq + Hash, V, S: BuildHasher + Default>,
-                (|size| HashbrownMap016::with_capacity_and_hasher(size, Default::default()))
+                (|size| HashbrownMap016::with_capacity_and_hasher(crate::utils::size_hint_cautious::<(K,V)>(Some(size)), Default::default()))
             );
             #[cfg(feature = "hashbrown_0_17")]
             $m!(
                 HashbrownMap017<K: Eq + Hash, V, S: BuildHasher + Default>,
-                (|size| HashbrownMap017::with_capacity_and_hasher(size, Default::default()))
+                (|size| HashbrownMap017::with_capacity_and_hasher(crate::utils::size_hint_cautious::<(K,V)>(Some(size)), Default::default()))
             );
             #[cfg(feature = "indexmap_1")]
             $m!(
                 IndexMap<K: Eq + Hash, V, S: BuildHasher + Default>,
-                (|size| IndexMap::with_capacity_and_hasher(size, Default::default()))
+                (|size| IndexMap::with_capacity_and_hasher(crate::utils::size_hint_cautious::<(K,V)>(Some(size)), Default::default()))
             );
             #[cfg(feature = "indexmap_2")]
             $m!(
                 IndexMap2<K: Eq + Hash, V, S: BuildHasher + Default>,
-                (|size| IndexMap2::with_capacity_and_hasher(size, Default::default()))
+                (|size| IndexMap2::with_capacity_and_hasher(crate::utils::size_hint_cautious::<(K,V)>(Some(size)), Default::default()))
             );
         };
     }
@@ -75,43 +75,43 @@ pub(crate) mod macros {
             #[cfg(feature = "std")]
             $m!(
                 HashSet<T: Eq + Hash, S: BuildHasher + Default>,
-                (|size| HashSet::with_capacity_and_hasher(size, S::default())),
+                (|size| HashSet::with_capacity_and_hasher(crate::utils::size_hint_cautious::<T>(Some(size)), S::default())),
                 insert
             );
             #[cfg(feature = "hashbrown_0_14")]
             $m!(
                 HashbrownSet014<T: Eq + Hash, S: BuildHasher + Default>,
-                (|size| HashbrownSet014::with_capacity_and_hasher(size, S::default())),
+                (|size| HashbrownSet014::with_capacity_and_hasher(crate::utils::size_hint_cautious::<T>(Some(size)), S::default())),
                 insert
             );
             #[cfg(feature = "hashbrown_0_15")]
             $m!(
                 HashbrownSet015<T: Eq + Hash, S: BuildHasher + Default>,
-                (|size| HashbrownSet015::with_capacity_and_hasher(size, S::default())),
+                (|size| HashbrownSet015::with_capacity_and_hasher(crate::utils::size_hint_cautious::<T>(Some(size)), S::default())),
                 insert
             );
             #[cfg(feature = "hashbrown_0_16")]
             $m!(
                 HashbrownSet016<T: Eq + Hash, S: BuildHasher + Default>,
-                (|size| HashbrownSet016::with_capacity_and_hasher(size, S::default())),
+                (|size| HashbrownSet016::with_capacity_and_hasher(crate::utils::size_hint_cautious::<T>(Some(size)), S::default())),
                 insert
             );
             #[cfg(feature = "hashbrown_0_17")]
             $m!(
                 HashbrownSet017<T: Eq + Hash, S: BuildHasher + Default>,
-                (|size| HashbrownSet017::with_capacity_and_hasher(size, S::default())),
+                (|size| HashbrownSet017::with_capacity_and_hasher(crate::utils::size_hint_cautious::<T>(Some(size)), S::default())),
                 insert
             );
             #[cfg(feature = "indexmap_1")]
             $m!(
                 IndexSet<T: Eq + Hash, S: BuildHasher + Default>,
-                (|size| IndexSet::with_capacity_and_hasher(size, S::default())),
+                (|size| IndexSet::with_capacity_and_hasher(crate::utils::size_hint_cautious::<T>(Some(size)), S::default())),
                 insert
             );
             #[cfg(feature = "indexmap_2")]
             $m!(
                 IndexSet2<T: Eq + Hash, S: BuildHasher + Default>,
-                (|size| IndexSet2::with_capacity_and_hasher(size, S::default())),
+                (|size| IndexSet2::with_capacity_and_hasher(crate::utils::size_hint_cautious::<T>(Some(size)), S::default())),
                 insert
             );
         };
@@ -124,19 +124,19 @@ pub(crate) mod macros {
             #[cfg(feature = "alloc")]
             $m!(
                 BinaryHeap<T: Ord>,
-                (|size| BinaryHeap::with_capacity(size)),
+                (|size| BinaryHeap::with_capacity(crate::utils::size_hint_cautious::<T>(Some(size)))),
                 push
             );
             #[cfg(feature = "alloc")]
-            $m!(BoxedSlice<T>, (|size| Vec::with_capacity(size)), push);
+            $m!(BoxedSlice<T>, (|size| crate::utils::vec_with_capacity_cautious(Some(size))), push);
             #[cfg(feature = "alloc")]
             $m!(LinkedList<T>, (|_| LinkedList::new()), push_back);
             #[cfg(feature = "alloc")]
-            $m!(Vec<T>, (|size| Vec::with_capacity(size)), push);
+            $m!(Vec<T>, (|size| crate::utils::vec_with_capacity_cautious(Some(size))), push);
             #[cfg(feature = "alloc")]
             $m!(
                 VecDeque<T>,
-                (|size| VecDeque::with_capacity(size)),
+                (|size| VecDeque::with_capacity(crate::utils::size_hint_cautious::<T>(Some(size)))),
                 push_back
             );
         };
