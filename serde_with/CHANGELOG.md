@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.21.0] - 2026-06-04
+
+### Security
+
+* [GHSA-7gcf-g7xr-8hxj](https://github.com/jonasbb/serde_with/security/advisories/GHSA-7gcf-g7xr-8hxj): KeyValueMap serialization panics on empty sequence or map entries
+    Bad or attacker controlled values could cause a panic while allocating too large values.
+    Fixed in #966 by setting a maximum allocation size during the creation of collections like `Vec` or sets.
+
+    Thanks to @7thParkk for reporting the issue.
+
 ### Added
 
-* Add `NoneAsZero` adapter that maps `Option<NonZero*>` to a plain integer, encoding `None` as `0` (#486)
+* Add `NoneAsZero` adapter that maps `Option<NonZero*>` to a plain integer, encoding `None` as `0` by @SAY-5 (#486)
+
+### Changed
+
+* Re-enable link-to-definition on docs.rs (#964)
+
+### Fixed
+
+* Fix some doc links to point to the correct types (#963)
+* Re-enable `unused_qualifications` and fix the resulting findings by @lms0806 (#962)
 
 ## [3.20.0] - 2026-05-10
 
