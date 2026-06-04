@@ -1,0 +1,3 @@
+disallowed-methods = [
+    {path = "std::vec::Vec::with_capacity", reason = "Large values can overflow the allocation capacity", replacement = "crate::utils::vec_with_capacity_cautious"},
+]

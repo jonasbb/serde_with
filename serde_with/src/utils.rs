@@ -15,6 +15,16 @@ pub(crate) fn size_hint_cautious<Element>(hint: Option<usize>) -> usize {
     }
 }
 
+/// Safer version of [`Vec::with_capacity`] that uses `size_hint_cautious` to prevent overflow when calculating the capacity.
+///
+/// Implemented to address crashes due to capacity overflow, e.g., GHSA-7gcf-g7xr-8hxj
+#[cfg(feature = "alloc")]
+#[inline]
+pub(crate) fn vec_with_capacity_cautious<Element>(hint: Option<usize>) -> Vec<Element> {
+    #[allow(clippy::disallowed_methods)]
+    Vec::with_capacity(size_hint_cautious::<Element>(hint))
+}
+
 /// Re-Implementation of `serde::private::de::size_hint::from_bounds`
 #[cfg(feature = "alloc")]
 #[inline]

@@ -607,7 +607,7 @@ where
             delegate: self.delegate,
             is_human_readable: self.is_human_readable,
             variant,
-            content: Content::TupleStruct(name, Vec::with_capacity(len)),
+            content: Content::TupleStruct(name, utils::vec_with_capacity_cautious(Some(len))),
         })
     }
 
@@ -634,7 +634,7 @@ where
             delegate: self.delegate,
             is_human_readable: self.is_human_readable,
             variant,
-            content: Content::Struct(name, Vec::with_capacity(len)),
+            content: Content::Struct(name, utils::vec_with_capacity_cautious(Some(len))),
         })
     }
 }

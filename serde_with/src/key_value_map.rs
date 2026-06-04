@@ -587,7 +587,7 @@ where
         Ok(KeyValueSeqSerializer {
             delegate: self.delegate,
             is_human_readable: self.is_human_readable,
-            content: Vec::with_capacity(len.unwrap_or(17) - 1),
+            content: utils::vec_with_capacity_cautious(Some(len.unwrap_or(17).saturating_sub(1))),
             key: None,
         })
     }
@@ -596,7 +596,7 @@ where
         Ok(KeyValueTupleSerializer {
             delegate: self.delegate,
             is_human_readable: self.is_human_readable,
-            content: Vec::with_capacity(len - 1),
+            content: utils::vec_with_capacity_cautious(Some(len.saturating_sub(1))),
             key: None,
         })
     }
@@ -610,7 +610,7 @@ where
             delegate: self.delegate,
             is_human_readable: self.is_human_readable,
             name,
-            content: Vec::with_capacity(len - 1),
+            content: utils::vec_with_capacity_cautious(Some(len.saturating_sub(1))),
             key: None,
         })
     }
@@ -629,7 +629,7 @@ where
         Ok(KeyValueMapSerializer {
             delegate: self.delegate,
             is_human_readable: self.is_human_readable,
-            content: Vec::with_capacity(len.unwrap_or(17) - 1),
+            content: utils::vec_with_capacity_cautious(Some(len.unwrap_or(17).saturating_sub(1))),
             next_is_magic_key: false,
             key: None,
             tmp: None,
@@ -645,7 +645,7 @@ where
             delegate: self.delegate,
             is_human_readable: self.is_human_readable,
             name,
-            content: Vec::with_capacity(len - 1),
+            content: utils::vec_with_capacity_cautious(Some(len.saturating_sub(1))),
             key: None,
         })
     }

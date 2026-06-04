@@ -60,6 +60,7 @@ redundant_closure_for_method_calls = "warn"
 semicolon_if_nothing_returned = "warn"
 # std_instead_of_core = "warn"
 # std_instead_of_alloc = "warn"
+disallowed_methods = "warn"
 
 [workspace.lints.rustdoc]
 missing_crate_level_docs = "warn"
