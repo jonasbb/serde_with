@@ -80,6 +80,59 @@ create_format!(
     Unpadded
 );
 
+/// When serializing a value of a type,
+///   that allows multiple types during deserialization,
+/// prefer a specific type.
+pub trait TypePreference: SerializeAs<[u8]> {}
+
+/// Prefer serializing it as ASCII string.
+pub struct PreferAsciiString;
+
+impl TypePreference for PreferAsciiString {}
+
+impl SerializeAs<[u8]> for PreferAsciiString {
+    fn serialize_as<S>(source: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match core::str::from_utf8(source) {
+            Ok(text) if text.is_ascii() => serializer.serialize_str(text),
+            _ => serializer.serialize_bytes(source),
+        }
+    }
+}
+
+/// Prefer serializing it as bytes.
+pub struct PreferBytes;
+
+impl TypePreference for PreferBytes {}
+
+impl SerializeAs<[u8]> for PreferBytes {
+    fn serialize_as<S>(source: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_bytes(source)
+    }
+}
+
+/// Prefer serializing it as string.
+pub struct PreferString;
+
+impl TypePreference for PreferString {}
+
+impl SerializeAs<[u8]> for PreferString {
+    fn serialize_as<S>(source: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match core::str::from_utf8(source) {
+            Ok(text) => serializer.serialize_str(text),
+            _ => serializer.serialize_bytes(source),
+        }
+    }
+}
+
 /// Specify how lenient the deserialization process should be
 ///
 /// Formats which make use of this trait should specify how it affects the deserialization behavior.
