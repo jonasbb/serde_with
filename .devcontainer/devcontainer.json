@@ -41,7 +41,7 @@
         "ghcr.io/devcontainers/features/github-cli:1": {
             "version": "latest"
         },
-        "ghcr.io/meaningful-ooo/devcontainer-features/fish:1": {
+        "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {
             "version": "latest"
         }
     },
