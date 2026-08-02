@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Add support for `jiff` v0.2 behind the new `jiff_0_2` feature flag (#936)
+    `jiff::SignedDuration` works with `DurationSeconds` and its variants.
+    `jiff::Timestamp`, `jiff::Zoned`, and `jiff::civil::DateTime` work with `TimestampSeconds` and its variants.
+    Deserializing a `jiff::Zoned` uses the system time zone, like `chrono::DateTime<Local>`.
+
 ## [3.21.0] - 2026-06-04
 
 ### Security

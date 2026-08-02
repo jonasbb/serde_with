@@ -303,6 +303,9 @@ pub mod formats;
 #[cfg(feature = "hex")]
 #[cfg_attr(docsrs, doc(cfg(feature = "hex")))]
 pub mod hex;
+#[cfg(feature = "jiff_0_2")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff_0_2")))]
+pub mod jiff_0_2;
 #[cfg(feature = "json")]
 #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
 pub mod json;
@@ -898,19 +901,22 @@ pub struct BytesOrString;
 /// Serialization of integers will round the duration to the nearest value.
 ///
 /// This type also supports [`chrono::Duration`] with the `chrono_0_4`-[feature flag].
+/// This type also supports [`jiff::SignedDuration`][::jiff_0_2::SignedDuration] with the `jiff_0_2`-[feature flag].
 /// This type also supports [`time::Duration`][::time_0_3::Duration] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different duration types.
 /// The `FORMAT` specifier defaults to `u64`/`f64`.
 ///
-/// | Duration Type         | Converter                 | Available `FORMAT`s      |
-/// | --------------------- | ------------------------- | ------------------------ |
-/// | `std::time::Duration` | `DurationSeconds`         | *`u64`*, `f64`, `String` |
-/// | `std::time::Duration` | `DurationSecondsWithFrac` | *`f64`*, `String`        |
-/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String`   |
-/// | `chrono::Duration`    | `DurationSecondsWithFrac` | *`f64`*, `String`        |
-/// | `time::Duration`      | `DurationSeconds`         | `i64`, `f64`, `String`   |
-/// | `time::Duration`      | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | Duration Type          | Converter                 | Available `FORMAT`s      |
+/// | ---------------------- | ------------------------- | ------------------------ |
+/// | `std::time::Duration`  | `DurationSeconds`         | *`u64`*, `f64`, `String` |
+/// | `std::time::Duration`  | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::Duration`     | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `chrono::Duration`     | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::SignedDuration` | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `jiff::SignedDuration` | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::Duration`       | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `time::Duration`       | `DurationSecondsWithFrac` | *`f64`*, `String`        |
 ///
 /// # Examples
 ///
@@ -1044,19 +1050,22 @@ pub struct DurationSeconds<
 /// For example, deserializing `DurationSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
 /// This type also supports [`chrono::Duration`] with the `chrono`-[feature flag].
+/// This type also supports [`jiff::SignedDuration`][::jiff_0_2::SignedDuration] with the `jiff_0_2`-[feature flag].
 /// This type also supports [`time::Duration`][::time_0_3::Duration] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different duration types.
 /// The `FORMAT` specifier defaults to `u64`/`f64`.
 ///
-/// | Duration Type         | Converter                 | Available `FORMAT`s      |
-/// | --------------------- | ------------------------- | ------------------------ |
-/// | `std::time::Duration` | `DurationSeconds`         | *`u64`*, `f64`, `String` |
-/// | `std::time::Duration` | `DurationSecondsWithFrac` | *`f64`*, `String`        |
-/// | `chrono::Duration`    | `DurationSeconds`         | `i64`, `f64`, `String`   |
-/// | `chrono::Duration`    | `DurationSecondsWithFrac` | *`f64`*, `String`        |
-/// | `time::Duration`      | `DurationSeconds`         | `i64`, `f64`, `String`   |
-/// | `time::Duration`      | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | Duration Type          | Converter                 | Available `FORMAT`s      |
+/// | ---------------------- | ------------------------- | ------------------------ |
+/// | `std::time::Duration`  | `DurationSeconds`         | *`u64`*, `f64`, `String` |
+/// | `std::time::Duration`  | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `chrono::Duration`     | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `chrono::Duration`     | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::SignedDuration` | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `jiff::SignedDuration` | `DurationSecondsWithFrac` | *`f64`*, `String`        |
+/// | `time::Duration`       | `DurationSeconds`         | `i64`, `f64`, `String`   |
+/// | `time::Duration`       | `DurationSecondsWithFrac` | *`f64`*, `String`        |
 ///
 /// # Examples
 ///
@@ -1224,6 +1233,7 @@ pub struct DurationNanoSecondsWithFrac<
 /// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
 /// This type also supports [`chrono::DateTime`] with the `chrono_0_4`-[feature flag].
+/// This type also supports [`jiff::Timestamp`][::jiff_0_2::Timestamp], [`jiff::Zoned`][::jiff_0_2::Zoned], and [`jiff::civil::DateTime`][::jiff_0_2::civil::DateTime] with the `jiff_0_2`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different timestamp types.
@@ -1239,6 +1249,12 @@ pub struct DurationNanoSecondsWithFrac<
 /// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 /// | `chrono::NaiveDateTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
 /// | `chrono::NaiveDateTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::Timestamp`         | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `jiff::Timestamp`         | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::Zoned`             | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `jiff::Zoned`             | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::civil::DateTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `jiff::civil::DateTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 /// | `time::OffsetDateTime`    | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
 /// | `time::OffsetDateTime`    | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 /// | `time::PrimitiveDateTime` | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
@@ -1378,6 +1394,7 @@ pub struct TimestampSeconds<
 /// For example, deserializing `TimestampSeconds<f64, Flexible>` will discard any subsecond precision during deserialization from `f64` and will parse a `String` as an integer number.
 ///
 /// This type also supports [`chrono::DateTime`] and [`chrono::NaiveDateTime`][NaiveDateTime] with the `chrono`-[feature flag].
+/// This type also supports [`jiff::Timestamp`][::jiff_0_2::Timestamp], [`jiff::Zoned`][::jiff_0_2::Zoned], and [`jiff::civil::DateTime`][::jiff_0_2::civil::DateTime] with the `jiff_0_2`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different timestamp types.
@@ -1393,6 +1410,12 @@ pub struct TimestampSeconds<
 /// | `chrono::DateTime<Local>` | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 /// | `chrono::NaiveDateTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
 /// | `chrono::NaiveDateTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::Timestamp`         | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `jiff::Timestamp`         | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::Zoned`             | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `jiff::Zoned`             | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
+/// | `jiff::civil::DateTime`   | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
+/// | `jiff::civil::DateTime`   | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 /// | `time::OffsetDateTime`    | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
 /// | `time::OffsetDateTime`    | `TimestampSecondsWithFrac` | *`f64`*, `String`        |
 /// | `time::PrimitiveDateTime` | `TimestampSeconds`         | *`i64`*, `f64`, `String` |
