@@ -304,15 +304,41 @@ where
 /// ```
 #[proc_macro_attribute]
 pub fn skip_serializing_none(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let res =
-        apply_function_to_struct_and_enum_fields(input, skip_serializing_none_add_attr_to_field)
-            .unwrap_or_else(|err| err.to_compile_error());
+    let res = apply_function_to_struct_and_enum_fields(input, |field| {
+        skip_serializing_if_add_attr_to_field(
+            field,
+            is_std_option,
+            "Option".into(),
+            "Option::is_none".into(),
+        )
+    })
+    .unwrap_or_else(|err| err.to_compile_error());
+    TokenStream::from(res)
+}
+
+/// Similar to [`skip_serializing_none`], but works for [`Vec`] fields using [`Vec::is_empty`] instead.
+#[proc_macro_attribute]
+pub fn skip_serializing_empty(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let res = apply_function_to_struct_and_enum_fields(input, |field| {
+        skip_serializing_if_add_attr_to_field(
+            field,
+            is_std_vec,
+            "Vec".into(),
+            "Vec::is_empty".into(),
+        )
+    })
+    .unwrap_or_else(|err| err.to_compile_error());
     TokenStream::from(res)
 }
 
 /// Add the `skip_serializing_if` annotation to each field of the struct
-fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), String> {
-    if is_std_option(&field.ty) {
+fn skip_serializing_if_add_attr_to_field(
+    field: &mut Field,
+    type_check: fn(&Type) -> bool,
+    type_name: String,
+    fn_name: String,
+) -> Result<(), String> {
+    if type_check(&field.ty) {
         let has_skip_serializing_if = field_has_attribute(field, "serde", "skip_serializing_if");
 
         // Remove the `serialize_always` attribute
@@ -342,18 +368,24 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
 
         // Add the `skip_serializing_if` attribute
         let attr = parse_quote!(
-            #[serde(skip_serializing_if = "Option::is_none")]
+            #[serde(skip_serializing_if = #fn_name)]
         );
         field.attrs.push(attr);
     } else {
+        // This check will likely have to be reworked, not sure how
+
+        /*
         // Warn on use of `serialize_always` on non-Option fields
         let has_attr = field
             .attrs
             .iter()
             .any(|attr| attr.path().is_ident("serialize_always"));
         if has_attr {
-            return Err("`serialize_always` may only be used on fields of type `Option`.".into());
+            return Err(format!(
+                "`serialize_always` may only be used on fields of type `{type_name}`."
+            ));
         }
+        */
     }
     Ok(())
 }
@@ -395,6 +427,48 @@ fn is_std_option(type_: &Type) -> bool {
                     && (path.segments[0].ident == "std" || path.segments[0].ident == "core")
                     && path.segments[1].ident == "option"
                     && path.segments[2].ident == "Option")
+        }
+        _ => false,
+    }
+}
+
+/// Return `true`, if the type path refers to `std::vec::Vec`
+///
+/// Accepts
+///
+/// * `Vec`
+/// * `std::vec::Vec`, with or without leading `::`
+/// * `alloc::vec::Vec`, with or without leading `::`
+fn is_std_vec(type_: &Type) -> bool {
+    match type_ {
+        Type::Array(_)
+        | Type::BareFn(_)
+        | Type::ImplTrait(_)
+        | Type::Infer(_)
+        | Type::Macro(_)
+        | Type::Never(_)
+        | Type::Ptr(_)
+        | Type::Reference(_)
+        | Type::Slice(_)
+        | Type::TraitObject(_)
+        | Type::Tuple(_)
+        | Type::Verbatim(_) => false,
+
+        Type::Group(syn::TypeGroup { elem, .. })
+        | Type::Paren(syn::TypeParen { elem, .. })
+        | Type::Path(syn::TypePath {
+            qself: Some(syn::QSelf { ty: elem, .. }),
+            ..
+        }) => is_std_vec(elem),
+
+        Type::Path(syn::TypePath { qself: None, path }) => {
+            (path.leading_colon.is_none()
+                && path.segments.len() == 1
+                && path.segments[0].ident == "Vec")
+                || (path.segments.len() == 3
+                    && (path.segments[0].ident == "std" || path.segments[0].ident == "alloc")
+                    && path.segments[1].ident == "vec"
+                    && path.segments[2].ident == "Vec")
         }
         _ => false,
     }
