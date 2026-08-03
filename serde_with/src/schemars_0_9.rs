@@ -1228,6 +1228,15 @@ mod timespan {
     #[cfg(feature = "chrono_0_4")]
     declare_timespan_target!(::chrono_0_4::NaiveDateTime { i64, f64, String });
 
+    #[cfg(feature = "jiff_0_2")]
+    declare_timespan_target!(::jiff_0_2::SignedDuration { i64, f64, String });
+    #[cfg(feature = "jiff_0_2")]
+    declare_timespan_target!(::jiff_0_2::Timestamp { i64, f64, String });
+    #[cfg(all(feature = "jiff_0_2", feature = "std"))]
+    declare_timespan_target!(::jiff_0_2::Zoned { i64, f64, String });
+    #[cfg(feature = "jiff_0_2")]
+    declare_timespan_target!(::jiff_0_2::civil::DateTime { i64, f64, String });
+
     #[cfg(feature = "time_0_3")]
     declare_timespan_target!(::time_0_3::Duration { i64, f64, String });
     #[cfg(feature = "time_0_3")]
