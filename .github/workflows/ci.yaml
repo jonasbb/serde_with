@@ -23,11 +23,11 @@ jobs:
         rust: ["stable", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy
@@ -47,11 +47,11 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1
         with:
           components: rustfmt
           cache: false
@@ -70,11 +70,11 @@ jobs:
         rust: ["1.88", "1.90", "1.95", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1
         with:
           toolchain: ${{ matrix.rust }}
           # Extra toolchain to test no_std
@@ -97,7 +97,7 @@ jobs:
       - name: "Check no_std+alloc (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo check --package serde_with --no-default-features --features=alloc --target thumbv7em-none-eabihf
       - name: "Check no_std+alloc+optional (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
-        run: cargo check --package serde_with --no-default-features --features=alloc,base58,base64,chrono_0_4,hashbrown_0_14,hashbrown_0_15,hashbrown_0_16,hex,indexmap_1,indexmap_2,json,time_0_3 --target thumbv7em-none-eabihf
+        run: cargo check --package serde_with --no-default-features --features=alloc,base58,base64,chrono_0_4,hashbrown_0_14,hashbrown_0_15,hashbrown_0_16,hex,indexmap_1,indexmap_2,jiff_0_2,json,time_0_3 --target thumbv7em-none-eabihf
 
       # The tests are split into build and run steps, to see the time impact of each
       # cargo test --all-targets does NOT run doctests
@@ -120,11 +120,11 @@ jobs:
     name: Test Coverage
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1
+        uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1
         with:
           toolchain: "nightly"
           components: "llvm-tools"

@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Security
+### Added
+
+* Add support for `jiff` v0.2 behind the new `jiff_0_2` feature flag (#936)
+    `jiff::SignedDuration` works with `DurationSeconds` and its variants.
+    `jiff::Timestamp`, `jiff::Zoned`, and `jiff::civil::DateTime` work with `TimestampSeconds` and its variants.
+    Deserializing a `jiff::Zoned` uses the system time zone, like `chrono::DateTime<Local>`.
+
+### Fixed
 
 * Extend the [GHSA-7gcf-g7xr-8hxj](https://github.com/jonasbb/serde_with/security/advisories/GHSA-7gcf-g7xr-8hxj) fix to the duplicate-key-prevention collections.
     The `rust::sets_duplicate_value_is_error`, `rust::maps_duplicate_key_is_error`, `rust::sets_last_value_wins`, and `rust::maps_first_key_wins` adapters created their backing sets/maps with `with_capacity_and_hasher` using the raw deserializer `size_hint`, bypassing the `size_hint_cautious` cap added in #966 (the `clippy.toml` `disallowed_methods` lint only covers `Vec::with_capacity`, not `with_capacity_and_hasher`, so these sites were not flagged).
