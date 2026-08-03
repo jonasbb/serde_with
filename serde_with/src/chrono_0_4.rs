@@ -12,6 +12,7 @@
 use crate::{
     formats::{Flexible, Format, Strict, Strictness},
     prelude::*,
+    utils::duration::{use_duration_signed_de, use_duration_signed_ser},
 };
 #[cfg(feature = "std")]
 use ::chrono_0_4::Local;
@@ -205,52 +206,6 @@ fn duration_into_duration_signed(dur: &Duration) -> DurationSigned {
     }
 }
 
-macro_rules! use_duration_signed_ser {
-    (
-        $main_trait:ident $internal_trait:ident
-        $(
-            => {
-                $ty:ty; $converter:ident =>
-                $($(#[$attr:meta])? {
-                    $format:ty, $strictness:ty =>
-                    $($tbound:ident: $bound:ident $(,)?)*
-                })*
-            }
-        )+
-    ) => {
-        $($(
-            $(#[$attr])?
-            impl<$($tbound ,)*> SerializeAs<$ty> for $main_trait<$format, $strictness>
-            where
-                $($tbound: $bound,)*
-            {
-                fn serialize_as<S>(source: &$ty, serializer: S) -> Result<S::Ok, S::Error>
-                where
-                    S: Serializer,
-                {
-                    let dur: DurationSigned = $converter(source);
-                    $internal_trait::<$format, $strictness>::serialize_as(
-                        &dur,
-                        serializer,
-                    )
-                }
-            }
-        )*)+
-    };
-    (
-        $main_traitA:ident $internal_traitA:ident,
-        $main_traitB:ident $internal_traitB:ident,
-        $main_traitC:ident $internal_traitC:ident,
-        $main_traitD:ident $internal_traitD:ident,
-        $(=> $rest:tt)+
-    ) => {
-        use_duration_signed_ser!($main_traitA $internal_traitA $(=> $rest)+);
-        use_duration_signed_ser!($main_traitB $internal_traitB $(=> $rest)+);
-        use_duration_signed_ser!($main_traitC $internal_traitC $(=> $rest)+);
-        use_duration_signed_ser!($main_traitD $internal_traitD $(=> $rest)+);
-    };
-}
-
 fn datetime_to_duration<TZ>(source: &DateTime<TZ>) -> DurationSigned
 where
     TZ: TimeZone,
@@ -324,49 +279,6 @@ use_duration_signed_ser!(
         #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
     }
 );
-
-macro_rules! use_duration_signed_de {
-    (
-        $main_trait:ident $internal_trait:ident
-        $(
-            => {
-                $ty:ty; $converter:ident =>
-                $($(#[$attr:meta])? {
-                    $format:ty, $strictness:ty =>
-                    $($tbound:ident: $bound:ident)*
-                })*
-            }
-        )+
-    ) =>{
-        $($(
-            $(#[$attr])?
-            impl<'de, $($tbound,)*> DeserializeAs<'de, $ty> for $main_trait<$format, $strictness>
-            where
-                $($tbound: $bound,)*
-            {
-                fn deserialize_as<D>(deserializer: D) -> Result<$ty, D::Error>
-                where
-                    D: Deserializer<'de>,
-                {
-                    let dur: DurationSigned = $internal_trait::<$format, $strictness>::deserialize_as(deserializer)?;
-                    $converter::<D>(dur)
-                }
-            }
-        )*)+
-    };
-    (
-        $main_traitA:ident $internal_traitA:ident,
-        $main_traitB:ident $internal_traitB:ident,
-        $main_traitC:ident $internal_traitC:ident,
-        $main_traitD:ident $internal_traitD:ident,
-        $(=> $rest:tt)+
-    ) => {
-        use_duration_signed_de!($main_traitA $internal_traitA $(=> $rest)+);
-        use_duration_signed_de!($main_traitB $internal_traitB $(=> $rest)+);
-        use_duration_signed_de!($main_traitC $internal_traitC $(=> $rest)+);
-        use_duration_signed_de!($main_traitD $internal_traitD $(=> $rest)+);
-    };
-}
 
 /// Convert a [`DurationSigned`] into a [`chrono_0_4::Duration`]
 fn duration_from_duration_signed<'de, D>(dur: DurationSigned) -> Result<Duration, D::Error>
