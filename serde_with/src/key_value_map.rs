@@ -235,10 +235,6 @@ where
     type SerializeStruct = Impossible<S::Ok, S::Error>;
     type SerializeStructVariant = Impossible<S::Ok, S::Error>;
 
-    fn is_human_readable(&self) -> bool {
-        self.0.is_human_readable()
-    }
-
     fn serialize_bool(self, _v: bool) -> Result<Self::Ok, Self::Error> {
         Err(SerError::custom("wrong type for KeyValueMap"))
     }
@@ -408,6 +404,10 @@ where
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
         Err(SerError::custom("wrong type for KeyValueMap"))
     }
+
+    fn is_human_readable(&self) -> bool {
+        self.0.is_human_readable()
+    }
 }
 
 /// Serialize a single element but turn the sequence into a map logic.
@@ -462,10 +462,6 @@ where
     type SerializeMap = KeyValueMapSerializer<'a, M>;
     type SerializeStruct = KeyValueStructSerializer<'a, M>;
     type SerializeStructVariant = Impossible<Self::Ok, Self::Error>;
-
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
 
     fn serialize_bool(self, _v: bool) -> Result<Self::Ok, Self::Error> {
         Err(SerError::custom("wrong type for KeyValueMap"))
@@ -658,6 +654,10 @@ where
         _len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
         Err(SerError::custom("wrong type for KeyValueMap"))
+    }
+
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
     }
 }
 
@@ -905,8 +905,11 @@ where
 {
     type Error = M::Error;
 
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+    where
+        V: Visitor<'de>,
+    {
+        self.deserialize_seq(visitor)
     }
 
     fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -916,11 +919,8 @@ where
         visitor.visit_seq(self)
     }
 
-    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
-    where
-        V: Visitor<'de>,
-    {
-        self.deserialize_seq(visitor)
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
     }
 
     forward_to_deserialize_any! {
@@ -969,10 +969,6 @@ where
     M: MapAccess<'de>,
 {
     type Error = M::Error;
-
-    fn is_human_readable(&self) -> bool {
-        self.is_human_readable
-    }
 
     fn deserialize_any<V>(self, visitor: V) -> Result<V::Value, Self::Error>
     where
@@ -1045,6 +1041,10 @@ where
             fields,
             first: Some(self.key_value),
         })
+    }
+
+    fn is_human_readable(&self) -> bool {
+        self.is_human_readable
     }
 
     forward_to_deserialize_any! {
@@ -1206,23 +1206,23 @@ where
         self.delegate.expecting(formatter)
     }
 
-    fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
-    where
-        A: MapAccess<'de>,
-    {
-        self.delegate.visit_map(MapAccessWrapper {
-            delegate: map,
-            is_human_readable: self.is_human_readable,
-            first: self.first,
-        })
-    }
-
     fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
     where
         A: SeqAccess<'de>,
     {
         self.delegate.visit_seq(SeqAccessWrapper {
             delegate: seq,
+            is_human_readable: self.is_human_readable,
+            first: self.first,
+        })
+    }
+
+    fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
+    where
+        A: MapAccess<'de>,
+    {
+        self.delegate.visit_map(MapAccessWrapper {
+            delegate: map,
             is_human_readable: self.is_human_readable,
             first: self.first,
         })
