@@ -15,9 +15,9 @@ use crate::{
     formats::{Flexible, Format, Strict, Strictness},
     prelude::*,
 };
-#[cfg(feature = "std")]
-use ::jiff_0_2::tz::TimeZone;
-use ::jiff_0_2::{civil::DateTime as CivilDateTime, SignedDuration, Timestamp, Zoned};
+use ::jiff_0_2::{
+    civil::DateTime as CivilDateTime, tz::TimeZone, SignedDuration, Timestamp, Zoned,
+};
 
 /// Create a [`CivilDateTime`] for the Unix Epoch
 fn unix_epoch_civil() -> CivilDateTime {
@@ -43,6 +43,181 @@ fn duration_into_duration_signed(dur: &SignedDuration) -> DurationSigned {
     )
 }
 
+macro_rules! use_duration_signed_ser {
+    (
+        $main_trait:ident $internal_trait:ident
+        $(
+            => {
+                $ty:ty; $converter:ident =>
+                $($(#[$attr:meta])? {
+                    $format:ty, $strictness:ty =>
+                    $($tbound:ident: $bound:ident $(,)?)*
+                })*
+            }
+        )+
+    ) => {
+        $($(
+            $(#[$attr])?
+            impl<$($tbound ,)*> SerializeAs<$ty> for $main_trait<$format, $strictness>
+            where
+                $($tbound: $bound,)*
+            {
+                fn serialize_as<S>(source: &$ty, serializer: S) -> Result<S::Ok, S::Error>
+                where
+                    S: Serializer,
+                {
+                    let dur: DurationSigned = $converter(source);
+                    $internal_trait::<$format, $strictness>::serialize_as(
+                        &dur,
+                        serializer,
+                    )
+                }
+            }
+        )*)+
+    };
+    (
+        $main_traitA:ident $internal_traitA:ident,
+        $main_traitB:ident $internal_traitB:ident,
+        $main_traitC:ident $internal_traitC:ident,
+        $main_traitD:ident $internal_traitD:ident,
+        $(=> $rest:tt)+
+    ) => {
+        use_duration_signed_ser!($main_traitA $internal_traitA $(=> $rest)+);
+        use_duration_signed_ser!($main_traitB $internal_traitB $(=> $rest)+);
+        use_duration_signed_ser!($main_traitC $internal_traitC $(=> $rest)+);
+        use_duration_signed_ser!($main_traitD $internal_traitD $(=> $rest)+);
+    };
+}
+
+fn timestamp_to_duration(source: &Timestamp) -> DurationSigned {
+    duration_into_duration_signed(&source.as_duration())
+}
+
+fn zoned_to_duration(source: &Zoned) -> DurationSigned {
+    timestamp_to_duration(&source.timestamp())
+}
+
+fn civil_datetime_to_duration(source: &CivilDateTime) -> DurationSigned {
+    duration_into_duration_signed(&source.duration_since(unix_epoch_civil()))
+}
+
+// No sub-unit precision
+use_duration_signed_ser!(
+    DurationSeconds DurationSeconds,
+    DurationMilliSeconds DurationMilliSeconds,
+    DurationMicroSeconds DurationMicroSeconds,
+    DurationNanoSeconds DurationNanoSeconds,
+    => {
+        SignedDuration; duration_into_duration_signed =>
+        {i64, STRICTNESS => STRICTNESS: Strictness}
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+);
+
+use_duration_signed_ser!(
+    TimestampSeconds DurationSeconds,
+    TimestampMilliSeconds DurationMilliSeconds,
+    TimestampMicroSeconds DurationMicroSeconds,
+    TimestampNanoSeconds DurationNanoSeconds,
+    => {
+        Timestamp; timestamp_to_duration =>
+        {i64, STRICTNESS => STRICTNESS: Strictness}
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+    => {
+        Zoned; zoned_to_duration =>
+        {i64, STRICTNESS => STRICTNESS: Strictness}
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+    => {
+        CivilDateTime; civil_datetime_to_duration =>
+        {i64, STRICTNESS => STRICTNESS: Strictness}
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+);
+
+// Duration/Timestamp WITH FRACTIONS
+use_duration_signed_ser!(
+    DurationSecondsWithFrac DurationSecondsWithFrac,
+    DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
+    DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
+    DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
+    => {
+        SignedDuration; duration_into_duration_signed =>
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+);
+
+use_duration_signed_ser!(
+    TimestampSecondsWithFrac DurationSecondsWithFrac,
+    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
+    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
+    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
+    => {
+        Timestamp; timestamp_to_duration =>
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+    => {
+        Zoned; zoned_to_duration =>
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+    => {
+        CivilDateTime; civil_datetime_to_duration =>
+        {f64, STRICTNESS => STRICTNESS: Strictness}
+        #[cfg(feature = "alloc")] {String, STRICTNESS => STRICTNESS: Strictness}
+    }
+);
+
+macro_rules! use_duration_signed_de {
+    (
+        $main_trait:ident $internal_trait:ident
+        $(
+            => {
+                $ty:ty; $converter:ident =>
+                $($(#[$attr:meta])? {
+                    $format:ty, $strictness:ty =>
+                    $($tbound:ident: $bound:ident)*
+                })*
+            }
+        )+
+    ) =>{
+        $($(
+            $(#[$attr])?
+            impl<'de, $($tbound,)*> DeserializeAs<'de, $ty> for $main_trait<$format, $strictness>
+            where
+                $($tbound: $bound,)*
+            {
+                fn deserialize_as<D>(deserializer: D) -> Result<$ty, D::Error>
+                where
+                    D: Deserializer<'de>,
+                {
+                    let dur: DurationSigned = $internal_trait::<$format, $strictness>::deserialize_as(deserializer)?;
+                    $converter::<D>(dur)
+                }
+            }
+        )*)+
+    };
+    (
+        $main_traitA:ident $internal_traitA:ident,
+        $main_traitB:ident $internal_traitB:ident,
+        $main_traitC:ident $internal_traitC:ident,
+        $main_traitD:ident $internal_traitD:ident,
+        $(=> $rest:tt)+
+    ) => {
+        use_duration_signed_de!($main_traitA $internal_traitA $(=> $rest)+);
+        use_duration_signed_de!($main_traitB $internal_traitB $(=> $rest)+);
+        use_duration_signed_de!($main_traitC $internal_traitC $(=> $rest)+);
+        use_duration_signed_de!($main_traitD $internal_traitD $(=> $rest)+);
+    };
+}
+
 /// Convert a [`DurationSigned`] into a [`SignedDuration`]
 fn duration_from_duration_signed<'de, D>(sdur: DurationSigned) -> Result<SignedDuration, D::Error>
 where
@@ -62,306 +237,6 @@ where
     Ok(dur)
 }
 
-macro_rules! use_duration_signed_ser {
-    (
-        $main_trait:ident $internal_trait:ident =>
-        {
-            $ty:ty; $converter:ident =>
-            $({
-                $format:ty, $strictness:ty =>
-                $($tbound:ident: $bound:ident $(,)?)*
-            })*
-        }
-    ) => {
-        $(
-            impl<$($tbound ,)*> SerializeAs<$ty> for $main_trait<$format, $strictness>
-            where
-                $($tbound: $bound,)*
-            {
-                fn serialize_as<S>(source: &$ty, serializer: S) -> Result<S::Ok, S::Error>
-                where
-                    S: Serializer,
-                {
-                    let dur: DurationSigned = $converter(source);
-                    $internal_trait::<$format, $strictness>::serialize_as(
-                        &dur,
-                        serializer,
-                    )
-                }
-            }
-        )*
-    };
-    (
-        $( $main_trait:ident $internal_trait:ident, )+ => $rest:tt
-    ) => {
-        $( use_duration_signed_ser!($main_trait $internal_trait => $rest); )+
-    };
-}
-
-fn timestamp_to_duration(source: &Timestamp) -> DurationSigned {
-    duration_into_duration_signed(&source.as_duration())
-}
-
-fn zoned_to_duration(source: &Zoned) -> DurationSigned {
-    timestamp_to_duration(&source.timestamp())
-}
-
-fn civil_datetime_to_duration(source: &CivilDateTime) -> DurationSigned {
-    duration_into_duration_signed(&source.duration_since(unix_epoch_civil()))
-}
-
-use_duration_signed_ser!(
-    DurationSeconds DurationSeconds,
-    DurationMilliSeconds DurationMilliSeconds,
-    DurationMicroSeconds DurationMicroSeconds,
-    DurationNanoSeconds DurationNanoSeconds,
-    => {
-        SignedDuration; duration_into_duration_signed =>
-        {i64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    DurationSeconds DurationSeconds,
-    DurationMilliSeconds DurationMilliSeconds,
-    DurationMicroSeconds DurationMicroSeconds,
-    DurationNanoSeconds DurationNanoSeconds,
-    => {
-        SignedDuration; duration_into_duration_signed =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    DurationSeconds DurationSeconds,
-    DurationMilliSeconds DurationMilliSeconds,
-    DurationMicroSeconds DurationMicroSeconds,
-    DurationNanoSeconds DurationNanoSeconds,
-    => {
-        SignedDuration; duration_into_duration_signed =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Timestamp; timestamp_to_duration =>
-        {i64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Timestamp; timestamp_to_duration =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Timestamp; timestamp_to_duration =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Zoned; zoned_to_duration =>
-        {i64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Zoned; zoned_to_duration =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Zoned; zoned_to_duration =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        CivilDateTime; civil_datetime_to_duration =>
-        {i64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        CivilDateTime; civil_datetime_to_duration =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        CivilDateTime; civil_datetime_to_duration =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-
-// Duration/Timestamp WITH FRACTIONS
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    DurationSecondsWithFrac DurationSecondsWithFrac,
-    DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        SignedDuration; duration_into_duration_signed =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    DurationSecondsWithFrac DurationSecondsWithFrac,
-    DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        SignedDuration; duration_into_duration_signed =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        Timestamp; timestamp_to_duration =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        Timestamp; timestamp_to_duration =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        Zoned; zoned_to_duration =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        Zoned; zoned_to_duration =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_ser!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        CivilDateTime; civil_datetime_to_duration =>
-        {String, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_ser!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        CivilDateTime; civil_datetime_to_duration =>
-        {f64, STRICTNESS => STRICTNESS: Strictness}
-    }
-);
-
-macro_rules! use_duration_signed_de {
-    (
-        $main_trait:ident $internal_trait:ident =>
-        {
-            $ty:ty; $converter:ident =>
-            $({
-                $format:ty, $strictness:ty =>
-                $($tbound:ident: $bound:ident)*
-            })*
-        }
-    ) =>{
-        $(
-            impl<'de, $($tbound,)*> DeserializeAs<'de, $ty> for $main_trait<$format, $strictness>
-            where
-                $($tbound: $bound,)*
-            {
-                fn deserialize_as<D>(deserializer: D) -> Result<$ty, D::Error>
-                where
-                    D: Deserializer<'de>,
-                {
-                    let dur: DurationSigned = $internal_trait::<$format, $strictness>::deserialize_as(deserializer)?;
-                    $converter::<D>(dur)
-                }
-            }
-        )*
-    };
-    (
-        $( $main_trait:ident $internal_trait:ident, )+ => $rest:tt
-    ) => {
-        $( use_duration_signed_de!($main_trait $internal_trait => $rest); )+
-    };
-}
-
 fn duration_to_timestamp<'de, D>(dur: DurationSigned) -> Result<Timestamp, D::Error>
 where
     D: Deserializer<'de>,
@@ -373,7 +248,7 @@ where
     })
 }
 
-#[cfg(feature = "std")]
+// #[cfg(feature = "std")]
 fn duration_to_zoned<'de, D>(dur: DurationSigned) -> Result<Zoned, D::Error>
 where
     D: Deserializer<'de>,
@@ -394,7 +269,7 @@ where
         })
 }
 
-// No sub-second precision
+// No sub-unit precision
 use_duration_signed_de!(
     DurationSeconds DurationSeconds,
     DurationMilliSeconds DurationMilliSeconds,
@@ -402,110 +277,38 @@ use_duration_signed_de!(
     DurationNanoSeconds DurationNanoSeconds,
     => {
         SignedDuration; duration_from_duration_signed =>
-        {i64, Strict =>}
         {FORMAT, Flexible => FORMAT: Format}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_de!(
-    DurationSeconds DurationSeconds,
-    DurationMilliSeconds DurationMilliSeconds,
-    DurationMicroSeconds DurationMicroSeconds,
-    DurationNanoSeconds DurationNanoSeconds,
-    => {
-        SignedDuration; duration_from_duration_signed =>
-        {String, Strict =>}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    DurationSeconds DurationSeconds,
-    DurationMilliSeconds DurationMilliSeconds,
-    DurationMicroSeconds DurationMicroSeconds,
-    DurationNanoSeconds DurationNanoSeconds,
-    => {
-        SignedDuration; duration_from_duration_signed =>
-        {f64, Strict =>}
-    }
-);
-use_duration_signed_de!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Timestamp; duration_to_timestamp =>
         {i64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
+        #[cfg(feature = "std")] {f64, Strict =>}
+    }
+);
+
+use_duration_signed_de!(
+    TimestampSeconds DurationSeconds,
+    TimestampMilliSeconds DurationMilliSeconds,
+    TimestampMicroSeconds DurationMicroSeconds,
+    TimestampNanoSeconds DurationNanoSeconds,
+    => {
+        Timestamp; duration_to_timestamp =>
         {FORMAT, Flexible => FORMAT: Format}
+        {i64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
+        #[cfg(feature = "std")] {f64, Strict =>}
     }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_de!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Timestamp; duration_to_timestamp =>
-        {String, Strict =>}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        Timestamp; duration_to_timestamp =>
-        {f64, Strict =>}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
     => {
         Zoned; duration_to_zoned =>
-        {i64, Strict =>}
-        {f64, Strict =>}
-        {String, Strict =>}
         {FORMAT, Flexible => FORMAT: Format}
-    }
-);
-use_duration_signed_de!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        CivilDateTime; duration_to_civil_datetime =>
         {i64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
+        #[cfg(feature = "std")] {f64, Strict =>}
+    }
+    => {
+        CivilDateTime; duration_to_civil_datetime =>
         {FORMAT, Flexible => FORMAT: Format}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_de!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        CivilDateTime; duration_to_civil_datetime =>
-        {String, Strict =>}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    TimestampSeconds DurationSeconds,
-    TimestampMilliSeconds DurationMilliSeconds,
-    TimestampMicroSeconds DurationMicroSeconds,
-    TimestampNanoSeconds DurationNanoSeconds,
-    => {
-        CivilDateTime; duration_to_civil_datetime =>
-        {f64, Strict =>}
+        {i64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
+        #[cfg(feature = "std")] {f64, Strict =>}
     }
 );
 
@@ -518,30 +321,11 @@ use_duration_signed_de!(
     => {
         SignedDuration; duration_from_duration_signed =>
         {FORMAT, Flexible => FORMAT: Format}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_de!(
-    DurationSecondsWithFrac DurationSecondsWithFrac,
-    DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        SignedDuration; duration_from_duration_signed =>
-        {String, Strict =>}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    DurationSecondsWithFrac DurationSecondsWithFrac,
-    DurationMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    DurationMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    DurationNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        SignedDuration; duration_from_duration_signed =>
         {f64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
     }
 );
+
 use_duration_signed_de!(
     TimestampSecondsWithFrac DurationSecondsWithFrac,
     TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
@@ -550,72 +334,19 @@ use_duration_signed_de!(
     => {
         Timestamp; duration_to_timestamp =>
         {FORMAT, Flexible => FORMAT: Format}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_de!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        Timestamp; duration_to_timestamp =>
-        {String, Strict =>}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        Timestamp; duration_to_timestamp =>
         {f64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
     }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
         Zoned; duration_to_zoned =>
-        {f64, Strict =>}
-        {String, Strict =>}
         {FORMAT, Flexible => FORMAT: Format}
+        {f64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
     }
-);
-use_duration_signed_de!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
     => {
         CivilDateTime; duration_to_civil_datetime =>
         {FORMAT, Flexible => FORMAT: Format}
-    }
-);
-#[cfg(feature = "alloc")]
-use_duration_signed_de!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        CivilDateTime; duration_to_civil_datetime =>
-        {String, Strict =>}
-    }
-);
-#[cfg(feature = "std")]
-use_duration_signed_de!(
-    TimestampSecondsWithFrac DurationSecondsWithFrac,
-    TimestampMilliSecondsWithFrac DurationMilliSecondsWithFrac,
-    TimestampMicroSecondsWithFrac DurationMicroSecondsWithFrac,
-    TimestampNanoSecondsWithFrac DurationNanoSecondsWithFrac,
-    => {
-        CivilDateTime; duration_to_civil_datetime =>
         {f64, Strict =>}
+        #[cfg(feature = "alloc")] {String, Strict =>}
     }
 );
