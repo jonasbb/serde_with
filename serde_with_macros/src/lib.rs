@@ -21,8 +21,6 @@
 // Not needed for 2018 edition and conflicts with `rust_2018_idioms`
 #![doc(test(no_crate_inject))]
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/3.22.0/")]
-// Tarpaulin does not work well with proc macros and marks most of the lines as uncovered.
-#![cfg(not(tarpaulin_include))]
 // FIXME: The darling 0.24.0 derives trigger this lint
 #![allow(unused_qualifications)]
 

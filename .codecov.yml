@@ -32,10 +32,8 @@ coverage:
         # Only include coverage of the "tests/" folder
         paths:
           - "serde_with/tests/"
-        # We cannot require 100%, as tarpaulin has some issues in counting lines
-        # Require at least 90% to pass this check
-        # FIXME: target is currently broken: https://community.codecov.io/t/github-check-not-properly-handling-subsets-of-files/1853
-        # target: 90%
+        # Compare the coverage with the base branch
+        target: auto
         # Allow the coverage to change by up to 5%
         threshold: "5%"
 
@@ -50,10 +48,8 @@ coverage:
       serde_with_macros_test:
         paths:
           - "serde_with_macros/tests/"
-        # We cannot require 100%, as tarpaulin has some issues in counting lines
-        # Require at least 90% to pass this check
-        # FIXME: target is currently broken: https://community.codecov.io/t/github-check-not-properly-handling-subsets-of-files/1853
-        # target: 90%
+        # Compare the coverage with the base branch
+        target: auto
         # Allow the coverage to change by up to 5%
         threshold: "5%"
 
