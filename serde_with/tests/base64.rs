@@ -43,7 +43,9 @@ fn base64_vec() {
     );
     check_error_deserialization::<BDefault>(
         r#"["zz"]"#,
-        expect!["Invalid last symbol 122, offset 1. at line 1 column 5"],
+        expect![
+            "Invalid last symbol 0x7a ('z') at offset 1, decoded as 0b00110011. at line 1 column 5"
+        ],
     );
 
     #[serde_as]
