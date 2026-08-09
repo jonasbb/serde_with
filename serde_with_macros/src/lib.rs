@@ -23,6 +23,8 @@
 #![doc(html_root_url = "https://docs.rs/serde_with_macros/3.22.0/")]
 // Tarpaulin does not work well with proc macros and marks most of the lines as uncovered.
 #![cfg(not(tarpaulin_include))]
+// FIXME: The darling 0.24.0 derives trigger this lint
+#![allow(unused_qualifications)]
 
 //! proc-macro extensions for [`serde_with`].
 //!
@@ -368,7 +370,7 @@ fn skip_serializing_none_add_attr_to_field(field: &mut Field) -> Result<(), Stri
 fn is_std_option(type_: &Type) -> bool {
     match type_ {
         Type::Array(_)
-        | Type::BareFn(_)
+        | Type::FnPtr(_)
         | Type::ImplTrait(_)
         | Type::Infer(_)
         | Type::Macro(_)
@@ -387,7 +389,11 @@ fn is_std_option(type_: &Type) -> bool {
             ..
         }) => is_std_option(elem),
 
-        Type::Path(syn::TypePath { qself: None, path }) => {
+        Type::Path(syn::TypePath {
+            qself: None,
+            path,
+            attrs: _,
+        }) => {
             (path.leading_colon.is_none()
                 && path.segments.len() == 1
                 && path.segments[0].ident == "Option")
@@ -860,9 +866,7 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
             Type::Paren(inner)
         }
         Type::Path(mut inner) => {
-            if let Some(Pair::End(mut t)) | Some(Pair::Punctuated(mut t, _)) =
-                inner.path.segments.pop()
-            {
+            if let Some(mut t) = inner.path.segments.pop() {
                 t.arguments = match t.arguments {
                     PathArguments::None => PathArguments::None,
                     PathArguments::AngleBracketed(mut inner) => {
@@ -882,11 +886,10 @@ fn replace_infer_type_with_type(to_replace: Type, replacement: &Type) -> Type {
                         PathArguments::AngleBracketed(inner)
                     }
                     PathArguments::Parenthesized(mut inner) => {
-                        inner.inputs = inner
-                            .inputs
-                            .into_iter()
-                            .map(|type_| replace_infer_type_with_type(type_, replacement))
-                            .collect();
+                        inner.inputs.iter_mut().for_each(|named_arg| {
+                            named_arg.ty =
+                                replace_infer_type_with_type(named_arg.ty.clone(), replacement);
+                        });
                         inner.output = match inner.output {
                             ReturnType::Type(arrow, mut type_) => {
                                 *type_ = replace_infer_type_with_type(*type_, replacement);
@@ -972,7 +975,7 @@ fn has_type_embedded(type_: &Type, embedded_type: &syn::Ident) -> bool {
                             inner
                                 .inputs
                                 .iter()
-                                .any(|type_| has_type_embedded(type_, embedded_type))
+                                .any(|named_arg| has_type_embedded(&named_arg.ty, embedded_type))
                                 || match &inner.output {
                                     ReturnType::Type(_arrow, type_) => {
                                         has_type_embedded(type_, embedded_type)
