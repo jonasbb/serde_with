@@ -502,12 +502,13 @@ fn unwrap_or_skip_none() {
 /// huge length panicked the parser ("Hash table capacity overflow") before a
 /// single element was read.
 mod malicious_size_hint {
-    use std::collections::{HashMap, HashSet};
-
-    use serde::de::{
-        value::Error as VError, DeserializeSeed, Deserializer, MapAccess, SeqAccess, Visitor,
+    use serde::{
+        de::{
+            value::Error as VError, DeserializeSeed, Deserializer, MapAccess, SeqAccess, Visitor,
+        },
+        Deserialize,
     };
-    use serde::Deserialize;
+    use std::collections::{HashMap, HashSet};
 
     // A deserializer whose seq/map report `size_hint == usize::MAX` but yield no
     // elements — mimicking untrusted input that lies about its length.

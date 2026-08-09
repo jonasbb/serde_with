@@ -138,7 +138,7 @@ fn ty_pattern_matches_ty(ty_pattern: &Type, ty: &Type) -> bool {
             let len_match = len_pattern == len || len_pattern.to_token_stream().to_string() == "_";
             ty_match && len_match
         }
-        (Type::BareFn(ty_pattern), Type::BareFn(ty)) => ty_pattern == ty,
+        (Type::FnPtr(ty_pattern), Type::FnPtr(ty)) => ty_pattern == ty,
         (Type::ImplTrait(ty_pattern), Type::ImplTrait(ty)) => ty_pattern == ty,
         (Type::Infer(_), _) => true,
         (Type::Macro(ty_pattern), Type::Macro(ty)) => ty_pattern == ty,
@@ -153,8 +153,13 @@ fn ty_pattern_matches_ty(ty_pattern: &Type, ty: &Type) -> bool {
             Type::Path(TypePath {
                 qself: qself_pattern,
                 path: path_pattern,
+                attrs: _,
             }),
-            Type::Path(TypePath { qself, path }),
+            Type::Path(TypePath {
+                qself,
+                path,
+                attrs: _,
+            }),
         ) => {
             /// Compare two paths for relaxed equality.
             ///
@@ -207,22 +212,16 @@ fn ty_pattern_matches_ty(ty_pattern: &Type, ty: &Type) -> bool {
         }
         (
             Type::Ptr(TypePtr {
-                const_token: const_token_pattern,
                 mutability: mutability_pattern,
                 elem: ty_pattern,
                 ..
             }),
             Type::Ptr(TypePtr {
-                const_token,
                 mutability,
                 elem: ty,
                 ..
             }),
-        ) => {
-            const_token_pattern == const_token
-                && mutability_pattern == mutability
-                && ty_pattern_matches_ty(ty_pattern, ty)
-        }
+        ) => mutability_pattern == mutability && ty_pattern_matches_ty(ty_pattern, ty),
         (
             Type::Reference(TypeReference {
                 lifetime: lifetime_pattern,
