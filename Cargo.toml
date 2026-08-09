@@ -35,7 +35,7 @@ unused_qualifications = "warn"
 variant_size_differences = "warn"
 # Unsafe code is needed for array initialization using MaybeUninit.
 # unsafe_code = "forbid"
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(tarpaulin)', 'cfg(tarpaulin_include)'] }
+unexpected_cfgs = { level = "warn", check-cfg = [] }
 
 [workspace.lints.clippy]
 # These lints have false positives and are disabled until they are fixed.
