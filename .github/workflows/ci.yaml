@@ -2,7 +2,6 @@ name: Rust CI
 on:
   # Always test pull requests
   pull_request:
-  # Bors related branches
   push:
     branches:
       - master
@@ -140,8 +139,7 @@ jobs:
           disable_search: true
           files: lcov.info
 
-  # Added to summarize the matrix (otherwise we would need to list every single
-  # job in bors.toml)
+  # Added to summarize the matrix
   # https://forum.bors.tech/t/bors-with-github-workflows/426
   tests-result:
     name: Tests result
