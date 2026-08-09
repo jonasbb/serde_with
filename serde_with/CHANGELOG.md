@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.22.0] - 2026-08-09
+
 ### Added
 
 * Add support for `jiff` v0.2 behind the new `jiff_0_2` feature flag (#936)
