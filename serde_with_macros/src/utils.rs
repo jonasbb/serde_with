@@ -8,7 +8,8 @@ use syn::{
     parse::{Parse, ParseStream},
     parse_quote,
     punctuated::Punctuated,
-    Attribute, DeriveInput, Generics, Meta, Path, PathSegment, Token, TypeGenerics, WhereClause,
+    Attribute, DeriveInput, Generics, LitBool, Meta, Path, PathSegment, Token, TypeGenerics,
+    WhereClause,
 };
 
 /// Merge multiple [`syn::Error`] into one.
@@ -85,7 +86,7 @@ impl ToTokens for DeImplGenerics<'_> {
 ///            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 struct CfgAttr {
-    condition: Meta,
+    condition: CfgAttrCondition,
     _comma: Token![,],
     metas: Punctuated<Meta, Token![,]>,
 }
@@ -97,6 +98,61 @@ impl Parse for CfgAttr {
             _comma: input.parse()?,
             metas: Punctuated::parse_terminated(input)?,
         })
+    }
+}
+
+/// Represents the condition of a `#[cfg_attr]` attribute.
+///
+/// ```text
+/// #[cfg_attr(feature = "things", derive(Macro))]
+///            ^^^^^^^^^^^^^^^^^^
+/// ```
+///
+/// ```text
+/// #[cfg_attr(true, derive(Macro))]
+///            ^^^^
+/// ```
+///
+/// ```text
+/// #[cfg_attr(all(), derive(Macro))]
+///            ^^^^^
+/// ```
+///
+/// Find more information about the syntax in the reference:
+/// <https://doc.rust-lang.org/reference/conditional-compilation.html>
+#[allow(clippy::large_enum_variant)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub(crate) enum CfgAttrCondition {
+    /// `false` keyword
+    False,
+    /// `true` keyword
+    True,
+    /// Generic `Meta` expression, e.g. `feature = "things"`, `all(...)`, `any(...)`, `not(...)`
+    Meta(Meta),
+}
+
+impl Parse for CfgAttrCondition {
+    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
+        if input.peek(LitBool) {
+            let lit_bool = input.parse::<LitBool>()?;
+            if lit_bool.value {
+                Ok(Self::True)
+            } else {
+                Ok(Self::False)
+            }
+        } else {
+            Ok(Self::Meta(input.parse()?))
+        }
+    }
+}
+
+impl ToTokens for CfgAttrCondition {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        match self {
+            Self::False => tokens.extend(quote::quote!(false)),
+            Self::True => tokens.extend(quote::quote!(true)),
+            Self::Meta(meta) => meta.to_tokens(tokens),
+        }
     }
 }
 
@@ -123,7 +179,7 @@ pub(crate) fn has_derive_jsonschema(input: TokenStream) -> syn::Result<SchemaFie
                     condition, metas, ..
                 } = meta.require_list()?.parse_args()?;
 
-                Ok(eval_metas(&metas)? & SchemaFieldConfig::Lazy(condition.into()))
+                Ok(eval_metas(&metas)? & SchemaFieldConfig::from(condition))
             }
             path if path.is_ident("derive") => {
                 let config = if meta
@@ -158,14 +214,14 @@ pub(crate) fn has_derive_jsonschema(input: TokenStream) -> syn::Result<SchemaFie
 /// Enum controlling when we should emit a `#[schemars]` field attribute.
 pub(crate) type SchemaFieldConfig = LazyBool<SchemaFieldCondition>;
 
-impl From<Meta> for SchemaFieldConfig {
-    fn from(meta: Meta) -> Self {
-        Self::Lazy(meta.into())
+impl From<CfgAttrCondition> for SchemaFieldConfig {
+    fn from(cfg_attr_condition: CfgAttrCondition) -> Self {
+        Self::Lazy(SchemaFieldCondition(cfg_attr_condition))
     }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub(crate) struct SchemaFieldCondition(pub(crate) Meta);
+pub(crate) struct SchemaFieldCondition(pub(crate) CfgAttrCondition);
 
 impl BitAnd for SchemaFieldCondition {
     type Output = Self;
@@ -200,12 +256,6 @@ impl Not for SchemaFieldCondition {
     fn not(self) -> Self::Output {
         let Self(condition) = self;
         Self(parse_quote!(not(#condition)))
-    }
-}
-
-impl From<Meta> for SchemaFieldCondition {
-    fn from(meta: Meta) -> Self {
-        Self(meta)
     }
 }
 

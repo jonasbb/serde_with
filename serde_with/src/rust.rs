@@ -18,7 +18,7 @@ use crate::prelude::*;
 /// This cannot work, since there is no way to tell the `Vec` to skip the inner `DoubleOption` if it is `None`.
 ///
 /// ```rust
-/// # #[cfg(any())] {
+/// # #[cfg(false)] {
 /// # struct Foobar {
 /// #[serde_as(as = "Vec<DoubleOption<_>>")]
 /// data: Vec<Option<Option<i32>>>,
@@ -182,7 +182,7 @@ pub mod unwrap_or_skip {
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
 ///
 /// ```rust
-/// # #[cfg(any())] {
+/// # #[cfg(false)] {
 /// #[serde_as]
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
@@ -298,7 +298,7 @@ pub mod sets_duplicate_value_is_error {
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
 ///
 /// ```rust
-/// # #[cfg(any())] {
+/// # #[cfg(false)] {
 /// #[serde_as]
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
@@ -418,7 +418,7 @@ pub mod maps_duplicate_key_is_error {
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
 ///
 /// ```rust
-/// # #[cfg(any())] {
+/// # #[cfg(false)] {
 /// #[serde_as]
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
@@ -506,7 +506,7 @@ pub mod sets_last_value_wins {
 /// The `_` is a placeholder which works for any type which implements [`Serialize`]/[`Deserialize`].
 ///
 /// ```rust
-/// # #[cfg(any())] {
+/// # #[cfg(false)] {
 /// #[serde_as]
 /// #[derive(Deserialize, Serialize)]
 /// struct A {
