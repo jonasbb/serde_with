@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Update `syn` and `darling` dependencies to use `syn` v3 (#992)
 * Update dev-dependencies to newer versions (#993)
 * Update `base64` to a newer version. This should not have any API change, but some error messages might change. (#993)
+* `serde_as` can now parse `cfg_attr(true, ...)` and `cfg_attr(false, ...)` (#995)
+    `true`/`false` are new literals as of Rust 1.88 but need to be parsed explicitly with the `syn` types.
+    This is used when emitting `schemars` annotations.
 
 ## [3.22.0] - 2026-08-09
 
