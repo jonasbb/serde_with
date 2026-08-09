@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Update `syn` and `darling` dependencies to use `syn` v3 (#992)
+
 ## [3.22.0] - 2026-08-09
 
 No changes.
