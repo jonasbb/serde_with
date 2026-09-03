@@ -2800,3 +2800,6 @@ pub struct SetLastValueWins<T>(PhantomData<T>);
     feature = "schemars_1"
 ))]
 pub struct Schema<T: ?Sized, TA>(PhantomData<T>, PhantomData<TA>);
+
+// Test error matcher
+struct Unused;
