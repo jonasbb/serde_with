@@ -127,7 +127,7 @@ jobs:
         with:
           toolchain: "nightly"
           components: "llvm-tools"
-          build-warnings: ""
+          build-warnings: "allow"
       - name: Run cargo llvm-cov
         continue-on-error: true
         run: |
