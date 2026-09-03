@@ -30,6 +30,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy
+          build-warnings: ""
 
       - name: clippy "No Default Features" (${{ matrix.os }} / ${{ matrix.rust }})
         run: cargo clippy --workspace --no-default-features --all-targets
@@ -78,6 +79,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           # Extra toolchain to test no_std
           target: thumbv7em-none-eabihf
+          build-warnings: ""
 
       # # Test that the project also compiles with the newest dependencies.
       # # On nightly there is little cache reuse, so there is not much overhead
@@ -127,7 +129,6 @@ jobs:
         with:
           toolchain: "nightly"
           components: "llvm-tools"
-          build-warnings: "allow"
       - name: Run cargo llvm-cov
         continue-on-error: true
         run: |
