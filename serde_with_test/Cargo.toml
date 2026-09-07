@@ -16,5 +16,9 @@ s = { package = "serde", version = "1.0.75", features = ["derive"] }
 s_json = { package = "serde_json", version = "1.0.151" }
 s_with = { package = "serde_with", path = "../serde_with" }
 
+# Do not inherit the workspace lints
+# The tests in this crate are quite specific and do not follow the same linting rules as the main crate
+[lints]
+
 [package.metadata.release]
 release = false
