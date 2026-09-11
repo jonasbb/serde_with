@@ -80,6 +80,7 @@ pub fn apply(args: TokenStream, input: TokenStream) -> TokenStream {
     let res = match super::apply_function_to_struct_and_enum_fields_darling(
         input,
         &serde_with_crate_path,
+        false,
         &prepare_apply_attribute_to_field(args),
     ) {
         Ok(res) => res,
@@ -94,8 +95,8 @@ pub fn apply(args: TokenStream, input: TokenStream) -> TokenStream {
 /// To account for this a new function must be created to stay compatible with the function signature or [`super::apply_function_to_struct_and_enum_fields`].
 fn prepare_apply_attribute_to_field(
     input: ApplyInput,
-) -> impl Fn(&mut Field) -> Result<(), DarlingError> {
-    move |field: &mut Field| {
+) -> impl Fn(&mut Field, super::AttrTarget) -> Result<(), DarlingError> {
+    move |field: &mut Field, _target: super::AttrTarget| {
         let has_skip_attr = super::field_has_attribute(field, "serde_with", "skip_apply");
         if has_skip_attr {
             return Ok(());

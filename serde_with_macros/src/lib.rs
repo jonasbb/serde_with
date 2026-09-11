@@ -53,8 +53,20 @@ use syn::{
     punctuated::{Pair, Punctuated},
     spanned::Spanned,
     DeriveInput, Error, Field, Fields, GenericArgument, ItemEnum, ItemStruct, Meta, Path,
-    PathArguments, ReturnType, Token, Type,
+    PathArguments, ReturnType, Token, Type, Variant,
 };
+
+/// Where a `serde_as` attribute was written.
+///
+/// The emitted `serde` attributes differ slightly between the two positions, since serde does not
+/// accept the same set of attributes on a field and on an enum variant.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum AttrTarget {
+    /// A struct field, or a field inside an enum variant.
+    Field,
+    /// A newtype variant itself, i.e., the `Variant` in `Variant(T)`.
+    NewtypeVariant,
+}
 
 /// Apply function on every field of structs or enums
 fn apply_function_to_struct_and_enum_fields<F>(
@@ -107,19 +119,24 @@ where
 }
 
 /// Like [`apply_function_to_struct_and_enum_fields`] but for darling errors
+///
+/// `translate_serde_as_on_variants` enables the handling of `serde_as` attributes written on an
+/// enum variant itself. Only the [`serde_as`][macro@serde_as] macro understands those; for other
+/// callers such an attribute is none of their business and is left untouched.
 fn apply_function_to_struct_and_enum_fields_darling<F>(
     input: TokenStream,
     serde_with_crate_path: &Path,
+    translate_serde_as_on_variants: bool,
     function: F,
 ) -> Result<TokenStream2, DarlingError>
 where
     F: Copy,
-    F: Fn(&mut Field) -> Result<(), DarlingError>,
+    F: Fn(&mut Field, AttrTarget) -> Result<(), DarlingError>,
 {
     /// Handle a single struct or a single enum variant
     fn apply_on_fields<F>(fields: &mut Fields, function: F) -> Result<(), DarlingError>
     where
-        F: Fn(&mut Field) -> Result<(), DarlingError>,
+        F: Fn(&mut Field, AttrTarget) -> Result<(), DarlingError>,
     {
         match fields {
             // simple, no fields, do nothing
@@ -128,7 +145,9 @@ where
                 let errors: Vec<DarlingError> = fields
                     .named
                     .iter_mut()
-                    .map(|field| function(field).map_err(|err| err.with_span(&field)))
+                    .map(|field| {
+                        function(field, AttrTarget::Field).map_err(|err| err.with_span(&field))
+                    })
                     // turn the Err variant into the Some, such that we only collect errors
                     .filter_map(Result::err)
                     .collect();
@@ -142,7 +161,9 @@ where
                 let errors: Vec<DarlingError> = fields
                     .unnamed
                     .iter_mut()
-                    .map(|field| function(field).map_err(|err| err.with_span(&field)))
+                    .map(|field| {
+                        function(field, AttrTarget::Field).map_err(|err| err.with_span(&field))
+                    })
                     // turn the Err variant into the Some, such that we only collect errors
                     .filter_map(Result::err)
                     .collect();
@@ -153,6 +174,75 @@ where
                 }
             }
         }
+    }
+
+    /// Handle a `serde_as` attribute placed on an enum variant itself.
+    ///
+    /// For a newtype variant of an adjacently tagged enum, serde's derive requires
+    /// `with`/`serialize_with`/`deserialize_with` on the *variant*; the same attribute on the
+    /// variant's field makes the derive demand a `Deserialize` impl for the inner type.
+    /// So `serde_as` has to be accepted on the variant as well and be translated there.
+    ///
+    /// The attribute is processed as if it were written on the variant's single field, and the
+    /// generated `serde` attributes are then moved onto the variant.
+    fn apply_on_variant<F>(variant: &mut Variant, function: F) -> Result<(), DarlingError>
+    where
+        F: Fn(&mut Field, AttrTarget) -> Result<(), DarlingError>,
+    {
+        if !variant
+            .attrs
+            .iter()
+            .any(|attr| attr.path().is_ident("serde_as"))
+        {
+            return Ok(());
+        }
+
+        // Only newtype variants need this. For every other shape the attribute belongs on the
+        // field, where it already works, so keep rejecting it to avoid two ways of spelling the
+        // same thing.
+        let fields = match &mut variant.fields {
+            Fields::Unnamed(fields) if fields.unnamed.len() == 1 => fields,
+            _ => {
+                let errors: Vec<DarlingError> = variant
+                    .attrs
+                    .iter()
+                    .filter(|attr| attr.path().is_ident("serde_as"))
+                    .map(|attr| {
+                        DarlingError::custom(
+                            "serde_as attribute on an enum variant is only supported for newtype \
+                             variants, i.e., variants with exactly one unnamed field. Place the \
+                             attribute on the field instead.",
+                        )
+                        .with_span(&attr)
+                    })
+                    .collect();
+                return Err(DarlingError::multiple(errors));
+            }
+        };
+
+        let inner_field = &mut fields.unnamed[0];
+        if inner_field
+            .attrs
+            .iter()
+            .any(|attr| attr.path().is_ident("serde_as"))
+        {
+            return Err(DarlingError::custom(
+                "Cannot combine a serde_as attribute on a newtype variant with a serde_as \
+                 attribute on its field.",
+            )
+            .with_span(&variant.ident));
+        }
+
+        // The synthetic field carries the inner type, so `serde_as(as = "...")` resolves against
+        // it, plus the variant's own attributes, so the existing conflict checks against serde's
+        // `with`/`serialize_with`/`deserialize_with` still apply.
+        let mut synthetic_field = inner_field.clone();
+        synthetic_field.attrs.clone_from(&variant.attrs);
+        let generated_from = synthetic_field.attrs.len();
+        function(&mut synthetic_field, AttrTarget::NewtypeVariant)?;
+        let generated = synthetic_field.attrs.split_off(generated_from);
+        variant.attrs.extend(generated);
+        Ok(())
     }
 
     // Add a dummy derive macro which consumes (makes inert) all field attributes
@@ -167,25 +257,18 @@ where
         input.attrs.push(consume_serde_as_attribute);
         Ok(quote!(#input))
     } else if let Ok(mut input) = syn::parse::<ItemEnum>(input) {
-        // Prevent serde_as on enum variants
-        let mut errors: Vec<DarlingError> = input
-            .variants
-            .iter()
-            .flat_map(|variant| {
-                variant.attrs.iter().filter_map(|attr| {
-                    if attr.path().is_ident("serde_as") {
-                        Some(
-                            DarlingError::custom(
-                                "serde_as attribute is not allowed on enum variants",
-                            )
-                            .with_span(&attr),
-                        )
-                    } else {
-                        None
-                    }
-                })
-            })
-            .collect();
+        // Process serde_as written on a variant itself
+        let mut errors: Vec<DarlingError> = if translate_serde_as_on_variants {
+            input
+                .variants
+                .iter_mut()
+                .map(|variant| apply_on_variant(variant, function))
+                // turn the Err variant into the Some, such that we only collect errors
+                .filter_map(Result::err)
+                .collect()
+        } else {
+            Vec::new()
+        };
         // Process serde_as on all fields
         errors.extend(
             input
@@ -454,8 +537,11 @@ fn field_has_attribute(field: &Field, namespace: &str, name: &str) -> bool {
 /// The [`serde_as`] system is designed as a more flexible alternative to serde's `with` annotation.
 /// The `#[serde_as]` attribute must be placed *before* the `#[derive]` attribute.
 /// Each field of a struct or enum can be annotated with `#[serde_as(...)]` to specify which
-/// transformations should be applied. `serde_as` is *not* supported on enum variants.
-/// This is in contrast to `#[serde(with = "...")]`.
+/// transformations should be applied.
+/// Additionally, `serde_as` can be placed on a newtype variant, i.e., a variant with exactly one
+/// unnamed field, mirroring `#[serde(with = "...")]`.
+/// This is required for newtype variants of adjacently tagged enums, where serde's derive only
+/// accepts the annotation on the variant and not on its field.
 ///
 /// # Example
 ///
@@ -638,7 +724,15 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
             let res = apply_function_to_struct_and_enum_fields_darling(
                 input,
                 &serde_with_crate_path,
-                |field| serde_as_add_attr_to_field(field, &serde_with_crate_path, &schemars_config),
+                true,
+                |field, target| {
+                    serde_as_add_attr_to_field(
+                        field,
+                        target,
+                        &serde_with_crate_path,
+                        &schemars_config,
+                    )
+                },
             )
             .unwrap_or_else(darling::Error::write_errors);
             TokenStream::from(res)
@@ -650,6 +744,7 @@ pub fn serde_as(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Inspect the field and convert the `serde_as` attribute into the classical `serde`
 fn serde_as_add_attr_to_field(
     field: &mut Field,
+    target: AttrTarget,
     serde_with_crate_path: &Path,
     schemars_config: &SchemaFieldConfig,
 ) -> Result<(), DarlingError> {
@@ -703,8 +798,13 @@ fn serde_as_add_attr_to_field(
         serde_as_options: &SerdeAsOptions,
         serde_options: &SerdeOptions,
         as_type: &Type,
+        target: AttrTarget,
         field: &mut Field,
     ) {
+        // serde has no variant-level `default` attribute, emitting one would not compile.
+        if target != AttrTarget::Field {
+            return;
+        }
         if !serde_as_options.no_default.is_present()
             && serde_options.default.is_none()
             && is_std_option(as_type)
@@ -750,6 +850,12 @@ fn serde_as_add_attr_to_field(
     let serde_as_options = SerdeAsOptions::from_field(field)?;
     let serde_options = SerdeOptions::from_field(field)?;
 
+    // `schemars` has no variant-level `with` attribute, so nothing can be emitted there.
+    let schemars_config = match target {
+        AttrTarget::Field => schemars_config,
+        AttrTarget::NewtypeVariant => &SchemaFieldConfig::False,
+    };
+
     let mut errors = Vec::new();
     if !serde_as_options.has_any_set() {
         errors.push(DarlingError::custom("An empty `serde_as` attribute on a field has no effect. You are missing an `as`, `serialize_as`, or `deserialize_as` parameter."));
@@ -774,7 +880,7 @@ fn serde_as_add_attr_to_field(
     let type_same = &syn::parse_quote!(#serde_with_crate_path::Same);
     if let Some(type_) = &serde_as_options.r#as {
         emit_borrow_annotation(&serde_options, type_, field);
-        emit_default_annotation(&serde_as_options, &serde_options, type_, field);
+        emit_default_annotation(&serde_as_options, &serde_options, type_, target, field);
 
         let replacement_type = replace_infer_type_with_type(type_.clone(), type_same);
         let attr_inner_tokens = quote!(#serde_with_crate_path::As::<#replacement_type>).to_string();
@@ -819,7 +925,7 @@ fn serde_as_add_attr_to_field(
     }
     if let Some(type_) = &serde_as_options.deserialize_as {
         emit_borrow_annotation(&serde_options, type_, field);
-        emit_default_annotation(&serde_as_options, &serde_options, type_, field);
+        emit_default_annotation(&serde_as_options, &serde_options, type_, target, field);
 
         let replacement_type = replace_infer_type_with_type(type_.clone(), type_same);
         let attr_inner_tokens =
