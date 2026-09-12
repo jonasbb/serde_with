@@ -1,0 +1,23 @@
+error: serde_as attribute on an enum variant is only supported for newtype variants, i.e., variants with exactly one unnamed field. Place the attribute on the field instead.
+ --> tests/compile-fail/serde_as-enum-variant.rs:9:5
+  |
+9 |     #[serde_as(as = "serde_with::DisplayFromStr")]
+  |     ^
+
+error: serde_as attribute on an enum variant is only supported for newtype variants, i.e., variants with exactly one unnamed field. Place the attribute on the field instead.
+  --> tests/compile-fail/serde_as-enum-variant.rs:11:5
+   |
+11 |     #[serde_as(as = "serde_with::DisplayFromStr")]
+   |     ^
+
+error: serde_as attribute on an enum variant is only supported for newtype variants, i.e., variants with exactly one unnamed field. Place the attribute on the field instead.
+  --> tests/compile-fail/serde_as-enum-variant.rs:13:5
+   |
+13 |     #[serde_as(as = "serde_with::DisplayFromStr")]
+   |     ^
+
+error: Cannot combine a serde_as attribute on a newtype variant with a serde_as attribute on its field.
+  --> tests/compile-fail/serde_as-enum-variant.rs:22:5
+   |
+22 |     Value(#[serde_as(as = "serde_with::DisplayFromStr")] u32),
+   |     ^^^^^

@@ -54,3 +54,31 @@ fn test_jsonstring_nested() {
             }"#]],
     );
 }
+
+/// Nested JSON in an adjacently tagged enum, i.e., the original use case of
+/// <https://github.com/jonasbb/serde_with/issues/499>.
+#[test]
+fn test_jsonstring_on_newtype_variant() {
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    #[serde(tag = "messageType", content = "content")]
+    enum Message {
+        Text(String),
+        #[serde_as(as = "JsonString")]
+        Object(Nested),
+    }
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Nested {
+        id: u32,
+    }
+
+    is_equal(
+        Message::Object(Nested { id: 7 }),
+        expect![[r#"
+            {
+              "messageType": "Object",
+              "content": "{\"id\":7}"
+            }"#]],
+    );
+}

@@ -305,3 +305,77 @@ fn test_default_on_option() {
         expect!["missing field `a` at line 1 column 2"],
     );
 }
+
+/// Test that `serde_as` works on newtype variants.
+///
+/// serde's derive requires `with`/`serialize_with`/`deserialize_with` on the *variant* for newtype
+/// variants; the same attribute on the variant's field makes the derive demand `Deserialize` for
+/// the inner type. `serde_as` therefore has to be accepted on the variant too.
+/// <https://github.com/jonasbb/serde_with/issues/975>
+#[test]
+fn test_serde_as_on_newtype_variant() {
+    #[serde_as]
+    #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(tag = "type", content = "content")]
+    enum Adjacent {
+        #[serde_as(as = "DisplayFromStr")]
+        Value(u32),
+    }
+
+    is_equal(
+        Adjacent::Value(123),
+        expect![[r#"
+            {
+              "type": "Value",
+              "content": "123"
+            }"#]],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+    enum External {
+        #[serde_as(as = "DisplayFromStr")]
+        Value(u32),
+    }
+
+    is_equal(
+        External::Value(123),
+        expect![[r#"
+            {
+              "Value": "123"
+            }"#]],
+    );
+
+    // `serialize_as` and `deserialize_as` are translated independently.
+    #[serde_as]
+    #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+    enum SplitDirections {
+        #[serde_as(serialize_as = "DisplayFromStr")]
+        #[serde_as(deserialize_as = "Same")]
+        Value(u32),
+    }
+
+    check_serialization(
+        SplitDirections::Value(123),
+        expect![[r#"
+            {
+              "Value": "123"
+            }"#]],
+    );
+    check_deserialization(SplitDirections::Value(123), r#"{"Value": 123}"#);
+
+    // `serde_as` on the field of a newtype variant keeps working where serde accepts it.
+    #[serde_as]
+    #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+    enum OnField {
+        Value(#[serde_as(as = "DisplayFromStr")] u32),
+    }
+
+    is_equal(
+        OnField::Value(123),
+        expect![[r#"
+            {
+              "Value": "123"
+            }"#]],
+    );
+}

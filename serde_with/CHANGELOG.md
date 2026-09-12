@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* `serde_as` is now supported on newtype variants, i.e., enum variants with exactly one unnamed field ([#975]).
+    serde's derive only accepts `with`/`serialize_with`/`deserialize_with` on the variant itself for these, so the same had to become possible with `serde_as`.
+    On all other variant shapes `serde_as` still has to be placed on the field and is rejected on the variant.
+
+[#975]: https://github.com/jonasbb/serde_with/issues/975
+
 ## [3.23.0] - 2026-09-07
 
 ### Changed
