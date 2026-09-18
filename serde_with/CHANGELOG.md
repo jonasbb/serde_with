@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Make `with_prefix!` and `with_suffix!` available with the `alloc` feature, instead of only with `std` (#1008)
+
 ## [3.23.0] - 2026-09-07
 
 ### Changed
