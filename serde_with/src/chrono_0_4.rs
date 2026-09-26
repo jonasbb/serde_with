@@ -289,7 +289,7 @@ where
         Ok(dur) => dur,
         Err(msg) => {
             return Err(DeError::custom(format_args!(
-                "Duration is outside of the representable range: {msg}"
+                "Value is outside of the representable range: {msg}"
             )))
         }
     };
@@ -303,7 +303,9 @@ fn duration_to_datetime_utc<'de, D>(dur: DurationSigned) -> Result<DateTime<Utc>
 where
     D: Deserializer<'de>,
 {
-    Ok(unix_epoch_utc() + duration_from_duration_signed::<D>(dur)?)
+    unix_epoch_utc()
+        .checked_add_signed(duration_from_duration_signed::<D>(dur)?)
+        .ok_or_else(|| DeError::custom("Value is outside of the representable range"))
 }
 
 #[cfg(feature = "std")]
@@ -311,14 +313,18 @@ fn duration_to_datetime_local<'de, D>(dur: DurationSigned) -> Result<DateTime<Lo
 where
     D: Deserializer<'de>,
 {
-    Ok(unix_epoch_local() + duration_from_duration_signed::<D>(dur)?)
+    unix_epoch_local()
+        .checked_add_signed(duration_from_duration_signed::<D>(dur)?)
+        .ok_or_else(|| DeError::custom("Value is outside of the representable range"))
 }
 
 fn duration_to_naive_datetime<'de, D>(dur: DurationSigned) -> Result<NaiveDateTime, D::Error>
 where
     D: Deserializer<'de>,
 {
-    Ok(unix_epoch_naive() + duration_from_duration_signed::<D>(dur)?)
+    unix_epoch_naive()
+        .checked_add_signed(duration_from_duration_signed::<D>(dur)?)
+        .ok_or_else(|| DeError::custom("Value is outside of the representable range"))
 }
 
 // No subsecond precision

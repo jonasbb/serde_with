@@ -743,3 +743,32 @@ fn test_naive_datetime_smoketest() {
         NaiveDateTime, "TimestampSecondsWithFrac", zero - Duration::seconds(1), {expect![[r#"-1.0"#]]};
     };
 }
+
+#[test]
+fn test_duration_large_duration() {
+    let large_duration = Duration::seconds(9_000_000_000_000);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SDur(#[serde_as(as = "DurationSeconds<i64>")] Duration);
+
+    is_equal::<SDur>(SDur(large_duration), expect![["9000000000000"]]);
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SDtUtc(#[serde_as(as = "TimestampSeconds<i64>")] DateTime<Utc>);
+
+    check_error_deserialization::<SDtUtc>(
+        r#"9000000000000"#,
+        expect!["Value is outside of the representable range"],
+    );
+
+    #[serde_as]
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct SDtNaive(#[serde_as(as = "TimestampSeconds<i64>")] NaiveDateTime);
+
+    check_error_deserialization::<SDtNaive>(
+        r#"9000000000000"#,
+        expect!["Value is outside of the representable range"],
+    );
+}

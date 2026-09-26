@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Make `with_prefix!` and `with_suffix!` available with the `alloc` feature, instead of only with `std` (#1008)
 
+### Fixed
+
+* Handle potential panics in deserialization of chrono and time DateTimes.
+    This was privately reported by @NotAFlightRisk.
+
 ## [3.23.0] - 2026-09-07
 
 ### Changed
