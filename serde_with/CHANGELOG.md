@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.24.0] - 2026-09-26
+
 ### Added
 
 * Implement `JsonSchemaAs` for `NoneAsEmptyString`, so fields using it compile with the `schemars_*` features (#1014)
