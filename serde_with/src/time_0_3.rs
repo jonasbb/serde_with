@@ -129,7 +129,7 @@ where
         Ok(dur) => dur,
         Err(msg) => {
             return Err(DeError::custom(format_args!(
-                "Duration is outside of the representable range: {msg}"
+                "Value is outside of the representable range: {msg}"
             )))
         }
     };
@@ -143,7 +143,9 @@ fn duration_to_offset_datetime<'de, D>(dur: DurationSigned) -> Result<OffsetDate
 where
     D: Deserializer<'de>,
 {
-    Ok(OffsetDateTime::UNIX_EPOCH + duration_from_duration_signed::<D>(dur)?)
+    OffsetDateTime::UNIX_EPOCH
+        .checked_add(duration_from_duration_signed::<D>(dur)?)
+        .ok_or_else(|| DeError::custom("Value is outside of the representable range"))
 }
 
 fn duration_to_primitive_datetime<'de, D>(
@@ -152,7 +154,9 @@ fn duration_to_primitive_datetime<'de, D>(
 where
     D: Deserializer<'de>,
 {
-    Ok(unix_epoch_primitive() + duration_from_duration_signed::<D>(dur)?)
+    unix_epoch_primitive()
+        .checked_add(duration_from_duration_signed::<D>(dur)?)
+        .ok_or_else(|| DeError::custom("Value is outside of the representable range"))
 }
 
 // No sub-unit precision
