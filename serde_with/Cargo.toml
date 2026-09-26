@@ -288,7 +288,12 @@ required-features = ["macros"]
 [[test]]
 name = "with_prefix"
 path = "tests/with_prefix.rs"
-required-features = ["macros"]
+required-features = ["alloc"]
+
+[[test]]
+name = "with_suffix"
+path = "tests/with_suffix.rs"
+required-features = ["alloc"]
 
 [[test]]
 name = "rust"

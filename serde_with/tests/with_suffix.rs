@@ -9,7 +9,6 @@ use alloc::collections::BTreeMap;
 use expect_test::expect;
 use serde::{Deserialize, Serialize};
 use serde_with::with_suffix;
-use std::collections::HashMap;
 
 #[test]
 fn test_flatten_with_suffix() {
@@ -22,7 +21,7 @@ fn test_flatten_with_suffix() {
         #[serde(flatten, with = "suffix_player3")]
         player3: Option<Player>,
         #[serde(flatten, with = "suffix_tag")]
-        tags: HashMap<String, String>,
+        tags: BTreeMap<String, String>,
     }
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -46,7 +45,7 @@ fn test_flatten_with_suffix() {
             votes: 2,
         }),
         player3: None,
-        tags: HashMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
+        tags: BTreeMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
     };
 
     is_equal(
@@ -73,7 +72,7 @@ fn test_plain_with_suffix() {
         #[serde(with = "suffix_player3")]
         player3: Option<Player>,
         #[serde(with = "suffix_tag")]
-        tags: HashMap<String, String>,
+        tags: BTreeMap<String, String>,
     }
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -97,7 +96,7 @@ fn test_plain_with_suffix() {
             votes: 2,
         }),
         player3: None,
-        tags: HashMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
+        tags: BTreeMap::from_iter(vec![("t".to_owned(), "T".to_owned())]),
     };
 
     is_equal(

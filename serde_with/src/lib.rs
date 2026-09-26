@@ -327,10 +327,10 @@ mod serde_conv;
 #[cfg_attr(docsrs, doc(cfg(feature = "time_0_3")))]
 pub mod time_0_3;
 mod utils;
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[doc(hidden)]
 pub mod with_prefix;
-#[cfg(feature = "std")]
+#[cfg(feature = "alloc")]
 #[doc(hidden)]
 pub mod with_suffix;
 
