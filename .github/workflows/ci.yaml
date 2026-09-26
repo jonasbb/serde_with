@@ -106,6 +106,10 @@ jobs:
         run: cargo test --no-default-features --no-run
       - name: "Test Run (No Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --no-default-features --no-fail-fast
+      - name: "Test Build (alloc Feature / ${{ matrix.os }} / ${{ matrix.rust }})"
+        run: cargo test --no-default-features --features=alloc --no-run
+      - name: "Test Run (alloc Feature / ${{ matrix.os }} / ${{ matrix.rust }})"
+        run: cargo test --no-default-features --features=alloc --no-fail-fast
       - name: "Test Build (Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"
         run: cargo test --no-run
       - name: "Test Run (Default Features / ${{ matrix.os }} / ${{ matrix.rust }})"

@@ -298,7 +298,7 @@ required-features = ["alloc"]
 [[test]]
 name = "rust"
 path = "tests/rust.rs"
-required-features = ["alloc"]
+required-features = ["std"]
 
 [[test]]
 name = "smallvec_1"
