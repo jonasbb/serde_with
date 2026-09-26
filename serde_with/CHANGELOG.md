@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Implement `JsonSchemaAs` for `NoneAsEmptyString`, so fields using it compile with the `schemars_*` features (#1014)
+
 ### Changed
 
 * Make `with_prefix!` and `with_suffix!` available with the `alloc` feature, instead of only with `std` (#1008)

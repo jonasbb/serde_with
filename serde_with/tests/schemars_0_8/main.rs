@@ -1235,3 +1235,29 @@ fn test_nonzero() {
     check_valid_json_schema(&SUsize(NonZeroUsize::new(0)));
     check_valid_json_schema(&SUsize(NonZeroUsize::new(123)));
 }
+
+mod none_as_empty_string {
+    use super::*;
+
+    #[serde_as]
+    #[derive(JsonSchema, Serialize)]
+    #[serde(transparent)]
+    struct S(#[serde_as(as = "NoneAsEmptyString")] Option<u32>);
+
+    #[test]
+    fn test_serialized_is_valid() {
+        check_valid_json_schema(&S(None));
+        check_valid_json_schema(&S(Some(42)));
+    }
+
+    #[test]
+    fn test_null_is_valid() {
+        check_matches_schema::<S>(&json!(null));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_number_is_invalid() {
+        check_matches_schema::<S>(&json!(42));
+    }
+}

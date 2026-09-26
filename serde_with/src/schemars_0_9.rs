@@ -1406,3 +1406,7 @@ none_as_zero! {
     NonZeroI128  => i128,
     NonZeroIsize => isize,
 }
+
+impl<T> JsonSchemaAs<Option<T>> for NoneAsEmptyString {
+    forward_schema!(Option<String>);
+}
