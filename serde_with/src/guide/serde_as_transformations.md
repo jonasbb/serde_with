@@ -276,7 +276,7 @@ value: Duration,
 
 The same conversions are also implemented for [`chrono::Duration`] with the `chrono` feature.
 
-The same conversions are also implemented for [`jiff::SignedDuration`] with the `jiff_0_2` feature.
+The same conversions are also implemented for [`jiff::SignedDuration`] with the `jiff_0_2` or `jiff_1` feature, depending on the jiff version.
 
 The same conversions are also implemented for [`time::Duration`] with the `time_0_3` feature.
 
@@ -548,6 +548,7 @@ value: SystemTime,
 The same conversions are also implemented for [`chrono::DateTime<Utc>`], [`chrono::DateTime<Local>`], and [`chrono::NaiveDateTime`] with the `chrono` feature.
 
 The conversions are available for [`jiff::Timestamp`], [`jiff::Zoned`], and [`jiff::civil::DateTime`] with the `jiff_0_2` feature enabled.
+With the `jiff_1` feature, they are available for the corresponding jiff v1 types, using `ZonedDateTime` instead of `Zoned`.
 
 The conversions are available for [`time::OffsetDateTime`] and [`time::PrimitiveDateTime`] with the `time_0_3` feature enabled.
 

@@ -306,6 +306,9 @@ pub mod hex;
 #[cfg(feature = "jiff_0_2")]
 #[cfg_attr(docsrs, doc(cfg(feature = "jiff_0_2")))]
 pub mod jiff_0_2;
+#[cfg(feature = "jiff_1")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff_1")))]
+pub mod jiff_1;
 #[cfg(feature = "json")]
 #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
 pub mod json;
@@ -902,6 +905,7 @@ pub struct BytesOrString;
 ///
 /// This type also supports [`chrono::Duration`] with the `chrono_0_4`-[feature flag].
 /// This type also supports [`jiff::SignedDuration`][::jiff_0_2::SignedDuration] with the `jiff_0_2`-[feature flag].
+/// The `jiff::SignedDuration` type from jiff v1 is also supported with the `jiff_1`-[feature flag].
 /// This type also supports [`time::Duration`][::time_0_3::Duration] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different duration types.
@@ -1051,6 +1055,7 @@ pub struct DurationSeconds<
 ///
 /// This type also supports [`chrono::Duration`] with the `chrono`-[feature flag].
 /// This type also supports [`jiff::SignedDuration`][::jiff_0_2::SignedDuration] with the `jiff_0_2`-[feature flag].
+/// The `jiff::SignedDuration` type from jiff v1 is also supported with the `jiff_1`-[feature flag].
 /// This type also supports [`time::Duration`][::time_0_3::Duration] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different duration types.
@@ -1234,6 +1239,7 @@ pub struct DurationNanoSecondsWithFrac<
 ///
 /// This type also supports [`chrono::DateTime`] with the `chrono_0_4`-[feature flag].
 /// This type also supports [`jiff::Timestamp`][::jiff_0_2::Timestamp], [`jiff::Zoned`][::jiff_0_2::Zoned], and [`jiff::civil::DateTime`][::jiff_0_2::civil::DateTime] with the `jiff_0_2`-[feature flag].
+/// The corresponding jiff v1 types, including `ZonedDateTime`, are supported with the `jiff_1`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different timestamp types.
@@ -1395,6 +1401,7 @@ pub struct TimestampSeconds<
 ///
 /// This type also supports [`chrono::DateTime`] and [`chrono::NaiveDateTime`][NaiveDateTime] with the `chrono`-[feature flag].
 /// This type also supports [`jiff::Timestamp`][::jiff_0_2::Timestamp], [`jiff::Zoned`][::jiff_0_2::Zoned], and [`jiff::civil::DateTime`][::jiff_0_2::civil::DateTime] with the `jiff_0_2`-[feature flag].
+/// The corresponding jiff v1 types, including `ZonedDateTime`, are supported with the `jiff_1`-[feature flag].
 /// This type also supports [`time::OffsetDateTime`][::time_0_3::OffsetDateTime] and [`time::PrimitiveDateTime`][::time_0_3::PrimitiveDateTime] with the `time_0_3`-[feature flag].
 ///
 /// This table lists the available `FORMAT`s for the different timestamp types.
