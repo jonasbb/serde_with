@@ -306,6 +306,9 @@ pub mod hex;
 #[cfg(feature = "jiff_0_2")]
 #[cfg_attr(docsrs, doc(cfg(feature = "jiff_0_2")))]
 pub mod jiff_0_2;
+#[cfg(feature = "jiff_1")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jiff_1")))]
+pub mod jiff_1;
 #[cfg(feature = "json")]
 #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
 pub mod json;

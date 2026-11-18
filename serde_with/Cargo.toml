@@ -41,7 +41,7 @@ alloc = ["serde_core/alloc", "base64?/alloc", "bs58?/alloc", "chrono_0_4?/alloc"
 ## Enables support for various types from the std library.
 ## This will enable `std` support in all dependencies too.
 ## The feature enabled by default and also enables `alloc`.
-std = ["alloc", "bs58?/std", "serde_core/std", "chrono_0_4?/clock", "chrono_0_4?/std", "indexmap_1?/std", "indexmap_2?/std", "jiff_0_2?/std", "jiff_0_2?/tz-system", "jiff_0_2?/tzdb-bundle-platform", "jiff_0_2?/tzdb-concatenated", "jiff_0_2?/tzdb-zoneinfo", "time_0_3?/serde-well-known", "time_0_3?/std", "schemars_0_9?/std", "schemars_1?/std"]
+std = ["alloc", "bs58?/std", "serde_core/std", "chrono_0_4?/clock", "chrono_0_4?/std", "indexmap_1?/std", "indexmap_2?/std", "jiff_0_2?/std", "jiff_0_2?/tz-system", "jiff_0_2?/tzdb-bundle-platform", "jiff_0_2?/tzdb-concatenated", "jiff_0_2?/tzdb-zoneinfo", "jiff_1?/std", "jiff_1?/tz-system", "jiff_1?/tzdb-bundle-platform", "jiff_1?/tzdb-concatenated", "jiff_1?/tzdb-zoneinfo", "time_0_3?/serde-well-known", "time_0_3?/std", "schemars_0_9?/std", "schemars_1?/std"]
 
 #! # Documentation
 #!
@@ -125,6 +125,12 @@ indexmap_2 = ["dep:indexmap_2", "alloc"]
 ## This pulls in [`jiff` v0.2](::jiff_0_2) as a dependency.
 ## Some functionality is only available when `alloc` or `std` is enabled too.
 jiff_0_2 = ["dep:jiff_0_2"]
+## The feature enables integration of `jiff` v1 specific conversions.
+## This includes support for the timestamp, duration, zoned datetime and civil datetime types.
+##
+## This pulls in [`jiff` v1](::jiff_1) as a dependency.
+## Some functionality is only available when `alloc` or `std` is enabled too.
+jiff_1 = ["dep:jiff_1"]
 ## The feature enables JSON conversions from the `json` module.
 ##
 ## This pulls in [`serde_json`] as a dependency.
@@ -181,6 +187,7 @@ hex = { version = "0.4.3", optional = true, default-features = false }
 indexmap_1 = { package = "indexmap", version = "1.8", optional = true, default-features = false, features = ["serde-1"] }
 indexmap_2 = { package = "indexmap", version = "2.0", optional = true, default-features = false, features = ["serde"] }
 jiff_0_2 = { package = "jiff", version = "0.2.0", optional = true, default-features = false }
+jiff_1 = { package = "jiff", version = "1.0.0", optional = true, default-features = false }
 schemars_0_8 = { package = "schemars", version = "0.8.16", optional = true, default-features = false }
 schemars_0_9 = { package = "schemars", version = "0.9.0", optional = true, default-features = false }
 schemars_1 = { package = "schemars", version = "1.0.2", optional = true, default-features = false }
