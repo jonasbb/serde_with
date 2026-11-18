@@ -12,6 +12,10 @@ ignore = [
     # paste - no longer maintained
     # Transitive dev-dependency of rmp-serde
     "RUSTSEC-2024-0436",
+
+    # chrono is unmaintained
+    # Optional dependency
+    "RUSTSEC-2026-0543"
 ]
 # warn for categories of informational advisories
 informational_warnings = [
