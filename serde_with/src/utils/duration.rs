@@ -67,7 +67,12 @@ impl DurationSigned {
         Some(self)
     }
 
-    #[cfg(any(feature = "chrono_0_4", feature = "jiff_0_2", feature = "time_0_3"))]
+    #[cfg(any(
+        feature = "chrono_0_4",
+        feature = "jiff_0_2",
+        feature = "jiff_1",
+        feature = "time_0_3"
+    ))]
     pub(crate) fn with_duration(sign: Sign, duration: Duration) -> Self {
         Self { sign, duration }
     }
@@ -580,7 +585,12 @@ fn parse_float_into_time_parts(mut value: &str) -> Result<(Sign, u64, u32), Pars
 /// They take the conversion that should be implemented publicly (`DurationSeconds`, `TimestampSeconds`, etc.) and the internal
 /// conversion that is used with the `DurationSigned` (`DurationSeconds`) and then the types that should be implemented
 /// for (`i64`, `f64`, `String`) and the strictness that should be used (Strict, Flexible).
-#[cfg(any(feature = "chrono_0_4", feature = "jiff_0_2", feature = "time_0_3"))]
+#[cfg(any(
+    feature = "chrono_0_4",
+    feature = "jiff_0_2",
+    feature = "jiff_1",
+    feature = "time_0_3"
+))]
 macro_rules! use_duration_signed_ser {
     (
         $main_trait:ident $internal_trait:ident
@@ -627,11 +637,21 @@ macro_rules! use_duration_signed_ser {
     };
 }
 // Make the macros available to the rest of the crate
-#[cfg(any(feature = "chrono_0_4", feature = "jiff_0_2", feature = "time_0_3"))]
+#[cfg(any(
+    feature = "chrono_0_4",
+    feature = "jiff_0_2",
+    feature = "jiff_1",
+    feature = "time_0_3"
+))]
 pub(crate) use use_duration_signed_ser;
 
 /// The following macros are used to implement `SerializeAs` and `DeserializeAs` for the various `DurationSigned` types
-#[cfg(any(feature = "chrono_0_4", feature = "jiff_0_2", feature = "time_0_3"))]
+#[cfg(any(
+    feature = "chrono_0_4",
+    feature = "jiff_0_2",
+    feature = "jiff_1",
+    feature = "time_0_3"
+))]
 macro_rules! use_duration_signed_de {
     (
         $main_trait:ident $internal_trait:ident
@@ -675,7 +695,12 @@ macro_rules! use_duration_signed_de {
     };
 }
 // Make the macros available to the rest of the crate
-#[cfg(any(feature = "chrono_0_4", feature = "jiff_0_2", feature = "time_0_3"))]
+#[cfg(any(
+    feature = "chrono_0_4",
+    feature = "jiff_0_2",
+    feature = "jiff_1",
+    feature = "time_0_3"
+))]
 pub(crate) use use_duration_signed_de;
 
 #[test]
