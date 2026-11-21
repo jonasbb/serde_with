@@ -20,7 +20,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
@@ -35,12 +35,12 @@ jobs:
         shell: bash
       - name: Get Changelog Entry
         id: changelog_reader
-        uses: mindsers/changelog-reader-action@1faaf50aa09d5793d9a100819973df801febfb31 # v2
+        uses: mindsers/changelog-reader-action@v2.4.0
         with:
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./serde_with/CHANGELOG.md
       - name: Create Release
-        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
+        uses: softprops/action-gh-release@v3.0.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -51,7 +51,7 @@ jobs:
           body: ${{ steps.changelog_reader.outputs.changes }}
           prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
           draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
-      - uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1
+      - uses: rust-lang/crates-io-auth-action@v1.0.6
         id: auth
       # The programs wait until the package is in the index.
       - run: cargo publish --package serde_with_macros
