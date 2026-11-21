@@ -16,6 +16,8 @@ workflows:
         - 'mindsers/changelog-reader-action@v2.4.0'
         - 'rust-lang/crates-io-auth-action@v1.0.6'
         - 'softprops/action-gh-release@v3.0.4'
+    '.github/workflows/verify-lockfile.yaml':
+        - 'actions/checkout@v7.0.1'
 dependencies:
     'actions-rust-lang/audit@v1.2.7':
         ref: 'v1.2.7'
