@@ -22,11 +22,11 @@ jobs:
         rust: ["stable", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy
@@ -46,17 +46,17 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
         with:
           components: rustfmt
           cache: false
 
       - name: Rustfmt Check (${{ matrix.rust }})
-        uses: actions-rust-lang/rustfmt@4066006ec54a31931b9b1fddfd38f2fdf2d27143 # v1
+        uses: actions-rust-lang/rustfmt@v1.1.2
 
   build_and_test:
     name: Build and Test
@@ -69,11 +69,11 @@ jobs:
         rust: ["1.88", "1.90", "1.95", "stable", "beta", "nightly"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
         with:
           toolchain: ${{ matrix.rust }}
           # Extra toolchain to test no_std
@@ -123,11 +123,11 @@ jobs:
     name: Test Coverage
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: "Install/Update the Rust version"
-        uses: actions-rust-lang/setup-rust-toolchain@a188e68d0fd2bd36ad51dccb2b07ba6e75105f30 # v2.0.1
+        uses: actions-rust-lang/setup-rust-toolchain@v2.0.1
         with:
           toolchain: "nightly"
           components: "llvm-tools"
@@ -137,7 +137,7 @@ jobs:
           cargo install cargo-llvm-cov
           cargo llvm-cov --all-features --workspace --doctests --lcov --output-path lcov.info
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        uses: codecov/codecov-action@v7.1.1
         continue-on-error: true
         with:
           disable_search: true
